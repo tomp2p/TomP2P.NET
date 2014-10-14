@@ -9,28 +9,50 @@ namespace TomP2P.Message
 {
     public class NeighborSet
     {
-        private readonly int _neighborLimit;
-        private readonly IEnumerable<PeerAddress> _neighbors;
-
         public NeighborSet(int neighborLimit, IEnumerable<PeerAddress> neighbors)
         {
-            _neighborLimit = neighborLimit;
-            _neighbors = neighbors;
+            NeighborsLimit = neighborLimit;
+            IList<PeerAddress> peerAddresses = neighbors as IList<PeerAddress> ?? neighbors.ToList();
+            Neighbors = peerAddresses;
 
             // remove neighbors that are over the limit
             int serializedSize = 1;
             
             // no need to cut if we don't provide a limit
-            if (neighborLimit < 0) // TODO shouldn't this be <= 0?
+            if (NeighborsLimit < 0) // TODO shouldn't this be <= 0?
             {
                 return;
             }
+            foreach (var neighbor in peerAddresses)
+            {
+                serializedSize += neighbor.Size;
+                if (serializedSize > NeighborsLimit)
+                {
+                    peerAddresses.Remove(neighbor); // TODO correct comparator?
+                }
+            }
+        }
+
+        public void Add(PeerAddress neighbor)
+        {
+            Neighbors.Add(neighbor);
+        }
+
+        public void AddResult(IEnumerable<PeerAddress> neighbors)
+        {
             foreach (var neighbor in neighbors)
             {
-                //serializedSize += neighbor.Size;
-                //if (serializedSize > neighborLimit)
-
+                Neighbors.Add(neighbor);
             }
+        }
+
+        public int NeighborsLimit { get; private set; }
+
+        public ICollection<PeerAddress> Neighbors { get; private set; }
+
+        public int Size
+        {
+            get { return Neighbors.Count; }
         }
     }
 }

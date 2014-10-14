@@ -8,5 +8,8 @@ namespace TomP2P.Peers
 {
     public class PeerAddress
     {
+        public int Size { get; private set; }
+
     }
+
 }
