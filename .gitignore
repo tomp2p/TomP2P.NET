@@ -154,3 +154,6 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+/TomP2P/packages/NLog.3.1.0.0
+/TomP2P/packages/NLog.Config.3.1.0.0
+/TomP2P/packages/NLog.Schema.3.1.0.0
