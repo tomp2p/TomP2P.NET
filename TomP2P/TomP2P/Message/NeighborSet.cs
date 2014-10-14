@@ -9,6 +9,9 @@ namespace TomP2P.Message
 {
     public class NeighborSet
     {
+        public int NeighborsLimit { get; private set; }
+        public ICollection<PeerAddress> Neighbors { get; private set; }
+
         public NeighborSet(int neighborLimit, IEnumerable<PeerAddress> neighbors)
         {
             NeighborsLimit = neighborLimit;
@@ -45,10 +48,6 @@ namespace TomP2P.Message
                 Neighbors.Add(neighbor);
             }
         }
-
-        public int NeighborsLimit { get; private set; }
-
-        public ICollection<PeerAddress> Neighbors { get; private set; }
 
         public int Size
         {

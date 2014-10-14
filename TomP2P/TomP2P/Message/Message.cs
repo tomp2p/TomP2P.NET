@@ -7,6 +7,8 @@ using TomP2P.Peers;
 
 namespace TomP2P.Message
 {
+    // TODO introduce header and payload regions
+
     public class Message
     {
         // used for creating random message id
@@ -19,6 +21,7 @@ namespace TomP2P.Message
         /// </summary>
         public enum Content
         {
+            Undefined, // required as default enum value
             Empty, Key, MapKey640Data, MapKey640Keys, SetKey640, SetNeighbors, ByteBuffer,
             Long, Integer, PublicKeySignature, SetTrackerData, BloomFilter, MapKey640Byte,
             PublicKey, SetPeerSocket, User1
@@ -27,7 +30,7 @@ namespace TomP2P.Message
         /// <summary>
         /// 4 x 1 bit.
         /// </summary>
-        public enum Type
+        public enum MessageType
         {
             // REQUEST_1 is the normal request
             // REQUEST_2 for GET returns the extended digest (hashes of all stored data)
@@ -54,10 +57,22 @@ namespace TomP2P.Message
             PartiallyOk, NotFound, Denied, UnknownId, Exception, Cancel, User1, User2
         }
 
-        // Header:
-        private int _messageId;
-        private int _version;
-        private Type _type;
+        // *** HEADER ***
+
+        /// <summary>
+        /// Randomly generated message ID.
+        /// </summary>
+        public int MessageId { get; private set; }
+
+        /// <summary>
+        /// Returns the version, which is 32bit. Each application can choose a version to not interfere with other applications.
+        /// </summary>
+        public int Version { get; private set; }
+
+        /// <summary>
+        /// Determines if its a request or command reply and what kind of reply (error, warning states).
+        /// </summary>
+        public MessageType Type { get; private set; }
 
         /* commands so far:
          *  0: PING
@@ -73,19 +88,158 @@ namespace TomP2P.Message
          * 10: PEX
          * 11: TASK
          * 12: BROADCAST_DATA*/
-        private byte _command;
-        private PeerAddress _sender;
-        private PeerAddress _recipient;
-        private PeerAddress _recipientRelay;
+
+        /// <summary>
+        /// Command of the message, such as GET, PING, etc.
+        /// </summary>
+        public byte Command { get; private set; }
+
+        /// <summary>
+        /// The ID of the sender. Note that the IP is set via the socket.
+        /// </summary>
+        public PeerAddress Sender { get; private set; }
+
+        /// <summary>
+        /// The ID of the recipient. Note that the IP is set via the socket.
+        /// </summary>
+        public PeerAddress Recipient { get; private set; }
+
+        public PeerAddress RecipientRelay { get; private set; }
+
         private int _options = 0;
 
-        // Payload:
+        // *** PAYLOAD ***
+
         // we can send 8 types
-        private Content[] _contentTypes = new Content[ContentTypeLength];
+
+        /// <summary>
+        /// The content types. Can be empty if not set.
+        /// </summary>
+        public Content[] ContentTypes { get; private set; }
+
         private readonly Queue<NumberType> _contentReferences = new Queue<NumberType>();
 
         // following the payload objects:
         // content lists:
+        private List<NeighborSet> _neighborsList = null;
 
+        // TODO add all further lists
+
+        /// <summary>
+        /// Creates a message with a random message ID.
+        /// </summary>
+        public Message()
+        {
+            MessageId = Random.Next();
+            ContentTypes = new Content[ContentTypeLength];
+        }
+
+        /// <summary>
+        /// For deserialization, the ID needs to be set.
+        /// </summary>
+        /// <param name="messageId">The message ID.</param>
+        /// <returns>This class.</returns>
+        public Message SetMessageId(int messageId)
+        {
+            MessageId = messageId;
+            return this;
+        }
+
+        /// <summary>
+        /// For deserialization.
+        /// </summary>
+        /// <param name="version">The 24bit version.</param>
+        /// <returns>This class.</returns>
+        public Message SetVersion(int version)
+        {
+            Version = version;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the message type. Either its a request or reply (with error and warning codes).
+        /// </summary>
+        /// <param name="type">The type of the message.</param>
+        /// <returns>This class.</returns>
+        public Message SetMessageType(MessageType type)
+        {
+            Type = type;
+            return this;
+        }
+
+        /// <summary>
+        /// Command of the message, such as GET, PING, etc.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>This class.</returns>
+        public Message SetCommand(byte command)
+        {
+            Command = command;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the ID of the sender. The IP of the sender will NOT be transferred, as this information is in the IP packet.
+        /// </summary>
+        /// <param name="sender">The ID of the sender.</param>
+        /// <returns>This class.</returns>
+        public Message SetSender(PeerAddress sender)
+        {
+            Sender = sender;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the ID of the recipient. The IP is used to connect to the recipient, but the IP is NOT transferred.
+        /// </summary>
+        /// <param name="recipient">The ID of the recipient.</param>
+        /// <returns>This class.</returns>
+        public Message SetRecipient(PeerAddress recipient)
+        {
+            Recipient = recipient;
+            return this;
+        }
+
+        public Message SetRecipientRelay(PeerAddress recipientRelay)
+        {
+            RecipientRelay = recipientRelay;
+            return this;
+        }
+
+        /// <summary>
+        /// Convenient method to set the content type.
+        /// Set first content type 1, if this is set (not empty), then set the second, etc. 
+        /// </summary>
+        /// <param name="contentType">The content type to set.</param>
+        /// <returns>This class.</returns>
+        public Message SetContentType(Content contentType)
+        {
+            for (int i = 0, reference = 0; i < ContentTypeLength; i++)
+            {
+                if (ContentTypes[i] == Content.Undefined) // TODO check expression
+                {
+                    if (contentType == Content.PublicKeySignature && i != 0)
+                    {
+                        throw new InvalidOperationException("The public key needs to be the first to be set.");
+                    }
+                    ContentTypes[i] = contentType;
+                    _contentReferences.Enqueue(new NumberType(reference, contentType));
+                    return this;
+                }
+                if (ContentTypes[i] == contentType)
+                {
+                    reference++;
+                }
+                else if (ContentTypes[i] == Content.PublicKeySignature || ContentTypes[i] == Content.PublicKey)
+                {
+                    // special handling for public key, as we store both in the same list
+                    if (contentType == Content.PublicKeySignature || contentType == Content.PublicKey)
+                    {
+                        reference++;
+                    }
+                }
+            }
+            throw new InvalidOperationException("Already set 8 content types.");
+        }
     }
 }
