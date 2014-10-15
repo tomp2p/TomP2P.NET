@@ -12,7 +12,7 @@ namespace TomP2P.Message
     public class Message
     {
         // used for creating random message id
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new Random(); // TODO make transient
 
         public const int ContentTypeLength = 8;
 
@@ -104,7 +104,7 @@ namespace TomP2P.Message
         /// </summary>
         public PeerAddress Recipient { get; private set; }
 
-        public PeerAddress RecipientRelay { get; private set; }
+        public PeerAddress RecipientRelay { get; private set; } // TODO make transient
 
         private int _options = 0;
 
@@ -117,13 +117,32 @@ namespace TomP2P.Message
         /// </summary>
         public Content[] ContentTypes { get; private set; }
 
-        private readonly Queue<NumberType> _contentReferences = new Queue<NumberType>();
+        /// <summary>
+        /// The serialized content and references to the respective arrays.
+        /// </summary>
+        public Queue<NumberType> ContentReferences { get; private set; }
 
         // following the payload objects:
         // content lists:
         private List<NeighborSet> _neighborsList = null;
 
         // TODO add all further lists
+
+        // TODO make status variables transient
+        private bool _presetContentTypes = false;
+        // TODO PrivateKey
+        // TODO 2x InetSocketAddress
+        private bool _udp = false;
+        private bool _done = false;
+        private bool _sign = false;
+        private bool _content = false;
+        private bool _verified = false;
+
+        public List<NeighborSet> NeighborsList
+        {
+            get { return _neighborsList; }
+            set { _neighborsList = value; }
+        }
 
         /// <summary>
         /// Creates a message with a random message ID.
@@ -132,6 +151,7 @@ namespace TomP2P.Message
         {
             MessageId = Random.Next();
             ContentTypes = new Content[ContentTypeLength];
+            ContentReferences = new Queue<NumberType>();
         }
 
         /// <summary>
@@ -223,7 +243,7 @@ namespace TomP2P.Message
                         throw new InvalidOperationException("The public key needs to be the first to be set.");
                     }
                     ContentTypes[i] = contentType;
-                    _contentReferences.Enqueue(new NumberType(reference, contentType));
+                    ContentReferences.Enqueue(new NumberType(reference, contentType));
                     return this;
                 }
                 if (ContentTypes[i] == contentType)
@@ -240,6 +260,159 @@ namespace TomP2P.Message
                 }
             }
             throw new InvalidOperationException("Already set 8 content types.");
+        }
+
+        /// <summary>
+        /// Sets or replaces the content type at a specific index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <param name="contentType">The content type to be set.</param>
+        /// <returns>This class.</returns>
+        public Message SetContentType(int index, Content contentType)
+        {
+            ContentTypes[index] = contentType;
+            return this;
+        }
+
+        /// <summary>
+        /// Used for deserialization.
+        /// </summary>
+        /// <param name="contentTypes">The content types that were decoded.</param>
+        /// <returns>This class.</returns>
+        public Message SetContentType(Content[] contentTypes)
+        {
+            ContentTypes = contentTypes;
+            return this;
+        }
+
+        // TODO check comment, if only vs. only if
+        /// <summary>
+        /// Restore the content references if only the content types array is
+        /// present. The content references are removed when decoding a message. That
+        /// means if a message was received it cannot be used a second time as the
+        /// content references are not there anymore. This method restores the
+        /// content references based on the content types of the message.
+        /// </summary>
+        public void RestoreContentReferences()
+        {
+            IDictionary<Content, int> references = new Dictionary<Content, int>(ContentTypes.Count() * 2);
+
+            foreach (var contentType in ContentTypes)
+            {
+                // TODO what about Content.Undefined
+                if (contentType == Content.Empty)
+                {
+                    return;
+                }
+
+                int index = 0;
+                if (contentType == Content.PublicKeySignature || contentType == Content.PublicKey)
+                {
+                    int j = references[Content.PublicKeySignature];
+                    if (j != default(int))
+                    {
+                        index = j;
+                    }
+                    else
+                    {
+                        j = references[Content.PublicKey];
+                        if (j != default(int))
+                        {
+                            index = j;
+                        }
+                    }
+                }
+
+                if (!references.ContainsKey(contentType))
+                {
+                    references.Add(contentType, index);
+                }
+                else
+                {
+                    index = references[contentType];
+                }
+
+                ContentReferences.Enqueue(new NumberType(index, contentType));
+                references.Add(contentType, index + 1);
+            }
+        }
+
+        /// <summary>
+        /// True if we have content and not only the header.
+        /// </summary>
+        public bool HasContent()
+        {
+            return ContentReferences.Count > 0 || _content;
+        }
+        
+        /// <summary>
+        /// We can set this already in the header to know if we have content or not.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns>This class.</returns>
+        public Message HasContent(bool content)
+        {
+            _content = content;
+            return this;
+        }
+
+        // *** TYPES OF REQUEST ***
+
+        // TODO check comment
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if this is a request, a regural or a fire and forget.</returns>
+        public bool IsRequest()
+        {
+            return Type == MessageType.Request1 || Type == MessageType.Request2 || Type == MessageType.Request3
+                || Type == MessageType.Request4 || Type == MessageType.RequestFf1 || Type == MessageType.RequestFf2;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if this is a fire and forget. (That means, we don't expect an answer.)</returns>
+        public bool IsFireAndForget()
+        {
+            return Type == MessageType.RequestFf1 || Type == MessageType.RequestFf2;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if the message was OK, or at least sent partial data.</returns>
+        public bool IsOk()
+        {
+            return Type == MessageType.Ok || Type == MessageType.PartiallyOk;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if the message arrived, but data was not found or access was denied.</returns>
+        public bool IsNotOk()
+        {
+            return Type == MessageType.NotFound || Type == MessageType.Denied;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if the message contained an unexpected error or behavior.</returns>
+        public bool IsError()
+        {
+            return IsError(Type);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type">The message type to check.</param>
+        /// <returns>True if the message contained an unexpected error or behavior.</returns>
+        public bool IsError(MessageType type)
+        {
+            return type == MessageType.UnknownId || type == MessageType.Exception || type == MessageType.Cancel;
         }
     }
 }
