@@ -106,7 +106,10 @@ namespace TomP2P.Message
 
         public PeerAddress RecipientRelay { get; private set; } // TODO make transient
 
-        private int _options = 0;
+        /// <summary>
+        /// The option from the last byte of the header.
+        /// </summary>
+        public int Option { get; private set; }
 
         // *** PAYLOAD ***
 
@@ -414,5 +417,72 @@ namespace TomP2P.Message
         {
             return type == MessageType.UnknownId || type == MessageType.Exception || type == MessageType.Cancel;
         }
+
+        /// <summary>
+        /// Set the option from the last byte of the header.
+        /// </summary>
+        /// <param name="option">The option to be set.</param>
+        /// <returns>This class.</returns>
+        public Message SetOption(int option)
+        {
+            Option = option;
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isKeepAlive">True if the connection should remain open. We need to announce this in the header, as otherwise the other end has an idle handler that will close the connection.</param>
+        /// <returns>This class.</returns>
+        public Message SetKeepAlive(bool isKeepAlive)
+        {
+            // TODO check operator meanings
+            if (isKeepAlive)
+            {
+                Option |= 1;
+            }
+            else
+            {
+                Option &= ~1;
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>True if this message was sent on a connection that should be kept alive.</returns>
+        public bool IsKeepAlive()
+        {
+            return (Option & 1) > 0;
+        }
+
+        public Message SetStreaming()
+        {
+            return SetStreaming(true);
+        }
+
+        public Message SetStreaming(bool isStreaming)
+        {
+            if (isStreaming)
+            {
+                Option |= 2;
+            }
+            else
+            {
+                Option &= ~2;
+            }
+            return this;
+        }
+
+        public bool IsStreaming()
+        {
+            return (Option & 2) > 0;
+        }
+
+        // Header data ends here.
+        // Static payload starts now.
+
+
     }
 }
