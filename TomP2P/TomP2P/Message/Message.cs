@@ -12,7 +12,7 @@ using TomP2P.Rpc;
 namespace TomP2P.Message
 {
     // TODO introduce header and payload regions
-
+    // TODO rename the setters to Add...(), as they add to lists
     public class Message
     {
         // used for creating random message id
@@ -146,9 +146,7 @@ namespace TomP2P.Message
         // TODO publicKeyList
         private List<PeerSocketAddress> _peerSocketAddressList = null;
 
-        private ISignatureCodec _signatureEncode = null; // TODO only encode?
-
-        // TODO add all further lists
+        public ISignatureCodec ReceivedSignature { get; private set; }
 
         // TODO make status variables transient
         private bool _presetContentTypes = false;
@@ -165,6 +163,7 @@ namespace TomP2P.Message
         /// </summary>
         public Message()
         {
+            ReceivedSignature = null;
             MessageId = Random.Next();
             ContentTypes = new Content[ContentTypeLength];
             ContentReferences = new Queue<NumberType>();
@@ -689,5 +688,163 @@ namespace TomP2P.Message
             }
             return _keyCollectionList[index];
         }
+
+        public Message SetKeyMap640Keys(KeyMap640Keys keyMap640Keys)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.MapKey640Keys);
+            }
+            if (_keyMap640KeysList == null)
+            {
+                _keyMap640KeysList = new List<KeyMap640Keys>(1);
+            }
+            _keyMap640KeysList.Add(keyMap640Keys);
+            return this;
+        }
+
+        public List<KeyMap640Keys> KeyMap640KeysList
+        {
+            get { return _keyMap640KeysList ?? new List<KeyMap640Keys>(); }
+        }
+
+        public KeyMap640Keys KeyMap640Keys(int index)
+        {
+            if (_keyMap640KeysList == null || index > _keyMap640KeysList.Count - 1)
+            {
+                return null;
+            }
+            return _keyMap640KeysList[index];
+        }
+
+        public Message SetKeyMapByte(KeyMapByte keyMapByte)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.MapKey640Byte);
+            }
+            if (_keyMapByteList == null) {
+                _keyMapByteList = new List<KeyMapByte>(1);
+            }
+            _keyMapByteList.Add(keyMapByte);
+            return this;
+        }
+
+        public List<KeyMapByte> KeyMapByteList
+        {
+            get { return _keyMapByteList ?? new List<KeyMapByte>(); }
+        }
+
+        public KeyMapByte KeyMapByte(int index)
+        {
+            if (_keyMapByteList == null || index > _keyMapByteList.Count - 1)
+            {
+                return null;
+            }
+            return _keyMapByteList[index];
+        }
+
+        // TODO implement publicKey functions here
+
+        public Message SetPeerSocketAddresses(IEnumerable<PeerSocketAddress> peerSocketAddresses)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.SetPeerSocket);
+            }
+            if (_peerSocketAddressList == null)
+            {
+                _peerSocketAddressList = new List<PeerSocketAddress>(peerSocketAddresses.Count());
+            }
+            _peerSocketAddressList.AddRange(peerSocketAddresses);
+            return this;
+        }
+
+        public List<PeerSocketAddress> PeerSocketAddresses
+        {
+            get { return _peerSocketAddressList ?? new List<PeerSocketAddress>(); }
+        }
+
+        // TODO implement publicKey / privateKey getters here
+
+        public Message SetBuffer(Buffer byteBuffer)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.ByteBuffer);
+            }
+            if (_bufferList == null)
+            {
+                _bufferList = new List<Buffer>(1);
+            }
+            _bufferList.Add(byteBuffer);
+            return this;
+        }
+
+        public List<Buffer> BufferList
+        {
+            get { return _bufferList ?? new List<Buffer>(); }
+        }
+
+        public Buffer Buffer(int index)
+        {
+            if (_bufferList == null || index > _bufferList.Count - 1)
+            {
+                return null;
+            }
+            return _bufferList[index];
+        }
+
+        public Message SetTrackerData(TrackerData trackerData)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.SetTrackerData);
+            }
+            if (_trackerDataList == null)
+            {
+                _trackerDataList = new List<TrackerData>(1);
+            }
+            _trackerDataList.Add(trackerData);
+            return this;
+        }
+
+        public List<TrackerData> TrackerDataList
+        {
+            get { return _trackerDataList ?? new List<TrackerData>(); }
+        }
+
+        public TrackerData TrackerData(int index)
+        {
+            if (_trackerDataList == null || index > _trackerDataList.Count - 1)
+            {
+                return null;
+            }
+            return _trackerDataList[index];
+        }
+
+        public Message SetReceivedSignature(ISignatureCodec signatureEncode)
+        {
+            ReceivedSignature = signatureEncode;
+            return this;
+        }
+
+        // *** NON-TRANSFERABLE OBJECTS ***
+
+        /// <summary>
+        /// If we are setting values from the decoder, then the content type is already set.
+        /// </summary>
+        /// <param name="presetContentTypes">True if the content type is already set.</param>
+        /// <returns>This class.</returns>
+        public Message SetPresetContentTypes(bool presetContentTypes)
+        {
+            _presetContentTypes = presetContentTypes;
+            return this;
+        }
+
+        // TODO implement SetSenderSocket() here
+        // TODO implement SetRecipientSocket() here
+
+
     }
 }
