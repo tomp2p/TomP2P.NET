@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,6 +34,12 @@ namespace TomP2P
             x += (x >> 8);
             x += (x >> 16);
             return (x & 0x0000003f);
+        }
+
+        public static byte[] ComputeHash(this string x)
+        {
+            HashAlgorithm algorithm = SHA1.Create();
+            return algorithm.ComputeHash(Encoding.UTF8.GetBytes(x));
         }
     }
 }

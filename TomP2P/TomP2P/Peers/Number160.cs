@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace TomP2P.Peers
@@ -357,10 +356,7 @@ namespace TomP2P.Peers
         public static Number160 CreateHash(string stringValue)
         {
             // TODO compare result with java implementation
-            HashAlgorithm algorithm = SHA1.Create();
-            byte[] hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(stringValue));
-
-            return new Number160(hash);
+            return new Number160(stringValue.ComputeHash());
         }
 
         /// <summary>
