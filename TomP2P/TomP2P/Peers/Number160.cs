@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace TomP2P.Peers
 {
@@ -179,22 +175,6 @@ namespace TomP2P.Peers
         }
 
         /// <summary>
-        /// The first (most significant) 64 bits.
-        /// </summary>
-        public long Timestamp
-        {
-            get { return ((_val[0] & LongMask) << IntegerSize) + (_val[1] & LongMask); }
-        }
-
-        /// <summary>
-        /// The lower (least significant) 96 bits.
-        /// </summary>
-        public Number160 Number96
-        {
-            get { return new Number160(0, 0, _val[2], _val[3], _val[4]); }
-        }
-
-        /// <summary>
         /// XOR operation.
         /// </summary>
         /// <param name="key">The second operand for the XOR operation.</param>
@@ -258,6 +238,32 @@ namespace TomP2P.Peers
             return offset + ByteArraySize;
         }
 
+        public double ToDouble()
+        {
+            double d = 0;
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                d *= LongMask + 1;
+                d += _val[i] & LongMask;
+            }
+            return d;
+        }
+
+        public float ToFloat()
+        {
+            return (float) ToDouble();
+        }
+
+        public int ToInt()
+        {
+            return _val[IntArraySize - 1];
+        }
+
+        public long ToLong()
+        {
+            return ((_val[IntArraySize - 1] & LongMask) << IntegerSize) + (_val[IntArraySize - 2] & LongMask);
+        }
+
         /// <summary>
         /// Shows the content in a human-readable manner.
         /// </summary>
@@ -276,6 +282,140 @@ namespace TomP2P.Peers
                 }
             }
             return sb.ToString();
+        }
+
+        public override string ToString()
+        {
+            return ToString(true);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Number160))
+            {
+                return false;
+            }
+            if (obj == this) // TODO might introduce StackOverflow, as in .NET it's no value type
+            {
+                return true;
+            }
+            var key = (Number160) obj;
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                if (key._val[i] != _val[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 0;
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                hashCode = (int) (31 * hashCode + (_val[i] & LongMask));
+            }
+            return hashCode;
+        }
+
+        public int CompareTo(Number160 other)
+        {
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                long b1 = _val[i] & LongMask;
+                long b2 = other._val[i] & LongMask;
+                if (b1 < b2)
+                {
+                    return -1;
+                }
+                if (b1 > b2)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Creates a new Number160 from the integer, which fills all the 160 bits.
+        /// A new random object will be created, thus, its thread-safe.
+        /// </summary>
+        /// <param name="intValue">The value to hash from. (Seed)</param>
+        /// <returns>A hash based on pseudo radnom, to fill the 160 bits.</returns>
+        public static Number160 CreateHash(int intValue)
+        {
+            return new Number160(new Random(intValue));
+        }
+
+        /// <summary>
+        /// Creates a new Number160 using SHA-1 on the string.
+        /// </summary>
+        /// <param name="stringValue">The value to hash from.</param>
+        /// <returns>A hash based on SHA-1 of the string.</returns>
+        public static Number160 CreateHash(string stringValue)
+        {
+            // TODO compare result with java implementation
+            HashAlgorithm algorithm = SHA1.Create();
+            byte[] hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(stringValue));
+
+            return new Number160(hash);
+        }
+
+        /// <summary>
+        /// The first (most significant) 64 bits.
+        /// </summary>
+        public long Timestamp
+        {
+            get { return ((_val[0] & LongMask) << IntegerSize) + (_val[1] & LongMask); }
+        }
+
+        /// <summary>
+        /// The lower (least significant) 96 bits.
+        /// </summary>
+        public Number160 Number96
+        {
+            get { return new Number160(0, 0, _val[2], _val[3], _val[4]); }
+        }
+
+        /// <summary>
+        /// Check if this number is zero.
+        /// </summary>
+        public bool IsZero
+        {
+            get
+            {
+                for (int i = 0; i < IntArraySize; i++)
+                {
+                    if (_val[i] != 0)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// The number of bits used to represent this number. All leading (leftmost) zero bits are ignored.
+        /// </summary>
+        public int BitLength
+        {
+            get
+            {
+                int bits = 0;
+                for (int i = 0; i < IntArraySize; i++)
+                {
+                    if (_val[i] != 0)
+                    {
+                        bits += (IntegerSize - _val[i].LeadingZeros()); // TODO test
+                        bits += (IntegerSize * (IntArraySize - ++i));
+                        break;
+                    }
+                }
+                return bits;
+            }
         }
 
         /// <summary>
@@ -300,11 +440,6 @@ namespace TomP2P.Peers
                 integer >>= 4; // TODO check if zero filling is done
             }
             sb.Append(buf, charPos, (CharsPerInt - charPos));
-        }
-
-        public int CompareTo(Number160 other)
-        {
-            throw new NotImplementedException();
         }
     }
 }
