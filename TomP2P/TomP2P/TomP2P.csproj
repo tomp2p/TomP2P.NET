@@ -42,6 +42,7 @@
     <Compile Include="Message\Message.cs" />
     <Compile Include="Message\NeighborSet.cs" />
     <Compile Include="Message\NumberType.cs" />
+    <Compile Include="Peers\Number160.cs" />
     <Compile Include="Peers\PeerAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
