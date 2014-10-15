@@ -40,12 +40,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="Message\Buffer.cs" />
+    <Compile Include="Message\DataMap.cs" />
+    <Compile Include="Message\KeyCollection.cs" />
+    <Compile Include="Message\KeyMap640Keys.cs" />
+    <Compile Include="Message\KeyMapByte.cs" />
     <Compile Include="Message\Message.cs" />
     <Compile Include="Message\NeighborSet.cs" />
     <Compile Include="Message\NumberType.cs" />
+    <Compile Include="Message\SignatureCodec.cs" />
+    <Compile Include="Message\TrackerData.cs" />
     <Compile Include="Peers\Number160.cs" />
     <Compile Include="Peers\PeerAddress.cs" />
+    <Compile Include="Peers\PeerSocketAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rpc\SimpleBloomFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">

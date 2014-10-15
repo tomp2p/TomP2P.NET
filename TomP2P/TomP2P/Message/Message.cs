@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Peers;
+using TomP2P.Rpc;
 
 namespace TomP2P.Message
 {
@@ -128,6 +132,21 @@ namespace TomP2P.Message
         // following the payload objects:
         // content lists:
         private List<NeighborSet> _neighborsList = null;
+        private List<Number160> _keyList = null; 
+        private List<SimpleBloomFilter<Number160>> _bloomFilterList = null;
+        private List<DataMap> _dataMapList = null; 
+        // public key comes here...
+        private List<int> _integerList = null;
+        private List<long> _longList = null;
+        private List<KeyCollection> _keyCollectionList = null;
+        private List<KeyMap640Keys> _keyMap640KeysList = null;
+        private List<KeyMapByte> _keyMapByteList = null;
+        private List<Buffer> _bufferList = null;
+        private List<TrackerData> _trackerDataList = null;
+        // TODO publicKeyList
+        private List<PeerSocketAddress> _peerSocketAddressList = null;
+
+        private ISignatureCodec _signatureEncode = null; // TODO only encode?
 
         // TODO add all further lists
 
@@ -140,12 +159,6 @@ namespace TomP2P.Message
         private bool _sign = false;
         private bool _content = false;
         private bool _verified = false;
-
-        public List<NeighborSet> NeighborsList
-        {
-            get { return _neighborsList; }
-            set { _neighborsList = value; }
-        }
 
         /// <summary>
         /// Creates a message with a random message ID.
@@ -483,6 +496,198 @@ namespace TomP2P.Message
         // Header data ends here.
         // Static payload starts now.
 
+        public Message SetKey(Number160 key)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.Key);
+            }
+            if (_keyList == null)
+            {
+                _keyList = new List<Number160>(1);
+            }
+            _keyList.Add(key);
+            return this;
+        }
 
+        public List<Number160> KeyList
+        {
+            get { return _keyList ?? new List<Number160>(); }
+        }
+
+        public Number160 Key(int index)
+        {
+            if (_keyList == null || index > _keyList.Count - 1)
+            {
+                return null;
+            }
+            return _keyList[index];
+        }
+
+        public Message SetBloomFilter(SimpleBloomFilter<Number160> bloomFilter)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.BloomFilter);
+            }
+            if (_bloomFilterList == null)
+            {
+                _bloomFilterList = new List<SimpleBloomFilter<Number160>>(1);
+            }
+            _bloomFilterList.Add(bloomFilter);
+            return this;
+        }
+
+        public List<SimpleBloomFilter<Number160>> BloomFilterList()
+        {
+            return _bloomFilterList ?? new List<SimpleBloomFilter<Number160>>();
+        }
+
+        public SimpleBloomFilter<Number160> BloomFilter(int index)
+        {
+            if (_bloomFilterList == null || index > _bloomFilterList.Count - 1)
+            {
+                return null;
+            }
+            return _bloomFilterList[index];
+        }
+
+        // TODO implement publicKeyAndSign
+
+        public Message SetIntValue(int integer)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.Integer);
+            }
+            if (_integerList == null)
+            {
+                _integerList = new List<int>(1);
+            }
+            _integerList.Add(integer);
+            return this;
+        }
+
+        public List<int> IntList
+        {
+            get { return _integerList ?? new List<int>(); }
+        }
+
+        public int IntAt(int index)
+        {
+            if (_integerList == null || index > _integerList.Count - 1)
+            {
+                return 0; // TODO cannot return null
+            }
+            return _integerList[index];
+        }
+
+        public Message SetLongValue(long long0)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.Long);
+            }
+            if (_longList == null)
+            {
+                _longList = new List<long>(1);
+            }
+            _longList.Add(long0);
+            return this;
+        }
+
+        public List<long> LongList
+        {
+            get { return _longList ?? new List<long>(); }
+        }
+
+        public long LongAt(int index)
+        {
+            if (_longList == null || index > _longList.Count - 1)
+            {
+                return 0; // TODO cannot return null
+            }
+            return _longList[index];
+        }
+
+        public Message SetNeighborSet(NeighborSet neighborSet)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.SetNeighbors);
+            }
+            if (_neighborsList == null)
+            {
+                _neighborsList = new List<NeighborSet>(1);
+            }
+            _neighborsList.Add(neighborSet);
+            return this;
+        }
+
+        public List<NeighborSet> NeighborSetList
+        {
+            get { return _neighborsList ?? new List<NeighborSet>(); }
+        }
+
+        public NeighborSet NeighborsSet(int index)
+        {
+            if (_neighborsList == null || index > _neighborsList.Count - 1)
+            {
+                return null;
+            }
+            return _neighborsList[index];
+        }
+
+        public Message SetDataMap(DataMap dataMap)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.MapKey640Data);
+            }
+            _dataMapList.Add(dataMap);
+            return this;
+        }
+
+        public List<DataMap> DataMapList
+        {
+            get { return _dataMapList ?? new List<DataMap>(); }
+        }
+
+        public DataMap DataMap(int index)
+        {
+            if (_dataMapList == null || index > _dataMapList.Count - 1)
+            {
+                return null;
+            }
+            return _dataMapList[index];
+        }
+
+        public Message SetKeyCollection(KeyCollection keyCollection)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.SetKey640);
+            }
+            if (_keyCollectionList == null)
+            {
+                _keyCollectionList = new List<KeyCollection>();
+            }
+            _keyCollectionList.Add(keyCollection);
+            return this;
+        }
+
+        public List<KeyCollection> KeyCollectionList
+        {
+            get { return _keyCollectionList ?? new List<KeyCollection>(); }
+        }
+
+        public KeyCollection KeyCollection(int index)
+        {
+            if (_keyCollectionList == null || index > _keyCollectionList.Count - 1)
+            {
+                return null;
+            }
+            return _keyCollectionList[index];
+        }
     }
 }
