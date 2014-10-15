@@ -34,7 +34,8 @@ namespace TomP2P.Peers
         public const int IntArraySize = Bits/IntegerSize; 
 
         // size of a byte array
-        public const int ByteArraySize = Bits/8; // Byte.SIZE = 8;
+        public const int ByteSize = 8; // Byte.SIZE = 8;
+        public const int ByteArraySize = Bits/ByteSize; 
 
         public const int CharsPerInt = 8;
 
@@ -175,6 +176,130 @@ namespace TomP2P.Peers
             _val[2] = number96._val[2];
             _val[3] = number96._val[3];
             _val[4] = number96._val[4];
+        }
+
+        /// <summary>
+        /// The first (most significant) 64 bits.
+        /// </summary>
+        public long Timestamp
+        {
+            get { return ((_val[0] & LongMask) << IntegerSize) + (_val[1] & LongMask); }
+        }
+
+        /// <summary>
+        /// The lower (least significant) 96 bits.
+        /// </summary>
+        public Number160 Number96
+        {
+            get { return new Number160(0, 0, _val[2], _val[3], _val[4]); }
+        }
+
+        /// <summary>
+        /// XOR operation.
+        /// </summary>
+        /// <param name="key">The second operand for the XOR operation.</param>
+        /// <returns>A new key with the result of the XOR operation.</returns>
+        public Number160 Xor(Number160 key)
+        {
+            var result = new int[IntArraySize];
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                result[i] = _val[i] ^ key._val[i];
+            }
+            return new Number160(result);
+        }
+
+        /// <summary>
+        /// Returns a copy of the backing array, which is always of size 5.
+        /// </summary>
+        /// <returns>A copy of the backing array.</returns>
+        public int[] ToIntArray()
+        {
+            var result = new int[IntArraySize];
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                result[i] = _val[i];
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a byte array, which is always of size 20.
+        /// </summary>
+        /// <returns>A byte array.</returns>
+        public byte[] ToByteArray()
+        {
+            var result = new byte[ByteArraySize];
+            ToByteArray(result, 0); // TODO check if the result variable has been modified
+            return result;
+        }
+
+        /// <summary>
+        /// Fills the byte array with this number.
+        /// </summary>
+        /// <param name="me">The byte array.</param>
+        /// <param name="offset">Where to start in the byte array.</param>
+        /// <returns>The offset being read.</returns>
+        public int ToByteArray(byte[] me, int offset)
+        {
+            if (offset + ByteArraySize > me.Length)
+            {
+                throw new SystemException("Array too small.");
+            }
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                // multiply by 4
+                int idx = offset + (i << 2);
+                me[idx + 0] = (byte)(_val[i] >> 24);
+                me[idx + 1] = (byte)(_val[i] >> 16);
+                me[idx + 2] = (byte)(_val[i] >> 8);
+                me[idx + 3] = (byte)(_val[i]);
+            }
+            return offset + ByteArraySize;
+        }
+
+        /// <summary>
+        /// Shows the content in a human-readable manner.
+        /// </summary>
+        /// <param name="removeLeadingZero">Indicates if leading zeros should be removed.</param>
+        /// <returns>A human-readable representation of this key.</returns>
+        public string ToString(bool removeLeadingZero)
+        {
+            bool removeZero = removeLeadingZero;
+            var sb = new StringBuilder("0x");
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                ToHex(_val[i], removeZero, sb); // TODO check if reference works
+                if (removeZero && _val[i] != 0)
+                {
+                    removeZero = false;
+                }
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Convert an integer to a hexadecimal value.
+        /// </summary>
+        /// <param name="integer2">The integer to convert.</param>
+        /// <param name="removeLeadingZero">Indicate if leading zeros should be ignored.</param>
+        /// <param name="sb">The string builder where to store the result.</param>
+        private static void ToHex(int integer2, bool removeLeadingZero, StringBuilder sb)
+        {
+            // 4 bits form a char, thus we have 160/4=40 chars in a key.
+            // With an integer array size of 5, this gives 8 chars per integer.
+
+            var buf = new char[CharsPerInt];
+            int charPos = CharsPerInt;
+            int integer = integer2;
+            for (int i = 0; i < CharsPerInt && !(removeLeadingZero && integer == 0); i++)
+            {
+                buf[--charPos] = Digits[integer & CharMask];
+
+                // for hexadecimal, we have 4 bits per char, which ranges from [0-9a-f]
+                integer >>= 4; // TODO check if zero filling is done
+            }
+            sb.Append(buf, charPos, (CharsPerInt - charPos));
         }
 
         public int CompareTo(Number160 other)
