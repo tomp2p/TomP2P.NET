@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using TomP2P.Workaround;
@@ -152,7 +153,14 @@ namespace TomP2P.Message
         // status variables: 
         private bool _presetContentTypes = false;
         public IPrivateKey PrivateKey { get; private set; }
-        // TODO 2x InetSocketAddress
+        /// <summary>
+        /// The sender of the packet. This is needed for UDP traffic.
+        /// </summary>
+        public IPEndPoint SenderSocket { get; private set; }
+        /// <summary>
+        /// The recipient as we saw it on the interface. This is needed for UDP (especially broadcast) packets.
+        /// </summary>
+        public IPEndPoint RecipientSocket { get; private set; }
         public bool Udp { get; private set; }
         public bool Done { get; private set; }
         private bool _sign = false;
@@ -894,10 +902,29 @@ namespace TomP2P.Message
             return this;
         }
 
-        // TODO implement SetSenderSocket() here
-        // TODO implement SetRecipientSocket() here
-        // TODO implement RecipientSocket property
+        /// <summary>
+        /// Store the sender of the packet. This is needed for UDP traffic.
+        /// </summary>
+        /// <param name="senderSocket">The sender as we saw it on the interface.</param>
+        /// <returns>This class.</returns>
+        public Message SetSenderSocket(IPEndPoint senderSocket)
+        {
+            SenderSocket = senderSocket;
+            return this;
+        }
 
+        /// <summary>
+        /// Store the recipient of the packet. This is needed for UDP (especially broadcast) packets.
+        /// </summary>
+        /// <param name="recipientSocket">The recipient as we saw it on the interface.</param>
+        /// <returns>This class.</returns>
+        public Message SetRecipientSocket(IPEndPoint recipientSocket)
+        {
+            RecipientSocket = recipientSocket;
+            return this;
+        }
+
+        
         /// <summary>
         /// Set if we have a signed message.
         /// </summary>
