@@ -56,6 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Rpc\SimpleBloomFilter.cs" />
+    <Compile Include="Storage\Data.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />
     <Compile Include="Workaround\IPublicKey.cs" />
     <Compile Include="Workaround\KeyPair.cs" />
