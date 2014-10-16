@@ -152,17 +152,20 @@ namespace TomP2P.Message
         private bool _presetContentTypes = false;
         // TODO PrivateKey
         // TODO 2x InetSocketAddress
-        private bool _udp = false;
-        private bool _done = false;
+
+        public bool Udp { get; private set; }
+        public bool Done { get; private set; }
         private bool _sign = false;
         private bool _content = false;
-        private bool _verified = false;
+        public bool Verified { get; private set; }
 
         /// <summary>
         /// Creates a message with a random message ID.
         /// </summary>
         public Message()
         {
+            Udp = false;
+            Done = false;
             ReceivedSignature = null;
             MessageId = Random.Next();
             ContentTypes = new Content[ContentTypeLength];
@@ -844,7 +847,69 @@ namespace TomP2P.Message
 
         // TODO implement SetSenderSocket() here
         // TODO implement SetRecipientSocket() here
+        // TODO implement RecipientSocket property
+
+        /// <summary>
+        /// Set if we have a signed message.
+        /// </summary>
+        /// <returns>This class.</returns>
+        public Message SetHintSign()
+        {
+            _sign = true;
+            return this;
+        }
+
+        /*/// <summary>
+        /// True, if message is or should be signed.
+        /// </summary>
+        public bool IsSign
+        {
+            get { return _sign || _privateKey != null; }
+        }*/
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isUdp">True, if connection is UDP.</param>
+        /// <returns>This class.</returns>
+        public Message SetIsUdp(bool isUdp)
+        {
+            Udp = isUdp;
+            return this;
+        }
 
 
+        public Message SetVerified()
+        {
+            return SetVerified(true);
+        }
+
+        public Message SetVerified(bool isVerified)
+        {
+            Verified = isVerified;
+            return this;
+        }
+
+        /// <summary>
+        /// Set done to true, if message decoding or encoding is done.
+        /// </summary>
+        /// <returns>This class.</returns>
+        public Message SetDone()
+        {
+            return SetDone(true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isDone">True, if message decoding or encoding is done.</param>
+        /// <returns>This class.</returns>
+        public Message SetDone(bool isDone)
+        {
+            Done = true;
+            return this;
+        }
+
+        
     }
 }
