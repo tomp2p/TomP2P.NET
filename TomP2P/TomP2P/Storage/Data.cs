@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Peers;
 
 namespace TomP2P.Storage
 {
@@ -13,5 +14,9 @@ namespace TomP2P.Storage
      /// </summary>
      public class Data
     {
+         public Number160 Hash()
+         {
+             throw new NotImplementedException();
+         }
     }
 }
