@@ -57,6 +57,7 @@
     <Compile Include="Rpc\SimpleBloomFilter.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />
     <Compile Include="Workaround\IPublicKey.cs" />
+    <Compile Include="Workaround\KeyPair.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">

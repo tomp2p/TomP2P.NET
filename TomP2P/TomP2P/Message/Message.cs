@@ -146,15 +146,13 @@ namespace TomP2P.Message
         private List<TrackerData> _trackerDataList = null;
         private List<IPublicKey> _publicKeyList = null; 
         private List<PeerSocketAddress> _peerSocketAddressList = null;
-
         public ISignatureCodec ReceivedSignature { get; private set; }
 
         //TODO make status variables transient
         // status variables: 
         private bool _presetContentTypes = false;
-        // TODO PrivateKey
+        public IPrivateKey PrivateKey { get; private set; }
         // TODO 2x InetSocketAddress
-
         public bool Udp { get; private set; }
         public bool Done { get; private set; }
         private bool _sign = false;
@@ -556,7 +554,17 @@ namespace TomP2P.Message
             return _bloomFilterList[index];
         }
 
-        // TODO implement publicKeyAndSign
+        public Message SetPublicKeyAndSign(KeyPair keyPair)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.PublicKeySignature);
+            }
+            SetPublicKey0(keyPair.PublicKey);
+            PrivateKey = keyPair.PrivateKey;
+
+            return this;
+        }
 
         public Message SetIntValue(int integer)
         {
@@ -797,11 +805,12 @@ namespace TomP2P.Message
             {
                 SetContentType(Content.SetPeerSocket);
             }
+            var socketAddresses = peerSocketAddresses as IList<PeerSocketAddress> ?? peerSocketAddresses.ToList();
             if (_peerSocketAddressList == null)
             {
-                _peerSocketAddressList = new List<PeerSocketAddress>(peerSocketAddresses.Count());
+                _peerSocketAddressList = new List<PeerSocketAddress>(socketAddresses.Count());
             }
-            _peerSocketAddressList.AddRange(peerSocketAddresses);
+            _peerSocketAddressList.AddRange(socketAddresses);
             return this;
         }
 
@@ -809,8 +818,6 @@ namespace TomP2P.Message
         {
             get { return _peerSocketAddressList ?? new List<PeerSocketAddress>(); }
         }
-
-        // TODO implement publicKey / privateKey getters here
 
         public Message SetBuffer(Buffer byteBuffer)
         {
@@ -901,13 +908,13 @@ namespace TomP2P.Message
             return this;
         }
 
-        /*/// <summary>
+        /// <summary>
         /// True, if message is or should be signed.
         /// </summary>
         public bool IsSign
         {
-            get { return _sign || _privateKey != null; }
-        }*/
+            get { return _sign || PrivateKey != null; }
+        }
 
         /// <summary>
         /// 
