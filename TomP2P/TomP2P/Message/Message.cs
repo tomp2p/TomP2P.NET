@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TomP2P.Peers;
 using TomP2P.Rpc;
+using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {
     // TODO introduce header and payload regions
     // TODO rename the setters to Add...(), as they add to lists
+
+    /// <summary>
+    /// The message is in binary format in TomP2P. It is defined as follows and has several header and payload fields.
+    /// Since the serialization is done manually, no serialization field is needed.
+    /// </summary>
     public class Message
     {
         // used for creating random message id
@@ -134,8 +135,8 @@ namespace TomP2P.Message
         private List<NeighborSet> _neighborsList = null;
         private List<Number160> _keyList = null; 
         private List<SimpleBloomFilter<Number160>> _bloomFilterList = null;
-        private List<DataMap> _dataMapList = null; 
-        // public key comes here...
+        private List<DataMap> _dataMapList = null;
+        //private IPublicKey _publicKey = null; // there can only be one
         private List<int> _integerList = null;
         private List<long> _longList = null;
         private List<KeyCollection> _keyCollectionList = null;
@@ -143,12 +144,13 @@ namespace TomP2P.Message
         private List<KeyMapByte> _keyMapByteList = null;
         private List<Buffer> _bufferList = null;
         private List<TrackerData> _trackerDataList = null;
-        // TODO publicKeyList
+        private List<IPublicKey> _publicKeyList = null; 
         private List<PeerSocketAddress> _peerSocketAddressList = null;
 
         public ISignatureCodec ReceivedSignature { get; private set; }
 
-        // TODO make status variables transient
+        //TODO make status variables transient
+        // status variables: 
         private bool _presetContentTypes = false;
         // TODO PrivateKey
         // TODO 2x InetSocketAddress
@@ -646,6 +648,10 @@ namespace TomP2P.Message
             {
                 SetContentType(Content.MapKey640Data);
             }
+            if (_dataMapList == null)
+            {
+                _dataMapList = new List<DataMap>(1);
+            }
             _dataMapList.Add(dataMap);
             return this;
         }
@@ -747,7 +753,43 @@ namespace TomP2P.Message
             return _keyMapByteList[index];
         }
 
-        // TODO implement publicKey functions here
+        public Message SetPublicKey(IPublicKey publicKey)
+        {
+            if (!_presetContentTypes)
+            {
+                SetContentType(Content.PublicKey);
+            }
+            if (_publicKeyList == null)
+            {
+                _publicKeyList = new List<IPublicKey>(1);
+            }
+            _publicKeyList.Add(publicKey);
+            return this;
+        }
+
+        public Message SetPublicKey0(IPublicKey publicKey)
+        {
+            if (_publicKeyList == null)
+            {
+                _publicKeyList = new List<IPublicKey>(1);
+            }
+            _publicKeyList.Add(publicKey);
+            return this;
+        }
+
+        public List<IPublicKey> PublicKeyList
+        {
+            get { return _publicKeyList ?? new List<IPublicKey>(); }
+        }
+
+        public IPublicKey PublicKey(int index)
+        {
+            if (_publicKeyList == null || index > _publicKeyList.Count - 1)
+            {
+                return null;
+            }
+            return _publicKeyList[index];
+        }
 
         public Message SetPeerSocketAddresses(IEnumerable<PeerSocketAddress> peerSocketAddresses)
         {
