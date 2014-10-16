@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {
-    // TODO introduce header and payload regions
-    // TODO rename the setters to Add...(), as they add to lists
-
     /// <summary>
     /// The message is in binary format in TomP2P. It is defined as follows and has several header and payload fields.
     /// Since the serialization is done manually, no serialization field is needed.
@@ -161,7 +159,7 @@ namespace TomP2P.Message
         /// The recipient as we saw it on the interface. This is needed for UDP (especially broadcast) packets.
         /// </summary>
         public IPEndPoint RecipientSocket { get; private set; }
-        public bool Udp { get; private set; }
+        public bool IsUdp { get; private set; }
         public bool Done { get; private set; }
         private bool _sign = false;
         private bool _content = false;
@@ -172,7 +170,7 @@ namespace TomP2P.Message
         /// </summary>
         public Message()
         {
-            Udp = false;
+            IsUdp = false;
             Done = false;
             ReceivedSignature = null;
             MessageId = Random.Next();
@@ -889,6 +887,8 @@ namespace TomP2P.Message
             return this;
         }
 
+        // end of content payload
+
         // *** NON-TRANSFERABLE OBJECTS ***
 
         /// <summary>
@@ -950,7 +950,7 @@ namespace TomP2P.Message
         /// <returns>This class.</returns>
         public Message SetIsUdp(bool isUdp)
         {
-            Udp = isUdp;
+            IsUdp = isUdp;
             return this;
         }
 
@@ -986,6 +986,15 @@ namespace TomP2P.Message
             return this;
         }
 
-        
+        public override string ToString()
+        {
+            var sb = new StringBuilder("msgid=");
+            return sb.Append(MessageId)
+                .Append(",t=").Append(Type)
+                .Append(",c=").Append(Enum.GetName(typeof(Rpc.Rpc.Commands), Command)) // TODO check if this works, as Command is byte
+                .Append(IsUdp ? "udp" : "tcp")
+                .Append(",s=").Append(Sender)
+                .Append(",r=").Append(Recipient).ToString();
+        }
     }
 }

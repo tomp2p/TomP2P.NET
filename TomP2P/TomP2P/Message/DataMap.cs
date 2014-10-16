@@ -8,5 +8,6 @@ namespace TomP2P.Message
 {
     public class DataMap
     {
+
     }
 }

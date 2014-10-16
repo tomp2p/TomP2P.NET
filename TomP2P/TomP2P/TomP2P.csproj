@@ -54,6 +54,7 @@
     <Compile Include="Peers\PeerAddress.cs" />
     <Compile Include="Peers\PeerSocketAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Rpc\SimpleBloomFilter.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />
     <Compile Include="Workaround\IPublicKey.cs" />
