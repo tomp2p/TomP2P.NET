@@ -120,7 +120,7 @@ namespace TomP2P.Message
         }
 
         /// <summary>
-        /// The size of either the datamap with the Number480 as key, or datamap with the Number160 as key.
+        /// The size of either the datamap with the Number480 as key, or the datamap with the Number160 as key.
         /// </summary>
         public int Size
         {
