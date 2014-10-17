@@ -14,6 +14,11 @@ namespace TomP2P.Storage
      /// </summary>
      public class Data
     {
+         public Data(int i, int i1)
+         {
+             throw new NotImplementedException();
+         }
+
          public Number160 Hash()
          {
              throw new NotImplementedException();
