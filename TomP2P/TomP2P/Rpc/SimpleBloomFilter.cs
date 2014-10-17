@@ -9,6 +9,12 @@ using NLog;
 
 namespace TomP2P.Rpc
 {
+    // TODO finish SimpleBloomFilter implementation (and documentation)
+
+    /// <summary>
+    /// A simple bloom filter that uses Random as a primitive hash function.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class SimpleBloomFilter<T> // TODO implement ISet<T>
     {
         private static Logger Logger = LogManager.GetCurrentClassLogger();
@@ -20,10 +26,19 @@ namespace TomP2P.Rpc
         private const int SizeHeader = SizeHeaderLength + SizeHeaderElements;
 
         private readonly int _k;
-        private readonly BitArray _bitArray;
+
+        /// <summary>
+        /// The bit array that backs the bloom filter.
+        /// </summary>
+        public BitArray BitArray { get; private set; }
+
         private readonly int _byteArraySize;
         private readonly int _bitArraySize;
-        private readonly int _expectedElements;
+
+        /// <summary>
+        /// The expected elements that was provided.
+        /// </summary>
+        public int ExpectedElements { get; private set; }
 
         /// <summary>
         /// Constructs an empty SimpleBloomFilter. You must specify the number of bits in the bloom filter and also specify the number of items being expected to be added.
@@ -46,15 +61,15 @@ namespace TomP2P.Rpc
         {
             _byteArraySize = byteArraySize;
             _bitArraySize = byteArraySize * 8;
-            _expectedElements = expectedElements;
-            _bitArray = bitArray;
+            ExpectedElements = expectedElements;
+            BitArray = bitArray;
 
-            double hf = (_bitArraySize/(double) _expectedElements)*Math.Log(2.0);
+            double hf = (_bitArraySize/(double) ExpectedElements)*Math.Log(2.0);
             _k = (int)Math.Ceiling(hf);
 
             if (hf < 1.0)
             {
-                Logger.Warn("Bit size too small for storing all expected elements. For optimum result increase byte array size to {0}", _expectedElements / Math.Log(2.0));
+                Logger.Warn("Bit size too small for storing all expected elements. For optimum result increase byte array size to {0}", ExpectedElements / Math.Log(2.0));
             }
         }
 
@@ -65,10 +80,10 @@ namespace TomP2P.Rpc
 
             _byteArraySize = ((tmpBitArraySize + 7)/8);
             _bitArraySize = _byteArraySize*8;
-            _expectedElements = expectedElements;
-            _bitArray = new BitArray(_bitArraySize);
+            ExpectedElements = expectedElements;
+            BitArray = new BitArray(_bitArraySize);
 
-            double hf = (_bitArraySize/(double) _expectedElements)*Math.Log(2.0);
+            double hf = (_bitArraySize/(double) ExpectedElements)*Math.Log(2.0);
             _k = (int) Math.Ceiling(hf);
         }
 
@@ -82,5 +97,15 @@ namespace TomP2P.Rpc
             throw new NotImplementedException();
         }
 
+        public void ToByteBuffer(MemoryStream buffer)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public double ExpectedFalsePositiveProbability
+        {
+            get { return Math.Pow((1 - Math.Exp(-_k*(double) ExpectedElements/_bitArraySize)), _k); }
+        }
     }
 }
