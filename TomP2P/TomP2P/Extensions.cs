@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -40,6 +41,19 @@ namespace TomP2P
         {
             HashAlgorithm algorithm = SHA1.Create();
             return algorithm.ComputeHash(Encoding.UTF8.GetBytes(x));
+        }
+
+        /// <summary>
+        /// Copies the content of the buffer and returns a new instance (separate indexes).
+        /// NOTE: Changes to the respective MemoryStream instances are not mirrored as in Java Netty's ByteBuf.duplicate().
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <returns></returns>
+        public static MemoryStream Duplicate(this MemoryStream ms)
+        {
+            var copy = new MemoryStream(ms.Capacity);
+            ms.CopyTo(copy); // TODO make async
+            return copy;
         }
     }
 }
