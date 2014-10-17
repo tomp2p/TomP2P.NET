@@ -15,11 +15,11 @@ namespace TomP2P.Utils
             {
                 return false;
             }
-            if (set1.Count != set2.Count)
+            if (set1 != null && (set1.Count != set2.Count))
             {
                 return false;
             }
-            if (set1.Any(obj => !set2.Contains(obj)))
+            if (set1 != null && (set1.Any(obj => !set2.Contains(obj))))
             {
                 return false;
             }
