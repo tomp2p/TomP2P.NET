@@ -8,7 +8,7 @@ using TomP2P.Peers;
 
 namespace TomP2P.Message
 {
-    public class KeyCollection
+    public class KeyCollection : IEquatable<KeyCollection>
     {
         public ICollection<Number640> Keys { get; private set; }
         public ICollection<Number160> KeysConvert { get; private set; }
@@ -67,17 +67,28 @@ namespace TomP2P.Message
 
         public override bool Equals(object obj)
         {
-            if (!(obj is KeyCollection))
+            if (Object.ReferenceEquals(obj, null))
             {
                 return false;
             }
-            if (obj == this)
+
+            if (Object.ReferenceEquals(this, obj))
             {
                 return true;
             }
-            var k = (KeyCollection) obj;
+
+            if (this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            return this.Equals(obj as KeyCollection);
+        }
+
+        public bool Equals(KeyCollection other)
+        {
             ICollection<Number640> kc2 = Convert(this);
-            ICollection<Number640> kc3 = Convert(k);
+            ICollection<Number640> kc3 = Convert(other);
             return Utils.Utils.IsSameSets(kc2, kc3);
         }
 

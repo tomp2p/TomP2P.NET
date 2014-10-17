@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TomP2P.Peers
 {
-    public sealed class Number640 : IComparable<Number640>
+    public sealed class Number640 : IComparable<Number640>, IEquatable<Number640>
     {
         public Number640(Number160 locationKey, Number160 domainKey, Number160 key)
         {
@@ -19,6 +19,11 @@ namespace TomP2P.Peers
         }
 
         public int CompareTo(Number640 other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Equals(Number640 other)
         {
             throw new NotImplementedException();
         }

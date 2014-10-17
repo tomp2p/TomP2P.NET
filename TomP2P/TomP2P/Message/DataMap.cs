@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TomP2P.Peers;
 using TomP2P.Storage;
 
 namespace TomP2P.Message
 {
-    public class DataMap
+    public class DataMap : IEquatable<DataMap>
     {
         public Dictionary<Number640, Data> BackingDataMap { get; private set; }
         public Dictionary<Number160, Data> DataMapConvert { get; private set; }
@@ -96,17 +97,25 @@ namespace TomP2P.Message
 
         public override bool Equals(object obj)
         {
-            if (!(obj is DataMap))
+            if (Object.ReferenceEquals(obj, null))
             {
                 return false;
             }
-            if (obj == this)
+            if (Object.ReferenceEquals(this, obj))
             {
                 return true;
             }
-            var d = (DataMap) obj;
+            if (this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return this.Equals(obj as DataMap);
+        }
+
+        public bool Equals(DataMap other)
+        {
             Dictionary<Number640, Data> dm2 = Convert(this);
-            Dictionary<Number640, Data> dm3 = Convert(d);
+            Dictionary<Number640, Data> dm3 = Convert(other);
 
             bool t1 = Utils.Utils.IsSameSets(dm2.Keys, dm3.Keys); // TODO test
             bool t2 = Utils.Utils.IsSameSets(dm2.Values, dm3.Values);

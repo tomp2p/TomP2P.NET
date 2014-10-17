@@ -6,7 +6,7 @@ namespace TomP2P.Peers
     /// <summary>
     /// This class represents a 160 bit number.
     /// </summary>
-    public class Number160 : IComparable<Number160>
+    public class Number160 : IComparable<Number160>, IEquatable<Number160>
     {
         // TODO serialVersionUID equivalent required?
 
@@ -290,18 +290,27 @@ namespace TomP2P.Peers
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Number160))
+            if (Object.ReferenceEquals(obj, null))
             {
                 return false;
             }
-            if (obj == this) // TODO might introduce StackOverflow, as in .NET it's no value type
+            if (Object.ReferenceEquals(this, obj))
             {
                 return true;
             }
-            var key = (Number160) obj;
+            if (this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return this.Equals(obj as Number160);
+
+        }
+
+        public bool Equals(Number160 other)
+        {
             for (int i = 0; i < IntArraySize; i++)
             {
-                if (key._val[i] != _val[i])
+                if (other._val[i] != _val[i])
                 {
                     return false;
                 }
@@ -309,6 +318,7 @@ namespace TomP2P.Peers
             return true;
         }
 
+        // TODO check correct implementation (often used as hashtable-keys)
         public override int GetHashCode()
         {
             int hashCode = 0;
