@@ -27,7 +27,7 @@ namespace TomP2P.Peers
     /// <para>  - 2 bytes       UDP port</para>
     /// <para>  - 4 or 16 bytes Inet Address</para>
     /// </summary>
-    public class PeerAddress : IComparable<PeerAddress>
+    public class PeerAddress : IComparable<PeerAddress>, IEquatable<PeerAddress>
     {
         public const int MaxSize = 142;
         public const int MinSize = 30;
@@ -36,17 +36,39 @@ namespace TomP2P.Peers
         private const int Net6 = 1;
         private const int FirewallUdp = 2;
         private const int FirewallTcp = 4;
-        private const int IsRelayed = 8;
+        private const int Relayed = 8;
 
         // network information
+        /// <summary>
+        /// The ID of the peer. A peer cannot change its ID.
+        /// </summary>
         public Number160 PeerId { get; private set; }
-        private readonly PeerSocketAddress _peerSocketAddress;
+        public PeerSocketAddress PeerSocketAddress { get; private set; }
 
         // connection information
-        private readonly bool _isNet6;
-        private readonly bool _isFirewalledUdp;
-        private readonly bool _isFirewalledTcp;
-        private readonly bool _isRelayed;
+        /// <summary>
+        /// True, if the internet address is IPv6.
+        /// </summary>
+        public bool IsIPv6 { get; private set; }
+        /// <summary>
+        /// True, if the internet address is IPv4.
+        /// </summary>
+        public bool IsIPv4 { get { return !IsIPv6; } }
+
+        /// <summary>
+        /// True, if the peer cannot be reached via UDP.
+        /// </summary>
+        public bool IsFirewalledUdp { get; private set; }
+
+        /// <summary>
+        /// True, if the peer cannot be reached via TCP.
+        /// </summary>
+        public bool IsFirewalledTcp { get; private set; }
+
+        /// <summary>
+        /// True, if the peer address is used as a relay.
+        /// </summary>
+        public bool IsRelayed { get; private set; }
 
         // calculate only once and cache
         private readonly int _hashCode; 
@@ -99,10 +121,10 @@ namespace TomP2P.Peers
 
             // get the options
             int options = me[offset++] & Utils.Utils.MaskFf;
-            _isNet6 = (options & Net6) > 0; // TODO static methods could be used instead
-            _isFirewalledUdp = (options & FirewallUdp) > 0;
-            _isFirewalledTcp = (options & FirewallTcp) > 0;
-            _isRelayed = (options & IsRelayed) > 0;
+            IsIPv6 = (options & Net6) > 0; // TODO static methods could be used instead
+            IsFirewalledUdp = (options & FirewallUdp) > 0;
+            IsFirewalledTcp = (options & FirewallTcp) > 0;
+            IsRelayed = (options & Relayed) > 0;
 
             // get the relays
             int relays = me[offset++] & Utils.Utils.MaskFf;
@@ -120,8 +142,8 @@ namespace TomP2P.Peers
             PeerId = new Number160(tmp);
             Offset += Number160.ByteArraySize;
 
-            _peerSocketAddress = PeerSocketAddress.Create(me, IsIPv4, offset);
-            offset = _peerSocketAddress.Offset;
+            PeerSocketAddress = PeerSocketAddress.Create(me, IsIPv4, offset);
+            offset = PeerSocketAddress.Offset;
             if (_relaySize > 0)
             {
                 _peerSocketAddresses = new List<PeerSocketAddress>(_relaySize);
@@ -183,15 +205,15 @@ namespace TomP2P.Peers
         {
             PeerId = id;
             int size = Number160.ByteArraySize;
-            _peerSocketAddress = peerSocketAddress;
+            PeerSocketAddress = peerSocketAddress;
             _hashCode = id.GetHashCode();
-            _isNet6 = false; // TODO implement correctly
-            _isFirewalledUdp = isFirewalledUdp;
-            _isFirewalledTcp = isFirewalledTcp;
-            _isRelayed = isRelayed;
+            IsIPv6 = false; // TODO implement correctly
+            IsFirewalledUdp = isFirewalledUdp;
+            IsFirewalledTcp = isFirewalledTcp;
+            IsRelayed = isRelayed;
 
             // header + TCP port + UDP port
-            size += HeaderSize + PortSize + (_isNet6 ? Utils.Utils.IPv6Bytes : Utils.Utils.IPv4Bytes);
+            size += HeaderSize + PortSize + (IsIPv6 ? Utils.Utils.IPv6Bytes : Utils.Utils.IPv4Bytes);
 
             if (_peerSocketAddresses == null)
             {
@@ -238,17 +260,62 @@ namespace TomP2P.Peers
         { }
 
         public PeerAddress(Number160 peerId, IPAddress inetAddress, int tcpPort, int udpPort, int options)
-            : this(peerId, new PeerSocketAddress(inetAddress, tcpPort, udpPort), IsFirewalledTCP(options), IsFirewalledUDP(options), IsRelay(options), EmptyPeerSocketAddresses)
+            : this(peerId, new PeerSocketAddress(inetAddress, tcpPort, udpPort), ReadIsFirewalledTcp(options), ReadIsFirewalledUdp(options), ReadIsRelay(options), EmptyPeerSocketAddresses)
         { }
 
         /// <summary>
-        /// Checks if options has firewall TCP set.
+        /// Serializes to a new array with the proper size.
         /// </summary>
-        /// <param name="options">The option field, lowest 8 bit.</param>
-        /// <returns>True, if its firewalled via TCP.</returns>
-        private static bool IsFirewalledTCP(int options)
+        /// <returns>The serialized representation.</returns>
+        public byte[] ToByteArray()
         {
-            return ((options & Utils.Utils.MaskFf) & FirewallTcp) > 0;
+            var me = new byte[Size];
+            ToByteArray(me, 0); // TODO check if references are updated
+            return me;
+        }
+
+        /// <summary>
+        /// Serializes to an existing array.
+        /// </summary>
+        /// <param name="me">The array where the result should be stored.</param>
+        /// <param name="offset">The offset where to start to save the result in the byte array.</param>
+        /// <returns>The new offset.</returns>
+        public int ToByteArray(byte[] me, int offset)
+        {
+            // save the peer ID
+            int newOffset = offset;
+            me[newOffset++] = Options;
+            me[newOffset++] = Relays;
+            newOffset = PeerId.ToByteArray(me, newOffset);
+
+            // we store both the addresses of the peer and the relays
+            // currently, this is not needed as we don't consider asymmetric relays
+            newOffset = PeerSocketAddress.ToByteArray(me, newOffset);
+
+            foreach (var psa in _peerSocketAddresses)
+            {
+                newOffset = psa.ToByteArray(me, newOffset);
+            }
+
+            return newOffset;
+        }
+
+        /// <summary>
+        /// Creates and returns the socket address using the TCP port.
+        /// </summary>
+        /// <returns>The socket address how to reach this peer.</returns>
+        public IPEndPoint CreateSocketTcp()
+        {
+            return new IPEndPoint(PeerSocketAddress.InetAddress, PeerSocketAddress.TcpPort);
+        }
+
+        /// <summary>
+        /// Creates and returns the socket address using the UDP port.
+        /// </summary>
+        /// <returns>The socket address how to reach this peer.</returns>
+        public IPEndPoint CreateSocketUdp()
+        {
+            return new IPEndPoint(PeerSocketAddress.InetAddress, PeerSocketAddress.UdpPort);
         }
 
         /// <summary>
@@ -256,7 +323,7 @@ namespace TomP2P.Peers
         /// </summary>
         /// <param name="options">The option field, lowest 8 bit.</param>
         /// <returns>True, if its IPv6.</returns>
-        private static bool IsNet6(int options)
+        private static bool ReadIsNet6(int options)
         {
             return ((options & Utils.Utils.MaskFf) & Net6) > 0;
         }
@@ -266,9 +333,19 @@ namespace TomP2P.Peers
         /// </summary>
         /// <param name="options">The option field, lowest 8 bit.</param>
         /// <returns>True, if its firewalled via UDP.</returns>
-        private static bool IsFirewalledUDP(int options)
+        private static bool ReadIsFirewalledUdp(int options)
         {
             return ((options & Utils.Utils.MaskFf) & FirewallUdp) > 0;
+        }
+
+        /// <summary>
+        /// Checks if options has firewall TCP set.
+        /// </summary>
+        /// <param name="options">The option field, lowest 8 bit.</param>
+        /// <returns>True, if its firewalled via TCP.</returns>
+        private static bool ReadIsFirewalledTcp(int options)
+        {
+            return ((options & Utils.Utils.MaskFf) & FirewallTcp) > 0;
         }
 
         /// <summary>
@@ -276,22 +353,124 @@ namespace TomP2P.Peers
         /// </summary>
         /// <param name="options">The option field, lowest 8 bit.</param>
         /// <returns>True, if its used as a relay.</returns>
-        private static bool IsRelay(int options)
+        private static bool ReadIsRelay(int options)
         {
-            return ((options & Utils.Utils.MaskFf) & IsRelayed) > 0;
+            return ((options & Utils.Utils.MaskFf) & Relayed) > 0;
         }
 
         public int CompareTo(PeerAddress other)
         {
-            throw new NotImplementedException();
+            // the ID determines if two peers are equal, the address does not matter
+            return PeerId.CompareTo(other.PeerId);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder("paddr[");
+            return sb.Append(PeerId)
+                .Append(PeerSocketAddress)
+                .Append("]/relay(").Append(IsRelayed)
+                .Append(",").Append(_peerSocketAddresses.Count)
+                .Append(")=").Append(_peerSocketAddresses.ToArray())
+                .ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as PeerAddress);
+        }
+
+        public bool Equals(PeerAddress other)
+        {
+            return PeerId.Equals(other.PeerId);
+        }
+
+        public override int GetHashCode()
+        {
+            // use cached hash code
+            return _hashCode;
         }
 
         /// <summary>
-        /// True, if the Inet address is IPv4.
+        /// The IP address of this peer.
         /// </summary>
-        public bool IsIPv4
+        public IPAddress InetAddress
         {
-            get { return !_isNet6; }
+            get { return PeerSocketAddress.InetAddress; }
+        }
+
+        /// <summary>
+        /// The encoded options.
+        /// </summary>
+        public byte Options
+        {
+            get
+            {
+                byte result = 0;
+                if (IsIPv6)
+                {
+                    result |= Net6;
+                }
+                if (IsFirewalledUdp)
+                {
+                    result |= FirewallUdp;
+                }
+                if (IsFirewalledTcp)
+                {
+                    result |= FirewallTcp;
+                }
+                if (IsRelayed)
+                {
+                    result |= Relayed;
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// The encoded relays. There are maximal 5 relays.
+        /// </summary>
+        public byte Relays
+        {
+            get
+            {
+                if (_relaySize > 0)
+                {
+                    var result = (byte) (_relaySize << TypeBitSize);
+                    byte types = _relayType.ToByte();
+                    result |= (byte) (types & Mask1F);
+                    return result;
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// UDP port.
+        /// </summary>
+        public int UdpPort
+        {
+            get { return PeerSocketAddress.UdpPort; }
+        }
+
+        /// <summary>
+        /// TCP port.
+        /// </summary>
+        public int TcpPort
+        {
+            get { return PeerSocketAddress.TcpPort; }
         }
     }
 

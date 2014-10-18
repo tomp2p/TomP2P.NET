@@ -16,6 +16,9 @@ namespace TomP2P.Peers
         }
 
         public int Offset { get; private set; }
+        public IPAddress InetAddress { get; private set; }
+        public int TcpPort { get; private set; }
+        public int UdpPort { get; private set; }
 
         public int Size
         {
@@ -23,9 +26,15 @@ namespace TomP2P.Peers
             get { throw new NotImplementedException(); }
         }
 
+
         public static PeerSocketAddress Create(byte[] me, bool isIPv4, int offsetOriginal)
         {
             // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public int ToByteArray(byte[] me, int newOffset)
+        {
             throw new NotImplementedException();
         }
     }

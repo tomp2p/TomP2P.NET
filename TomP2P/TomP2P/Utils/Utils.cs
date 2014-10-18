@@ -10,6 +10,7 @@ namespace TomP2P.Utils
     {
         public const int IPv4Bytes = 4;
         public const int IPv6Bytes = 16;
+        public const int ByteBits = 8;
         public const int MaskFf = 0xff;
 
 

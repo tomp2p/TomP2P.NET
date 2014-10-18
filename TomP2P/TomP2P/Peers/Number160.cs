@@ -221,6 +221,7 @@ namespace TomP2P.Peers
         /// <returns>The offset being read.</returns>
         public int ToByteArray(byte[] me, int offset)
         {
+            // TODO check if references are updated
             if (offset + ByteArraySize > me.Length)
             {
                 throw new SystemException("Array too small.");
