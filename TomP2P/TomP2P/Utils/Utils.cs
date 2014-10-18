@@ -8,6 +8,9 @@ namespace TomP2P.Utils
 {
     public class Utils
     {
+        public const int MaskFf = 0xff;
+
+
         // TODO correct use of generics?
         public static bool IsSameSets<T>(ICollection<T> set1, ICollection<T> set2)
         {
