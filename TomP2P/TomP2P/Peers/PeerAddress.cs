@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TomP2P.Peers
 {
@@ -83,17 +81,20 @@ namespace TomP2P.Peers
         /// </summary>
         public int Size { get; private set; }
 
-        private readonly int _relaySize;
+        public int RelaySize { get; private set; }
         private readonly BitArray _relayType;
         private static readonly BitArray EmptyRelayType = new BitArray(0);
 
         // relays
-        private readonly ICollection<PeerSocketAddress> _peerSocketAddresses;
+        /// <summary>
+        /// The relay peers.
+        /// </summary>
+        public ICollection<PeerSocketAddress> PeerSocketAddresses { get; private set; }
         public static readonly ICollection<PeerSocketAddress> EmptyPeerSocketAddresses = new HashSet<PeerSocketAddress>();
 
         private const int TypeBitSize = 5;
         private const int HeaderSize = 2;
-        private const int PortSize = 4; // count both ports, UDP and TCP
+        private const int PortsSize = 4; // count both ports, UDP and TCP
 
         // used for relay bit shifting
         private const int Mask1F = 0x1f;    // 0001 1111
@@ -130,7 +131,7 @@ namespace TomP2P.Peers
             int relays = me[offset++] & Utils.Utils.MaskFf;
 
             // first 3 bits are the size
-            _relaySize = (relays >> TypeBitSize) & Mask7;
+            RelaySize = (relays >> TypeBitSize) & Mask7;
             
             // last 5 bits indicate if IPv6 or IPv4
             var b = (byte)(relays & Mask1F);
@@ -144,19 +145,19 @@ namespace TomP2P.Peers
 
             PeerSocketAddress = PeerSocketAddress.Create(me, IsIPv4, offset);
             offset = PeerSocketAddress.Offset;
-            if (_relaySize > 0)
+            if (RelaySize > 0)
             {
-                _peerSocketAddresses = new List<PeerSocketAddress>(_relaySize);
-                for (int i = 0; i < _relaySize; i++)
+                PeerSocketAddresses = new List<PeerSocketAddress>(RelaySize);
+                for (int i = 0; i < RelaySize; i++)
                 {
                     var psa = PeerSocketAddress.Create(me, !_relayType.Get(i), offset);
-                    _peerSocketAddresses.Add(psa);
+                    PeerSocketAddresses.Add(psa);
                     offset = psa.Offset;
                 }
             }
             else
             {
-                _peerSocketAddresses = EmptyPeerSocketAddresses;
+                PeerSocketAddresses = EmptyPeerSocketAddresses;
             }
 
             Size = offset - initialOffset;
@@ -213,23 +214,23 @@ namespace TomP2P.Peers
             IsRelayed = isRelayed;
 
             // header + TCP port + UDP port
-            size += HeaderSize + PortSize + (IsIPv6 ? Utils.Utils.IPv6Bytes : Utils.Utils.IPv4Bytes);
+            size += HeaderSize + PortsSize + (IsIPv6 ? Utils.Utils.IPv6Bytes : Utils.Utils.IPv4Bytes);
 
-            if (_peerSocketAddresses == null)
+            if (PeerSocketAddresses == null)
             {
-                _peerSocketAddresses = EmptyPeerSocketAddresses;
+                PeerSocketAddresses = EmptyPeerSocketAddresses;
                 _relayType = EmptyRelayType;
-                _relaySize = 0;
+                RelaySize = 0;
             }
             else
             {
-                _relaySize = _peerSocketAddresses.Count;
-                if (_relaySize > TypeBitSize)
+                RelaySize = PeerSocketAddresses.Count;
+                if (RelaySize > TypeBitSize)
                 {
-                    throw new ArgumentException(String.Format("Can only store up to {0} relay peers. Tried to store {1} relay peers.", TypeBitSize, _relaySize));
+                    throw new ArgumentException(String.Format("Can only store up to {0} relay peers. Tried to store {1} relay peers.", TypeBitSize, RelaySize));
                 }
-                _peerSocketAddresses = peerSocketAddresses;
-                _relayType = new BitArray(_relaySize);
+                PeerSocketAddresses = peerSocketAddresses;
+                _relayType = new BitArray(RelaySize);
             }
             int index = 0;
             foreach (var psa in peerSocketAddresses)
@@ -292,7 +293,7 @@ namespace TomP2P.Peers
             // currently, this is not needed as we don't consider asymmetric relays
             newOffset = PeerSocketAddress.ToByteArray(me, newOffset);
 
-            foreach (var psa in _peerSocketAddresses)
+            foreach (var psa in PeerSocketAddresses)
             {
                 newOffset = psa.ToByteArray(me, newOffset);
             }
@@ -316,6 +317,130 @@ namespace TomP2P.Peers
         public IPEndPoint CreateSocketUdp()
         {
             return new IPEndPoint(PeerSocketAddress.InetAddress, PeerSocketAddress.UdpPort);
+        }
+
+        /// <summary>
+        /// Create a new peer address and change the relayed status.
+        /// </summary>
+        /// <param name="isRelayed">The new relay status.</param>
+        /// <returns>The newly created peer address.</returns>
+        public PeerAddress ChangeIsRelayed(bool isRelayed)
+        {
+            return new PeerAddress(PeerId, PeerSocketAddress, IsFirewalledTcp, IsFirewalledUdp, isRelayed, PeerSocketAddresses);
+        }
+
+        /// <summary>
+        /// Create a new peer address and change the firewall UDP status.
+        /// </summary>
+        /// <param name="isFirewalledUdp">The new firewall UDP status.</param>
+        /// <returns>The newly created peer address.</returns>
+        public PeerAddress ChangeIsFirewalledUdp(bool isFirewalledUdp)
+        {
+            return new PeerAddress(PeerId, PeerSocketAddress, IsFirewalledTcp, isFirewalledUdp, IsRelayed, PeerSocketAddresses);
+        }
+
+        /// <summary>
+        /// Create a new peer address and change the firewall TCP status.
+        /// </summary>
+        /// <param name="isFirewalledTcp">The new firewall TCP status.</param>
+        /// <returns>The newly created peer address.</returns>
+        public PeerAddress ChangeIsFirewalledTcp(bool isFirewalledTcp)
+        {
+            return new PeerAddress(PeerId, PeerSocketAddress, isFirewalledTcp, IsFirewalledUdp, IsRelayed, PeerSocketAddresses);
+        }
+
+        /// <summary>
+        /// Create a new peer address and change the internet address.
+        /// </summary>
+        /// <param name="inetAddress">The new internet address.</param>
+        /// <returns>The newly created peer address.</returns>
+        public PeerAddress ChangeAddress(IPAddress inetAddress)
+        {
+            return new PeerAddress(PeerId, new PeerSocketAddress(inetAddress, PeerSocketAddress.TcpPort, PeerSocketAddress.UdpPort), IsFirewalledTcp, IsFirewalledUdp, IsRelayed, PeerSocketAddresses);
+        }
+
+        /// <summary>
+        /// Create a new peer address and change the TCP and UDP ports.
+        /// </summary>
+        /// <param name="tcpPort">The new TCP port.</param>
+        /// <param name="udpPort">The new UDP port.</param>
+        /// <returns>The newly created peer address.</returns>
+        public PeerAddress ChangePorts(int tcpPort, int udpPort)
+        {
+            return new PeerAddress(PeerId, new PeerSocketAddress(PeerSocketAddress.InetAddress, tcpPort, udpPort), IsFirewalledTcp, IsFirewalledUdp, IsRelayed, PeerSocketAddresses);
+        }
+
+        /// <summary>
+        /// Create a new peer address and change the peer ID.
+        /// </summary>
+        /// <param name="peerId">The new peer ID.</param>
+        /// <returns>The newly created peer address.</returns>
+        public PeerAddress ChangePeerId(Number160 peerId)
+        {
+            return new PeerAddress(peerId, PeerSocketAddress, IsFirewalledTcp, IsFirewalledUdp, IsRelayed, PeerSocketAddresses);
+        }
+
+        public PeerAddress ChangePeerSocketAddress(PeerSocketAddress peerSocketAddress)
+        {
+            return new PeerAddress(PeerId, peerSocketAddress, IsFirewalledTcp, IsFirewalledUdp, IsRelayed, PeerSocketAddresses);
+        }
+
+        public PeerAddress ChangePeerSocketAddresses(ICollection<PeerSocketAddress> peerSocketAddresses)
+        {
+            return new PeerAddress(PeerId, PeerSocketAddress, IsFirewalledTcp, IsFirewalledUdp, IsRelayed, peerSocketAddresses);   
+        }
+
+        /// <summary>
+        /// Calculates the size based on the two header bytes.
+        /// </summary>
+        /// <param name="header">The header in the lower 16 bits of this integer.</param>
+        /// <returns>The expected size of the peer address.</returns>
+        public static int CalculateSize(int header)
+        {
+            // TODO check correctness, potential BUG
+            int options = (header >> Utils.Utils.ByteBits) & Utils.Utils.MaskFf;
+            int relays = header & Utils.Utils.MaskFf;
+
+            return CalculateSize(options, relays);
+        }
+
+        /// <summary>
+        /// Calculates the size based on the two header bytes.
+        /// </summary>
+        /// <param name="options">The options tell us if the internet address is IPv4 or IPv6.</param>
+        /// <param name="relays">The relays tell us how many relays we have and of what type they are.</param>
+        /// <returns>The expected size of the peer address.</returns>
+        public static int CalculateSize(int options, int relays)
+        {
+            // header + tcp port + udp port + peer id
+            int size = HeaderSize + PortsSize + Number160.ByteArraySize;
+
+            if (ReadIsNet6(options))
+            {
+                size += Utils.Utils.IPv6Bytes;
+            }
+            else
+            {
+                size += Utils.Utils.IPv4Bytes;
+            }
+
+            // count the relays
+            int relaySize = (relays >> TypeBitSize) & Mask7;
+            var b = (byte) (relays & Mask1F);
+            var relayType = new BitArray(b);
+            for (int i = 0; i < relaySize; i++)
+            {
+                size += PortsSize;
+                if (relayType.Get(i))
+                {
+                    size += Utils.Utils.IPv6Bytes;
+                }
+                else
+                {
+                    size += Utils.Utils.IPv4Bytes;
+                }
+            }
+            return size;
         }
 
         /// <summary>
@@ -370,8 +495,8 @@ namespace TomP2P.Peers
             return sb.Append(PeerId)
                 .Append(PeerSocketAddress)
                 .Append("]/relay(").Append(IsRelayed)
-                .Append(",").Append(_peerSocketAddresses.Count)
-                .Append(")=").Append(_peerSocketAddresses.ToArray())
+                .Append(",").Append(PeerSocketAddresses.Count)
+                .Append(")=").Append(PeerSocketAddresses.ToArray())
                 .ToString();
         }
 
@@ -446,9 +571,9 @@ namespace TomP2P.Peers
         {
             get
             {
-                if (_relaySize > 0)
+                if (RelaySize > 0)
                 {
-                    var result = (byte) (_relaySize << TypeBitSize);
+                    var result = (byte) (RelaySize << TypeBitSize);
                     byte types = _relayType.ToByte();
                     result |= (byte) (types & Mask1F);
                     return result;
