@@ -31,5 +31,16 @@ namespace TomP2P.Utils
             }
             return true;
         }
+
+        #region .NET specific
+
+        public static double GetCurrentMillis()
+        {
+            var jan1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan ts = DateTime.UtcNow - jan1970;
+            return ts.TotalMilliseconds;
+        }
+
+        #endregion
     }
 }

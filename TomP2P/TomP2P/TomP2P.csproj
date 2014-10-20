@@ -51,6 +51,7 @@
     <Compile Include="Message\KeyMap640Keys.cs" />
     <Compile Include="Message\KeyMapByte.cs" />
     <Compile Include="Message\Message.cs" />
+    <Compile Include="Message\MessageHeaderCodec.cs" />
     <Compile Include="Message\NeighborSet.cs" />
     <Compile Include="Message\NumberType.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
