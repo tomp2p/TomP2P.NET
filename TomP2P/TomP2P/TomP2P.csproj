@@ -53,7 +53,7 @@
     <Compile Include="Message\Message.cs" />
     <Compile Include="Message\MessageHeaderCodec.cs" />
     <Compile Include="Message\NeighborSet.cs" />
-    <Compile Include="Message\NumberType.cs" />
+    <Compile Include="Message\MessageContentIndex.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
     <Compile Include="Message\TrackerData.cs" />
     <Compile Include="Peers\Number160.cs" />

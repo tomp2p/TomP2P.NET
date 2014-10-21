@@ -25,7 +25,6 @@ namespace TomP2P.Message
         /// </summary>
         public enum Content
         {
-            Undefined, // required as default enum value
             Empty, Key, MapKey640Data, MapKey640Keys, SetKey640, SetNeighbors, ByteBuffer,
             Long, Integer, PublicKeySignature, SetTrackerData, BloomFilter, MapKey640Byte,
             PublicKey, SetPeerSocket, User1
@@ -127,7 +126,7 @@ namespace TomP2P.Message
         /// <summary>
         /// The serialized content and references to the respective arrays.
         /// </summary>
-        public Queue<NumberType> ContentReferences { get; private set; }
+        public Queue<MessageContentIndex> ContentReferences { get; private set; }
 
         // following the payload objects:
         // content lists:
@@ -175,7 +174,7 @@ namespace TomP2P.Message
             ReceivedSignature = null;
             MessageId = Random.Next();
             ContentTypes = new Content[ContentTypeLength];
-            ContentReferences = new Queue<NumberType>();
+            ContentReferences = new Queue<MessageContentIndex>();
         }
 
         /// <summary>
@@ -260,14 +259,14 @@ namespace TomP2P.Message
         {
             for (int i = 0, reference = 0; i < ContentTypeLength; i++)
             {
-                if (ContentTypes[i] == Content.Undefined) // TODO check expression
+                if (ContentTypes[i] == Content.Empty) // TODO check if this works as expected (cf. java tests for null)
                 {
                     if (contentType == Content.PublicKeySignature && i != 0)
                     {
                         throw new InvalidOperationException("The public key needs to be the first to be set.");
                     }
                     ContentTypes[i] = contentType;
-                    ContentReferences.Enqueue(new NumberType(reference, contentType));
+                    ContentReferences.Enqueue(new MessageContentIndex(reference, contentType));
                     return this;
                 }
                 if (ContentTypes[i] == contentType)
@@ -356,7 +355,7 @@ namespace TomP2P.Message
                     index = references[contentType];
                 }
 
-                ContentReferences.Enqueue(new NumberType(index, contentType));
+                ContentReferences.Enqueue(new MessageContentIndex(index, contentType));
                 references.Add(contentType, index + 1);
             }
         }

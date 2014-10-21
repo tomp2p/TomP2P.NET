@@ -38,6 +38,8 @@ namespace TomP2P
         public static byte[] ComputeHash(this string x)
         {
             HashAlgorithm algorithm = SHA1.Create();
+
+            string s = "aw";
             return algorithm.ComputeHash(Encoding.UTF8.GetBytes(x));
         }
 

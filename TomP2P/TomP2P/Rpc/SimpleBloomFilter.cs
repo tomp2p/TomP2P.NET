@@ -9,6 +9,7 @@ using NLog;
 
 namespace TomP2P.Rpc
 {
+    // TODO maybe there is a .NET bloomfilter that can be used
     // TODO finish SimpleBloomFilter implementation (and documentation)
 
     /// <summary>
