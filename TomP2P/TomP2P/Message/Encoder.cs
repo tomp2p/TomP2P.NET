@@ -146,12 +146,35 @@ namespace TomP2P.Message
                         {
                             foreach (var key in keys.KeysConvert)
                             {
-                                
+                                bytes = keys.LocationKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = keys.DomainKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = key.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = keys.VersionKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
                             }
                         }
                         else
                         {
-                            
+                            foreach (var key in keys.Keys)
+                            {
+                                bytes = key.LocationKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = key.DomainKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = key.ContentKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = key.VersionKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+                            }
                         }
                         Message.ContentReferences.Dequeue();
                         break;

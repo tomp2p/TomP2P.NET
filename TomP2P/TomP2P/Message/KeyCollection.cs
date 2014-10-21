@@ -55,7 +55,7 @@ namespace TomP2P.Message
                 kc = new List<Number640>(k.KeysConvert.Count);
                 foreach (var num160 in k.KeysConvert)
                 {
-                    kc.Add(new Number640(k.LocationKey, k.DomainKey, k.VersionKey, num160));
+                    kc.Add(new Number640(k.LocationKey, k.DomainKey, k.VersionKey, num160)); // TODO check if correct
                 }
             }
             else

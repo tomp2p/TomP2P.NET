@@ -6,14 +6,12 @@ namespace TomP2P.Peers
     /// <summary>
     /// This class represents a 160 bit number.
     /// </summary>
-    public class Number160 : IComparable<Number160>, IEquatable<Number160>
+    public sealed class Number160 : IComparable<Number160>, IEquatable<Number160>
     {
         // TODO serialVersionUID equivalent required?
 
         // This key has ALWAYS 160 bit. Do not change.
         public const int Bits = 160;
-
-        public static readonly Number160 MaxValue = new Number160(new int[] {-1, -1, -1, -1, -1});
 
         private const long LongMask = 0xffffffffL;
         private const int ByteMask = 0xff;
@@ -37,8 +35,10 @@ namespace TomP2P.Peers
         // backing integer array
         private readonly int[] _val;
 
+        // constants
         public static readonly Number160 Zero = new Number160(0);
         public static readonly Number160 One = new Number160(1);
+        public static readonly Number160 MaxValue = new Number160(new int[] {-1, -1, -1, -1, -1});
 
         /// <summary>
         /// Create a key with value 0.
@@ -238,32 +238,6 @@ namespace TomP2P.Peers
             return offset + ByteArraySize;
         }
 
-        public double ToDouble()
-        {
-            double d = 0;
-            for (int i = 0; i < IntArraySize; i++)
-            {
-                d *= LongMask + 1;
-                d += _val[i] & LongMask;
-            }
-            return d;
-        }
-
-        public float ToFloat()
-        {
-            return (float) ToDouble();
-        }
-
-        public int ToInt()
-        {
-            return _val[IntArraySize - 1];
-        }
-
-        public long ToLong()
-        {
-            return ((_val[IntArraySize - 1] & LongMask) << IntegerSize) + (_val[IntArraySize - 2] & LongMask);
-        }
-
         /// <summary>
         /// Shows the content in a human-readable manner.
         /// </summary>
@@ -287,6 +261,24 @@ namespace TomP2P.Peers
         public override string ToString()
         {
             return ToString(true);
+        }
+
+        public int CompareTo(Number160 other)
+        {
+            for (int i = 0; i < IntArraySize; i++)
+            {
+                long b1 = _val[i] & LongMask;
+                long b2 = other._val[i] & LongMask;
+                if (b1 < b2)
+                {
+                    return -1;
+                }
+                if (b1 > b2)
+                {
+                    return 1;
+                }
+            }
+            return 0;
         }
 
         public override bool Equals(object obj)
@@ -328,24 +320,6 @@ namespace TomP2P.Peers
                 hashCode = (int) (31 * hashCode + (_val[i] & LongMask));
             }
             return hashCode;
-        }
-
-        public int CompareTo(Number160 other)
-        {
-            for (int i = 0; i < IntArraySize; i++)
-            {
-                long b1 = _val[i] & LongMask;
-                long b2 = other._val[i] & LongMask;
-                if (b1 < b2)
-                {
-                    return -1;
-                }
-                if (b1 > b2)
-                {
-                    return 1;
-                }
-            }
-            return 0;
         }
 
         /// <summary>
@@ -423,6 +397,35 @@ namespace TomP2P.Peers
                 }
                 return bits;
             }
+        }
+
+        public double DoubleValue
+        {
+            get
+            {
+                double d = 0;
+                for (int i = 0; i < IntArraySize; i++)
+                {
+                    d *= LongMask + 1;
+                    d += _val[i] & LongMask;
+                }
+                return d;
+            }
+        }
+
+        public float FloatValue
+        {
+            get { return (float) DoubleValue; }
+        }
+
+        public int IntegerValue
+        {
+            get { return _val[IntArraySize - 1]; }
+        }
+
+        public long LongValue
+        {
+            get { return ((_val[IntArraySize - 1] & LongMask) << IntegerSize) + (_val[IntArraySize - 2] & LongMask); }
         }
 
         /// <summary>
