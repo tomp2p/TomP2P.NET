@@ -178,6 +178,159 @@ namespace TomP2P.Message
                         }
                         Message.ContentReferences.Dequeue();
                         break;
+                    case Message.Content.MapKey640Data:
+                        var dm = Message.DataMap(next.Index);
+                        // write length
+                        lengthBytes = BitConverter.GetBytes(dm.Size);
+                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        if (dm.IsConvert)
+                        {
+                            foreach (var data in dm.DataMapConvert)
+                            {
+                                bytes = dm.LocationKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = dm.DomainKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = data.Key.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = dm.VersionKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest()); // TODO check reference passing
+                            }
+                        }
+                        else
+                        {
+                            foreach (var data in dm.BackingDataMap)
+                            {
+                                bytes = data.Key.LocationKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = data.Key.DomainKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = data.Key.ContentKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                bytes = data.Key.VersionKey.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+
+                                EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest()); // TODO check reference passing
+                            }
+                        }
+                        Message.ContentReferences.Dequeue();
+                        break;
+                    case Message.Content.MapKey640Keys:
+                        var kmk = Message.KeyMap640Keys(next.Index);
+                        // write length
+                        lengthBytes = BitConverter.GetBytes(kmk.Size);
+                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        foreach (var data in kmk.KeysMap)
+                        {
+                            bytes = data.Key.LocationKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            bytes = data.Key.DomainKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            bytes = data.Key.ContentKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            bytes = data.Key.VersionKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            // write number of based-on keys
+                            buffer.WriteByte((byte) data.Value.Count); // TODO does this work? (2x)
+
+                            // write based-on keys
+                            foreach (var key in data.Value)
+                            {
+                                bytes = key.ToByteArray();
+                                buffer.Write(bytes, 0, bytes.Length);
+                            }
+                        }
+                        Message.ContentReferences.Dequeue();
+                        break;
+                    case Message.Content.MapKey640Byte:
+                        var kmb = Message.KeyMapByte(next.Index);
+                        // write length
+                        lengthBytes = BitConverter.GetBytes(kmb.Size);
+                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        foreach (var data in kmb.KeysMap)
+                        {
+                            bytes = data.Key.LocationKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            bytes = data.Key.DomainKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            bytes = data.Key.ContentKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            bytes = data.Key.VersionKey.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+                            
+                            // write byte
+                            buffer.WriteByte(data.Value); // TODO does this work? (3x)
+                        }
+                        Message.ContentReferences.Dequeue();
+                        break;
+                    case Message.Content.ByteBuffer:
+                        var b = Message.Buffer(next.Index);
+                        if (!_resume)
+                        {
+                            bytes = BitConverter.GetBytes(b.Length);
+                            buffer.Write(bytes, 0, bytes.Length);
+                        }
+                        // length
+                        int readable = b.Readable;
+                        buffer.Write(b.BackingBuffer.GetBuffer(), 0, readable); // TODO check correctnes, port not trivial
+                        if (b.IncRead(readable) == b.Length)
+                        {
+                            Message.ContentReferences.Dequeue();
+                        }
+                        else if (Message.IsStreaming())
+                        {
+                            Logger.Debug("Partial message of length {0} sent.", readable);
+                            return false;
+                        }
+                        else
+                        {
+                            const string description = "Larger buffer has been announced, but not in message streaming mode. This is wrong.";
+                            Logger.Error(description);
+                            throw new SystemException(description);
+                        }
+                        break;
+                    case Message.Content.SetTrackerData:
+                        var td = Message.TrackerData(next.Index);
+                        // write length
+                        lengthBytes = BitConverter.GetBytes(td.PeerAddresses.Count);
+                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        foreach (var data in td.PeerAddresses)
+                        {
+                            bytes = data.Key.PeerAddress.ToByteArray();
+                            buffer.Write(bytes, 0, bytes.Length);
+
+                            var d = data.Value.Duplicate();
+                            EncodeData(buffer, d, false, !Message.IsRequest());
+                        }
+                        Message.ContentReferences.Dequeue();
+                        break;
+                    case Message.Content.PublicKeySignature:
+                        // flag to encode public key
+                        Message.SetHintSign();
+                        // then, do the regular public key stuff -> no break
+                        goto case Message.Content.PublicKey; // TODO check, else duplicate code
+                    case Message.Content.PublicKey:
+                        var pk = Message.PublicKey(next.Index);
+                        _signatureFactory.EncodePublicKey(pk, buffer); // TODO check reference passing
+                        Message.ContentReferences.Dequeue();
+                        break;
+                    default:
+                        throw new SystemException("Unknown type: " + next.Content);
                 }
 
                 Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.Position - start);

@@ -382,6 +382,7 @@ namespace TomP2P.Message
         // *** TYPES OF REQUEST ***
 
         // TODO check comment
+        // TODO make property
         /// <summary>
         /// 
         /// </summary>
