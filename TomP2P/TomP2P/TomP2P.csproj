@@ -46,6 +46,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\DataMap.cs" />
+    <Compile Include="Message\Decoder.cs" />
     <Compile Include="Message\Encoder.cs" />
     <Compile Include="Message\KeyCollection.cs" />
     <Compile Include="Message\KeyMap640Keys.cs" />
