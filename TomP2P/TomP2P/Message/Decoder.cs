@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Peers;
@@ -16,7 +13,7 @@ namespace TomP2P.Message
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        // TODO add attribute keys
+        // TODO add attribute keys??
 
         private readonly Queue<Message.Content> _contentTypes = new Queue<Message.Content>();
 
@@ -29,7 +26,7 @@ namespace TomP2P.Message
         private int _peerSocketAddressSize = -1;
         private List<PeerSocketAddress> _peerSocketAddresses = null;
 
-        private int _keyCollectionSize = -1;
+        private int _keyCollectionsSize = -1;
         private List<KeyCollection> _keyCollections = null;
 
         private int _mapSize = -1;
@@ -99,6 +96,33 @@ namespace TomP2P.Message
                 Console.WriteLine(ex.ToString());
                 return true;
             }
+        }
+
+        public Message PrepareFinish()
+        {
+            Message ret = Message;
+            Message.SetDone();
+
+            _contentTypes.Clear();
+            Message = null;
+            _neighborSize = -1;
+            _neighborSet = null;
+            // TODO set peerSocketAddressSize/peerSocketAddresses -1/null?
+            _keyCollectionsSize = -1;
+            _keyCollections = null;
+            _mapSize = -1;
+            _dataMap = null;
+            _data = null;
+            // TODO set _key to null?
+            _keyMap640KeysSize = -1;
+            _keyMap640Keys = null;
+            // TODO set _keyMapBytesSize/list to -1/null?
+            _bufferSize = -1;
+            _buffer = null;
+            // TODO set _trackerDataSize/list to -1/null?
+            // TODO set _signatureFactory to null?
+
+            return ret;
         }
 
         private bool DecodeHeader(MemoryStream buffer, IPEndPoint recipient, IPEndPoint sender)
