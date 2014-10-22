@@ -80,8 +80,8 @@ namespace TomP2P.Message
                 long start = buffer.Position;
                 Message.Content content = next.Content;
 
-                // TODO make all writes async
-                // TODO use BinaryWriter
+                // TODO make all writes async, also reads in decoder
+                // TODO use BinaryWriter, also in decoder
                 // TODO what happens if null is serialized? exception?
                 byte[] bytes;
                 byte[] lengthBytes;

@@ -70,5 +70,20 @@ namespace TomP2P
             }
             return b;
         }
+
+        /// <summary>
+        /// Returns the number of readable bytes. (writerPosition - readerPosition, aka Length - Position).
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static long ReadableBytes(this Stream s)
+        {
+            return s.Length - s.Position; // TODO find readableBytes equivalent
+        }
+
+        public static long ReadableBytes(this BinaryReader br)
+        {
+            return br.BaseStream.ReadableBytes();
+        }
     }
 }

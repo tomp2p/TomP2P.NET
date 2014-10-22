@@ -6,6 +6,7 @@ using NLog;
 using TomP2P.Connection;
 using TomP2P.Peers;
 using TomP2P.Storage;
+using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {
@@ -55,14 +56,14 @@ namespace TomP2P.Message
         }
 
         // TODO handle the Netty specific stuff, needed in .NET?
-        public bool Decode(MemoryStream buffer, IPEndPoint recipient, IPEndPoint sender)
+        public bool Decode(BinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
-            Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", "TODO"); // TODO find readable equivalent (2x)
+            Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", buffer.ReadableBytes());
 
             try
             {
                 // TODO review/redo: handle specific stuff
-                long readerBefore = buffer.Position;
+                long readerBefore = buffer.BaseStream.Position;
 
                 // TODO set sender of this message for handling timeout??
 
@@ -125,12 +126,11 @@ namespace TomP2P.Message
             return ret;
         }
 
-        private bool DecodeHeader(MemoryStream buffer, IPEndPoint recipient, IPEndPoint sender)
+        private bool DecodeHeader(BinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             if (Message == null)
             {
-                var readableBytes = buffer.Capacity - buffer.Position; // TODO find readable equivalent (2x)
-                if (readableBytes < MessageHeaderCodec.HeaderSize)
+                if (buffer.ReadableBytes() < MessageHeaderCodec.HeaderSize)
                 {
                     // we don't have the header yet, we need the full header first
                     // wait for more data
@@ -159,9 +159,43 @@ namespace TomP2P.Message
             return false;
         }
 
-        private bool DecodePayload(MemoryStream buffer)
+        private bool DecodePayload(BinaryReader buffer) // TODO throw exceptions?
         {
-            throw new NotImplementedException();
+            Logger.Debug("About to pass message {0} to {1}. Buffer to read: {2}.", Message, Message.SenderSocket, buffer.ReadableBytes());
+
+            if (!Message.HasContent())
+            {
+                return true;
+            }
+
+            int size;
+            IPublicKey receivedPublicKey;
+
+            while (_contentTypes.Count > 0)
+            {
+                Message.Content content = _contentTypes.Peek();
+                Logger.Debug("Go fo content: {0}.", content);
+
+                switch (content)
+                {
+                    case Message.Content.Integer:
+                        buffer.BaseStream.
+                        break;
+                }
+
+                if (Message.IsSign)
+                {
+                    var signatureEncode = _signatureFactory.SignatureCodec;
+                    size = signatureEncode.SignatureSize;
+                    if (buffer.ReadableBytes() < size)
+                    {
+                        return false;
+                    }
+
+                    signatureEncode.Read(buffer);
+                    Message.SetReceivedSignature(signatureEncode);
+                }
+            }
         }
 
         private void DecodeSignature(MemoryStream buffer, long readerBefore, bool donePayload)

@@ -17,7 +17,7 @@ namespace TomP2P.Message
             
         }
 
-        public static Message DecodeHeader(MemoryStream buffer, IPEndPoint recipient, IPEndPoint sender)
+        public static Message DecodeHeader(BinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             throw new NotImplementedException();
         }
