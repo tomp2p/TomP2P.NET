@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -31,10 +32,10 @@ namespace TomP2P.Peers
         public const int MinSize = 30;
         public const int MaxRelays = 5;
 
-        private const int Net6 = 1;
-        private const int FirewallUdp = 2;
-        private const int FirewallTcp = 4;
-        private const int Relayed = 8;
+        private const int Net6 = 1;         // 0001
+        private const int FirewallUdp = 2;  // 0010
+        private const int FirewallTcp = 4;  // 0100
+        private const int Relayed = 8;      // 1000
 
         // network information
         /// <summary>
@@ -79,7 +80,7 @@ namespace TomP2P.Peers
         /// <summary>
         /// The size of the serialized peer address.
         /// </summary>
-        public int Size { get; private set; }
+        public long Size { get; private set; }
 
         public int RelaySize { get; private set; }
         private readonly BitArray _relayType;
@@ -98,7 +99,7 @@ namespace TomP2P.Peers
 
         // used for relay bit shifting
         private const int Mask1F = 0x1f;    // 0001 1111
-        private const int Mask7 = 0x7;      // 0000 0111
+        private const int Mask07 = 0x7;      // 0000 0111
 
         /// <summary>
         /// Creates a peer address where the byte array has to be in the right format and size.
@@ -131,10 +132,10 @@ namespace TomP2P.Peers
             int relays = me[offset++] & Utils.Utils.MaskFf;
 
             // first 3 bits are the size
-            RelaySize = (relays >> TypeBitSize) & Mask7;
+            RelaySize = (relays >> TypeBitSize) & Mask07;
             
             // last 5 bits indicate if IPv6 or IPv4
-            var b = (byte)(relays & Mask1F);
+            var b = (byte)(relays & Mask1F); // TODO check if works (2x)
             _relayType = new BitArray(b);
 
             // get the ID
@@ -168,11 +169,47 @@ namespace TomP2P.Peers
         /// <summary>
         /// Creates a peer address from a byte buffer.
         /// </summary>
-        /// <param name="channelBuffer">The channel buffer to read from.</param>
-        public PeerAddress(MemoryStream channelBuffer)
+        /// <param name="buffer">The channel buffer to read from.</param>
+        public PeerAddress(BinaryReader buffer)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            long readerIndex = buffer.BaseStream.Position;
+
+            // get the type
+            int options = buffer.ReadByte(); // unsigned byte
+            IsIPv6 = (options & Net6) > 0;
+            IsFirewalledUdp = (options & FirewallUdp) > 0;
+            IsFirewalledTcp = (options & FirewallTcp) > 0;
+            IsRelayed = (options & Relayed) > 0;
+
+            // get the relays
+            int relays = buffer.ReadByte(); // unsigned byte
+            RelaySize = (relays >> TypeBitSize) & Mask07;
+            var b = (byte) (relays & Mask1F); // TODO check if works (2x)
+            _relayType = new BitArray(b);
+
+            // get the ID
+            byte[] id = buffer.ReadBytes(Number160.ByteArraySize);
+            PeerId = new Number160(id);
+
+            PeerSocketAddress = PeerSocketAddress.Create(buffer, IsIPv4);
+
+            if (RelaySize > 0)
+            {
+                PeerSocketAddresses = new List<PeerSocketAddress>(RelaySize);
+                for (int i = 0; i < RelaySize; i++)
+                {
+                    PeerSocketAddresses.Add(PeerSocketAddress.Create(buffer, !_relayType.Get(i)));
+                }
+            }
+            else
+            {
+                PeerSocketAddresses = EmptyPeerSocketAddresses;
+            }
+
+            Size = buffer.BaseStream.Position - readerIndex; // TODO check equivalent
+
+            Offset = -1; // not used here
+            _hashCode = PeerId.GetHashCode();
         }
 
         /// <summary>
@@ -241,7 +278,7 @@ namespace TomP2P.Peers
                 index++;
             }
             Size = size;
-            Offset = -1; // unused here
+            Offset = -1; // not used here
         }
 
         // Facade Constructors:
@@ -425,7 +462,7 @@ namespace TomP2P.Peers
             }
 
             // count the relays
-            int relaySize = (relays >> TypeBitSize) & Mask7;
+            int relaySize = (relays >> TypeBitSize) & Mask07;
             var b = (byte) (relays & Mask1F);
             var relayType = new BitArray(b);
             for (int i = 0; i < relaySize; i++)

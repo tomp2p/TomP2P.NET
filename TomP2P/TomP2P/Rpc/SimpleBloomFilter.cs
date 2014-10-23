@@ -89,13 +89,27 @@ namespace TomP2P.Rpc
         }
 
         /// <summary>
-        /// Constructs a SimpleBloomFilter out of existing data. You must specify the number of bits in the bloom filter and also specify the number of items being expected to be added.
-        /// The latter is used to choose some optimal internal values to minimize the false-positive rate. This can be expected with the ExpectedFalsePositiveRate property.
+        /// Constructs a SimpleBloomFilter out of existing data.
         /// </summary>
-        public SimpleBloomFilter(MemoryStream channelBuffer)
+        /// <param name="buffer">The byte buffer with the data.</param>
+        public SimpleBloomFilter(BinaryReader buffer)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            _byteArraySize = buffer.ReadUInt16() - (SizeHeaderElements - SizeHeaderLength);
+            _bitArraySize = _byteArraySize*8;
+
+            int expectedElements = buffer.ReadInt32();
+            ExpectedElements = expectedElements;
+            double hf = (_bitArraySize / (double) expectedElements)*Math.Log(2.0);
+            _k = (int) Math.Ceiling(hf);
+            if (_byteArraySize > 0)
+            {
+                byte[] me = buffer.ReadBytes(_byteArraySize);
+                BitArray = new BitArray(me);
+            }
+            else
+            {
+                BitArray = new BitArray(0); // TODO check if size needs/can extend later
+            }
         }
 
         public void ToByteBuffer(MemoryStream buffer)

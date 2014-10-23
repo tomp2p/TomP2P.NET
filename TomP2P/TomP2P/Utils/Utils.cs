@@ -8,11 +8,14 @@ namespace TomP2P.Utils
 {
     public class Utils
     {
-        public const int IPv4Bytes = 4;
-        public const int IPv6Bytes = 16;
+        public const int IPv4Bytes = 4;         //  32 bits
+        public const int IPv6Bytes = 16;        // 128 bits
         public const int ByteBits = 8;
-        public const int MaskFf = 0xff; // 1111 1111
-
+        public const int MaskFf = 0xff;         // 1111 1111
+        public const int ByteByteSize = 1;      //   8 bits
+        public const int ShortByteSize = 2;     //  16 bits
+        public const int IntegerByteSize = 4;   //  32 bits
+        public const int LongByteSize = 8;      //  64 bits
 
         // TODO correct use of generics?
         public static bool IsSameSets<T>(ICollection<T> set1, ICollection<T> set2)

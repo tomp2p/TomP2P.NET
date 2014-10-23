@@ -5,6 +5,7 @@ using System.Net;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Peers;
+using TomP2P.Rpc;
 using TomP2P.Storage;
 using TomP2P.Workaround;
 
@@ -174,12 +175,81 @@ namespace TomP2P.Message
             while (_contentTypes.Count > 0)
             {
                 Message.Content content = _contentTypes.Peek();
-                Logger.Debug("Go fo content: {0}.", content);
+                Logger.Debug("Go for content: {0}.", content);
 
                 switch (content)
                 {
                     case Message.Content.Integer:
-                        buffer.BaseStream.
+                        if (buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        {
+                            return false;
+                        }
+                        Message.SetIntValue(buffer.ReadInt32());
+                        LastContent = _contentTypes.Dequeue();
+                        break;
+                    case Message.Content.Long:
+                        if (buffer.ReadableBytes() < Utils.Utils.LongByteSize)
+                        {
+                            return false;
+                        }
+                        Message.SetLongValue(buffer.ReadInt64());
+                        LastContent = _contentTypes.Dequeue();
+                        break;
+                    case Message.Content.Key:
+                        if (buffer.ReadableBytes() < Number160.ByteArraySize)
+                        {
+                            return false;
+                        }
+                        byte[] keyBytes = buffer.ReadBytes(Number160.ByteArraySize);
+                        Message.SetKey(new Number160(keyBytes));
+                        LastContent = _contentTypes.Dequeue();
+                        break;
+                    case Message.Content.BloomFilter:
+                        if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                        {
+                            return false;
+                        }
+                        // TODO check port
+                        size = buffer.ReadUInt16(); // uses little-endian
+                        Message.SetBloomFilter(new SimpleBloomFilter<Number160>(buffer));
+                        LastContent = _contentTypes.Dequeue();
+                        break;
+                    case Message.Content.SetNeighbors:
+                        if (_neighborSize == -1 && buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                        {
+                            return false;
+                        }
+                        if (_neighborSize == -1)
+                        {
+                            _neighborSize = buffer.ReadByte(); // unsigned bytes // TODO byte -> int conversion valid?
+                        }
+                        if (_neighborSet == null)
+                        {
+                            _neighborSet = new NeighborSet(-1, new List<PeerAddress>(_neighborSize));
+                        }
+                        for (int i = _neighborSet.Size; i < _neighborSize; i++)
+                        {
+                            if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                            {
+                                return false;
+                            }
+                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
+                            int header = buffer.ReadUInt16();
+                            size = PeerAddress.CalculateSize(header);
+                            if (buffer.ReadableBytes() < size)
+                            {
+                                return false;
+                            }
+                            var pa = new PeerAddress(buffer);
+                            _neighborSet.Add(pa);
+                        }
+                        Message.SetNeighborSet(_neighborSet);
+                        LastContent = _contentTypes.Dequeue();
+                        _neighborSize = -1; // TODO why here? not in prepareFinish()?
+                        _neighborSet = null;
+                        break;
+                    case Message.Content.SetPeerSocket:
+
                         break;
                 }
 
@@ -198,9 +268,9 @@ namespace TomP2P.Message
             }
         }
 
-        private void DecodeSignature(MemoryStream buffer, long readerBefore, bool donePayload)
+        private void DecodeSignature(BinaryReader buffer, long readerBefore, bool donePayload)
         {
-            var readerAfter = buffer.Position; // TODO readerIndex
+            var readerAfter = buffer.BaseStream.Position; // TODO readerIndex
             var len = readerAfter - readerBefore;
             if (len > 0)
             {
@@ -208,7 +278,7 @@ namespace TomP2P.Message
             }
         }
 
-        private void VerifySignature(MemoryStream buffer, long readerBefore, long len, bool donePayload) // TODO throw exceptions?
+        private void VerifySignature(BinaryReader buffer, long readerBefore, long len, bool donePayload) // TODO throw exceptions?
         {
             if (!Message.IsSign)
             {

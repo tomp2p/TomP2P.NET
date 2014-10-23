@@ -10,7 +10,7 @@ namespace TomP2P.Message
 
         ISignatureCodec Write(MemoryStream buffer);
 
-        ISignatureCodec Read(MemoryStream buffer);
+        ISignatureCodec Read(BinaryReader buffer);
 
         int SignatureSize { get; set; }
     }

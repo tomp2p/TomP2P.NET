@@ -40,7 +40,12 @@ namespace TomP2P.Peers
             throw new NotImplementedException();
         }
 
-        internal byte[] ToByteArray()
+        public byte[] ToByteArray()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static PeerSocketAddress Create(System.IO.BinaryReader buffer, bool IsIPv4)
         {
             throw new NotImplementedException();
         }
