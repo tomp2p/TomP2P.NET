@@ -454,7 +454,45 @@ namespace TomP2P.Message
                         _keyMap640Keys = null;
                         break;
                     case Message.Content.MapKey640Byte:
+                        if (_keyMapByteSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        {
+                            return false;
+                        }
+                        if (_keyMapByteSize == -1)
+                        {
+                            _keyMapByteSize = buffer.ReadInt32();
+                        }
+                        if (_keyMapByte == null)
+                        {
+                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, byte>(2 * _keyMapByteSize));
+                        }
 
+                        for (int i = _keyMapByte.Size; i < _keyMapByteSize; i++)
+                        {
+                            if (buffer.ReadableBytes() < Number160.ByteArraySize + Number160.ByteArraySize
+                                + Number160.ByteArraySize + Number160.ByteArraySize + 1)
+                            {
+                                return false;
+                            }
+                            byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var locationKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var domainKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var contentKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var versionKey = new Number160(key);
+
+                            byte value = buffer.ReadByte();
+                            _keyMapByte.Put(new Number640(locationKey, domainKey, contentKey, versionKey), value);
+                        }
+
+                        Message.SetKeyMapByte(_keyMapByte);
+                        LastContent = _contentTypes.Dequeue();
+                        _keyMapByteSize = -1; // TODO why here? not in prepareFinish()?
+                        _keyMapByte = null;
+                        break;
+                    case Message.Content.ByteBuffer:
                         break;
                 }
 
