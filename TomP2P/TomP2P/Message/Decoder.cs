@@ -249,7 +249,36 @@ namespace TomP2P.Message
                         _neighborSet = null;
                         break;
                     case Message.Content.SetPeerSocket:
-
+                        if (_peerSocketAddressSize == -1 && buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                        {
+                            return false;
+                        }
+                        if (_peerSocketAddresses == null)
+                        {
+                            _peerSocketAddresses = new List<PeerSocketAddress>(_peerSocketAddressSize);
+                        }
+                        for (int i = _peerSocketAddresses.Count; i < _peerSocketAddressSize; i++)
+                        {
+                            if (buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                            {
+                                return false;
+                            }
+                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
+                            int header = buffer.ReadByte();
+                            bool isIPv4 = header == 0; // TODO check if works
+                            size = PeerSocketAddress.CalculateSize(isIPv4);
+                            if (buffer.ReadableBytes() < size + Utils.Utils.ByteByteSize)
+                            {
+                                return false;
+                            }
+                            // skip the ipv4/ipv6 header
+                            buffer.ReadByte();
+                            _peerSocketAddresses.Add(PeerSocketAddress.Create(buffer, isIPv4));
+                        }
+                        Message.SetPeerSocketAddresses(_peerSocketAddresses);
+                        LastContent = _contentTypes.Dequeue();
+                        _peerSocketAddressSize = -1; // TODO why here? not in prepareFinish()?
+                        _peerSocketAddresses = null;
                         break;
                 }
 

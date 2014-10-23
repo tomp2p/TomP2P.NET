@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -45,9 +46,15 @@ namespace TomP2P.Peers
             throw new NotImplementedException();
         }
 
-        public static PeerSocketAddress Create(System.IO.BinaryReader buffer, bool IsIPv4)
+        public static PeerSocketAddress Create(BinaryReader buffer, bool IsIPv4)
         {
             throw new NotImplementedException();
+        }
+
+        public static int CalculateSize(bool isIPv4)
+        {
+            // TODO introduce constants
+            return 2 + 2 + (isIPv4 ? Utils.Utils.IPv4Bytes : Utils.Utils.IPv6Bytes);
         }
     }
 }
