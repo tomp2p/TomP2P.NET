@@ -398,6 +398,62 @@ namespace TomP2P.Message
                         _dataMap = null;
                         break;
                     case Message.Content.MapKey640Keys:
+                        if (_keyMap640KeysSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        {
+                            return false;
+                        }
+                        if (_keyMap640KeysSize == -1)
+                        {
+                            _keyMap640KeysSize = buffer.ReadInt32();
+                        }
+                        if (_keyMap640Keys == null)
+                        {
+                            _keyMap640Keys = new KeyMap640Keys(new SortedDictionary<Number640, ICollection<Number160>>()); // TODO check TreeMap equivalent
+                        }
+
+                        const int meta = Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize;
+
+                        for (int i = _keyMap640Keys.Size; i < _keyMap640KeysSize; i++)
+                        {
+                            if (buffer.ReadableBytes() < meta + Utils.Utils.ByteByteSize)
+                            {
+                                return false;
+                            }
+                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
+                            buffer.BaseStream.Position += meta;
+                            size = buffer.ReadByte(); // unsigned byte
+
+                            if (buffer.ReadableBytes() <  meta + Utils.Utils.ByteByteSize + (size*Number160.ByteArraySize))
+                            {
+                                return false;
+                            }
+                            byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var locationKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var domainKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var contentKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var versionKey = new Number160(key);
+
+                            int numBasedOn = buffer.ReadByte();
+                            var value = new HashSet<Number160>();
+                            for (int j = 0; j < numBasedOn; j++)
+                            {
+                                key = buffer.ReadBytes(Number160.ByteArraySize);
+                                var basedOnKey = new Number160(key);
+                                value.Add(basedOnKey);
+                            }
+
+                            _keyMap640Keys.Put(new Number640(locationKey, domainKey, contentKey, versionKey), value);
+                        }
+
+                        Message.SetKeyMap640Keys(_keyMap640Keys);
+                        LastContent = _contentTypes.Dequeue();
+                        _keyMap640KeysSize = -1; // TODO why here? not in prepareFinish()?
+                        _keyMap640Keys = null;
+                        break;
+                    case Message.Content.MapKey640Byte:
 
                         break;
                 }
