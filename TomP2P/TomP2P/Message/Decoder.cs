@@ -44,7 +44,7 @@ namespace TomP2P.Message
         private KeyMapByte _keyMapByte = null;
 
         private int _bufferSize = -1;
-        private Buffer _buffer = null;
+        private DataBuffer _buffer = null;
 
         private int _trackerDataSize = -1;
         private TrackerData _trackerData = null;
@@ -493,6 +493,40 @@ namespace TomP2P.Message
                         _keyMapByte = null;
                         break;
                     case Message.Content.ByteBuffer:
+                        if (_bufferSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        {
+                            return false;
+                        }
+                        if (_bufferSize == -1)
+                        {
+                            _bufferSize = buffer.ReadInt32();
+                        }
+                        if (_buffer == null)
+                        {
+                            _buffer = new DataBuffer();
+                        }
+
+                        int already = _buffer.AlreadyTransferred();
+                        int remaining = _bufferSize - already;
+                        // already finished
+                        if (remaining != 0)
+                        {
+                            int read = _buffer.TransferFrom(buffer, remaining);
+                            if (read != remaining)
+                            {
+                                Logger.Debug("Still looking for data. Indicating that its not finished yet. Read = {0}, Size = {1}.", _buffer.AlreadyTransferred(), _bufferSize);
+                                return false;
+                            }
+                        }
+
+                        // TODO create ByteBuf, port not trivial
+                        var buffer2 = new MemoryStream(); // TODO this is not working yet!!!
+                        Message.SetBuffer(new Buffer(buffer2, _bufferSize));
+                        LastContent = _contentTypes.Dequeue();
+                        _bufferSize = -1;
+                        _buffer = null;
+                        break;
+                    case Message.Content.SetTrackerData:
                         break;
                 }
 
