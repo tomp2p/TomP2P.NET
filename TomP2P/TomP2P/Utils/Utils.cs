@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TomP2P.Utils
 {
-    public class Utils
+    public static class Utils
     {
         public const int IPv4Bytes = 4;         //  32 bits
         public const int IPv6Bytes = 16;        // 128 bits

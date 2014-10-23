@@ -28,8 +28,8 @@ namespace TomP2P.Message
         private int _peerSocketAddressSize = -1;
         private List<PeerSocketAddress> _peerSocketAddresses = null;
 
-        private int _keyCollectionsSize = -1;
-        private List<KeyCollection> _keyCollections = null;
+        private int _keyCollectionSize = -1;
+        private KeyCollection _keyCollection = null;
 
         private int _mapSize = -1;
         private DataMap _dataMap = null;
@@ -110,8 +110,8 @@ namespace TomP2P.Message
             _neighborSize = -1;
             _neighborSet = null;
             // TODO set peerSocketAddressSize/peerSocketAddresses -1/null?
-            _keyCollectionsSize = -1;
-            _keyCollections = null;
+            _keyCollectionSize = -1;
+            _keyCollection = null;
             _mapSize = -1;
             _dataMap = null;
             _data = null;
@@ -253,6 +253,10 @@ namespace TomP2P.Message
                         {
                             return false;
                         }
+                        if (_peerSocketAddressSize == -1)
+                        {
+                            _peerSocketAddressSize = buffer.ReadByte(); // unsigned byte
+                        }
                         if (_peerSocketAddresses == null)
                         {
                             _peerSocketAddresses = new List<PeerSocketAddress>(_peerSocketAddressSize);
@@ -279,6 +283,45 @@ namespace TomP2P.Message
                         LastContent = _contentTypes.Dequeue();
                         _peerSocketAddressSize = -1; // TODO why here? not in prepareFinish()?
                         _peerSocketAddresses = null;
+                        break;
+                    case Message.Content.SetKey640:
+                        if (_keyCollectionSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        {
+                            return false;
+                        }
+                        if (_keyCollectionSize == -1)
+                        {
+                            _keyCollectionSize = buffer.ReadInt32();
+                        }
+                        if (_keyCollection == null)
+                        {
+                            _keyCollection = new KeyCollection(new List<Number640>(_keyCollectionSize));
+                        }
+                        for (int i = _keyCollection.Size; i < _keyCollectionSize; i++)
+                        {
+                            if (buffer.ReadableBytes() <
+                                Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize +
+                                Number160.ByteArraySize)
+                            {
+                                return false;
+                            }
+                            byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var locationKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var domainKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var contentKey = new Number160(key);
+                            key = buffer.ReadBytes(Number160.ByteArraySize);
+                            var versionKey = new Number160(key);
+                            _keyCollection.Add(new Number640(locationKey, domainKey, contentKey, versionKey));
+                        }
+                        Message.SetKeyCollection(_keyCollection);
+                        LastContent = _contentTypes.Dequeue();
+                        _keyCollectionSize = -1; // TODO why here? not in prepareFinish()?
+                        _keyCollection = null;
+                        break;
+                    case Message.Content.MapKey640Data:
+
                         break;
                 }
 
