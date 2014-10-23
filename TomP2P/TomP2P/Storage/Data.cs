@@ -61,5 +61,35 @@ namespace TomP2P.Storage
          {
              throw new NotImplementedException();
          }
+
+         public bool DecodeBuffer(BinaryReader buffer)
+         {
+             throw new NotImplementedException();
+         }
+
+         public bool DecodeDone(BinaryReader buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
+         {
+             throw new NotImplementedException();
+         }
+
+         public static Data DecodeHeader(BinaryReader buffer, ISignatureFactory signatureFactory)
+         {
+             throw new NotImplementedException();
+         }
+
+         public IPublicKey PublicKey()
+         {
+             throw new NotImplementedException();
+         }
+
+         public Data PublicKey(IPublicKey publicKey)
+         {
+             throw new NotImplementedException();
+         }
+
+         public bool HasPublicKey()
+         {
+             throw new NotImplementedException();
+         }
     }
 }

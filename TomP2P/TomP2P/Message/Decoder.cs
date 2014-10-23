@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using TomP2P.Storage;
@@ -321,6 +322,82 @@ namespace TomP2P.Message
                         _keyCollection = null;
                         break;
                     case Message.Content.MapKey640Data:
+                        if (_mapSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        {
+                            return false;
+                        }
+                        if (_mapSize == -1)
+                        {
+                            _mapSize = buffer.ReadInt32();
+                        }
+                        if (_dataMap == null)
+                        {
+                            _dataMap = new DataMap(new Dictionary<Number640, Data>(2 * _mapSize));
+                        }
+                        if (_data != null)
+                        {
+                            if (!_data.DecodeBuffer(buffer))
+                            {
+                                return false;
+                            }
+                            if (!_data.DecodeDone(buffer, Message.PublicKey(0), _signatureFactory))
+                            {
+                                return false;
+                            }
+                            _data = null; // TODO why here? not in prepareFinish()?
+                            _key = null;
+                        }
+                        for (int i = _dataMap.Size; i < _mapSize; i++)
+                        {
+                            if (_key == null)
+                            {
+                                if (buffer.ReadableBytes() <
+                                    Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize +
+                                    Number160.ByteArraySize)
+                                {
+                                    return false;
+                                }
+                                byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
+                                var locationKey = new Number160(key);
+                                key = buffer.ReadBytes(Number160.ByteArraySize);
+                                var domainKey = new Number160(key);
+                                key = buffer.ReadBytes(Number160.ByteArraySize);
+                                var contentKey = new Number160(key);
+                                key = buffer.ReadBytes(Number160.ByteArraySize);
+                                var versionKey = new Number160(key);
+                                _key = new Number640(locationKey, domainKey, contentKey, versionKey);
+                            }
+                            _data = Data.DecodeHeader(buffer, _signatureFactory);
+                            if (_data == null)
+                            {
+                                return false;
+                            }
+                            _dataMap.BackingDataMap.Add(_key, _data);
+
+                            if (!_data.DecodeBuffer(buffer))
+                            {
+                                return false;
+                            }
+                            if (!_data.DecodeDone(buffer, Message.PublicKey(0), _signatureFactory))
+                            {
+                                return false;
+                            }
+                            // if we have signed the message, set the public key anyway, but only if we indicated so
+                            if (Message.IsSign && Message.PublicKey(0) != null && _data.HasPublicKey()
+                                && (_data.PublicKey() == null || _data.PublicKey() == PeerBuilder.EmptyPublicKey)) // TODO check empty key condition
+                            {
+                                _data.PublicKey(Message.PublicKey(0));
+                            }
+                            _data = null; // TODO why here? not in prepareFinish()?
+                            _key = null;
+                        }
+
+                        Message.SetDataMap(_dataMap);
+                        LastContent = _contentTypes.Dequeue();
+                        _mapSize = -1; // TODO why here? not in prepareFinish()?
+                        _dataMap = null;
+                        break;
+                    case Message.Content.MapKey640Keys:
 
                         break;
                 }

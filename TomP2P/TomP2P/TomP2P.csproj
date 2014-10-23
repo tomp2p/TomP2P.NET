@@ -57,6 +57,7 @@
     <Compile Include="Message\MessageContentIndex.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
     <Compile Include="Message\TrackerData.cs" />
+    <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\Number160.cs" />
     <Compile Include="Peers\Number320.cs" />
     <Compile Include="Peers\Number480.cs" />
