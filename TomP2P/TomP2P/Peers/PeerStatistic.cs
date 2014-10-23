@@ -11,6 +11,11 @@ namespace TomP2P.Peers
     /// </summary>
     public class PeerStatistic
     {
+        public PeerStatistic(PeerAddress pa)
+        {
+            throw new NotImplementedException();
+        }
+
         public PeerAddress PeerAddress { get; private set; }
     }
 }

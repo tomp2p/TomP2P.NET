@@ -18,7 +18,7 @@ namespace TomP2P.Connection
         /// <returns>The decoded public key.</returns>
         IPublicKey DecodePublicKey(byte[] me);
 
-        IPublicKey DecodePublicKey(MemoryStream buffer);
+        IPublicKey DecodePublicKey(BinaryReader buffer);
 
         void EncodePublicKey(IPublicKey publicKey, MemoryStream buffer);
 

@@ -332,7 +332,7 @@ namespace TomP2P.Message
                         }
                         if (_dataMap == null)
                         {
-                            _dataMap = new DataMap(new Dictionary<Number640, Data>(2 * _mapSize));
+                            _dataMap = new DataMap(new Dictionary<Number640, Data>(2*_mapSize));
                         }
                         if (_data != null)
                         {
@@ -384,7 +384,8 @@ namespace TomP2P.Message
                             }
                             // if we have signed the message, set the public key anyway, but only if we indicated so
                             if (Message.IsSign && Message.PublicKey(0) != null && _data.HasPublicKey()
-                                && (_data.PublicKey() == null || _data.PublicKey() == PeerBuilder.EmptyPublicKey)) // TODO check empty key condition
+                                && (_data.PublicKey() == null || _data.PublicKey() == PeerBuilder.EmptyPublicKey))
+                                // TODO check empty key condition
                             {
                                 _data.PublicKey(Message.PublicKey(0));
                             }
@@ -408,10 +409,13 @@ namespace TomP2P.Message
                         }
                         if (_keyMap640Keys == null)
                         {
-                            _keyMap640Keys = new KeyMap640Keys(new SortedDictionary<Number640, ICollection<Number160>>()); // TODO check TreeMap equivalent
+                            _keyMap640Keys = new KeyMap640Keys(new SortedDictionary<Number640, ICollection<Number160>>());
+                                // TODO check TreeMap equivalent
                         }
 
-                        const int meta = Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize;
+                        const int meta =
+                            Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize +
+                            Number160.ByteArraySize;
 
                         for (int i = _keyMap640Keys.Size; i < _keyMap640KeysSize; i++)
                         {
@@ -423,7 +427,8 @@ namespace TomP2P.Message
                             buffer.BaseStream.Position += meta;
                             size = buffer.ReadByte(); // unsigned byte
 
-                            if (buffer.ReadableBytes() <  meta + Utils.Utils.ByteByteSize + (size*Number160.ByteArraySize))
+                            if (buffer.ReadableBytes() <
+                                meta + Utils.Utils.ByteByteSize + (size*Number160.ByteArraySize))
                             {
                                 return false;
                             }
@@ -464,7 +469,7 @@ namespace TomP2P.Message
                         }
                         if (_keyMapByte == null)
                         {
-                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, byte>(2 * _keyMapByteSize));
+                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, byte>(2*_keyMapByteSize));
                         }
 
                         for (int i = _keyMapByte.Size; i < _keyMapByteSize; i++)
@@ -514,7 +519,9 @@ namespace TomP2P.Message
                             int read = _buffer.TransferFrom(buffer, remaining);
                             if (read != remaining)
                             {
-                                Logger.Debug("Still looking for data. Indicating that its not finished yet. Read = {0}, Size = {1}.", _buffer.AlreadyTransferred(), _bufferSize);
+                                Logger.Debug(
+                                    "Still looking for data. Indicating that its not finished yet. Read = {0}, Size = {1}.",
+                                    _buffer.AlreadyTransferred(), _bufferSize);
                                 return false;
                             }
                         }
@@ -527,22 +534,110 @@ namespace TomP2P.Message
                         _buffer = null;
                         break;
                     case Message.Content.SetTrackerData:
+                        if (_trackerDataSize == -1 && buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                        {
+                            return false;
+                        }
+                        if (_trackerDataSize == -1)
+                        {
+                            _trackerDataSize = buffer.ReadByte(); // unsigned byte
+                        }
+                        if (_trackerData == null)
+                        {
+                            _trackerData = new TrackerData(new Dictionary<PeerStatistic, Data>(2*_trackerDataSize));
+                        }
+                        if (_currentTrackerData != null)
+                        {
+                            if (!_currentTrackerData.DecodeBuffer(buffer))
+                            {
+                                return false;
+                            }
+                            if (!_currentTrackerData.DecodeDone(buffer, Message.PublicKey(0), _signatureFactory))
+                            {
+                                return false;
+                            }
+                            _currentTrackerData = null;
+                        }
+                        for (int i = _trackerData.Size; i < _trackerDataSize; i++)
+                        {
+                            if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                            {
+                                return false;
+                            }
+
+                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
+                            int header = buffer.ReadUInt16();
+                            size = PeerAddress.CalculateSize(header);
+                            if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                            {
+                                return false;
+                            }
+                            var pa = new PeerAddress(buffer);
+                            var ps = new PeerStatistic(pa);
+
+                            _currentTrackerData = Data.DecodeHeader(buffer, _signatureFactory);
+                            if (_currentTrackerData == null)
+                            {
+                                return false;
+                            }
+                            _trackerData.PeerAddresses.Add(ps, _currentTrackerData);
+                            if (Message.IsSign)
+                            {
+                                _currentTrackerData.PublicKey(Message.PublicKey(0));
+                            }
+                            if (!_currentTrackerData.DecodeBuffer(buffer))
+                            {
+                                return false;
+                            }
+                            if (!_currentTrackerData.DecodeDone(buffer, Message.PublicKey(0), _signatureFactory))
+                            {
+                                return false;
+                            }
+                            _currentTrackerData = null; // TODO why here?
+                        }
+
+                        Message.SetTrackerData(_trackerData);
+                        LastContent = _contentTypes.Dequeue();
+                        _trackerDataSize = -1;
+                        _trackerData = null;
+                        break;
+                    case Message.Content.PublicKey: // fall-through
+                    case Message.Content.PublicKeySignature:
+                        receivedPublicKey = _signatureFactory.DecodePublicKey(buffer);
+                        if (content == Message.Content.PublicKeySignature)
+                        {
+                            if (receivedPublicKey == PeerBuilder.EmptyPublicKey) // TODO check if works
+                            {
+                                // TODO throw InvalidKeyException
+                                throw new SystemException("The public key cannot be empty.");
+                            }
+                        }
+                        if (receivedPublicKey == null)
+                        {
+                            return false;
+                        }
+
+                        Message.SetPublicKey(receivedPublicKey);
+                        LastContent = _contentTypes.Dequeue();
+                        break;
+                    default:
                         break;
                 }
-
-                if (Message.IsSign)
-                {
-                    var signatureEncode = _signatureFactory.SignatureCodec;
-                    size = signatureEncode.SignatureSize;
-                    if (buffer.ReadableBytes() < size)
-                    {
-                        return false;
-                    }
-
-                    signatureEncode.Read(buffer);
-                    Message.SetReceivedSignature(signatureEncode);
-                }
             }
+
+            if (Message.IsSign)
+            {
+                var signatureEncode = _signatureFactory.SignatureCodec;
+                size = signatureEncode.SignatureSize;
+                if (buffer.ReadableBytes() < size)
+                {
+                    return false;
+                }
+
+                signatureEncode.Read(buffer);
+                Message.SetReceivedSignature(signatureEncode);
+            }
+            return true;
         }
 
         private void DecodeSignature(BinaryReader buffer, long readerBefore, bool donePayload)
