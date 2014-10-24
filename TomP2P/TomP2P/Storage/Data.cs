@@ -47,17 +47,17 @@ namespace TomP2P.Storage
              get { throw new InvalidOperationException();}
          }
 
-         public void EncodeHeader(MemoryStream buffer, ISignatureFactory signatureFactory)
+         public void EncodeHeader(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
          {
              throw new NotImplementedException();
          }
 
-         public bool EncodeBuffer(MemoryStream buffer)
+         public bool EncodeBuffer(JavaBinaryWriter buffer)
          {
              throw new NotImplementedException();
          }
 
-         public void EncodeDone(MemoryStream buffer, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
+         public void EncodeDone(JavaBinaryWriter buffer, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
          {
              throw new NotImplementedException();
          }

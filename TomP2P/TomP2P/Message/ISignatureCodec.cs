@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {
@@ -8,7 +9,7 @@ namespace TomP2P.Message
 
         byte[] Encode(); // TODO throws exception?
 
-        ISignatureCodec Write(MemoryStream buffer);
+        ISignatureCodec Write(JavaBinaryWriter buffer);
 
         ISignatureCodec Read(BinaryReader buffer);
 

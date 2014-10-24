@@ -20,9 +20,9 @@ namespace TomP2P.Connection
 
         IPublicKey DecodePublicKey(BinaryReader buffer);
 
-        void EncodePublicKey(IPublicKey publicKey, MemoryStream buffer);
+        void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer);
 
-        ISignatureCodec Sign(IPrivateKey privateKey, MemoryStream buffer); // TODO throw exception?
+        ISignatureCodec Sign(IPrivateKey privateKey, JavaBinaryWriter buffer); // TODO throw exception?
 
         bool Verify(IPublicKey publicKey, MemoryStream buffer, ISignatureCodec signatureEncoded); // TODO throw exception?
 

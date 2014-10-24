@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {
@@ -12,7 +13,7 @@ namespace TomP2P.Message
     {
         public const int HeaderSize = 58; // bytes
         
-        public static void EncodeHeader(MemoryStream buffer, Message message)
+        public static void EncodeHeader(JavaBinaryWriter buffer, Message message)
         {
             
         }

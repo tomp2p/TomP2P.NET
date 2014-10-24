@@ -71,6 +71,7 @@
     <Compile Include="Storage\Data.cs" />
     <Compile Include="Storage\DataBuffer.cs" />
     <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Workaround\IJavaBuffer.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />
     <Compile Include="Workaround\IPublicKey.cs" />
     <Compile Include="Workaround\JavaBinaryReader.cs" />

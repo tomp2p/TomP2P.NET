@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Workaround;
 
 namespace TomP2P.Rpc
 {
@@ -112,7 +113,7 @@ namespace TomP2P.Rpc
             }
         }
 
-        public void ToByteBuffer(MemoryStream buffer)
+        public void ToByteBuffer(JavaBinaryWriter buffer)
         {
             // TODO implement
             throw new NotImplementedException();

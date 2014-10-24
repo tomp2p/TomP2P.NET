@@ -11,7 +11,7 @@ namespace TomP2P.Workaround
     /// This class allows to write Java types to a <code>byte[]</code>.
     /// Internally, a <see cref="BinaryWriter"/> is used.
     /// </summary>
-    public class JavaBinaryWriter
+    public class JavaBinaryWriter : IJavaBuffer
     {
         private readonly BinaryWriter _bw;
 
@@ -38,5 +38,29 @@ namespace TomP2P.Workaround
             _bw.Write(b3);
             _bw.Write(b4);
         }
+
+        public void WriteLong(long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteByte(byte value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteBytes(byte[] value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CanRead
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public int WriterIndex { get; private set; }
+        public int ReaderIndex { get; private set; }
+        public byte[] Buffer { get; private set; }
     }
 }

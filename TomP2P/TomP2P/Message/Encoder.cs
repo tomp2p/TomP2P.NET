@@ -1,8 +1,8 @@
 ﻿using System;
-using System.IO;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Storage;
+using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {
@@ -22,7 +22,7 @@ namespace TomP2P.Message
         }
 
         // TODO throw exceptions?
-        public bool Write(MemoryStream buffer, Message message, ISignatureCodec signatureCodec)
+        public bool Write(JavaBinaryWriter buffer, Message message, ISignatureCodec signatureCodec)
         {
             Message = message;
             Logger.Debug("Message for outbound {0}.", message);
@@ -69,7 +69,7 @@ namespace TomP2P.Message
         }
 
         // TODO throw exception?
-        private bool Loop(MemoryStream buffer)
+        private bool Loop(JavaBinaryWriter buffer)
         {
             MessageContentIndex next;
 
@@ -77,99 +77,75 @@ namespace TomP2P.Message
             while ((next = Message.ContentReferences.Peek()) != null)
             {
                 // TODO check buffer equivalent
-                long start = buffer.Position;
+                long start = buffer.WriterIndex;
                 Message.Content content = next.Content;
 
                 // TODO make all writes async, also reads in decoder
                 // TODO use BinaryWriter, also in decoder
                 // TODO what happens if null is serialized? exception?
-                byte[] bytes;
-                byte[] lengthBytes;
                 switch (content)
                 {
                     case Message.Content.Key:
-                        bytes = Message.Key(next.Index).ToByteArray();
-                        buffer.Write(bytes, 0, bytes.Length);
+                        buffer.WriteBytes(Message.Key(next.Index).ToByteArray());
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.Integer:
-                        bytes = BitConverter.GetBytes(Message.IntAt(next.Index));
-                        buffer.Write(bytes, 0, bytes.Length);
+                        buffer.WriteInt32(Message.IntAt(next.Index));
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.Long:
-                        bytes = BitConverter.GetBytes(Message.LongAt(next.Index));
-                        buffer.Write(bytes, 0, bytes.Length);
+                        buffer.WriteLong(Message.LongAt(next.Index));
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.SetNeighbors:
                         var neighborSet = Message.NeighborsSet(next.Index);
                         // write length
-                        lengthBytes = BitConverter.GetBytes(neighborSet.Size);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteByte((byte) neighborSet.Size); // TODO check if conversion is valid
                         foreach (var neighbor in neighborSet.Neighbors)
                         {
-                            bytes = neighbor.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
+                            buffer.WriteBytes(neighbor.ToByteArray());
                         }
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.SetPeerSocket:
                         var list = Message.PeerSocketAddresses;
                         // write length
-                        lengthBytes = BitConverter.GetBytes(list.Count);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteByte((byte) list.Count); // TODO check if conversion is valid
                         foreach (var psa in list)
                         {
                             // write IP version flag
-                            buffer.WriteByte(psa.IsIPv4 ? (byte)0 : (byte)1); // TODO does this work?
-                            bytes = psa.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
+                            buffer.WriteByte(psa.IsIPv4 ? (byte)0 : (byte)1); // TODO check if conversion is valid
+                            buffer.WriteBytes(psa.ToByteArray());
                         }
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.BloomFilter:
                         var bf = Message.BloomFilter(next.Index);
-                        bf.ToByteBuffer(buffer); // TODO make better, don't write to buffer in encapsulated style?
+                        bf.ToByteBuffer(buffer);
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.SetKey640:
                         var keys = Message.KeyCollection(next.Index);
                         // write length
-                        lengthBytes = BitConverter.GetBytes(keys.Size);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteInt32(keys.Size);
                         if (keys.IsConvert)
                         {
                             foreach (var key in keys.KeysConvert)
                             {
-                                bytes = keys.LocationKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = keys.DomainKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = key.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = keys.VersionKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
+                                buffer.WriteBytes(keys.LocationKey.ToByteArray());
+                                buffer.WriteBytes(keys.DomainKey.ToByteArray());
+                                buffer.WriteBytes(key.ToByteArray());
+                                buffer.WriteBytes(keys.VersionKey.ToByteArray());
                             }
                         }
                         else
                         {
                             foreach (var key in keys.Keys)
                             {
-                                bytes = key.LocationKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = key.DomainKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = key.ContentKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = key.VersionKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
+                                buffer.WriteBytes(key.LocationKey.ToByteArray());
+                                buffer.WriteBytes(key.DomainKey.ToByteArray());
+                                buffer.WriteBytes(key.ContentKey.ToByteArray());
+                                buffer.WriteBytes(key.VersionKey.ToByteArray());
                             }
                         }
                         Message.ContentReferences.Dequeue();
@@ -177,23 +153,15 @@ namespace TomP2P.Message
                     case Message.Content.MapKey640Data:
                         var dm = Message.DataMap(next.Index);
                         // write length
-                        lengthBytes = BitConverter.GetBytes(dm.Size);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteInt32(dm.Size);
                         if (dm.IsConvert)
                         {
                             foreach (var data in dm.DataMapConvert)
                             {
-                                bytes = dm.LocationKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = dm.DomainKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = data.Key.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = dm.VersionKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
+                                buffer.WriteBytes(dm.LocationKey.ToByteArray());
+                                buffer.WriteBytes(dm.DomainKey.ToByteArray());
+                                buffer.WriteBytes(data.Key.ToByteArray());
+                                buffer.WriteBytes(dm.VersionKey.ToByteArray());
 
                                 EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest()); // TODO check reference passing
                             }
@@ -202,17 +170,10 @@ namespace TomP2P.Message
                         {
                             foreach (var data in dm.BackingDataMap)
                             {
-                                bytes = data.Key.LocationKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = data.Key.DomainKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = data.Key.ContentKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
-
-                                bytes = data.Key.VersionKey.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
+                                buffer.WriteBytes(data.Key.LocationKey.ToByteArray());
+                                buffer.WriteBytes(data.Key.DomainKey.ToByteArray());
+                                buffer.WriteBytes(data.Key.ContentKey.ToByteArray());
+                                buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
 
                                 EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest()); // TODO check reference passing
                             }
@@ -222,30 +183,21 @@ namespace TomP2P.Message
                     case Message.Content.MapKey640Keys:
                         var kmk = Message.KeyMap640Keys(next.Index);
                         // write length
-                        lengthBytes = BitConverter.GetBytes(kmk.Size);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteInt32(kmk.Size);
                         foreach (var data in kmk.KeysMap)
                         {
-                            bytes = data.Key.LocationKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
-
-                            bytes = data.Key.DomainKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
-
-                            bytes = data.Key.ContentKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
-
-                            bytes = data.Key.VersionKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
+                            buffer.WriteBytes(data.Key.LocationKey.ToByteArray());
+                            buffer.WriteBytes(data.Key.DomainKey.ToByteArray());
+                            buffer.WriteBytes(data.Key.ContentKey.ToByteArray());
+                            buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
 
                             // write number of based-on keys
-                            buffer.WriteByte((byte) data.Value.Count); // TODO does this work? (2x)
+                            buffer.WriteByte((byte) data.Value.Count); // TODO check if conversion is valid
 
                             // write based-on keys
                             foreach (var key in data.Value)
                             {
-                                bytes = key.ToByteArray();
-                                buffer.Write(bytes, 0, bytes.Length);
+                                buffer.WriteBytes(key.ToByteArray());
                             }
                         }
                         Message.ContentReferences.Dequeue();
@@ -253,24 +205,16 @@ namespace TomP2P.Message
                     case Message.Content.MapKey640Byte:
                         var kmb = Message.KeyMapByte(next.Index);
                         // write length
-                        lengthBytes = BitConverter.GetBytes(kmb.Size);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteInt32(kmb.Size);
                         foreach (var data in kmb.KeysMap)
                         {
-                            bytes = data.Key.LocationKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
-
-                            bytes = data.Key.DomainKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
-
-                            bytes = data.Key.ContentKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
-
-                            bytes = data.Key.VersionKey.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
+                            buffer.WriteBytes(data.Key.LocationKey.ToByteArray());
+                            buffer.WriteBytes(data.Key.DomainKey.ToByteArray());
+                            buffer.WriteBytes(data.Key.ContentKey.ToByteArray());
+                            buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
                             
                             // write byte
-                            buffer.WriteByte(data.Value); // TODO does this work? (3x)
+                            buffer.WriteByte(data.Value);
                         }
                         Message.ContentReferences.Dequeue();
                         break;
@@ -278,12 +222,11 @@ namespace TomP2P.Message
                         var b = Message.Buffer(next.Index);
                         if (!_resume)
                         {
-                            bytes = BitConverter.GetBytes(b.Length);
-                            buffer.Write(bytes, 0, bytes.Length);
+                            buffer.WriteInt32(b.Length);
                         }
-                        // length
+                        // write length
                         int readable = b.Readable;
-                        buffer.Write(b.BackingBuffer.GetBuffer(), 0, readable); // TODO check correctnes, port not trivial
+                        buffer.WriteBytes(buffer.Buffer); // TODO check correctnes, port not trivial
                         if (b.IncRead(readable) == b.Length)
                         {
                             Message.ContentReferences.Dequeue();
@@ -303,12 +246,10 @@ namespace TomP2P.Message
                     case Message.Content.SetTrackerData:
                         var td = Message.TrackerData(next.Index);
                         // write length
-                        lengthBytes = BitConverter.GetBytes(td.PeerAddresses.Count);
-                        buffer.Write(lengthBytes, 0, lengthBytes.Length);
+                        buffer.WriteByte((byte) td.PeerAddresses.Count); // TODO check if conversion is valid
                         foreach (var data in td.PeerAddresses)
                         {
-                            bytes = data.Key.PeerAddress.ToByteArray();
-                            buffer.Write(bytes, 0, bytes.Length);
+                            buffer.WriteBytes(data.Key.PeerAddress.ToByteArray());
 
                             var d = data.Value.Duplicate();
                             EncodeData(buffer, d, false, !Message.IsRequest());
@@ -329,14 +270,14 @@ namespace TomP2P.Message
                         throw new SystemException("Unknown type: " + next.Content);
                 }
 
-                Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.Position - start);
+                Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.WriterIndex - start);
             }
             return true;
         }
 
         // TODO throw exceptions?
         // TODO return type long instead of int?
-        private long EncodeData(MemoryStream buffer, Data data, bool isConvertMeta, bool isReply)
+        private long EncodeData(JavaBinaryWriter buffer, Data data, bool isConvertMeta, bool isReply)
         {
             data = isConvertMeta ? data.DuplicateMeta() : data.Duplicate();
 
@@ -347,12 +288,12 @@ namespace TomP2P.Message
             }
 
             // TODO check again, port isn't easy
-            long startWriter = buffer.Position;
+            long startWriter = buffer.WriterIndex;
             data.EncodeHeader(buffer, _signatureFactory);
             data.EncodeBuffer(buffer);
             data.EncodeDone(buffer, _signatureFactory, Message.PrivateKey);
 
-            return buffer.Position - startWriter;
+            return buffer.WriterIndex - startWriter; // TODO remove?
         }
     }
 }

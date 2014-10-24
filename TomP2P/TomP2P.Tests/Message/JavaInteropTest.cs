@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using TomP2P.Workaround;
-using Encoder = TomP2P.Message.Encoder;
-using Message = TomP2P.Message.Message;
 
 namespace TomP2P.Tests.Message
 {
@@ -52,7 +50,6 @@ namespace TomP2P.Tests.Message
             var br = new JavaBinaryReader(ms);
 
             int value = br.ReadInt32();
-
         }
     }
 }
