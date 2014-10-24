@@ -43,10 +43,10 @@ namespace TomP2P.Tests.Message
             
             var br = new BinaryReader(ms);
 
-            int ch1 = br.Read();
-            int ch2 = br.Read();
-            int ch3 = br.Read();
-            int ch4 = br.Read();
+            int ch1 = br.ReadByte() & 0xFF;
+            int ch2 = br.ReadByte() & 0xFF;
+            int ch3 = br.ReadByte() & 0xFF;
+            int ch4 = br.ReadByte() & 0xFF;
             // TODO check for end of stream
 
             int value = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + ch4);
