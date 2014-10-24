@@ -73,6 +73,7 @@
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />
     <Compile Include="Workaround\IPublicKey.cs" />
+    <Compile Include="Workaround\JavaBinaryReader.cs" />
     <Compile Include="Workaround\KeyPair.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using TomP2P.Workaround;
 using Encoder = TomP2P.Message.Encoder;
 using Message = TomP2P.Message.Message;
 
@@ -40,16 +41,10 @@ namespace TomP2P.Tests.Message
             var bytes = File.ReadAllBytes(From);
 
             var ms = new MemoryStream(bytes); // assumes unsigned-bytes
-            
-            var br = new BinaryReader(ms);
 
-            int ch1 = br.ReadByte() & 0xFF;
-            int ch2 = br.ReadByte() & 0xFF;
-            int ch3 = br.ReadByte() & 0xFF;
-            int ch4 = br.ReadByte() & 0xFF;
-            // TODO check for end of stream
+            var br = new JavaBinaryReader(ms);
 
-            int value = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + ch4);
+
 
         }
     }
