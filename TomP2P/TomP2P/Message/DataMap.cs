@@ -85,7 +85,7 @@ namespace TomP2P.Message
 
                 foreach (var data in map.DataMapConvert)
                 {
-                    dm.Add(new Number640(map.LocationKey, map.DomainKey, data.Key), data.Value);
+                    dm.Add(new Number640(map.LocationKey, map.DomainKey, data.Key, map.VersionKey), data.Value);
                 }
             }
             else

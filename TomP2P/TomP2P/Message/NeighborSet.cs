@@ -16,7 +16,7 @@ namespace TomP2P.Message
             Neighbors = peerAddresses;
 
             // remove neighbors that are over the limit
-            int serializedSize = 1;
+            long serializedSize = 1;
             
             // no need to cut if we don't provide a limit
             if (NeighborsLimit < 0) // TODO shouldn't this be <= 0?
