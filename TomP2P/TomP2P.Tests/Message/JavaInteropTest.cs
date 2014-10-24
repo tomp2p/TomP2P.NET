@@ -11,6 +11,9 @@ using Message = TomP2P.Message.Message;
 
 namespace TomP2P.Tests.Message
 {
+    /// <summary>
+    /// These tests have to be done manually as they exceed the boundary of the .NET platform.
+    /// </summary>
     [TestFixture]
     public class JavaInteropTest
     {
@@ -25,14 +28,18 @@ namespace TomP2P.Tests.Message
             m1.SetIntValue(integer);*/
 
             //var encoder = new Encoder(null);
-            //var buffer = new MemoryStream();
+            var ms = new MemoryStream();
+            var buffer = new JavaBinaryWriter(ms);
 
             //encoder.Write(buffer, m1, null);
 
-            //byte[] bytes = buffer.GetBuffer(); // gets unsigned bytes
+            const int value = Int32.MaxValue; // 2147483647
 
-            //byte[] bytes = new byte[] {0, 1, 2, 3};
+            buffer.WriteInt32(value);
 
+            byte[] bytes = ms.GetBuffer();
+
+            File.WriteAllBytes(To, bytes);
         }
 
         [Test]
@@ -44,7 +51,7 @@ namespace TomP2P.Tests.Message
 
             var br = new JavaBinaryReader(ms);
 
-
+            int value = br.ReadInt32();
 
         }
     }
