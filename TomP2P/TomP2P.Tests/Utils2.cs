@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using TomP2P.Message;
+using TomP2P.Peers;
+
+namespace TomP2P.Tests
+{
+    public class Utils2
+    {
+        public static readonly long TheAnswer = 42L;
+        public static readonly long TheAnsert2 = 43L;
+
+        public static TomP2P.Message.Message CreateDummyMessage()
+        {
+            return CreateDummyMessage(false, false);
+        }
+
+        public static TomP2P.Message.Message CreateDummyMessage(bool firewallUdp, bool firewallTcp)
+        {
+            return CreateDummyMessage(new Number160("0x4321"), "127.0.0.1", 8001, 8002, new Number160("0x1234"),
+                "127.0.0.1", 8003, 8004, (byte)0, TomP2P.Message.Message.MessageType.Request1, firewallUdp, firewallTcp);
+        }
+
+        public static TomP2P.Message.Message CreateDummyMessage(Number160 idSender, String inetSender, int tcpPortSendor,
+            int udpPortSender, Number160 idRecipient, String inetRecipient, int tcpPortRecipient,
+            int udpPortRecipient, byte command, TomP2P.Message.Message.MessageType type, bool firewallUdp, bool firewallTcp)
+        {
+            var message = new TomP2P.Message.Message();
+
+            PeerAddress n1 = CreateAddress(idSender, inetSender, tcpPortSendor, udpPortSender, firewallUdp, firewallTcp);
+            message.SetSender(n1);
+            //
+            PeerAddress n2 = CreateAddress(idRecipient, inetRecipient, tcpPortRecipient, udpPortRecipient, firewallUdp, firewallTcp);
+            message.SetRecipient(n2);
+            message.SetMessageType(type);
+            message.SetCommand(command);
+            return message;
+        }
+
+        public static PeerAddress CreateAddress(Number160 id)
+        {
+            return CreateAddress(id, "127.0.0.1", 8005, 8006, false, false);
+        }
+
+        public static PeerAddress CreateAddress()
+        {
+            return CreateAddress(new Number160("0x5678"), "127.0.0.1", 8005, 8006, false, false);
+        }
+
+        public static PeerAddress CreateAddress(int id)
+        {
+            return CreateAddress(new Number160(id), "127.0.0.1", 8005, 8006, false, false);
+        }
+
+        public static PeerAddress CreateAddress(String id)
+        {
+            return CreateAddress(new Number160(id), "127.0.0.1", 8005, 8006, false, false);
+        }
+
+        public static PeerAddress CreateAddress(Number160 idSender, String inetSender, int tcpPortSender,
+            int udpPortSender, bool firewallUdp, bool firewallTcp)
+        {
+            IPAddress inetSend = IPAddress.Parse(inetSender); // TODO correct port
+            PeerSocketAddress peerSocketAddress = new PeerSocketAddress(inetSend, tcpPortSender, udpPortSender);
+            PeerAddress n1 = new PeerAddress(idSender, peerSocketAddress, firewallTcp, firewallUdp, false, PeerAddress.EmptyPeerSocketAddresses);
+            return n1;
+        }
+    }
+}
