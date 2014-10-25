@@ -69,7 +69,9 @@ namespace TomP2P.Tests.Message
 
             var br = new JavaBinaryReader(ms);
 
-            long value = br.ReadLong();
+            long minVal = br.ReadLong();
+            long zero = br.ReadLong();
+            long maxVal = br.ReadLong();
         }
 
         [Test]
