@@ -23,19 +23,12 @@ namespace TomP2P.Tests.Message
         [Test]
         public void TestEncodeInt()
         {
-            /*var m1 = Utils2.CreateDummyMessage();
-            const int integer = 42;
-            m1.SetIntValue(integer);*/
-
-            //var encoder = new Encoder(null);
             var ms = new MemoryStream();
             var buffer = new JavaBinaryWriter(ms);
 
-            //encoder.Write(buffer, m1, null);
-
-            const int value = Int32.MaxValue; // 2147483647
-
-            buffer.WriteInt32(value);
+            buffer.WriteInt32(int.MinValue);    //-2147483648
+            buffer.WriteInt32(0);
+            buffer.WriteInt32(int.MaxValue);  // 2147483647
 
             byte[] bytes = ms.GetBuffer();
 
