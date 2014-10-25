@@ -26,9 +26,11 @@ namespace TomP2P.Workaround
         /// Writes a 4-byte integer to the current stream and advances the stream position by 4 bytes.
         /// </summary>
         /// <param name="value"></param>
-        public void WriteInt32(int value)
+        public void WriteInt(int value)
         {
-            var b1 = (byte) (((uint) value >> 24) & Mask0XFf);
+            // signed -> unsigned
+            // little-endian -> big-endian
+            var b1 = (byte) (((uint) value >> 24) & Mask0XFf); // TODO mask not needed
             var b2 = (byte) (((uint) value >> 16) & Mask0XFf);
             var b3 = (byte) (((uint) value >> 8) & Mask0XFf);
             var b4 = (byte) (((uint) value) & Mask0XFf);
@@ -41,7 +43,25 @@ namespace TomP2P.Workaround
 
         public void WriteLong(long value)
         {
-            throw new NotImplementedException();
+            // signed -> unsigned
+            // little-endian -> big-endian
+            var b1 = (byte) ((ulong) value >> 56);
+            var b2 = (byte) ((ulong) value >> 48);
+            var b3 = (byte) ((ulong) value >> 40);
+            var b4 = (byte) ((ulong) value >> 32);
+            var b5 = (byte) ((ulong) value >> 24);
+            var b6 = (byte) ((ulong) value >> 16);
+            var b7 = (byte) ((ulong) value >> 8);
+            var b8 = (byte) ((ulong) value);
+
+            _bw.Write(b1);
+            _bw.Write(b2);
+            _bw.Write(b3);
+            _bw.Write(b4);
+            _bw.Write(b5);
+            _bw.Write(b6);
+            _bw.Write(b7);
+            _bw.Write(b8);
         }
 
         public void WriteByte(byte value)

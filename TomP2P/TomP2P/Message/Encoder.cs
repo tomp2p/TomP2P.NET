@@ -90,7 +90,7 @@ namespace TomP2P.Message
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.Integer:
-                        buffer.WriteInt32(Message.IntAt(next.Index));
+                        buffer.WriteInt(Message.IntAt(next.Index));
                         Message.ContentReferences.Dequeue();
                         break;
                     case Message.Content.Long:
@@ -127,7 +127,7 @@ namespace TomP2P.Message
                     case Message.Content.SetKey640:
                         var keys = Message.KeyCollection(next.Index);
                         // write length
-                        buffer.WriteInt32(keys.Size);
+                        buffer.WriteInt(keys.Size);
                         if (keys.IsConvert)
                         {
                             foreach (var key in keys.KeysConvert)
@@ -153,7 +153,7 @@ namespace TomP2P.Message
                     case Message.Content.MapKey640Data:
                         var dm = Message.DataMap(next.Index);
                         // write length
-                        buffer.WriteInt32(dm.Size);
+                        buffer.WriteInt(dm.Size);
                         if (dm.IsConvert)
                         {
                             foreach (var data in dm.DataMapConvert)
@@ -183,7 +183,7 @@ namespace TomP2P.Message
                     case Message.Content.MapKey640Keys:
                         var kmk = Message.KeyMap640Keys(next.Index);
                         // write length
-                        buffer.WriteInt32(kmk.Size);
+                        buffer.WriteInt(kmk.Size);
                         foreach (var data in kmk.KeysMap)
                         {
                             buffer.WriteBytes(data.Key.LocationKey.ToByteArray());
@@ -205,7 +205,7 @@ namespace TomP2P.Message
                     case Message.Content.MapKey640Byte:
                         var kmb = Message.KeyMapByte(next.Index);
                         // write length
-                        buffer.WriteInt32(kmb.Size);
+                        buffer.WriteInt(kmb.Size);
                         foreach (var data in kmb.KeysMap)
                         {
                             buffer.WriteBytes(data.Key.LocationKey.ToByteArray());
@@ -222,7 +222,7 @@ namespace TomP2P.Message
                         var b = Message.Buffer(next.Index);
                         if (!_resume)
                         {
-                            buffer.WriteInt32(b.Length);
+                            buffer.WriteInt(b.Length);
                         }
                         // write length
                         int readable = b.Readable;

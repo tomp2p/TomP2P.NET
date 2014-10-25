@@ -26,9 +26,9 @@ namespace TomP2P.Tests.Message
             var ms = new MemoryStream();
             var buffer = new JavaBinaryWriter(ms);
 
-            buffer.WriteInt32(int.MinValue);    //-2147483648
-            buffer.WriteInt32(0);
-            buffer.WriteInt32(int.MaxValue);  // 2147483647
+            buffer.WriteInt(int.MinValue);    //-2147483648
+            buffer.WriteInt(0);
+            buffer.WriteInt(int.MaxValue);  // 2147483647
 
             byte[] bytes = ms.GetBuffer();
 
@@ -40,7 +40,7 @@ namespace TomP2P.Tests.Message
         {
             var bytes = File.ReadAllBytes(From);
 
-            var ms = new MemoryStream(bytes); // assumes unsigned-bytes
+            var ms = new MemoryStream(bytes);
 
             var br = new JavaBinaryReader(ms);
 
@@ -56,7 +56,16 @@ namespace TomP2P.Tests.Message
         [Test]
         public void TestEncodeLong()
         {
-            
+            var ms = new MemoryStream();
+            var buffer = new JavaBinaryWriter(ms);
+
+            buffer.WriteLong(long.MinValue);    //-923372036854775808
+            buffer.WriteLong(0);
+            buffer.WriteLong(long.MaxValue);    // 923372036854775807
+
+            byte[] bytes = ms.GetBuffer();
+
+            File.WriteAllBytes(To, bytes);
         }
 
         [Test]

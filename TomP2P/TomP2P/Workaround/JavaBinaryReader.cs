@@ -36,7 +36,7 @@ namespace TomP2P.Workaround
             int v3 = _br.ReadByte() & Mask0XFf;
             int v4 = _br.ReadByte() & Mask0XFf;
 
-            // left-shift the ints to their according place
+            // big-endian (java) -> little-endian (.NET)
             return ((v1 << 24) + (v2 << 16) + (v3 << 8) + v4);
         }
 
@@ -50,10 +50,7 @@ namespace TomP2P.Workaround
             var v5 = (long)_br.ReadByte() & Mask0XFf;
             var v6 = (long)_br.ReadByte() & Mask0XFf;
             var v7 = (long)_br.ReadByte() & Mask0XFf;
-            var v8 = (long)_br.ReadByte() & Mask0XFf;
-
-            return ((v1 << 56) + (v2 << 48) + (v3 << 40) + (v4 << 32)
-                + (v5 << 24) + (v6 << 16) + (v7 << 8) + v8);*/
+            var v8 = (long)_br.ReadByte() & Mask0XFf;*/
 
             // alternative: _br.ReadByte & (long)Mask0XFf
             // alternative: (long) _br.ReadByte() & Mask0XFf
@@ -67,6 +64,7 @@ namespace TomP2P.Workaround
             var v7 = (long)_br.ReadByte();
             var v8 = (long)_br.ReadByte();
 
+            // big-endian (java) -> little-endian (.NET)
             return ((v1 << 56) + (v2 << 48) + (v3 << 40) + (v4 << 32)
                 + (v5 << 24) + (v6 << 16) + (v7 << 8) + v8);
         }
