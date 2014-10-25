@@ -15,7 +15,7 @@ namespace TomP2P.Workaround
     {
         private readonly BinaryWriter _bw;
 
-        private const int Mask0XFf = 0xFF;  // 1111 1111
+        private const int Mask0XFf = 0xFF;  // 00000000 00000000 00000000 11111111
 
         public JavaBinaryWriter(Stream output)
         {

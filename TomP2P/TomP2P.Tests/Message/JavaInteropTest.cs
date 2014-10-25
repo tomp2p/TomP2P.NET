@@ -15,11 +15,13 @@ namespace TomP2P.Tests.Message
     [TestFixture]
     public class JavaInteropTest
     {
-        private const string From = "D:/Desktop/interop/bytes-JAVA-encoded.txt";
-        private const string To = "D:/Desktop/interop/bytes-NET-encoded.txt";
+        //private const string From = "D:/Desktop/interop/bytes-JAVA-encoded.txt";
+        //private const string To = "D:/Desktop/interop/bytes-NET-encoded.txt";
+        private const string From = "C:/Users/Christian/Desktop/interop/bytes-JAVA-encoded.txt";
+        private const string To = "C:/Users/Christian/Desktop/interop/bytes-NET-encoded.txt";
 
         [Test]
-        public void TestEncode()
+        public void TestEncodeInt32()
         {
             /*var m1 = Utils2.CreateDummyMessage();
             const int integer = 42;
@@ -41,7 +43,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
-        public void TestDecode()
+        public void TestDecodeInt32()
         {
             var bytes = File.ReadAllBytes(From);
 
@@ -50,6 +52,48 @@ namespace TomP2P.Tests.Message
             var br = new JavaBinaryReader(ms);
 
             int value = br.ReadInt32();
+        }
+
+        [Test]
+        public void TestEncodeLong()
+        {
+            
+        }
+
+        [Test]
+        public void TestDecodeLong()
+        {
+            var bytes = File.ReadAllBytes(From);
+
+            var ms = new MemoryStream(bytes);
+
+            var br = new JavaBinaryReader(ms);
+
+            long value = br.ReadLong();
+        }
+
+        [Test]
+        public void TestEncodeByte()
+        {
+            
+        }
+
+        [Test]
+        public void TestDecodeByte()
+        {
+            
+        }
+
+        [Test]
+        public void TestEncodeBytes()
+        {
+            
+        }
+
+        [Test]
+        public void TestDecodeBytes()
+        {
+            
         }
     }
 }
