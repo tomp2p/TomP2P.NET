@@ -26,7 +26,7 @@ namespace TomP2P.Workaround
         /// Reads a 4-byte integer from the current stream and advances the current position of the stream by 4 bytes.
         /// </summary>
         /// <returns></returns>
-        public int ReadInt32()
+        public int ReadInt()
         {
             // read 4 bytes (32 bit)
             // apply 0xFF (32 bit) mask to convert from Java's signed int to .NET unsigned int

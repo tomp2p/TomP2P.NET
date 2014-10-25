@@ -21,7 +21,7 @@ namespace TomP2P.Tests.Message
         private const string To = "C:/Users/Christian/Desktop/interop/bytes-NET-encoded.txt";
 
         [Test]
-        public void TestEncodeInt32()
+        public void TestEncodeInt()
         {
             /*var m1 = Utils2.CreateDummyMessage();
             const int integer = 42;
@@ -43,7 +43,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
-        public void TestDecodeInt32()
+        public void TestDecodeInt()
         {
             var bytes = File.ReadAllBytes(From);
 
@@ -51,9 +51,13 @@ namespace TomP2P.Tests.Message
 
             var br = new JavaBinaryReader(ms);
 
-            int minVal = br.ReadInt32();
-            int zero = br.ReadInt32();
-            int maxVal = br.ReadInt32();
+            int minVal = br.ReadInt();
+            int zero = br.ReadInt();
+            int maxVal = br.ReadInt();
+
+            Assert.IsTrue(minVal == int.MinValue);
+            Assert.IsTrue(zero == 0);
+            Assert.IsTrue(maxVal == int.MaxValue);
         }
 
         [Test]
@@ -74,6 +78,10 @@ namespace TomP2P.Tests.Message
             long minVal = br.ReadLong();
             long zero = br.ReadLong();
             long maxVal = br.ReadLong();
+
+            Assert.IsTrue(minVal == long.MinValue);
+            Assert.IsTrue(zero == 0);
+            Assert.IsTrue(maxVal == long.MaxValue);
         }
 
         [Test]
