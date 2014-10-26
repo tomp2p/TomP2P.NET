@@ -26,9 +26,9 @@ namespace TomP2P.Workaround
         /// <returns></returns>
         public int ReadInt()
         {
-            // NOTE: _br.ReadInt32() would read in little-endian fashion
+            // NOTE: _br.ReadInt32() would read in little-endian fashion (.NET)
             
-            // read bytes in big-endian fashion
+            // read bytes in big-endian fashion (Java)
             byte b1 = _br.ReadByte();
             byte b2 = _br.ReadByte();
             byte b3 = _br.ReadByte();
@@ -40,29 +40,20 @@ namespace TomP2P.Workaround
 
         public long ReadLong()
         {
-            /* WORKS !!
-            var v1 = (long)_br.ReadByte() & Mask0XFf;
-            var v2 = (long)_br.ReadByte() & Mask0XFf;
-            var v3 = (long)_br.ReadByte() & Mask0XFf;
-            var v4 = (long)_br.ReadByte() & Mask0XFf;
-            var v5 = (long)_br.ReadByte() & Mask0XFf;
-            var v6 = (long)_br.ReadByte() & Mask0XFf;
-            var v7 = (long)_br.ReadByte() & Mask0XFf;
-            var v8 = (long)_br.ReadByte() & Mask0XFf;*/
+            // NOTE: _br.ReadInt64() would read in little-endian fashion (.NET)
+            
+            // read bytes in big-endian fashion (Java)
+            // direct implicit conversion to long, allows shifts > 24
+            long v1 = _br.ReadByte();
+            long v2 = _br.ReadByte();
+            long v3 = _br.ReadByte();
+            long v4 = _br.ReadByte();
+            long v5 = _br.ReadByte();
+            long v6 = _br.ReadByte();
+            long v7 = _br.ReadByte();
+            long v8 = _br.ReadByte();
 
-            // alternative: _br.ReadByte & (long)Mask0XFf
-            // alternative: (long) _br.ReadByte() & Mask0XFf
-
-            var v1 = (long)_br.ReadByte();
-            var v2 = (long)_br.ReadByte();
-            var v3 = (long)_br.ReadByte();
-            var v4 = (long)_br.ReadByte();
-            var v5 = (long)_br.ReadByte();
-            var v6 = (long)_br.ReadByte();
-            var v7 = (long)_br.ReadByte();
-            var v8 = (long)_br.ReadByte();
-
-            // big-endian (java) -> little-endian (.NET)
+            // shift bytes to their position and sum up their long values
             return ((v1 << 56) + (v2 << 48) + (v3 << 40) + (v4 << 32)
                 + (v5 << 24) + (v6 << 16) + (v7 << 8) + v8);
         }

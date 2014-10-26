@@ -97,13 +97,33 @@ namespace TomP2P.Tests.Message
 
             var br = new JavaBinaryReader(ms);
 
-            long minVal = br.ReadLong();
-            long zero = br.ReadLong();
-            long maxVal = br.ReadLong();
+            long val1 = br.ReadLong();
+            long val2 = br.ReadLong();
+            long val3 = br.ReadLong();
+            long val4 = br.ReadLong();
+            long val5 = br.ReadLong();
+            long val6 = br.ReadLong();
+            long val7 = br.ReadLong();
+            long val8 = br.ReadLong();
+            long val9 = br.ReadLong();
+            long val10 = br.ReadLong();
+            long val11 = br.ReadLong();
+            long val12 = br.ReadLong();
+            long val13 = br.ReadLong();
 
-            Assert.IsTrue(minVal == long.MinValue);
-            Assert.IsTrue(zero == 0);
-            Assert.IsTrue(maxVal == long.MaxValue);
+            Assert.IsTrue(val1 == long.MinValue);
+            Assert.IsTrue(val2 == -256);
+            Assert.IsTrue(val3 == -255);
+            Assert.IsTrue(val4 == -128);
+            Assert.IsTrue(val5 == -127);
+            Assert.IsTrue(val6 == -1);
+            Assert.IsTrue(val7 == 0);
+            Assert.IsTrue(val8 == 1);
+            Assert.IsTrue(val9 == 127);
+            Assert.IsTrue(val10 == 128);
+            Assert.IsTrue(val11 == 255);
+            Assert.IsTrue(val12 == 256);
+            Assert.IsTrue(val13 == long.MaxValue);
         }
 
         [Test]
