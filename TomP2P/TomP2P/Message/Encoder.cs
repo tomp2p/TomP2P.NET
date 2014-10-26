@@ -100,7 +100,7 @@ namespace TomP2P.Message
                     case Message.Content.SetNeighbors:
                         var neighborSet = Message.NeighborsSet(next.Index);
                         // write length
-                        buffer.WriteByte((byte) neighborSet.Size); // TODO check if conversion is valid
+                        buffer.WriteByte((sbyte) neighborSet.Size); // TODO check if conversion is valid
                         foreach (var neighbor in neighborSet.Neighbors)
                         {
                             buffer.WriteBytes(neighbor.ToByteArray());
@@ -110,11 +110,11 @@ namespace TomP2P.Message
                     case Message.Content.SetPeerSocket:
                         var list = Message.PeerSocketAddresses;
                         // write length
-                        buffer.WriteByte((byte) list.Count); // TODO check if conversion is valid
+                        buffer.WriteByte((sbyte) list.Count); // TODO check if conversion is valid
                         foreach (var psa in list)
                         {
                             // write IP version flag
-                            buffer.WriteByte(psa.IsIPv4 ? (byte)0 : (byte)1); // TODO check if conversion is valid
+                            buffer.WriteByte(psa.IsIPv4 ? (sbyte)0 : (sbyte)1); // TODO check if conversion is valid
                             buffer.WriteBytes(psa.ToByteArray());
                         }
                         Message.ContentReferences.Dequeue();
@@ -192,7 +192,7 @@ namespace TomP2P.Message
                             buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
 
                             // write number of based-on keys
-                            buffer.WriteByte((byte) data.Value.Count); // TODO check if conversion is valid
+                            buffer.WriteByte((sbyte) data.Value.Count); // TODO check if conversion is valid
 
                             // write based-on keys
                             foreach (var key in data.Value)
@@ -214,7 +214,7 @@ namespace TomP2P.Message
                             buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
                             
                             // write byte
-                            buffer.WriteByte(data.Value);
+                            buffer.WriteByte((sbyte)data.Value);
                         }
                         Message.ContentReferences.Dequeue();
                         break;
@@ -246,7 +246,7 @@ namespace TomP2P.Message
                     case Message.Content.SetTrackerData:
                         var td = Message.TrackerData(next.Index);
                         // write length
-                        buffer.WriteByte((byte) td.PeerAddresses.Count); // TODO check if conversion is valid
+                        buffer.WriteByte((sbyte) td.PeerAddresses.Count); // TODO check if conversion is valid
                         foreach (var data in td.PeerAddresses)
                         {
                             buffer.WriteBytes(data.Key.PeerAddress.ToByteArray());

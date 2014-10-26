@@ -149,7 +149,18 @@ namespace TomP2P.Tests.Message
         [Test]
         public void TestEncodeByte()
         {
-            
+            var ms = new MemoryStream();
+            var buffer = new JavaBinaryWriter(ms);
+
+            // Java byte is signed
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++) // -128 ... 127
+            {
+                buffer.WriteByte((sbyte) i);
+            }
+
+            byte[] bytes = ms.GetBuffer();
+
+            File.WriteAllBytes(To, bytes);
         }
 
         [Test]
@@ -161,6 +172,7 @@ namespace TomP2P.Tests.Message
 
             var br = new JavaBinaryReader(ms);
 
+            // Java byte is signed
             for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++) // -128 ... 127
             {
                 sbyte b = br.ReadByte();

@@ -66,9 +66,10 @@ namespace TomP2P.Workaround
             _bw.Write(b8);
         }
 
-        public void WriteByte(byte value)
+        public void WriteByte(sbyte value)
         {
-            throw new NotImplementedException();
+            // Java byte is signed
+            _bw.Write(value);
         }
 
         public void WriteBytes(byte[] value)
