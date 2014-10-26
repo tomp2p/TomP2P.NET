@@ -15,8 +15,6 @@ namespace TomP2P.Workaround
     {
         private readonly BinaryReader _br;
 
-        private const int Mask0XFf = 0xFF;  // 00000000 00000000 00000000 11111111
-
         public JavaBinaryReader(Stream input)
         {
             _br = new BinaryReader(input);
@@ -28,16 +26,16 @@ namespace TomP2P.Workaround
         /// <returns></returns>
         public int ReadInt()
         {
-            // read 4 bytes (32 bit)
-            // apply 0xFF (32 bit) mask to convert from Java's signed int to .NET unsigned int
+            // NOTE: _br.ReadInt32() would read in little-endian fashion
+            
+            // read bytes in big-endian fashion
+            byte b1 = _br.ReadByte();
+            byte b2 = _br.ReadByte();
+            byte b3 = _br.ReadByte();
+            byte b4 = _br.ReadByte();
 
-            var v1 = _br.ReadByte() & Mask0XFf;
-            int v2 = _br.ReadByte() & Mask0XFf;
-            int v3 = _br.ReadByte() & Mask0XFf;
-            int v4 = _br.ReadByte() & Mask0XFf;
-
-            // big-endian (java) -> little-endian (.NET)
-            return ((v1 << 24) + (v2 << 16) + (v3 << 8) + v4);
+            // shift bytes to their position and sum up their int values
+            return ((b1 << 24) + (b2 << 16) + (b3 << 8) + b4);
         }
 
         public long ReadLong()
