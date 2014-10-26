@@ -21,7 +21,7 @@ namespace TomP2P.Workaround
         }
 
         /// <summary>
-        /// Reads a 4-byte integer from the current stream and advances the current position of the stream by 4 bytes.
+        /// Reads a 4-byte signed integer from the current stream and advances the current position of the stream by 4 bytes.
         /// </summary>
         /// <returns></returns>
         public int ReadInt()
@@ -38,10 +38,14 @@ namespace TomP2P.Workaround
             return ((b1 << 24) + (b2 << 16) + (b3 << 8) + b4);
         }
 
+        /// <summary>
+        /// Reads a 8-byte signed integer from the current stream and advances the current position of the stream by 8 bytes.
+        /// </summary>
+        /// <returns></returns>
         public long ReadLong()
         {
             // NOTE: _br.ReadInt64() would read in little-endian fashion (.NET)
-            
+
             // read bytes in big-endian fashion (Java)
             // direct implicit conversion to long, allows shifts > 24
             long v1 = _br.ReadByte();
