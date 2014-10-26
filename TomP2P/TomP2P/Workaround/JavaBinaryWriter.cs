@@ -28,11 +28,11 @@ namespace TomP2P.Workaround
         {
             // NOTE: _br.Write(int) would write in little-endian fashion (.NET)
             
-            // shift int bits to their position and convert to byte
+            // shift int bits to their position and cast to byte
             var b1 = (byte) (value >> 24);
             var b2 = (byte) (value >> 16);
             var b3 = (byte) (value >> 8);
-            var b4 = (byte) (value);
+            var b4 = (byte) value;
 
             // write bytes in big-endian fashion (Java)
             _bw.Write(b1);
@@ -43,17 +43,19 @@ namespace TomP2P.Workaround
 
         public void WriteLong(long value)
         {
-            // signed -> unsigned
-            // little-endian -> big-endian
-            var b1 = (byte) ((ulong) value >> 56);
-            var b2 = (byte) ((ulong) value >> 48);
-            var b3 = (byte) ((ulong) value >> 40);
-            var b4 = (byte) ((ulong) value >> 32);
-            var b5 = (byte) ((ulong) value >> 24);
-            var b6 = (byte) ((ulong) value >> 16);
-            var b7 = (byte) ((ulong) value >> 8);
-            var b8 = (byte) ((ulong) value);
+            // NOTE: _br.Write(long) would write in little-endian fashion (.NET)
 
+            // shift long bits to their position and cast to byte
+            var b1 = (byte) (value >> 56);
+            var b2 = (byte) (value >> 48);
+            var b3 = (byte) (value >> 40);
+            var b4 = (byte) (value >> 32);
+            var b5 = (byte) (value >> 24);
+            var b6 = (byte) (value >> 16);
+            var b7 = (byte) (value >> 8);
+            var b8 = (byte) value;
+
+            // write bytes in big-endian fashion (Java)
             _bw.Write(b1);
             _bw.Write(b2);
             _bw.Write(b3);
