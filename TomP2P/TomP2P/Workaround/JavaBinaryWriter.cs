@@ -15,8 +15,6 @@ namespace TomP2P.Workaround
     {
         private readonly BinaryWriter _bw;
 
-        private const int Mask0XFf = 0xFF;  // 00000000 00000000 00000000 11111111
-
         public JavaBinaryWriter(Stream output)
         {
             _bw = new BinaryWriter(output);
@@ -28,13 +26,15 @@ namespace TomP2P.Workaround
         /// <param name="value"></param>
         public void WriteInt(int value)
         {
-            // signed -> unsigned
-            // little-endian -> big-endian
-            var b1 = (byte) (((uint) value >> 24) & Mask0XFf); // TODO mask not needed
-            var b2 = (byte) (((uint) value >> 16) & Mask0XFf);
-            var b3 = (byte) (((uint) value >> 8) & Mask0XFf);
-            var b4 = (byte) (((uint) value) & Mask0XFf);
+            // NOTE: _br.Write(int) would write in little-endian fashion (.NET)
+            
+            // shift int bits to their position and convert to byte
+            var b1 = (byte) (value >> 24);
+            var b2 = (byte) (value >> 16);
+            var b3 = (byte) (value >> 8);
+            var b4 = (byte) (value);
 
+            // write bytes in big-endian fashion (Java)
             _bw.Write(b1);
             _bw.Write(b2);
             _bw.Write(b3);

@@ -26,8 +26,18 @@ namespace TomP2P.Tests.Message
             var ms = new MemoryStream();
             var buffer = new JavaBinaryWriter(ms);
 
-            buffer.WriteInt(int.MinValue);    //-2147483648
+            buffer.WriteInt(int.MinValue);  //-2147483648
+            buffer.WriteInt(-256);
+            buffer.WriteInt(-255);
+            buffer.WriteInt(-128);
+            buffer.WriteInt(-127);
+            buffer.WriteInt(-1);
             buffer.WriteInt(0);
+            buffer.WriteInt(1);
+            buffer.WriteInt(127);
+            buffer.WriteInt(128);
+            buffer.WriteInt(255);
+            buffer.WriteInt(256);
             buffer.WriteInt(int.MaxValue);  // 2147483647
 
             byte[] bytes = ms.GetBuffer();
