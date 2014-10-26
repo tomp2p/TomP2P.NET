@@ -10,7 +10,9 @@ using TomP2P.Workaround;
 namespace TomP2P.Tests.Message
 {
     /// <summary>
-    /// These tests have to be done manually as they exceed the boundary of the .NET platform.
+    /// These tests check the binary encoding/decoding of data types between Java and .NET.
+    /// They have to be run manually as they exceed the boundary of the .NET platform.
+    /// Thus, these tests are [Ignore] by default.
     /// </summary>
     [TestFixture]
     public class JavaInteropTest
@@ -21,6 +23,7 @@ namespace TomP2P.Tests.Message
         private const string To = "C:/Users/Christian/Desktop/interop/bytes-NET-encoded.txt";
 
         [Test]
+        [Ignore]
         public void TestEncodeInt()
         {
             var ms = new MemoryStream();
@@ -46,6 +49,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
+        [Ignore]
         public void TestDecodeInt()
         {
             var bytes = File.ReadAllBytes(From);
@@ -84,6 +88,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
+        [Ignore]
         public void TestEncodeLong()
         {
             var ms = new MemoryStream();
@@ -109,6 +114,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
+        [Ignore]
         public void TestDecodeLong()
         {
             var bytes = File.ReadAllBytes(From);
@@ -147,6 +153,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
+        [Ignore]
         public void TestEncodeByte()
         {
             var ms = new MemoryStream();
@@ -164,6 +171,7 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
+        [Ignore]
         public void TestDecodeByte()
         {
             var bytes = File.ReadAllBytes(From);
@@ -181,15 +189,30 @@ namespace TomP2P.Tests.Message
         }
 
         [Test]
+        [Ignore]
         public void TestEncodeBytes()
         {
             
         }
 
         [Test]
+        [Ignore]
         public void TestDecodeBytes()
         {
-            
+            var bytes = File.ReadAllBytes(From);
+
+            var ms = new MemoryStream(bytes);
+
+            var br = new JavaBinaryReader(ms);
+
+            // Java byte is signed
+            var byteArray = new sbyte[256];
+            br.ReadBytes(byteArray);
+
+            for (int i = 0, b = sbyte.MinValue; i <= sbyte.MaxValue; i++, b++) // -128 ... 127
+            {
+                Assert.IsTrue(b == byteArray[i]);
+            }
         }
     }
 }

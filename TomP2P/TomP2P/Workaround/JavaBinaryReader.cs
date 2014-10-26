@@ -71,5 +71,14 @@ namespace TomP2P.Workaround
             // Java byte is signed
             return _br.ReadSByte();
         }
+
+        public void ReadBytes(sbyte[] dst)
+        {
+            // Java byte is signed
+            for (int i = 0; i < dst.Length; i++)
+            {
+                dst[i] = ReadByte();
+            }
+        }
     }
 }
