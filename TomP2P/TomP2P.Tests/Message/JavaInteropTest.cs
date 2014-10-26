@@ -155,7 +155,17 @@ namespace TomP2P.Tests.Message
         [Test]
         public void TestDecodeByte()
         {
-            
+            var bytes = File.ReadAllBytes(From);
+
+            var ms = new MemoryStream(bytes);
+
+            var br = new JavaBinaryReader(ms);
+
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++) // -128 ... 127
+            {
+                sbyte b = br.ReadByte();
+                Assert.IsTrue(i == b);
+            }
         }
 
         [Test]

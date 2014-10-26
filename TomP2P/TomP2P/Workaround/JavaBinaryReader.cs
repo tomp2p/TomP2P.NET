@@ -61,5 +61,15 @@ namespace TomP2P.Workaround
             return ((v1 << 56) + (v2 << 48) + (v3 << 40) + (v4 << 32)
                 + (v5 << 24) + (v6 << 16) + (v7 << 8) + v8);
         }
+
+        /// <summary>
+        /// Reads a signed byte from the current stream and advances the current position of the stream by 1 byte.
+        /// </summary>
+        /// <returns></returns>
+        public sbyte ReadByte()
+        {
+            // Java byte is signed
+            return _br.ReadSByte();
+        }
     }
 }
