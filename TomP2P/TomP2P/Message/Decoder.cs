@@ -65,7 +65,7 @@ namespace TomP2P.Message
             try
             {
                 // TODO review/redo: handle specific stuff
-                int readerBefore = buffer.ReaderIndex;
+                long readerBefore = buffer.ReaderIndex;
 
                 // TODO set sender of this message for handling timeout??
 

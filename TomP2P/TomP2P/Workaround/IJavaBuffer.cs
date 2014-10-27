@@ -13,7 +13,7 @@ namespace TomP2P.Workaround
 
         int WriterIndex { get; }
 
-        int ReaderIndex { get; }
+        long ReaderIndex { get; }
 
         sbyte[] Buffer { get; }
     }

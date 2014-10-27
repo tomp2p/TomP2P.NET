@@ -83,6 +83,9 @@ namespace TomP2P.Workaround
 
         public int ReadableBytes()
         {
+            // TODO implement!!
+            return Int32.MaxValue;
+
             throw new NotImplementedException();
         }
 
@@ -96,9 +99,10 @@ namespace TomP2P.Workaround
             get { throw new NotImplementedException(); }
         }
 
-        public int ReaderIndex
+        public long ReaderIndex
         {
-            get { throw new NotImplementedException(); }
+            // TODO implement!!
+            get { return _br.BaseStream.Position; throw new NotImplementedException(); }
         }
 
         public sbyte[] Buffer
@@ -111,7 +115,7 @@ namespace TomP2P.Workaround
             throw new NotImplementedException();
         }
 
-        public byte GetUByte(int i)
+        public byte GetUByte(long i)
         {
             // TODO dont move reader index
             throw new NotImplementedException();

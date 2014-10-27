@@ -87,7 +87,7 @@ namespace TomP2P.Workaround
         }
 
         public int WriterIndex { get; private set; }
-        public int ReaderIndex { get; private set; }
+        public long ReaderIndex { get; private set; }
         public sbyte[] Buffer { get; private set; }
     }
 }
