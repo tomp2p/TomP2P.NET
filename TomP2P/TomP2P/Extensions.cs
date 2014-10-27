@@ -58,14 +58,14 @@ namespace TomP2P
         /// </summary>
         /// <param name="ba"></param>
         /// <returns></returns>
-        public static byte ToByte(this BitArray ba)
+        public static sbyte ToByte(this BitArray ba)
         {
-            byte b = 0;
+            sbyte b = 0;
             for (int i = 0; i < Utils.Utils.ByteBits; i++)
             {
                 if (ba.Get(i))
                 {
-                    b |= (byte)(1 << i); // TODO test
+                    b |= (sbyte)(1 << i); // TODO test
                 }
             }
             return b;

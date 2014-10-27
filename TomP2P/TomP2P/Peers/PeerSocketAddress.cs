@@ -36,12 +36,12 @@ namespace TomP2P.Peers
             throw new NotImplementedException();
         }
 
-        public int ToByteArray(byte[] me, int newOffset)
+        public int ToByteArray(sbyte[] me, int newOffset)
         {
             throw new NotImplementedException();
         }
 
-        public byte[] ToByteArray()
+        public sbyte[] ToByteArray()
         {
             throw new NotImplementedException();
         }

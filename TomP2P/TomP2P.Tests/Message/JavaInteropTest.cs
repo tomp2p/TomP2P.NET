@@ -192,7 +192,20 @@ namespace TomP2P.Tests.Message
         [Ignore]
         public void TestEncodeBytes()
         {
-            
+            var ms = new MemoryStream();
+            var bw = new JavaBinaryWriter(ms);
+
+            var byteArray = new sbyte[256];
+            for (int i = 0, b = sbyte.MinValue; b <= sbyte.MaxValue; i++, b++)
+            {
+                byteArray[i] = (sbyte) b;
+            }
+
+            bw.WriteBytes(byteArray);
+
+            byte[] bytes = ms.GetBuffer();
+
+            File.WriteAllBytes(To, bytes);
         }
 
         [Test]

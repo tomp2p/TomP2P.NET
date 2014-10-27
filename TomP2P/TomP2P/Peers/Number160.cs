@@ -206,9 +206,9 @@ namespace TomP2P.Peers
         /// Returns a byte array, which is always of size 20.
         /// </summary>
         /// <returns>A byte array.</returns>
-        public byte[] ToByteArray()
+        public sbyte[] ToByteArray()
         {
-            var result = new byte[ByteArraySize];
+            var result = new sbyte[ByteArraySize];
             ToByteArray(result, 0); // TODO check if the result variable has been modified
             return result;
         }
@@ -219,7 +219,7 @@ namespace TomP2P.Peers
         /// <param name="me">The byte array.</param>
         /// <param name="offset">Where to start in the byte array.</param>
         /// <returns>The offset being read.</returns>
-        public int ToByteArray(byte[] me, int offset)
+        public int ToByteArray(sbyte[] me, int offset)
         {
             // TODO check if references are updated
             if (offset + ByteArraySize > me.Length)
@@ -230,10 +230,10 @@ namespace TomP2P.Peers
             {
                 // multiply by 4
                 int idx = offset + (i << 2);
-                me[idx + 0] = (byte)(_val[i] >> 24);
-                me[idx + 1] = (byte)(_val[i] >> 16);
-                me[idx + 2] = (byte)(_val[i] >> 8);
-                me[idx + 3] = (byte)(_val[i]);
+                me[idx + 0] = (sbyte)(_val[i] >> 24);
+                me[idx + 1] = (sbyte)(_val[i] >> 16);
+                me[idx + 2] = (sbyte)(_val[i] >> 8);
+                me[idx + 3] = (sbyte)(_val[i]);
             }
             return offset + ByteArraySize;
         }

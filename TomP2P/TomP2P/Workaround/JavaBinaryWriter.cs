@@ -72,9 +72,13 @@ namespace TomP2P.Workaround
             _bw.Write(value);
         }
 
-        public void WriteBytes(byte[] value)
+        public void WriteBytes(sbyte[] src)
         {
-            throw new NotImplementedException();
+            // Java byte is signed
+            for (int i = 0; i < src.Length; i++)
+            {
+                WriteByte(src[i]);
+            }
         }
 
         public bool CanRead
@@ -84,6 +88,6 @@ namespace TomP2P.Workaround
 
         public int WriterIndex { get; private set; }
         public int ReaderIndex { get; private set; }
-        public byte[] Buffer { get; private set; }
+        public sbyte[] Buffer { get; private set; }
     }
 }

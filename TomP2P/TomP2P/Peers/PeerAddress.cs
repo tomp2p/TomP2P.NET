@@ -305,9 +305,9 @@ namespace TomP2P.Peers
         /// Serializes to a new array with the proper size.
         /// </summary>
         /// <returns>The serialized representation.</returns>
-        public byte[] ToByteArray()
+        public sbyte[] ToByteArray()
         {
-            var me = new byte[Size];
+            var me = new sbyte[Size];
             ToByteArray(me, 0); // TODO check if references are updated
             return me;
         }
@@ -318,7 +318,7 @@ namespace TomP2P.Peers
         /// <param name="me">The array where the result should be stored.</param>
         /// <param name="offset">The offset where to start to save the result in the byte array.</param>
         /// <returns>The new offset.</returns>
-        public int ToByteArray(byte[] me, int offset)
+        public int ToByteArray(sbyte[] me, int offset)
         {
             // save the peer ID
             int newOffset = offset;
@@ -576,11 +576,11 @@ namespace TomP2P.Peers
         /// <summary>
         /// The encoded options.
         /// </summary>
-        public byte Options
+        public sbyte Options
         {
             get
             {
-                byte result = 0;
+                sbyte result = 0;
                 if (IsIPv6)
                 {
                     result |= Net6;
@@ -604,15 +604,15 @@ namespace TomP2P.Peers
         /// <summary>
         /// The encoded relays. There are maximal 5 relays.
         /// </summary>
-        public byte Relays
+        public sbyte Relays
         {
             get
             {
                 if (RelaySize > 0)
                 {
-                    var result = (byte) (RelaySize << TypeBitSize);
-                    byte types = _relayType.ToByte();
-                    result |= (byte) (types & Mask1F);
+                    var result = (sbyte) (RelaySize << TypeBitSize);
+                    sbyte types = _relayType.ToByte();
+                    result |= (sbyte) (types & Mask1F);
                     return result;
                 }
                 return 0;

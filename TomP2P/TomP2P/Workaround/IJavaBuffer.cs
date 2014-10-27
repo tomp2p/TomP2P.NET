@@ -15,6 +15,6 @@ namespace TomP2P.Workaround
 
         int ReaderIndex { get; }
 
-        byte[] Buffer { get; }
+        sbyte[] Buffer { get; }
     }
 }
