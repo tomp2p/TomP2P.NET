@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Workaround;
 
 namespace TomP2P.Storage
 {
@@ -14,7 +15,7 @@ namespace TomP2P.Storage
             throw new NotImplementedException();
         }
 
-        public int TransferFrom(BinaryReader buffer, int remaining)
+        public int TransferFrom(JavaBinaryReader buffer, int remaining)
         {
             throw new NotImplementedException();
         }

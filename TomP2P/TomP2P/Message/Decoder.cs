@@ -58,14 +58,14 @@ namespace TomP2P.Message
         }
 
         // TODO handle the Netty specific stuff, needed in .NET?
-        public bool Decode(BinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
+        public bool Decode(JavaBinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", buffer.ReadableBytes());
 
             try
             {
                 // TODO review/redo: handle specific stuff
-                long readerBefore = buffer.BaseStream.Position;
+                int readerBefore = buffer.ReaderIndex;
 
                 // TODO set sender of this message for handling timeout??
 
@@ -128,7 +128,7 @@ namespace TomP2P.Message
             return ret;
         }
 
-        private bool DecodeHeader(BinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
+        private bool DecodeHeader(JavaBinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             if (Message == null)
             {
@@ -161,7 +161,7 @@ namespace TomP2P.Message
             return false;
         }
 
-        private bool DecodePayload(BinaryReader buffer) // TODO throw exceptions?
+        private bool DecodePayload(JavaBinaryReader buffer) // TODO throw exceptions?
         {
             Logger.Debug("About to pass message {0} to {1}. Buffer to read: {2}.", Message, Message.SenderSocket, buffer.ReadableBytes());
 
@@ -185,7 +185,7 @@ namespace TomP2P.Message
                         {
                             return false;
                         }
-                        Message.SetIntValue(buffer.ReadInt32());
+                        Message.SetIntValue(buffer.ReadInt());
                         LastContent = _contentTypes.Dequeue();
                         break;
                     case Message.Content.Long:
@@ -193,7 +193,7 @@ namespace TomP2P.Message
                         {
                             return false;
                         }
-                        Message.SetLongValue(buffer.ReadInt64());
+                        Message.SetLongValue(buffer.ReadLong());
                         LastContent = _contentTypes.Dequeue();
                         break;
                     case Message.Content.Key:
@@ -201,7 +201,8 @@ namespace TomP2P.Message
                         {
                             return false;
                         }
-                        byte[] keyBytes = buffer.ReadBytes(Number160.ByteArraySize);
+                        var keyBytes = new sbyte[Number160.ByteArraySize];
+                        buffer.ReadBytes(keyBytes);
                         Message.SetKey(new Number160(keyBytes));
                         LastContent = _contentTypes.Dequeue();
                         break;
@@ -211,7 +212,7 @@ namespace TomP2P.Message
                             return false;
                         }
                         // TODO check port
-                        size = buffer.ReadUInt16(); // uses little-endian
+                        size = buffer.ReadUShort(); // uses little-endian
                         Message.SetBloomFilter(new SimpleBloomFilter<Number160>(buffer));
                         LastContent = _contentTypes.Dequeue();
                         break;
@@ -222,7 +223,7 @@ namespace TomP2P.Message
                         }
                         if (_neighborSize == -1)
                         {
-                            _neighborSize = buffer.ReadByte(); // unsigned bytes // TODO byte -> int conversion valid?
+                            _neighborSize = buffer.ReadByte(); // TODO byte -> int conversion valid?
                         }
                         if (_neighborSet == null)
                         {
@@ -235,7 +236,7 @@ namespace TomP2P.Message
                                 return false;
                             }
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
-                            int header = buffer.ReadUInt16();
+                            int header = buffer.ReadUShort();
                             size = PeerAddress.CalculateSize(header);
                             if (buffer.ReadableBytes() < size)
                             {
@@ -292,7 +293,7 @@ namespace TomP2P.Message
                         }
                         if (_keyCollectionSize == -1)
                         {
-                            _keyCollectionSize = buffer.ReadInt32();
+                            _keyCollectionSize = buffer.ReadInt();
                         }
                         if (_keyCollection == null)
                         {
@@ -306,14 +307,15 @@ namespace TomP2P.Message
                             {
                                 return false;
                             }
-                            byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var locationKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var domainKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var contentKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var versionKey = new Number160(key);
+                            var me = new sbyte[Number160.ByteArraySize];
+                            buffer.ReadBytes(me);
+                            var locationKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var domainKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var contentKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var versionKey = new Number160(me);
                             _keyCollection.Add(new Number640(locationKey, domainKey, contentKey, versionKey));
                         }
                         Message.SetKeyCollection(_keyCollection);
@@ -328,7 +330,7 @@ namespace TomP2P.Message
                         }
                         if (_mapSize == -1)
                         {
-                            _mapSize = buffer.ReadInt32();
+                            _mapSize = buffer.ReadInt();
                         }
                         if (_dataMap == null)
                         {
@@ -357,14 +359,16 @@ namespace TomP2P.Message
                                 {
                                     return false;
                                 }
-                                byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
-                                var locationKey = new Number160(key);
-                                key = buffer.ReadBytes(Number160.ByteArraySize);
-                                var domainKey = new Number160(key);
-                                key = buffer.ReadBytes(Number160.ByteArraySize);
-                                var contentKey = new Number160(key);
-                                key = buffer.ReadBytes(Number160.ByteArraySize);
-                                var versionKey = new Number160(key);
+                                var me = new sbyte[Number160.ByteArraySize];
+                                buffer.ReadBytes(me);
+                                var locationKey = new Number160(me);
+                                buffer.ReadBytes(me);
+                                var domainKey = new Number160(me);
+                                buffer.ReadBytes(me);
+                                var contentKey = new Number160(me);
+                                buffer.ReadBytes(me);
+                                var versionKey = new Number160(me);
+                                
                                 _key = new Number640(locationKey, domainKey, contentKey, versionKey);
                             }
                             _data = Data.DecodeHeader(buffer, _signatureFactory);
@@ -405,7 +409,7 @@ namespace TomP2P.Message
                         }
                         if (_keyMap640KeysSize == -1)
                         {
-                            _keyMap640KeysSize = buffer.ReadInt32();
+                            _keyMap640KeysSize = buffer.ReadInt();
                         }
                         if (_keyMap640Keys == null)
                         {
@@ -424,29 +428,29 @@ namespace TomP2P.Message
                                 return false;
                             }
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
-                            buffer.BaseStream.Position += meta;
-                            size = buffer.ReadByte(); // unsigned byte
+                            size = buffer.GetUByte(buffer.ReaderIndex + meta);
 
                             if (buffer.ReadableBytes() <
                                 meta + Utils.Utils.ByteByteSize + (size*Number160.ByteArraySize))
                             {
                                 return false;
                             }
-                            byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var locationKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var domainKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var contentKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var versionKey = new Number160(key);
+                            var me = new sbyte[Number160.ByteArraySize];
+                            buffer.ReadBytes(me);
+                            var locationKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var domainKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var contentKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var versionKey = new Number160(me);
 
                             int numBasedOn = buffer.ReadByte();
                             var value = new HashSet<Number160>();
                             for (int j = 0; j < numBasedOn; j++)
                             {
-                                key = buffer.ReadBytes(Number160.ByteArraySize);
-                                var basedOnKey = new Number160(key);
+                                buffer.ReadBytes(me);
+                                var basedOnKey = new Number160(me);
                                 value.Add(basedOnKey);
                             }
 
@@ -465,11 +469,11 @@ namespace TomP2P.Message
                         }
                         if (_keyMapByteSize == -1)
                         {
-                            _keyMapByteSize = buffer.ReadInt32();
+                            _keyMapByteSize = buffer.ReadInt();
                         }
                         if (_keyMapByte == null)
                         {
-                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, byte>(2*_keyMapByteSize));
+                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, sbyte>(2*_keyMapByteSize));
                         }
 
                         for (int i = _keyMapByte.Size; i < _keyMapByteSize; i++)
@@ -479,16 +483,17 @@ namespace TomP2P.Message
                             {
                                 return false;
                             }
-                            byte[] key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var locationKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var domainKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var contentKey = new Number160(key);
-                            key = buffer.ReadBytes(Number160.ByteArraySize);
-                            var versionKey = new Number160(key);
+                            var me = new sbyte[Number160.ByteArraySize];
+                            buffer.ReadBytes(me);
+                            var locationKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var domainKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var contentKey = new Number160(me);
+                            buffer.ReadBytes(me);
+                            var versionKey = new Number160(me);
 
-                            byte value = buffer.ReadByte();
+                            sbyte value = buffer.ReadByte();
                             _keyMapByte.Put(new Number640(locationKey, domainKey, contentKey, versionKey), value);
                         }
 
@@ -504,7 +509,7 @@ namespace TomP2P.Message
                         }
                         if (_bufferSize == -1)
                         {
-                            _bufferSize = buffer.ReadInt32();
+                            _bufferSize = buffer.ReadInt();
                         }
                         if (_buffer == null)
                         {
@@ -566,7 +571,7 @@ namespace TomP2P.Message
                             }
 
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
-                            int header = buffer.ReadUInt16();
+                            int header = buffer.ReadUShort();
                             size = PeerAddress.CalculateSize(header);
                             if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
                             {
@@ -640,9 +645,9 @@ namespace TomP2P.Message
             return true;
         }
 
-        private void DecodeSignature(BinaryReader buffer, long readerBefore, bool donePayload)
+        private void DecodeSignature(JavaBinaryReader buffer, long readerBefore, bool donePayload)
         {
-            var readerAfter = buffer.BaseStream.Position; // TODO readerIndex
+            var readerAfter = buffer.ReaderIndex;
             var len = readerAfter - readerBefore;
             if (len > 0)
             {
@@ -650,7 +655,7 @@ namespace TomP2P.Message
             }
         }
 
-        private void VerifySignature(BinaryReader buffer, long readerBefore, long len, bool donePayload) // TODO throw exceptions?
+        private void VerifySignature(JavaBinaryReader buffer, long readerBefore, long len, bool donePayload) // TODO throw exceptions?
         {
             if (!Message.IsSign)
             {

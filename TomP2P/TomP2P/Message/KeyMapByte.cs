@@ -6,14 +6,14 @@ namespace TomP2P.Message
 {
     public class KeyMapByte : IEquatable<KeyMapByte>
     {
-        public IDictionary<Number640, byte> KeysMap { get; private set; }
+        public IDictionary<Number640, sbyte> KeysMap { get; private set; }
 
-        public KeyMapByte(IDictionary<Number640, byte> keysMap)
+        public KeyMapByte(IDictionary<Number640, sbyte> keysMap)
         {
             KeysMap = keysMap;
         }
 
-        public void Put(Number640 key, byte value)
+        public void Put(Number640 key, sbyte value)
         {
             KeysMap.Add(key, value);
         }

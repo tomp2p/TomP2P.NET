@@ -11,7 +11,7 @@ namespace TomP2P.Message
 
         ISignatureCodec Write(JavaBinaryWriter buffer);
 
-        ISignatureCodec Read(BinaryReader buffer);
+        ISignatureCodec Read(JavaBinaryReader buffer);
 
         int SignatureSize { get; set; }
     }

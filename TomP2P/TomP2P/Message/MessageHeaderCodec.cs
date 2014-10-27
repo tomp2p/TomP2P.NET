@@ -15,10 +15,10 @@ namespace TomP2P.Message
         
         public static void EncodeHeader(JavaBinaryWriter buffer, Message message)
         {
-            
+            throw new NotImplementedException();
         }
 
-        public static Message DecodeHeader(BinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
+        public static Message DecodeHeader(JavaBinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             throw new NotImplementedException();
         }

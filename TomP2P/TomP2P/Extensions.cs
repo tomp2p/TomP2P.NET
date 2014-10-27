@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -34,10 +35,10 @@ namespace TomP2P
             return (x & 0x0000003f);
         }
 
-        public static byte[] ComputeHash(this string x)
+        public static sbyte[] ComputeHash(this string x)
         {
             HashAlgorithm algorithm = SHA1.Create();
-            return algorithm.ComputeHash(Encoding.UTF8.GetBytes(x));
+            return (sbyte[])(Array)algorithm.ComputeHash(Encoding.UTF8.GetBytes(x)); // TODO test double cast
         }
 
         /// <summary>

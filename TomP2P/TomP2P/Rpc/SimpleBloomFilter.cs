@@ -93,19 +93,20 @@ namespace TomP2P.Rpc
         /// Constructs a SimpleBloomFilter out of existing data.
         /// </summary>
         /// <param name="buffer">The byte buffer with the data.</param>
-        public SimpleBloomFilter(BinaryReader buffer)
+        public SimpleBloomFilter(JavaBinaryReader buffer)
         {
-            _byteArraySize = buffer.ReadUInt16() - (SizeHeaderElements - SizeHeaderLength);
+            _byteArraySize = buffer.ReadUShort() - (SizeHeaderElements - SizeHeaderLength);
             _bitArraySize = _byteArraySize*8;
 
-            int expectedElements = buffer.ReadInt32();
+            int expectedElements = buffer.ReadInt();
             ExpectedElements = expectedElements;
             double hf = (_bitArraySize / (double) expectedElements)*Math.Log(2.0);
             _k = (int) Math.Ceiling(hf);
             if (_byteArraySize > 0)
             {
-                byte[] me = buffer.ReadBytes(_byteArraySize);
-                BitArray = new BitArray(me);
+                var me = new SByte[_byteArraySize];
+                buffer.ReadBytes(me);
+                BitArray = new BitArray((byte[])(Array) me); // TODO test if OK to pass casted byte
             }
             else
             {

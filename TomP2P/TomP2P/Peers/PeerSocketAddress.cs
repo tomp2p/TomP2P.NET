@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Workaround;
 
 namespace TomP2P.Peers
 {
@@ -46,7 +47,7 @@ namespace TomP2P.Peers
             throw new NotImplementedException();
         }
 
-        public static PeerSocketAddress Create(BinaryReader buffer, bool IsIPv4)
+        public static PeerSocketAddress Create(JavaBinaryReader buffer, bool IsIPv4)
         {
             throw new NotImplementedException();
         }

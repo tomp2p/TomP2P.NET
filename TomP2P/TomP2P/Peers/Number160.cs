@@ -122,7 +122,7 @@ namespace TomP2P.Peers
         /// Creates a key with a byte array. The array is copied to the backing int[] array.
         /// </summary>
         /// <param name="val">The byte array.</param>
-        public Number160(byte[] val) : this(val, 0, val.Length)
+        public Number160(sbyte[] val) : this(val, 0, val.Length)
         {}
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace TomP2P.Peers
         /// <param name="val">The byte array.</param>
         /// <param name="offset">The offset where to start.</param>
         /// <param name="length">The length to read.</param>
-        public Number160(byte[] val, int offset, int length)
+        public Number160(sbyte[] val, int offset, int length)
         {
             if (length > ByteArraySize)
             {

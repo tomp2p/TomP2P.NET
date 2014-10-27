@@ -18,7 +18,7 @@ namespace TomP2P.Connection
         /// <returns>The decoded public key.</returns>
         IPublicKey DecodePublicKey(byte[] me);
 
-        IPublicKey DecodePublicKey(BinaryReader buffer);
+        IPublicKey DecodePublicKey(JavaBinaryReader buffer);
 
         void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer);
 

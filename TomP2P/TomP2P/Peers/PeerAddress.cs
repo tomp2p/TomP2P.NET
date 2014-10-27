@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using TomP2P.Workaround;
 
 namespace TomP2P.Peers
 {
@@ -139,7 +140,7 @@ namespace TomP2P.Peers
             _relayType = new BitArray(b);
 
             // get the ID
-            var tmp = new byte[Number160.ByteArraySize];
+            var tmp = new sbyte[Number160.ByteArraySize];
             Array.Copy(me, offset, tmp, 0, Number160.ByteArraySize);
             PeerId = new Number160(tmp);
             Offset += Number160.ByteArraySize;
@@ -170,26 +171,27 @@ namespace TomP2P.Peers
         /// Creates a peer address from a byte buffer.
         /// </summary>
         /// <param name="buffer">The channel buffer to read from.</param>
-        public PeerAddress(BinaryReader buffer)
+        public PeerAddress(JavaBinaryReader buffer)
         {
-            long readerIndex = buffer.BaseStream.Position;
+            int readerIndex = buffer.ReaderIndex;
 
             // get the type
-            int options = buffer.ReadByte(); // unsigned byte
+            int options = buffer.ReadByte();
             IsIPv6 = (options & Net6) > 0;
             IsFirewalledUdp = (options & FirewallUdp) > 0;
             IsFirewalledTcp = (options & FirewallTcp) > 0;
             IsRelayed = (options & Relayed) > 0;
 
             // get the relays
-            int relays = buffer.ReadByte(); // unsigned byte
+            int relays = buffer.ReadByte();
             RelaySize = (relays >> TypeBitSize) & Mask07;
             var b = (byte) (relays & Mask1F); // TODO check if works (2x)
             _relayType = new BitArray(b);
 
             // get the ID
-            byte[] id = buffer.ReadBytes(Number160.ByteArraySize);
-            PeerId = new Number160(id);
+            var me = new sbyte[Number160.ByteArraySize];
+            buffer.ReadBytes(me);
+            PeerId = new Number160(me);
 
             PeerSocketAddress = PeerSocketAddress.Create(buffer, IsIPv4);
 
@@ -206,7 +208,7 @@ namespace TomP2P.Peers
                 PeerSocketAddresses = EmptyPeerSocketAddresses;
             }
 
-            Size = buffer.BaseStream.Position - readerIndex; // TODO check equivalent
+            Size = buffer.ReaderIndex - readerIndex;
 
             Offset = -1; // not used here
             _hashCode = PeerId.GetHashCode();

@@ -62,17 +62,17 @@ namespace TomP2P.Storage
              throw new NotImplementedException();
          }
 
-         public bool DecodeBuffer(BinaryReader buffer)
+         public bool DecodeBuffer(JavaBinaryReader buffer)
          {
              throw new NotImplementedException();
          }
 
-         public bool DecodeDone(BinaryReader buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
+         public bool DecodeDone(JavaBinaryReader buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
          {
              throw new NotImplementedException();
          }
 
-         public static Data DecodeHeader(BinaryReader buffer, ISignatureFactory signatureFactory)
+         public static Data DecodeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
          {
              throw new NotImplementedException();
          }
