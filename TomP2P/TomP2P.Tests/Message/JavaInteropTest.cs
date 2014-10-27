@@ -55,7 +55,6 @@ namespace TomP2P.Tests.Message
             var bytes = File.ReadAllBytes(From);
 
             var ms = new MemoryStream(bytes);
-
             var br = new JavaBinaryReader(ms);
 
             int val1 = br.ReadInt();
@@ -120,7 +119,6 @@ namespace TomP2P.Tests.Message
             var bytes = File.ReadAllBytes(From);
 
             var ms = new MemoryStream(bytes);
-
             var br = new JavaBinaryReader(ms);
 
             long val1 = br.ReadLong();
@@ -177,7 +175,6 @@ namespace TomP2P.Tests.Message
             var bytes = File.ReadAllBytes(From);
 
             var ms = new MemoryStream(bytes);
-
             var br = new JavaBinaryReader(ms);
 
             // Java byte is signed
@@ -195,8 +192,9 @@ namespace TomP2P.Tests.Message
             var ms = new MemoryStream();
             var bw = new JavaBinaryWriter(ms);
 
+            // Java byte is signed
             var byteArray = new sbyte[256];
-            for (int i = 0, b = sbyte.MinValue; b <= sbyte.MaxValue; i++, b++)
+            for (int i = 0, b = sbyte.MinValue; b <= sbyte.MaxValue; i++, b++) // -128 ... 127
             {
                 byteArray[i] = (sbyte) b;
             }
@@ -215,7 +213,6 @@ namespace TomP2P.Tests.Message
             var bytes = File.ReadAllBytes(From);
 
             var ms = new MemoryStream(bytes);
-
             var br = new JavaBinaryReader(ms);
 
             // Java byte is signed
