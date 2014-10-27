@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NUnit.Framework;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
+using TomP2P.Tests.Interop;
 using TomP2P.Workaround;
 
 namespace TomP2P.Tests.Message
@@ -15,13 +11,8 @@ namespace TomP2P.Tests.Message
     /// Thus, these tests are [Ignore] by default.
     /// </summary>
     [TestFixture]
-    public class JavaInteropTest
+    public class JavaInteropTest : InteropBaseTest
     {
-        //private const string From = "D:/Desktop/interop/bytes-JAVA-encoded.txt";
-        //private const string To = "D:/Desktop/interop/bytes-NET-encoded.txt";
-        private const string From = "C:/Users/Christian/Desktop/interop/bytes-JAVA-encoded.txt";
-        private const string To = "C:/Users/Christian/Desktop/interop/bytes-NET-encoded.txt";
-
         [Test]
         [Ignore]
         public void TestEncodeInt()
