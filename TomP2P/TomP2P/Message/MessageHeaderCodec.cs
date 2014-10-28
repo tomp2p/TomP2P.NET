@@ -20,7 +20,7 @@ namespace TomP2P.Message
         /// <summary>
         /// Encodes a message object.
         /// The format looks as follows: 28 bit P2P version, 4 bit message type, 32 bit message ID, 8 bit message command,
-        /// 160 bit sender ID, 16 bit sender TCP port, 16 bit sender UDP port, 160 bit recipient ID, 32 bit content types, 8 bit options.
+        /// 160 bit senderSocket ID, 16 bit senderSocket TCP port, 16 bit senderSocket UDP port, 160 bit recipientSocket ID, 32 bit content types, 8 bit options.
         /// In total, the header is of size 58 bytes.
         /// </summary>
         /// <param name="buffer">The buffer to encode to.</param>
@@ -44,16 +44,16 @@ namespace TomP2P.Message
         /// <summary>
         /// Decodes a message object.
         /// The format looks as follows: 28 bit P2P version, 4 bit message type, 32 bit message ID, 8 bit message command,
-        /// 160 bit sender ID, 16 bit sender TCP port, 16 bit sender UDP port, 160 bit recipient ID, 32 bit content types, 8 bit options.
+        /// 160 bit senderSocket ID, 16 bit senderSocket TCP port, 16 bit senderSocket UDP port, 160 bit recipientSocket ID, 32 bit content types, 8 bit options.
         /// In total, the header is of size 58 bytes.
         /// </summary>
         /// <param name="buffer">The buffer to decode from.</param>
-        /// <param name="recipient">The recipient of the message.</param>
-        /// <param name="sender">The sender of the packet, which has been set in the socket class.</param> // TODO check if true
+        /// <param name="recipientSocket">The recipientSocket of the message.</param>
+        /// <param name="senderSocket">The senderSocket of the packet, which has been set in the socket class.</param> // TODO check if true
         /// <returns>The partial message where only the header fields are set.</returns>
-        public static Message DecodeHeader(JavaBinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
+        public static Message DecodeHeader(JavaBinaryReader buffer, IPEndPoint recipientSocket, IPEndPoint senderSocket)
         {
-            Logger.Debug("Decode message. Recipient: {0}, Sender: {1}", recipient, sender);
+            Logger.Debug("Decode message. Recipient: {0}, Sender: {1}", recipientSocket, senderSocket);
 
             var message = new Message();
 
@@ -69,18 +69,18 @@ namespace TomP2P.Message
             int contentTypes = buffer.ReadInt(); // 57
             int options = buffer.ReadUByte(); // 58 // TODO check if should be read as unsigned/signed
 
-            message.SetRecipient(new PeerAddress(recipientId, recipient));
+            message.SetRecipient(new PeerAddress(recipientId, recipientSocket));
             message.HasContent(contentTypes != 0);
             message.SetContentType(DecodeContentTypes(contentTypes, message));
             message.SetOptions(options & Utils.Utils.Mask0F);
 
             // set the address as we see it, important for port forwarding identification
             int senderOptions = options >> 4;
-            var pa = new PeerAddress(senderId, sender.Address, tcpPort, udpPort, senderOptions); // TODO check port
+            var pa = new PeerAddress(senderId, senderSocket.Address, tcpPort, udpPort, senderOptions);
 
             message.SetSender(pa);
-            message.SetSenderSocket(sender);
-            message.SetRecipientSocket(recipient);
+            message.SetSenderSocket(senderSocket);
+            message.SetRecipientSocket(recipientSocket);
 
             return message;
         }

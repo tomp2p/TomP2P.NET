@@ -19,7 +19,7 @@ namespace TomP2P.Peers
     /// <para>      - last  5 bits: if the 5 relays are IPv6 (bit set) or not (no bit set)</para>
     /// <para> 2 bytes      TCP port</para>
     /// <para> 2 bytes      UDP port</para>
-    /// <para> 2 or 4bytes  Inet Address</para>
+    /// <para> 2 or 4 bytes  Inet Address</para>
     /// <para> 0-5 relays:</para>
     /// <para>  - 2 bytes       TCP port</para>
     /// <para>  - 2 bytes       UDP port</para>
@@ -282,23 +282,49 @@ namespace TomP2P.Peers
         }
 
         // Facade Constructors:
-        // TODO document
 
+        /// <summary>
+        /// Facade for PeerAddress(Number160, PeerSocketAddress, bool, bool, bool, Collection-PeerSocketAddress>)}.
+        /// </summary>
+        /// <param name="peerId">The ID of the peer.</param>
+        /// <param name="inetAddress">The internet address of the peer.</param>
+        /// <param name="tcpPort">The TCP port of the peer.</param>
+        /// <param name="udpPort">The UDP port of the peer.</param>
         public PeerAddress(Number160 peerId, IPAddress inetAddress, int tcpPort, int udpPort)
             : this(peerId, new PeerSocketAddress(inetAddress, tcpPort, udpPort), false, false, false, EmptyPeerSocketAddresses)
         { }
 
-        // TODO exception handling from invalid string format
-        public PeerAddress(Number160 peerId, string address, int tcpPort, int udpPort)
-            : this(peerId, IPAddress.Parse(address), tcpPort, udpPort)
-        { }
-
-        public PeerAddress(Number160 peerId, IPEndPoint inetSocketAddress)
-            : this(peerId, inetSocketAddress.Address, inetSocketAddress.Port, inetSocketAddress.Port)
-        { }
-
+        /// <summary>
+        /// Facade for PeerAddress(Number160, PeerSocketAddress, bool, bool, bool, Collection-PeerSocketAddress>.
+        /// </summary>
+        /// <param name="peerId">The ID of the peer.</param>
+        /// <param name="inetAddress">The internet address of the peer.</param>
+        /// <param name="tcpPort">The TCP port of the peer.</param>
+        /// <param name="udpPort">The UDP port of the peer.</param>
+        /// <param name="options">The options for the created <see cref="PeerAddress"/>.</param>
         public PeerAddress(Number160 peerId, IPAddress inetAddress, int tcpPort, int udpPort, int options)
             : this(peerId, new PeerSocketAddress(inetAddress, tcpPort, udpPort), ReadIsFirewalledTcp(options), ReadIsFirewalledUdp(options), ReadIsRelay(options), EmptyPeerSocketAddresses)
+        { }
+
+        // TODO exception handling from invalid string format
+        /// <summary>
+        /// Facade for PeerAddress(Number160, IPAddress, int, int).
+        /// </summary>
+        /// <param name="peerId">The ID of the peer.</param>
+        /// <param name="inetAddress">The internet address of the peer.</param>
+        /// <param name="tcpPort">The TCP port of the peer.</param>
+        /// <param name="udpPort">The UDP port of the peer.</param>
+        public PeerAddress(Number160 peerId, string inetAddress, int tcpPort, int udpPort)
+            : this(peerId, IPAddress.Parse(inetAddress), tcpPort, udpPort)
+        { }
+
+        /// <summary>
+        /// Facade for PeerAddress(Number160, IPAddress, int, int).
+        /// </summary>
+        /// <param name="peerId">The ID of the peer.</param>
+        /// <param name="inetSocketAddress">The socket address of the peer. Both TCP and UDP will be set to the same port.</param>
+        public PeerAddress(Number160 peerId, IPEndPoint inetSocketAddress)
+            : this(peerId, inetSocketAddress.Address, inetSocketAddress.Port, inetSocketAddress.Port)
         { }
 
         /// <summary>
