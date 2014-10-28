@@ -47,14 +47,20 @@ namespace TomP2P.Utils
 
         #endregion
 
-        public static IPAddress Inet4AddressFromBytes(sbyte[] me, long offset)
+        public static IPAddress Inet4AddressFromBytes(sbyte[] src, long offset)
         {
-            throw new NotImplementedException();
+            var tmp = new byte[IPv4Bytes];
+            Array.Copy(src, offset, tmp, 0, IPv4Bytes);
+
+            return new IPAddress(tmp); // TODO test
         }
 
-        public static IPAddress Inet6AddressFromBytes(sbyte[] me, long offset)
+        public static IPAddress Inet6AddressFromBytes(sbyte[] src, long offset)
         {
-            throw new NotImplementedException();
+            var tmp = new byte[IPv6Bytes];
+            Array.Copy(src, offset, tmp, 0, IPv6Bytes);
+
+            return new IPAddress(tmp); // TODO test
         }
     }
 }
