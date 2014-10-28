@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
 using System.IO;
-using TomP2P.Tests.Interop;
 using TomP2P.Workaround;
 
-namespace TomP2P.Tests.Message
+namespace TomP2P.Tests.Interop
 {
     /// <summary>
     /// These tests check the binary encoding/decoding of data types between Java and .NET.

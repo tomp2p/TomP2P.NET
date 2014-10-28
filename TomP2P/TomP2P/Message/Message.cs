@@ -10,8 +10,8 @@ using TomP2P.Workaround;
 namespace TomP2P.Message
 {
     /// <summary>
-    /// The message is in binary format in TomP2P. It is defined as follows and has several header and payload fields.
-    /// Since the serialization is done manually, no serialization field is needed.
+    /// The message is in binary format in TomP2P. It has several header and payload fields.
+    /// Since the serialization/encoding is done manually, no serialization field is needed.
     /// </summary>
     public class Message
     {
@@ -95,7 +95,7 @@ namespace TomP2P.Message
         /// <summary>
         /// Command of the message, such as GET, PING, etc.
         /// </summary>
-        public byte Command { get; private set; }
+        public sbyte Command { get; private set; } // TODO check if should be unsigned
 
         /// <summary>
         /// The ID of the sender. Note that the IP is set via the socket.
@@ -110,9 +110,9 @@ namespace TomP2P.Message
         public PeerAddress RecipientRelay { get; private set; } // TODO make transient
 
         /// <summary>
-        /// The option from the last byte of the header.
+        /// The options from the last byte of the header.
         /// </summary>
-        public int Option { get; private set; }
+        public int Options { get; private set; }
 
         // *** PAYLOAD ***
 
@@ -204,7 +204,7 @@ namespace TomP2P.Message
         /// </summary>
         /// <param name="type">The type of the message.</param>
         /// <returns>This class.</returns>
-        public Message SetMessageType(MessageType type)
+        public Message SetType(MessageType type)
         {
             Type = type;
             return this;
@@ -215,7 +215,7 @@ namespace TomP2P.Message
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns>This class.</returns>
-        public Message SetCommand(byte command)
+        public Message SetCommand(sbyte command)
         {
             Command = command;
             return this;
@@ -444,9 +444,9 @@ namespace TomP2P.Message
         /// </summary>
         /// <param name="option">The option to be set.</param>
         /// <returns>This class.</returns>
-        public Message SetOption(int option)
+        public Message SetOptions(int option)
         {
-            Option = option;
+            Options = option;
             return this;
         }
 
@@ -460,11 +460,11 @@ namespace TomP2P.Message
             // TODO check operator meanings
             if (isKeepAlive)
             {
-                Option |= 1;
+                Options |= 1;
             }
             else
             {
-                Option &= ~1;
+                Options &= ~1;
             }
             return this;
         }
@@ -475,7 +475,7 @@ namespace TomP2P.Message
         /// <returns>True if this message was sent on a connection that should be kept alive.</returns>
         public bool IsKeepAlive()
         {
-            return (Option & 1) > 0;
+            return (Options & 1) > 0;
         }
 
         public Message SetStreaming()
@@ -487,18 +487,18 @@ namespace TomP2P.Message
         {
             if (isStreaming)
             {
-                Option |= 2;
+                Options |= 2;
             }
             else
             {
-                Option &= ~2;
+                Options &= ~2;
             }
             return this;
         }
 
         public bool IsStreaming()
         {
-            return (Option & 2) > 0;
+            return (Options & 2) > 0;
         }
 
         // Header data ends here.

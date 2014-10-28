@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using TomP2P.Workaround;
 using Decoder = TomP2P.Message.Decoder;
-using Message = TomP2P.Message.Message;
 
 namespace TomP2P.Tests.Interop
 {

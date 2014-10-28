@@ -36,7 +36,7 @@ namespace TomP2P.Tests
             //
             PeerAddress n2 = CreateAddress(idRecipient, inetRecipient, tcpPortRecipient, udpPortRecipient, firewallUdp, firewallTcp);
             message.SetRecipient(n2);
-            message.SetMessageType(type);
+            message.SetType(type);
             message.SetCommand(command);
             return message;
         }

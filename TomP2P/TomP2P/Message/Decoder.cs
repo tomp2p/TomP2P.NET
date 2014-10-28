@@ -60,7 +60,7 @@ namespace TomP2P.Message
         // TODO handle the Netty specific stuff, needed in .NET?
         public bool Decode(JavaBinaryReader buffer, IPEndPoint recipient, IPEndPoint sender)
         {
-            Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", buffer.ReadableBytes());
+            Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", buffer.ReadableBytes);
 
             try
             {
@@ -132,7 +132,7 @@ namespace TomP2P.Message
         {
             if (Message == null)
             {
-                if (buffer.ReadableBytes() < MessageHeaderCodec.HeaderSize)
+                if (buffer.ReadableBytes < MessageHeaderCodec.HeaderSize)
                 {
                     // we don't have the header yet, we need the full header first
                     // wait for more data
@@ -163,7 +163,7 @@ namespace TomP2P.Message
 
         private bool DecodePayload(JavaBinaryReader buffer) // TODO throw exceptions?
         {
-            Logger.Debug("About to pass message {0} to {1}. Buffer to read: {2}.", Message, Message.SenderSocket, buffer.ReadableBytes());
+            Logger.Debug("About to pass message {0} to {1}. Buffer to read: {2}.", Message, Message.SenderSocket, buffer.ReadableBytes);
 
             if (!Message.HasContent())
             {
@@ -181,7 +181,7 @@ namespace TomP2P.Message
                 switch (content)
                 {
                     case Message.Content.Integer:
-                        if (buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        if (buffer.ReadableBytes < Utils.Utils.IntegerByteSize)
                         {
                             return false;
                         }
@@ -189,7 +189,7 @@ namespace TomP2P.Message
                         LastContent = _contentTypes.Dequeue();
                         break;
                     case Message.Content.Long:
-                        if (buffer.ReadableBytes() < Utils.Utils.LongByteSize)
+                        if (buffer.ReadableBytes < Utils.Utils.LongByteSize)
                         {
                             return false;
                         }
@@ -197,7 +197,7 @@ namespace TomP2P.Message
                         LastContent = _contentTypes.Dequeue();
                         break;
                     case Message.Content.Key:
-                        if (buffer.ReadableBytes() < Number160.ByteArraySize)
+                        if (buffer.ReadableBytes < Number160.ByteArraySize)
                         {
                             return false;
                         }
@@ -207,7 +207,7 @@ namespace TomP2P.Message
                         LastContent = _contentTypes.Dequeue();
                         break;
                     case Message.Content.BloomFilter:
-                        if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                        if (buffer.ReadableBytes < Utils.Utils.ShortByteSize)
                         {
                             return false;
                         }
@@ -217,7 +217,7 @@ namespace TomP2P.Message
                         LastContent = _contentTypes.Dequeue();
                         break;
                     case Message.Content.SetNeighbors:
-                        if (_neighborSize == -1 && buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                        if (_neighborSize == -1 && buffer.ReadableBytes < Utils.Utils.ByteByteSize)
                         {
                             return false;
                         }
@@ -231,14 +231,14 @@ namespace TomP2P.Message
                         }
                         for (int i = _neighborSet.Size; i < _neighborSize; i++)
                         {
-                            if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                            if (buffer.ReadableBytes < Utils.Utils.ShortByteSize)
                             {
                                 return false;
                             }
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
                             int header = buffer.ReadUShort();
                             size = PeerAddress.CalculateSize(header);
-                            if (buffer.ReadableBytes() < size)
+                            if (buffer.ReadableBytes < size)
                             {
                                 return false;
                             }
@@ -251,7 +251,7 @@ namespace TomP2P.Message
                         _neighborSet = null;
                         break;
                     case Message.Content.SetPeerSocket:
-                        if (_peerSocketAddressSize == -1 && buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                        if (_peerSocketAddressSize == -1 && buffer.ReadableBytes < Utils.Utils.ByteByteSize)
                         {
                             return false;
                         }
@@ -265,7 +265,7 @@ namespace TomP2P.Message
                         }
                         for (int i = _peerSocketAddresses.Count; i < _peerSocketAddressSize; i++)
                         {
-                            if (buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                            if (buffer.ReadableBytes < Utils.Utils.ByteByteSize)
                             {
                                 return false;
                             }
@@ -273,7 +273,7 @@ namespace TomP2P.Message
                             int header = buffer.ReadByte();
                             bool isIPv4 = header == 0; // TODO check if works
                             size = PeerSocketAddress.CalculateSize(isIPv4);
-                            if (buffer.ReadableBytes() < size + Utils.Utils.ByteByteSize)
+                            if (buffer.ReadableBytes < size + Utils.Utils.ByteByteSize)
                             {
                                 return false;
                             }
@@ -287,7 +287,7 @@ namespace TomP2P.Message
                         _peerSocketAddresses = null;
                         break;
                     case Message.Content.SetKey640:
-                        if (_keyCollectionSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        if (_keyCollectionSize == -1 && buffer.ReadableBytes < Utils.Utils.IntegerByteSize)
                         {
                             return false;
                         }
@@ -301,7 +301,7 @@ namespace TomP2P.Message
                         }
                         for (int i = _keyCollection.Size; i < _keyCollectionSize; i++)
                         {
-                            if (buffer.ReadableBytes() <
+                            if (buffer.ReadableBytes <
                                 Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize +
                                 Number160.ByteArraySize)
                             {
@@ -324,7 +324,7 @@ namespace TomP2P.Message
                         _keyCollection = null;
                         break;
                     case Message.Content.MapKey640Data:
-                        if (_mapSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        if (_mapSize == -1 && buffer.ReadableBytes < Utils.Utils.IntegerByteSize)
                         {
                             return false;
                         }
@@ -353,7 +353,7 @@ namespace TomP2P.Message
                         {
                             if (_key == null)
                             {
-                                if (buffer.ReadableBytes() <
+                                if (buffer.ReadableBytes <
                                     Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize +
                                     Number160.ByteArraySize)
                                 {
@@ -403,7 +403,7 @@ namespace TomP2P.Message
                         _dataMap = null;
                         break;
                     case Message.Content.MapKey640Keys:
-                        if (_keyMap640KeysSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        if (_keyMap640KeysSize == -1 && buffer.ReadableBytes < Utils.Utils.IntegerByteSize)
                         {
                             return false;
                         }
@@ -423,14 +423,14 @@ namespace TomP2P.Message
 
                         for (int i = _keyMap640Keys.Size; i < _keyMap640KeysSize; i++)
                         {
-                            if (buffer.ReadableBytes() < meta + Utils.Utils.ByteByteSize)
+                            if (buffer.ReadableBytes < meta + Utils.Utils.ByteByteSize)
                             {
                                 return false;
                             }
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
                             size = buffer.GetUByte(buffer.ReaderIndex + meta);
 
-                            if (buffer.ReadableBytes() <
+                            if (buffer.ReadableBytes <
                                 meta + Utils.Utils.ByteByteSize + (size*Number160.ByteArraySize))
                             {
                                 return false;
@@ -463,7 +463,7 @@ namespace TomP2P.Message
                         _keyMap640Keys = null;
                         break;
                     case Message.Content.MapKey640Byte:
-                        if (_keyMapByteSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        if (_keyMapByteSize == -1 && buffer.ReadableBytes < Utils.Utils.IntegerByteSize)
                         {
                             return false;
                         }
@@ -478,7 +478,7 @@ namespace TomP2P.Message
 
                         for (int i = _keyMapByte.Size; i < _keyMapByteSize; i++)
                         {
-                            if (buffer.ReadableBytes() < Number160.ByteArraySize + Number160.ByteArraySize
+                            if (buffer.ReadableBytes < Number160.ByteArraySize + Number160.ByteArraySize
                                 + Number160.ByteArraySize + Number160.ByteArraySize + 1)
                             {
                                 return false;
@@ -503,7 +503,7 @@ namespace TomP2P.Message
                         _keyMapByte = null;
                         break;
                     case Message.Content.ByteBuffer:
-                        if (_bufferSize == -1 && buffer.ReadableBytes() < Utils.Utils.IntegerByteSize)
+                        if (_bufferSize == -1 && buffer.ReadableBytes < Utils.Utils.IntegerByteSize)
                         {
                             return false;
                         }
@@ -539,7 +539,7 @@ namespace TomP2P.Message
                         _buffer = null;
                         break;
                     case Message.Content.SetTrackerData:
-                        if (_trackerDataSize == -1 && buffer.ReadableBytes() < Utils.Utils.ByteByteSize)
+                        if (_trackerDataSize == -1 && buffer.ReadableBytes < Utils.Utils.ByteByteSize)
                         {
                             return false;
                         }
@@ -565,7 +565,7 @@ namespace TomP2P.Message
                         }
                         for (int i = _trackerData.Size; i < _trackerDataSize; i++)
                         {
-                            if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                            if (buffer.ReadableBytes < Utils.Utils.ShortByteSize)
                             {
                                 return false;
                             }
@@ -573,7 +573,7 @@ namespace TomP2P.Message
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
                             int header = buffer.ReadUShort();
                             size = PeerAddress.CalculateSize(header);
-                            if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
+                            if (buffer.ReadableBytes < Utils.Utils.ShortByteSize)
                             {
                                 return false;
                             }
@@ -634,7 +634,7 @@ namespace TomP2P.Message
             {
                 var signatureEncode = _signatureFactory.SignatureCodec;
                 size = signatureEncode.SignatureSize;
-                if (buffer.ReadableBytes() < size)
+                if (buffer.ReadableBytes < size)
                 {
                     return false;
                 }

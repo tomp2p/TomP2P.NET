@@ -9,7 +9,9 @@ namespace TomP2P.Utils
         public const int IPv4Bytes = 4;         //  32 bits
         public const int IPv6Bytes = 16;        // 128 bits
         public const int ByteBits = 8;
-        public const int MaskFf = 0xff;         // 1111 1111
+        public const int Mask0F = 0xf;          // 00000000 00000000 00000000 00001111
+        public const int Mask80 = 0x80;         // 00000000 00000000 00000000 10000000
+        public const int MaskFf = 0xff;         // 00000000 00000000 00000000 11111111
         public const int ByteByteSize = 1;      //   8 bits
         public const int ShortByteSize = 2;     //  16 bits
         public const int IntegerByteSize = 4;   //  32 bits

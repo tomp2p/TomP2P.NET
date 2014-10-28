@@ -20,6 +20,13 @@ namespace TomP2P.Workaround
             _bw = new BinaryWriter(output);
         }
 
+        public sbyte[] Buffer { get; private set; }
+
+        public void WriteShort(short tcpPort)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Writes a 4-byte integer to the current stream and advances the stream position by 4 bytes.
         /// </summary>
@@ -88,6 +95,5 @@ namespace TomP2P.Workaround
 
         public int WriterIndex { get; private set; }
         public long ReaderIndex { get; private set; }
-        public sbyte[] Buffer { get; private set; }
     }
 }

@@ -81,12 +81,10 @@ namespace TomP2P.Workaround
             }
         }
 
-        public int ReadableBytes()
+        public int ReadableBytes
         {
             // TODO implement!!
-            return Int32.MaxValue;
-
-            throw new NotImplementedException();
+            get { return int.MaxValue; }
         }
 
         public bool CanRead
@@ -118,6 +116,11 @@ namespace TomP2P.Workaround
         public byte GetUByte(long i)
         {
             // TODO dont move reader index
+            throw new NotImplementedException();
+        }
+
+        public byte ReadUByte()
+        {
             throw new NotImplementedException();
         }
     }
