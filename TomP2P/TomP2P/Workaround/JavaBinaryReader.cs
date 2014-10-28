@@ -110,7 +110,7 @@ namespace TomP2P.Workaround
 
         public ushort ReadUShort()
         {
-            throw new NotImplementedException();
+            return _br.ReadUInt16();
         }
 
         public byte GetUByte(long i)
@@ -121,7 +121,7 @@ namespace TomP2P.Workaround
 
         public byte ReadUByte()
         {
-            throw new NotImplementedException();
+            return _br.ReadByte();
         }
     }
 }
