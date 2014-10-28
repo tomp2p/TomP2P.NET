@@ -81,6 +81,23 @@ namespace TomP2P.Workaround
             }
         }
 
+        public ushort ReadUShort()
+        {
+            // NOTE: _br.ReadInt16() would read in little-endian fashion (.NET)
+
+            // read bytes in big-endian fashion (Java)
+            byte b1 = _br.ReadByte();
+            byte b2 = _br.ReadByte();
+
+            // shift bytes to their position and sum up their int values
+            return (ushort)((b1 << 8) + b2);
+        }
+
+        public byte ReadUByte()
+        {
+            return _br.ReadByte();
+        }
+
         public int ReadableBytes
         {
             // TODO implement!!
@@ -108,20 +125,10 @@ namespace TomP2P.Workaround
             get { throw new NotImplementedException(); }
         }
 
-        public ushort ReadUShort()
-        {
-            return _br.ReadUInt16();
-        }
-
         public byte GetUByte(long i)
         {
             // TODO dont move reader index
             throw new NotImplementedException();
-        }
-
-        public byte ReadUByte()
-        {
-            return _br.ReadByte();
         }
     }
 }
