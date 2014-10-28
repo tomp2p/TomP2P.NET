@@ -272,7 +272,7 @@ namespace TomP2P.Message
                             // TODO check port, java's getter don't change the reader index -> mimic behaviour
                             int header = buffer.ReadByte();
                             bool isIPv4 = header == 0; // TODO check if works
-                            size = PeerSocketAddress.CalculateSize(isIPv4);
+                            size = PeerSocketAddress.Size(isIPv4);
                             if (buffer.ReadableBytes < size + Utils.Utils.ByteByteSize)
                             {
                                 return false;

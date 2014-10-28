@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -85,6 +87,16 @@ namespace TomP2P
         public static long ReadableBytes(this BinaryReader br)
         {
             return br.BaseStream.ReadableBytes();
+        }
+
+        public static bool IsIPv4(this IPAddress ip)
+        {
+            return ip.AddressFamily == AddressFamily.InterNetwork; // TODO test
+        }
+
+        public static bool IsIPv6(this IPAddress ip)
+        {
+            return ip.AddressFamily == AddressFamily.InterNetworkV6; // TODO test
         }
     }
 }

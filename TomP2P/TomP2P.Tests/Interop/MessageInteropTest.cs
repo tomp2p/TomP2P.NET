@@ -30,10 +30,11 @@ namespace TomP2P.Tests.Interop
 
             var decoder = new Decoder(null); // TODO signaturefactory?
 
-            decoder.Decode(br, null, null); // TODO recipient/sender used?
-
             var m1 = Utils2.CreateDummyMessage();
             m1.SetIntValue(42);
+
+            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
+
 
             var m2 = decoder.Message;
 

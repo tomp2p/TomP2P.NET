@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace TomP2P.Utils
 {
@@ -45,5 +46,15 @@ namespace TomP2P.Utils
         }
 
         #endregion
+
+        public static IPAddress Inet4AddressFromBytes(sbyte[] me, long offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static IPAddress Inet6AddressFromBytes(sbyte[] me, long offset)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

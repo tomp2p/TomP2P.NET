@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -76,7 +74,7 @@ namespace TomP2P.Peers
         /// <summary>
         /// When deserializing, we need to know how much we deserialized from the constructor call.
         /// </summary>
-        public int Offset { get; private set; } 
+        public long Offset { get; private set; } 
 
         /// <summary>
         /// The size of the serialized peer address.
@@ -107,7 +105,7 @@ namespace TomP2P.Peers
         /// The new offset can be accessed through the Offset property.
         /// </summary>
         /// <param name="me">The serialized array.</param>
-        public PeerAddress(byte[] me)
+        public PeerAddress(sbyte[] me)
             : this(me, 0)
         { }
 
@@ -117,10 +115,10 @@ namespace TomP2P.Peers
         /// </summary>
         /// <param name="me">The serialized array.</param>
         /// <param name="initialOffset">The offset where to start.</param>
-        public PeerAddress(byte[] me, int initialOffset)
+        public PeerAddress(sbyte[] me, int initialOffset)
         {
             // get the peer ID, this is independent of the type
-            int offset = initialOffset;
+            long offset = initialOffset;
 
             // get the options
             int options = me[offset++] & Utils.Utils.MaskFf;
@@ -276,7 +274,7 @@ namespace TomP2P.Peers
             {
                 bool isIPv6 = false; // TODO implement correctly
                 _relayType.Set(index, isIPv6);
-                size += psa.Size;
+                size += psa.Size();
                 index++;
             }
             Size = size;
