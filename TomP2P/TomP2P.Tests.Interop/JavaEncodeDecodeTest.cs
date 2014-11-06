@@ -10,7 +10,7 @@ namespace TomP2P.Tests.Interop
     /// Thus, these tests are [Ignore] by default.
     /// </summary>
     [TestFixture]
-    public class JavaInteropTest : InteropBaseTest
+    public class JavaEncodeDecodeTest : InteropBaseTest
     {
         [Test]
         [Ignore]

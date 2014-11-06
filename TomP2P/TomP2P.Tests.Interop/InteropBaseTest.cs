@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TomP2P.Tests.Interop
 {
-    public class InteropBaseTest
+    public abstract class InteropBaseTest
     {
         // specify a local file path where the platforms can interchange their bytes
 

@@ -11,7 +11,7 @@ using Decoder = TomP2P.Message.Decoder;
 namespace TomP2P.Tests.Interop
 {
     [TestFixture]
-    public class MessageInteropTest : InteropBaseTest
+    public class MessageEncodeDecodeTest : InteropBaseTest
     {
         [Test]
         [Ignore]
