@@ -36,6 +36,8 @@ namespace TomP2P.Tests.Interop
             byte[] bytes = ms.GetBuffer();
 
             File.WriteAllBytes(To, bytes);
+
+            JarRunner.Run();
         }
 
         [Test]

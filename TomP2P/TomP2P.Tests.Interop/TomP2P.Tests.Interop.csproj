@@ -57,6 +57,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="InteropBaseTest.cs" />
+    <Compile Include="JarRunner.cs" />
     <Compile Include="JavaEncodeDecodeTest.cs" />
     <Compile Include="MessageEncodeDecodeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
