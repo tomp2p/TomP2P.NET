@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using TomP2P.Workaround;
 
 namespace TomP2P.Tests.Interop
 {
@@ -9,22 +10,42 @@ namespace TomP2P.Tests.Interop
     {
         public const string TmpDir = "C:/Users/Christian/Desktop/interop/";
 
-        public static void WriteBytesAndTestInterop( byte[] bytes, [CallerMemberName] string testName = "")
-        {
-            var path = String.Format("{0}{1}.txt", TmpDir, testName);
-            File.WriteAllBytes(path, bytes);
+        private const string JavaExecutable = "C:/Program Files/Java/jre7/bin/java.exe";
+        private const string JavaArgs = "-jar C:/Users/Christian/Desktop/interop/interop.jar";
 
-            Run(testName);
+        public static bool WriteBytesAndTestInterop(byte[] bytes, [CallerMemberName] string testArgument = "")
+        {
+            var outputPath = String.Format("{0}{1}-in.txt", TmpDir, testArgument);
+            var inputPath = String.Format("{0}{1}-out.txt", TmpDir, testArgument);
+
+            File.WriteAllBytes(outputPath, bytes);
+
+            Run(testArgument);
+
+            byte[] result = File.ReadAllBytes(inputPath);
+
+            var javaReader = new JavaBinaryReader(new MemoryStream(result));
+            
+            // 1: test succeeded
+            // 0: test failed
+            int res = javaReader.ReadByte();
+            return res == 1;
+        }
+
+        public static byte[] RequestJavaBytes([CallerMemberName] string testArgument = "")
+        {
+            Run(testArgument);
+
+            var inputPath = String.Format("{0}{1}-out.txt", TmpDir, testArgument);
+            byte[] bytes = File.ReadAllBytes(inputPath);
+            return bytes;
         }
 
         private static void Run(string testArgument)
         {
-            const string fileName = "C:/Program Files/Java/jre7/bin/java.exe";
-            const string args = "-jar C:/Users/Christian/Desktop/interop/interop.jar";
+            string jarArgs = String.Format("{0} {1}", JavaArgs, testArgument);
 
-            string jarArgs = String.Format("{0} {1}", args, testArgument);
-
-            var processInfo = new ProcessStartInfo(fileName, jarArgs)
+            var processInfo = new ProcessStartInfo(JavaExecutable, jarArgs)
             {
                 //CreateNoWindow = true;
                 UseShellExecute = false,

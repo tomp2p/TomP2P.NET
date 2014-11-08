@@ -6,14 +6,11 @@ namespace TomP2P.Tests.Interop
 {
     /// <summary>
     /// These tests check the binary encoding/decoding of data types between Java and .NET.
-    /// They have to be run manually as they exceed the boundary of the .NET platform.
-    /// Thus, these tests are [Ignore] by default.
     /// </summary>
     [TestFixture]
     public class JavaEncodeDecodeTest : InteropBaseTest
     {
         [Test]
-        [Ignore]
         public void TestEncodeInt()
         {
             var ms = new MemoryStream();
@@ -35,14 +32,14 @@ namespace TomP2P.Tests.Interop
 
             byte[] bytes = ms.GetBuffer();
 
-            JarRunner.WriteBytesAndTestInterop(bytes);
+            bool interopResult = JarRunner.WriteBytesAndTestInterop(bytes);
+            Assert.IsTrue(interopResult);
         }
 
         [Test]
-        [Ignore]
         public void TestDecodeInt()
         {
-            var bytes = File.ReadAllBytes(From);
+            var bytes = JarRunner.RequestJavaBytes();
 
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);
