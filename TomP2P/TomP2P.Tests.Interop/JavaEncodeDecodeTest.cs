@@ -8,7 +8,7 @@ namespace TomP2P.Tests.Interop
     /// These tests check the binary encoding/decoding of data types between Java and .NET.
     /// </summary>
     [TestFixture]
-    public class JavaEncodeDecodeTest : InteropBaseTest
+    public class JavaEncodeDecodeTest
     {
         [Test]
         public void TestEncodeInt()
@@ -29,6 +29,71 @@ namespace TomP2P.Tests.Interop
             buffer.WriteInt(255);
             buffer.WriteInt(256);
             buffer.WriteInt(int.MaxValue);  // 2147483647
+
+            byte[] bytes = ms.GetBuffer();
+
+            bool interopResult = JarRunner.WriteBytesAndTestInterop(bytes);
+            Assert.IsTrue(interopResult);
+        }
+
+        [Test]
+        public void TestEncodeLong()
+        {
+            var ms = new MemoryStream();
+            var buffer = new JavaBinaryWriter(ms);
+
+            buffer.WriteLong(long.MinValue);  //-923372036854775808
+            buffer.WriteLong(-256);
+            buffer.WriteLong(-255);
+            buffer.WriteLong(-128);
+            buffer.WriteLong(-127);
+            buffer.WriteLong(-1);
+            buffer.WriteLong(0);
+            buffer.WriteLong(1);
+            buffer.WriteLong(127);
+            buffer.WriteLong(128);
+            buffer.WriteLong(255);
+            buffer.WriteLong(256);
+            buffer.WriteLong(long.MaxValue);  // 923372036854775807
+
+            byte[] bytes = ms.GetBuffer();
+
+            bool interopResult = JarRunner.WriteBytesAndTestInterop(bytes);
+            Assert.IsTrue(interopResult);
+        }
+
+        [Test]
+        public void TestEncodeByte()
+        {
+            var ms = new MemoryStream();
+            var buffer = new JavaBinaryWriter(ms);
+
+            // Java byte is signed
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++) // -128 ... 127
+            {
+                buffer.WriteByte((sbyte) i);
+            }
+
+            byte[] bytes = ms.GetBuffer();
+
+            bool interopResult = JarRunner.WriteBytesAndTestInterop(bytes);
+            Assert.IsTrue(interopResult);
+        }
+
+        [Test]
+        public void TestEncodeBytes()
+        {
+            var ms = new MemoryStream();
+            var bw = new JavaBinaryWriter(ms);
+
+            // Java byte is signed
+            var byteArray = new sbyte[256];
+            for (int i = 0, b = sbyte.MinValue; b <= sbyte.MaxValue; i++, b++) // -128 ... 127
+            {
+                byteArray[i] = (sbyte) b;
+            }
+
+            bw.WriteBytes(byteArray);
 
             byte[] bytes = ms.GetBuffer();
 
@@ -74,36 +139,9 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        [Ignore]
-        public void TestEncodeLong()
-        {
-            var ms = new MemoryStream();
-            var buffer = new JavaBinaryWriter(ms);
-
-            buffer.WriteLong(long.MinValue);  //-923372036854775808
-            buffer.WriteLong(-256);
-            buffer.WriteLong(-255);
-            buffer.WriteLong(-128);
-            buffer.WriteLong(-127);
-            buffer.WriteLong(-1);
-            buffer.WriteLong(0);
-            buffer.WriteLong(1);
-            buffer.WriteLong(127);
-            buffer.WriteLong(128);
-            buffer.WriteLong(255);
-            buffer.WriteLong(256);
-            buffer.WriteLong(long.MaxValue);  // 923372036854775807
-
-            byte[] bytes = ms.GetBuffer();
-
-            File.WriteAllBytes(To, bytes);
-        }
-
-        [Test]
-        [Ignore]
         public void TestDecodeLong()
         {
-            var bytes = File.ReadAllBytes(From);
+            var bytes = JarRunner.RequestJavaBytes();
 
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);
@@ -138,28 +176,9 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        [Ignore]
-        public void TestEncodeByte()
-        {
-            var ms = new MemoryStream();
-            var buffer = new JavaBinaryWriter(ms);
-
-            // Java byte is signed
-            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++) // -128 ... 127
-            {
-                buffer.WriteByte((sbyte) i);
-            }
-
-            byte[] bytes = ms.GetBuffer();
-
-            File.WriteAllBytes(To, bytes);
-        }
-
-        [Test]
-        [Ignore]
         public void TestDecodeByte()
         {
-            var bytes = File.ReadAllBytes(From);
+            var bytes = JarRunner.RequestJavaBytes();
 
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);
@@ -173,31 +192,9 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        [Ignore]
-        public void TestEncodeBytes()
-        {
-            var ms = new MemoryStream();
-            var bw = new JavaBinaryWriter(ms);
-
-            // Java byte is signed
-            var byteArray = new sbyte[256];
-            for (int i = 0, b = sbyte.MinValue; b <= sbyte.MaxValue; i++, b++) // -128 ... 127
-            {
-                byteArray[i] = (sbyte) b;
-            }
-
-            bw.WriteBytes(byteArray);
-
-            byte[] bytes = ms.GetBuffer();
-
-            File.WriteAllBytes(To, bytes);
-        }
-
-        [Test]
-        [Ignore]
         public void TestDecodeBytes()
         {
-            var bytes = File.ReadAllBytes(From);
+            var bytes = JarRunner.RequestJavaBytes();
 
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);

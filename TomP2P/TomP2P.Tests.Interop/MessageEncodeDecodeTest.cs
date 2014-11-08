@@ -11,7 +11,7 @@ using Decoder = TomP2P.Message.Decoder;
 namespace TomP2P.Tests.Interop
 {
     [TestFixture]
-    public class MessageEncodeDecodeTest : InteropBaseTest
+    public class MessageEncodeDecodeTest
     {
         [Test]
         [Ignore]
@@ -24,7 +24,7 @@ namespace TomP2P.Tests.Interop
         [Ignore]
         public void TestMessageDecode()
         {
-            var bytes = File.ReadAllBytes(From);
+            /*var bytes = File.ReadAllBytes(From);
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);
 
@@ -38,7 +38,7 @@ namespace TomP2P.Tests.Interop
 
             var m2 = decoder.Message;
 
-            CompareMessages(m1, m2);
+            CompareMessages(m1, m2);*/
         }
 
         private void CompareMessages(TomP2P.Message.Message m1, TomP2P.Message.Message m2)

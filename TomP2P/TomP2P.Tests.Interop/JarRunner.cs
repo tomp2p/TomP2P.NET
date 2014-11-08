@@ -47,7 +47,7 @@ namespace TomP2P.Tests.Interop
 
             var processInfo = new ProcessStartInfo(JavaExecutable, jarArgs)
             {
-                //CreateNoWindow = true;
+                CreateNoWindow = true,
                 UseShellExecute = false,
 
                 // redirect output stream
