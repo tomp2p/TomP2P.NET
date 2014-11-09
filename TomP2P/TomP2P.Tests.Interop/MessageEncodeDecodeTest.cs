@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
+using TomP2P.Peers;
 using TomP2P.Workaround;
 using Decoder = TomP2P.Message.Decoder;
 
@@ -35,6 +38,37 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
+        public void TestMessageDecodeKey()
+        {
+            // create same message object as in Java
+            var m1 = Utils2.CreateDummyMessage();
+
+            m1.SetKey(Number160.Zero);
+            m1.SetKey(Number160.One);
+            m1.SetKey(Number160.MaxValue);
+            m1.SetKey(Number160.Zero);
+            m1.SetKey(Number160.One);
+            m1.SetKey(Number160.MaxValue);
+            m1.SetKey(Number160.Zero);
+            m1.SetKey(Number160.One);
+
+            // read Java encoded bytes
+            var bytes = JarRunner.RequestJavaBytes();
+            var ms = new MemoryStream(bytes);
+            var br = new JavaBinaryReader(ms);
+
+            var decoder = new Decoder(null); // TODO signaturefactory?
+
+            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = decoder.Message;
+
+            CompareContentTypes(m1, m2);
+            CheckIsSameList(m1.KeyList, m2.KeyList);
+        }
+
+        [Test]
         public void TestMessageDecodeInt()
         {
             // create same message object as in Java
@@ -60,7 +94,8 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            Assert.IsTrue(Utils.Utils.IsSameSets(m1.IntList, m2.IntList));
+            CompareContentTypes(m1, m2);
+            CheckIsSameList(m1.IntList, m2.IntList);
         }
 
         [Test]
@@ -89,7 +124,8 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            Assert.IsTrue(Utils.Utils.IsSameSets(m1.LongList, m2.LongList));
+            CompareContentTypes(m1, m2);
+            CheckIsSameList(m1.LongList, m2.LongList);
         }
 
         /*/// <summary>
@@ -138,6 +174,23 @@ namespace TomP2P.Tests.Interop
                 var type2 = m2.ContentTypes[i];
 
                 Assert.AreEqual(type1, type2);
+            }
+        }
+
+        private static void CheckIsSameList<T>(IList<T> list1, IList<T> list2)
+        {
+            if (list1 == null ^ list2 == null) // XOR
+            {
+                Assert.Fail();
+            }
+            if (list1 != null && (list1.Count != list2.Count))
+            {
+                Assert.Fail();
+            }
+
+            for (int i = 0; i < list1.Count; i++)
+            {
+                Assert.IsTrue(list1[i].Equals(list2[i]));
             }
         }
     }
