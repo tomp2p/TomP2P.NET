@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using TomP2P.Workaround;
 using Decoder = TomP2P.Message.Decoder;
@@ -16,6 +12,27 @@ namespace TomP2P.Tests.Interop
         /*Empty, Key, MapKey640Data, MapKey640Keys, SetKey640, SetNeighbors, ByteBuffer,
         Long, Integer, PublicKeySignature, SetTrackerData, BloomFilter, MapKey640Byte,
         PublicKey, SetPeerSocket, User1*/
+
+        [Test]
+        public void TestMessageDecodeEmpty()
+        {
+            // create same message object as in Java
+            var m1 = Utils2.CreateDummyMessage();
+
+            // read Java encoded bytes
+            var bytes = JarRunner.RequestJavaBytes();
+            var ms = new MemoryStream(bytes);
+            var br = new JavaBinaryReader(ms);
+
+            var decoder = new Decoder(null); // TODO signaturefactory?
+
+            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = decoder.Message;
+
+            CompareContentTypes(m1, m2);
+        }
 
         [Test]
         public void TestMessageDecodeInt()
