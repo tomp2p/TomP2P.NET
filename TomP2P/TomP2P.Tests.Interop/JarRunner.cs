@@ -8,10 +8,12 @@ namespace TomP2P.Tests.Interop
 {
     public class JarRunner
     {
-        public const string TmpDir = "C:/Users/Christian/Desktop/interop/";
+        //public const string TmpDir = "C:/Users/Christian/Desktop/interop/";
+        public const string TmpDir = "D:/Desktop/interop/";
 
         private const string JavaExecutable = "C:/Program Files/Java/jre7/bin/java.exe";
-        private const string JavaArgs = "-jar C:/Users/Christian/Desktop/interop/interop.jar";
+        //private const string JavaArgs = "-jar C:/Users/Christian/Desktop/interop/interop.jar";
+        private const string JavaArgs = "-jar D:/Desktop/interop/interop.jar";
 
         public static bool WriteBytesAndTestInterop(byte[] bytes, [CallerMemberName] string testArgument = "")
         {

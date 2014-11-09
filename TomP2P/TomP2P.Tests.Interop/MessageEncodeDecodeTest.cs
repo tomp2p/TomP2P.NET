@@ -14,34 +14,35 @@ namespace TomP2P.Tests.Interop
     public class MessageEncodeDecodeTest
     {
         [Test]
-        [Ignore]
-        public void TestMessageEncode()
+        public void TestMessageDecodeInt()
         {
+            // create same message object as in Java
+            var m1 = Utils2.CreateDummyMessage();
+		    m1.SetIntValue(Int32.MinValue);
+		    m1.SetIntValue(-256);
+		    m1.SetIntValue(-128);
+		    m1.SetIntValue(-1);
+		    m1.SetIntValue(0);
+		    m1.SetIntValue(1);
+		    m1.SetIntValue(128);
+		    m1.SetIntValue(Int32.MaxValue);
             
-        }
-
-        [Test]
-        [Ignore]
-        public void TestMessageDecode()
-        {
-            /*var bytes = File.ReadAllBytes(From);
+            // read Java encoded bytes
+            var bytes = JarRunner.RequestJavaBytes();
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);
 
             var decoder = new Decoder(null); // TODO signaturefactory?
 
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetIntValue(42);
-
             decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
 
-
+            // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            CompareMessages(m1, m2);*/
+            CompareMessages(m1, m2);
         }
 
-        private void CompareMessages(TomP2P.Message.Message m1, TomP2P.Message.Message m2)
+        private static void CompareMessages(Message.Message m1, Message.Message m2)
         {
             Assert.IsTrue(Utils.Utils.IsSameSets(m1.IntList, m2.IntList));
         }
