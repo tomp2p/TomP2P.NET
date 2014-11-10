@@ -35,7 +35,7 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            CompareContentTypes(m1, m2);
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
         }
 
         [Test]
@@ -65,12 +65,18 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            CompareContentTypes(m1, m2);
-            CheckIsSameList(m1.KeyList, m2.KeyList);
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.KeyList, m2.KeyList));
         }
 
         [Test]
         public void TestMessageDecodeMapKey640Data()
+        {
+            
+        }
+
+        [Test]
+        public void TestMessageDecodeMapKey640Keys()
         {
             // create same message object as in Java
             sbyte[] sampleBytes1 = new sbyte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
@@ -115,8 +121,8 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            CompareContentTypes(m1, m2);
-            CheckIsSameList(m1.KeyMap640KeysList, m2.KeyMap640KeysList);
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.KeyMap640KeysList, m2.KeyMap640KeysList));
         }
 
         [Test]
@@ -145,8 +151,8 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            CompareContentTypes(m1, m2);
-            CheckIsSameList(m1.IntList, m2.IntList);
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.IntList, m2.IntList));
         }
 
         [Test]
@@ -175,8 +181,8 @@ namespace TomP2P.Tests.Interop
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
-            CompareContentTypes(m1, m2);
-            CheckIsSameList(m1.LongList, m2.LongList);
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.LongList, m2.LongList));
         }
 
         /*/// <summary>
@@ -186,7 +192,7 @@ namespace TomP2P.Tests.Interop
         /// <param name="m2">The second message.</param>
         private static void CompareMessages(Message.Message m1, Message.Message m2)
         {
-            CompareContentTypes(m1, m2);
+            CheckSameContentTypes(m1, m2);
             
             Assert.AreEqual(m1.MessageId, m2.MessageId);
             Assert.AreEqual(m1.Version, m2.Version);
@@ -217,32 +223,40 @@ namespace TomP2P.Tests.Interop
         /// </summary>
         /// <param name="m1">The first message.</param>
         /// <param name="m2">The first message.</param>
-        private static void CompareContentTypes(Message.Message m1, Message.Message m2)
+        private static bool CheckSameContentTypes(Message.Message m1, Message.Message m2)
         {
             for (int i = 0; i < m1.ContentTypes.Length; i++)
             {
                 var type1 = m1.ContentTypes[i];
                 var type2 = m2.ContentTypes[i];
 
-                Assert.AreEqual(type1, type2);
+                if (!type1.Equals(type2))
+                {
+                    return false;
+                }
             }
+            return true;
         }
 
-        private static void CheckIsSameList<T>(IList<T> list1, IList<T> list2)
+        private static bool CheckIsSameList<T>(IList<T> list1, IList<T> list2) 
         {
             if (list1 == null ^ list2 == null) // XOR
             {
-                Assert.Fail();
+                return false;
             }
             if (list1 != null && (list1.Count != list2.Count))
             {
-                Assert.Fail();
+                return false;
             }
 
             for (int i = 0; i < list1.Count; i++)
             {
-                Assert.IsTrue(list1[i].Equals(list2[i]));
+                if (!list1[i].Equals(list2[i]))
+                {
+                    return false;
+                }
             }
+            return true;
         }
     }
 }

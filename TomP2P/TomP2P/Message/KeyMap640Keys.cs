@@ -38,7 +38,7 @@ namespace TomP2P.Message
         public bool Equals(KeyMap640Keys other)
         {
             bool t1 = Utils.Utils.IsSameSets(KeysMap.Keys, other.KeysMap.Keys);
-            bool t2 = Utils.Utils.IsSameCollectionSets(KeysMap.Values, other.KeysMap.Values); // TODO this won't work
+            bool t2 = Utils.Utils.IsSameCollectionSets(KeysMap.Values, other.KeysMap.Values);
 
             return t1 && t2;
         }
