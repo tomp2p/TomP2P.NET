@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
+using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Workaround;
 using Decoder = TomP2P.Message.Decoder;
@@ -57,15 +58,65 @@ namespace TomP2P.Tests.Interop
             var ms = new MemoryStream(bytes);
             var br = new JavaBinaryReader(ms);
 
-            var decoder = new Decoder(null); // TODO signaturefactory?
+            var decoder = new Decoder(null);
 
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
+            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp());
 
             // compare Java encoded and .NET decoded objects
             var m2 = decoder.Message;
 
             CompareContentTypes(m1, m2);
             CheckIsSameList(m1.KeyList, m2.KeyList);
+        }
+
+        [Test]
+        public void TestMessageDecodeMapKey640Data()
+        {
+            // create same message object as in Java
+            sbyte[] sampleBytes1 = new sbyte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+            sbyte[] sampleBytes2 = new sbyte[] { 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+            sbyte[] sampleBytes3 = new sbyte[Number160.ByteArraySize];
+
+            var keysMap = new SortedDictionary<Number640, ICollection<Number160>>();
+            var set = new HashSet<Number160>();
+            set.Add(Number160.MaxValue);
+            keysMap.Add(Number640.Zero, set);
+
+            set = new HashSet<Number160>();
+            set.Add(Number160.Zero);
+            set.Add(Number160.One);
+            keysMap.Add(new Number640(new Number160(sampleBytes1), new Number160(sampleBytes2), new Number160(sampleBytes3), Number160.MaxValue), set);
+
+            set = new HashSet<Number160>();
+            set.Add(new Number160(sampleBytes1));
+            set.Add(new Number160(sampleBytes2));
+            set.Add(new Number160(sampleBytes3));
+            keysMap.Add(new Number640(Number160.MaxValue, new Number160(sampleBytes1), new Number160(sampleBytes2), new Number160(sampleBytes3)), set);
+
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+
+            // read Java encoded bytes
+            var bytes = JarRunner.RequestJavaBytes();
+            var ms = new MemoryStream(bytes);
+            var br = new JavaBinaryReader(ms);
+
+            var decoder = new Decoder(null);
+
+            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp());
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = decoder.Message;
+
+            CompareContentTypes(m1, m2);
+            CheckIsSameList(m1.KeyMap640KeysList, m2.KeyMap640KeysList);
         }
 
         [Test]

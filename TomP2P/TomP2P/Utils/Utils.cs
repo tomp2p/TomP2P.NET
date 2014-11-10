@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 
@@ -18,14 +20,13 @@ namespace TomP2P.Utils
         public const int IntegerByteSize = 4;   //  32 bits
         public const int LongByteSize = 8;      //  64 bits
 
-        // TODO correct use of generics?
-        public static bool IsSameSets<T>(ICollection<T> set1, ICollection<T> set2)
+        public static bool IsSameSets<T>(IEnumerable<T> set1, IEnumerable<T> set2)
         {
             if (set1 == null ^ set2 == null) // XOR
             {
                 return false;
             }
-            if (set1 != null && (set1.Count != set2.Count))
+            if (set1 != null && (set1.Count() != set2.Count()))
             {
                 return false;
             }
@@ -34,6 +35,48 @@ namespace TomP2P.Utils
                 return false;
             }
             return true;
+        }
+
+        public static bool IsSameCollectionSets<T>(IEnumerable<IEnumerable<T>> set1, IEnumerable<IEnumerable<T>> set2)
+        {
+            if (set1 == null ^ set2 == null)
+            {
+                return false;
+            }
+            if (set1 != null && (set1.Count() != set2.Count()))
+            {
+                return false;
+            }
+            if (set1 != null)
+            {
+                foreach (var collection1 in set1)
+                {
+                    foreach (var collection2 in set2)
+                    {
+                        if (!CollectionsContainCollection(set1, collection2))
+                        {
+                            return false;
+                        }
+                        if (!CollectionsContainCollection(set2, collection1))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        private static bool CollectionsContainCollection<T>(IEnumerable<IEnumerable<T>> collections, IEnumerable<T> collection)
+        {
+            foreach (var col in collections)
+            {
+                if (IsSameSets(collection, col))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         #region .NET specific
@@ -62,5 +105,6 @@ namespace TomP2P.Utils
 
             return new IPAddress(tmp); // TODO test
         }
+
     }
 }

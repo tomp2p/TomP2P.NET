@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TomP2P.Workaround
 {
@@ -98,10 +94,23 @@ namespace TomP2P.Workaround
             return _br.ReadByte();
         }
 
-        public int ReadableBytes
+        public byte GetUByte(long index)
         {
-            // TODO implement!!
-            get { return int.MaxValue; }
+            // do not change reader index
+            var stream = _br.BaseStream;
+            var position = _br.BaseStream.Position;
+
+            stream.Position = index;
+            byte b = ReadUByte();
+
+            stream.Position = position;
+            return b;
+        }
+
+        public long ReadableBytes
+        {
+            // TODO check
+            get { return _br.BaseStream.Length - _br.BaseStream.Position; }
         }
 
         public bool CanRead
@@ -116,19 +125,13 @@ namespace TomP2P.Workaround
 
         public long ReaderIndex
         {
-            // TODO implement!!
-            get { return _br.BaseStream.Position; throw new NotImplementedException(); }
+            // TODO check
+            get { return _br.BaseStream.Position; }
         }
 
         public sbyte[] Buffer
         {
             get { throw new NotImplementedException(); }
-        }
-
-        public byte GetUByte(long i)
-        {
-            // TODO dont move reader index
-            throw new NotImplementedException();
         }
     }
 }
