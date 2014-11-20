@@ -7,8 +7,8 @@ namespace TomP2P.Message
 {
     public class DataMap : IEquatable<DataMap>
     {
-        public Dictionary<Number640, Data> BackingDataMap { get; private set; }
-        public Dictionary<Number160, Data> DataMapConvert { get; private set; }
+        public IDictionary<Number640, Data> BackingDataMap { get; private set; }
+        public IDictionary<Number160, Data> DataMapConvert { get; private set; }
 
         public Number160 LocationKey { get; private set; }
         public Number160 DomainKey { get; private set; }
@@ -16,11 +16,11 @@ namespace TomP2P.Message
 
         public bool IsConvertMeta { get; private set; }
 
-        public DataMap(Dictionary<Number640, Data> dataMap)
+        public DataMap(IDictionary<Number640, Data> dataMap)
             : this(dataMap, false)
         { }
 
-        public DataMap(Dictionary<Number640, Data> dataMap, bool isConvertMeta)
+        public DataMap(IDictionary<Number640, Data> dataMap, bool isConvertMeta)
         {
             BackingDataMap = dataMap;
             DataMapConvert = null;
@@ -50,7 +50,7 @@ namespace TomP2P.Message
             IsConvertMeta = isConvertMeta;
         }
 
-        public Dictionary<Number640, Data> ConvertToMap640()
+        public IDictionary<Number640, Data> ConvertToMap640()
         {
             return Convert(this);
         }
@@ -76,9 +76,9 @@ namespace TomP2P.Message
             return result;
         }
 
-        private static Dictionary<Number640, Data> Convert(DataMap map)
+        private static IDictionary<Number640, Data> Convert(DataMap map)
         {
-            Dictionary<Number640, Data> dm;
+            IDictionary<Number640, Data> dm;
             if (map.DataMapConvert != null)
             {
                 dm = new Dictionary<Number640, Data>(map.DataMapConvert.Count);
@@ -114,8 +114,8 @@ namespace TomP2P.Message
 
         public bool Equals(DataMap other)
         {
-            Dictionary<Number640, Data> dm2 = Convert(this);
-            Dictionary<Number640, Data> dm3 = Convert(other);
+            IDictionary<Number640, Data> dm2 = Convert(this);
+            IDictionary<Number640, Data> dm3 = Convert(other);
 
             bool t1 = Utils.Utils.IsSameSets(dm2.Keys, dm3.Keys); // TODO test
             bool t2 = Utils.Utils.IsSameSets(dm2.Values, dm3.Values);
@@ -124,7 +124,7 @@ namespace TomP2P.Message
 
         public override int GetHashCode()
         {
-            Dictionary<Number640, Data> dataMap = Convert(this);
+            IDictionary<Number640, Data> dataMap = Convert(this);
             return dataMap.GetHashCode();
         }
 

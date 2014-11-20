@@ -22,6 +22,11 @@ namespace TomP2P.Storage
              throw new NotImplementedException();
          }
 
+         public Data(sbyte[] buffer)
+         {
+             
+         }
+
          public Number160 Hash()
          {
              throw new NotImplementedException();
