@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
-using NUnit.Framework;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Storage;
@@ -33,7 +30,7 @@ namespace TomP2P.Tests.Interop
 
         static Number640 _sample640_1 = Number640.Zero;
         static Number640 _sample640_2 = new Number640(new Number160(_sampleBytes1), new Number160(_sampleBytes2), new Number160(_sampleBytes3), Number160.MaxValue);
-        static Number640 _sample640_3 = new Number640(Number160.MaxValue, new Number160(_sampleBytes1), new Number160(_sampleBytes2), new Number160(_sampleBytes3));
+        static Number640 _sample640_3 = new Number640(Number160.MaxValue, new Number160(_sampleBytes3), new Number160(_sampleBytes2), new Number160(_sampleBytes1));
 
 
         [Test]
@@ -42,17 +39,8 @@ namespace TomP2P.Tests.Interop
             // create same message object as in Java
             var m1 = Utils2.CreateDummyMessage();
 
-            // read Java encoded bytes
-            var bytes = JarRunner.RequestJavaBytes();
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
-
-            var decoder = new Decoder(null); // TODO signaturefactory?
-
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
-
             // compare Java encoded and .NET decoded objects
-            var m2 = decoder.Message;
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
         }
@@ -72,17 +60,8 @@ namespace TomP2P.Tests.Interop
             m1.SetKey(_sample160_2);
             m1.SetKey(_sample160_3);
 
-            // read Java encoded bytes
-            var bytes = JarRunner.RequestJavaBytes();
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
-
-            var decoder = new Decoder(null);
-
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp());
-
             // compare Java encoded and .NET decoded objects
-            var m2 = decoder.Message;
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.KeyList, m2.KeyList));
@@ -131,20 +110,50 @@ namespace TomP2P.Tests.Interop
             m1.SetDataMap(new DataMap(sampleMap2));
             m1.SetDataMap(new DataMap(sampleMap3));
 
-            // read Java encoded bytes
-            var bytes = JarRunner.RequestJavaBytes();
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
-
-            var decoder = new Decoder(null);
-
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp());
-
             // compare Java encoded and .NET decoded objects
-            var m2 = decoder.Message;
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.DataMapList, m2.DataMapList));
+            
+            // TODO implement Data to finish testing
+            Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageDecodeSetKey640()
+        {
+            // create same message object as in Java
+            ICollection<Number160> sampleCollection1 = new List<Number160>();
+            sampleCollection1.Add(_sample160_1);
+            sampleCollection1.Add(_sample160_2);
+            sampleCollection1.Add(_sample160_3);
+
+            ICollection<Number160> sampleCollection2 = new List<Number160>();
+            sampleCollection2.Add(_sample160_2);
+            sampleCollection2.Add(_sample160_3);
+            sampleCollection2.Add(_sample160_4);
+
+            ICollection<Number160> sampleCollection3 = new List<Number160>();
+            sampleCollection3.Add(_sample160_3);
+            sampleCollection3.Add(_sample160_4);
+            sampleCollection3.Add(_sample160_5);
+
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetKeyCollection(new KeyCollection(_sample160_1, _sample160_1, _sample160_1, sampleCollection1));
+            m1.SetKeyCollection(new KeyCollection(_sample160_2, _sample160_2, _sample160_2, sampleCollection2));
+            m1.SetKeyCollection(new KeyCollection(_sample160_3, _sample160_3, _sample160_3, sampleCollection3));
+            m1.SetKeyCollection(new KeyCollection(_sample160_4, _sample160_4, _sample160_4, sampleCollection1));
+            m1.SetKeyCollection(new KeyCollection(_sample160_5, _sample160_5, _sample160_5, sampleCollection2));
+            m1.SetKeyCollection(new KeyCollection(_sample160_1, _sample160_2, _sample160_3, sampleCollection3));
+            m1.SetKeyCollection(new KeyCollection(_sample160_2, _sample160_3, _sample160_4, sampleCollection1));
+            m1.SetKeyCollection(new KeyCollection(_sample160_3, _sample160_4, _sample160_5, sampleCollection2));
+
+            // read Java encoded bytes
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.KeyCollectionList, m2.KeyCollectionList));
         }
 
         [Test]
@@ -179,17 +188,8 @@ namespace TomP2P.Tests.Interop
             m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
             m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
 
-            // read Java encoded bytes
-            var bytes = JarRunner.RequestJavaBytes();
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
-
-            var decoder = new Decoder(null);
-
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp());
-
             // compare Java encoded and .NET decoded objects
-            var m2 = decoder.Message;
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.KeyMap640KeysList, m2.KeyMap640KeysList));
@@ -208,18 +208,9 @@ namespace TomP2P.Tests.Interop
 		    m1.SetIntValue(1);
 		    m1.SetIntValue(128);
 		    m1.SetIntValue(Int32.MaxValue);
-            
-            // read Java encoded bytes
-            var bytes = JarRunner.RequestJavaBytes();
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
-
-            var decoder = new Decoder(null); // TODO signaturefactory?
-
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
 
             // compare Java encoded and .NET decoded objects
-            var m2 = decoder.Message;
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.IntList, m2.IntList));
@@ -239,17 +230,8 @@ namespace TomP2P.Tests.Interop
             m1.SetLongValue(128);
             m1.SetLongValue(Int64.MaxValue);
 
-            // read Java encoded bytes
-            var bytes = JarRunner.RequestJavaBytes();
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
-
-            var decoder = new Decoder(null); // TODO signaturefactory?
-
-            decoder.Decode(br, m1.Recipient.CreateSocketTcp(), m1.Sender.CreateSocketTcp()); // TODO recipient/sender used?
-
             // compare Java encoded and .NET decoded objects
-            var m2 = decoder.Message;
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.LongList, m2.LongList));
@@ -287,6 +269,25 @@ namespace TomP2P.Tests.Interop
             // TODO compare DataMapList contents
             // TODO compare NeighborSetList contents
         }*/
+
+        /// <summary>
+        /// Decodes a message from the provided byte array.
+        /// </summary>
+        /// <param name="bytes">The message bytes from Java encoding.</param>
+        /// <returns>The .NET message version.</returns>
+        private static Message.Message DecodeMessage(byte[] bytes)
+        {
+            var ms = new MemoryStream(bytes);
+            var br = new JavaBinaryReader(ms);
+
+            var decoder = new Decoder(null);
+
+            // create dummy sender for decoding
+            var message = Utils2.CreateDummyMessage();
+            decoder.Decode(br, message.Recipient.CreateSocketTcp(), message.Sender.CreateSocketTcp());
+
+            return decoder.Message;
+        }
 
         /// <summary>
         /// Checks if two message's content types are the same.

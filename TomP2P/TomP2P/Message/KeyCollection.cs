@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TomP2P.Peers;
 
 namespace TomP2P.Message
@@ -55,7 +51,8 @@ namespace TomP2P.Message
                 kc = new List<Number640>(k.KeysConvert.Count);
                 foreach (var num160 in k.KeysConvert)
                 {
-                    kc.Add(new Number640(k.LocationKey, k.DomainKey, k.VersionKey, num160)); // TODO check if correct
+                    //kc.Add(new Number640(k.LocationKey, k.DomainKey, k.VersionKey, num160));
+                    kc.Add(new Number640(k.LocationKey, k.DomainKey, num160, k.VersionKey));
                 }
             }
             else
@@ -67,22 +64,22 @@ namespace TomP2P.Message
 
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(obj, null))
+            if (ReferenceEquals(obj, null))
             {
                 return false;
             }
 
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            if (this.GetType() != obj.GetType())
+            if (GetType() != obj.GetType())
             {
                 return false;
             }
 
-            return this.Equals(obj as KeyCollection);
+            return Equals(obj as KeyCollection);
         }
 
         public bool Equals(KeyCollection other)

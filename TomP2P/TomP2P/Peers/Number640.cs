@@ -130,7 +130,7 @@ namespace TomP2P.Peers
             var t1 = LocationKey.Equals(other.LocationKey);
             var t2 = DomainKey.Equals(other.DomainKey);
             var t3 = ContentKey.Equals(other.ContentKey);
-            var t4 = VersionKey.Equals(other.VersionKey); // TODO check if necessary
+            var t4 = VersionKey.Equals(other.VersionKey);
 
             return t1 && t2 && t3 && t4;
         }

@@ -301,21 +301,24 @@ namespace TomP2P.Message
                         }
                         for (int i = _keyCollection.Size; i < _keyCollectionSize; i++)
                         {
-                            if (buffer.ReadableBytes <
-                                Number160.ByteArraySize + Number160.ByteArraySize + Number160.ByteArraySize +
-                                Number160.ByteArraySize)
+                            if (buffer.ReadableBytes < 4 * Number160.ByteArraySize)
                             {
                                 return false;
                             }
                             var me = new sbyte[Number160.ByteArraySize];
+
                             buffer.ReadBytes(me);
                             var locationKey = new Number160(me);
+
                             buffer.ReadBytes(me);
                             var domainKey = new Number160(me);
+
                             buffer.ReadBytes(me);
                             var contentKey = new Number160(me);
+
                             buffer.ReadBytes(me);
                             var versionKey = new Number160(me);
+
                             _keyCollection.Add(new Number640(locationKey, domainKey, contentKey, versionKey));
                         }
                         Message.SetKeyCollection(_keyCollection);
