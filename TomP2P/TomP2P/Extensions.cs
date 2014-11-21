@@ -98,5 +98,18 @@ namespace TomP2P
         {
             return ip.AddressFamily == AddressFamily.InterNetworkV6; // TODO test
         }
+
+        /// <summary>
+        /// Converts a sbyte[] to byte[].
+        /// </summary>
+        /// <param name="signed">The sbyte[] to be converted.</param>
+        /// <returns>The converted byte[].</returns>
+        public static byte[] ToByteArray(this sbyte[] signed)
+        {
+            byte[] unsigned = new byte[signed.Length];
+            Buffer.BlockCopy(signed, 0, unsigned, 0, signed.Length);
+
+            return unsigned;
+        }
     }
 }

@@ -82,8 +82,8 @@ namespace TomP2P.Workaround
             // NOTE: _br.ReadInt16() would read in little-endian fashion (.NET)
 
             // read bytes in big-endian fashion (Java)
-            byte b1 = _br.ReadByte();
-            byte b2 = _br.ReadByte();
+            sbyte b1 = ReadByte(); // Java byte is signed
+            sbyte b2 = ReadByte();
 
             // shift bytes to their position and sum up their int values
             return (ushort)((b1 << 8) + b2);
@@ -92,6 +92,19 @@ namespace TomP2P.Workaround
         public byte ReadUByte()
         {
             return _br.ReadByte();
+        }
+
+        public ushort GetUShort(long index)
+        {
+            // do not change reader index
+            var stream = _br.BaseStream;
+            var position = _br.BaseStream.Position;
+
+            stream.Position = index;
+            ushort us = ReadUShort();
+
+            stream.Position = position;
+            return us;
         }
 
         public byte GetUByte(long index)
@@ -109,7 +122,6 @@ namespace TomP2P.Workaround
 
         public long ReadableBytes
         {
-            // TODO check
             get { return _br.BaseStream.Length - _br.BaseStream.Position; }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using TomP2P.Workaround;
 
@@ -88,7 +89,7 @@ namespace TomP2P.Peers
         /// <returns>The <see cref="PeerSocketAddress"/> and the new offset.</returns>
         public static PeerSocketAddress Create(JavaBinaryReader buffer, bool isIPv4)
         {
-            int tcpPort = buffer.ReadUShort();
+            int tcpPort = buffer.ReadUShort(); // TODO potential BUG
             int udpPort = buffer.ReadUShort();
 
             IPAddress address;

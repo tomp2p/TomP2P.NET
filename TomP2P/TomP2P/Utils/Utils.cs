@@ -92,18 +92,22 @@ namespace TomP2P.Utils
 
         public static IPAddress Inet4AddressFromBytes(sbyte[] src, long offset)
         {
-            var tmp = new byte[IPv4Bytes];
-            Array.Copy(src, offset, tmp, 0, IPv4Bytes);
+            byte[] tmp = new byte[IPv4Bytes];
+            byte[] src2 = src.ToByteArray();
 
-            return new IPAddress(tmp); // TODO test
+            Array.Copy(src2, offset, tmp, 0, IPv4Bytes);
+
+            return new IPAddress(tmp);
         }
 
         public static IPAddress Inet6AddressFromBytes(sbyte[] src, long offset)
         {
             var tmp = new byte[IPv6Bytes];
-            Array.Copy(src, offset, tmp, 0, IPv6Bytes);
+            byte[] src2 = src.ToByteArray();
 
-            return new IPAddress(tmp); // TODO test
+            Array.Copy(src2, offset, tmp, 0, IPv6Bytes);
+
+            return new IPAddress(tmp);
         }
 
     }

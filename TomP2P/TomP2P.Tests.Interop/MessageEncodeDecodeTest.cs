@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Net;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -193,6 +194,48 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.KeyMap640KeysList, m2.KeyMap640KeysList));
+        }
+
+        [Test]
+        public void TestMessageDecodeSetNeighbors()
+        {
+            // create same message object as in Java
+            var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
+            var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
+            var sampleAddress3 = new PeerAddress(_sample160_3, IPAddress.Parse("127.0.0.1"));
+            var sampleAddress4 = new PeerAddress(_sample160_4, IPAddress.Parse("0:1:2:3:4:5:6:7"));
+            var sampleAddress5 = new PeerAddress(_sample160_5, IPAddress.Parse("7:6:5:4:3:2:1:0"));
+
+            ICollection<PeerAddress> sampleNeighbours1 = new List<PeerAddress>();
+            sampleNeighbours1.Add(sampleAddress1);
+            sampleNeighbours1.Add(sampleAddress2);
+            sampleNeighbours1.Add(sampleAddress3);
+
+            ICollection<PeerAddress> sampleNeighbours2 = new List<PeerAddress>();
+            sampleNeighbours2.Add(sampleAddress2);
+            sampleNeighbours2.Add(sampleAddress3);
+            sampleNeighbours2.Add(sampleAddress4);
+
+            ICollection<PeerAddress> sampleNeighbours3 = new List<PeerAddress>();
+            sampleNeighbours3.Add(sampleAddress3);
+            sampleNeighbours3.Add(sampleAddress4);
+            sampleNeighbours3.Add(sampleAddress5);
+
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours3));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours3));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
+            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.NeighborSetList, m2.NeighborSetList));
         }
 
         [Test]

@@ -223,7 +223,7 @@ namespace TomP2P.Message
                         }
                         if (_neighborSize == -1)
                         {
-                            _neighborSize = buffer.ReadByte(); // TODO byte -> int conversion valid?
+                            _neighborSize = buffer.ReadByte();
                         }
                         if (_neighborSet == null)
                         {
@@ -235,8 +235,7 @@ namespace TomP2P.Message
                             {
                                 return false;
                             }
-                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
-                            int header = buffer.ReadUShort();
+                            int header = buffer.GetUShort(buffer.ReaderIndex);
                             size = PeerAddress.CalculateSize(header);
                             if (buffer.ReadableBytes < size)
                             {

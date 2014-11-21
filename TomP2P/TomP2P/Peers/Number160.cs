@@ -311,7 +311,6 @@ namespace TomP2P.Peers
             return true;
         }
 
-        // TODO check correct implementation (often used as hashtable-keys)
         public override int GetHashCode()
         {
             int hashCode = 0;

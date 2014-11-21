@@ -245,7 +245,7 @@ namespace TomP2P.Peers
             int size = Number160.ByteArraySize;
             PeerSocketAddress = peerSocketAddress;
             _hashCode = id.GetHashCode();
-            IsIPv6 = false; // TODO implement correctly
+            IsIPv6 = peerSocketAddress.InetAddress.IsIPv6();
             IsFirewalledUdp = isFirewalledUdp;
             IsFirewalledTcp = isFirewalledTcp;
             IsRelayed = isRelayed;
@@ -290,7 +290,7 @@ namespace TomP2P.Peers
         /// <param name="inetAddress">The internet address of the peer.</param>
         /// <param name="tcpPort">The TCP port of the peer.</param>
         /// <param name="udpPort">The UDP port of the peer.</param>
-        public PeerAddress(Number160 peerId, IPAddress inetAddress, int tcpPort, int udpPort)
+        public PeerAddress(Number160 peerId, IPAddress inetAddress, int tcpPort, int udpPort) // TODO both IPv4 and IPv6 can be passed here -> fix flags
             : this(peerId, new PeerSocketAddress(inetAddress, tcpPort, udpPort), false, false, false, EmptyPeerSocketAddresses)
         { }
 
