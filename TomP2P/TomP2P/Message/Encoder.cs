@@ -1,8 +1,8 @@
 ﻿using System;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Storage;
-using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace TomP2P.Workaround
+namespace TomP2P.Extensions.Workaround
 {
     /// <summary>
     /// This class allows to read Java types that have been stored to a <code>byte[]</code>.
@@ -122,7 +122,12 @@ namespace TomP2P.Workaround
 
         public long ReadableBytes
         {
-            get { return _br.BaseStream.Length - _br.BaseStream.Position; }
+            get { return _br.BaseStream.ReadableBytes(); }
+        }
+
+        public Stream BaseStream
+        {
+            get { return _br.BaseStream; }
         }
 
         public bool CanRead
@@ -137,7 +142,6 @@ namespace TomP2P.Workaround
 
         public long ReaderIndex
         {
-            // TODO check
             get { return _br.BaseStream.Position; }
         }
 

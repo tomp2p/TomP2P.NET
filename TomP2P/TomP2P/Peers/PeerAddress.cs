@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using TomP2P.Workaround;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Peers
 {

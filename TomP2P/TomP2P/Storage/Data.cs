@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Connection;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
-using TomP2P.Workaround;
 
 namespace TomP2P.Storage
 {

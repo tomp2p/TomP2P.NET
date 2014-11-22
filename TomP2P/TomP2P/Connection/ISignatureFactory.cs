@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
-using TomP2P.Workaround;
 
 namespace TomP2P.Connection
 {

@@ -4,11 +4,11 @@ using System.IO;
 using System.Net;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Extensions.Workaround;
 using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using TomP2P.Storage;
-using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {

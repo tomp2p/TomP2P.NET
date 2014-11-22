@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using TomP2P.Workaround;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Tests.Interop
 {

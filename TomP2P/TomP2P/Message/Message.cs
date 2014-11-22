@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
 using TomP2P.Rpc;
-using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using TomP2P.Extensions;
 
 namespace TomP2P.Peers
 {

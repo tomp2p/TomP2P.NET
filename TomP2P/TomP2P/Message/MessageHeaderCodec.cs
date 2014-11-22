@@ -1,7 +1,7 @@
 ﻿using NLog;
 using System.Net;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
-using TomP2P.Workaround;
 
 namespace TomP2P.Message
 {

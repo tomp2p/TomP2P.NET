@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TomP2P.Workaround
+namespace TomP2P.Extensions.Workaround
 {
     /// <summary>
     /// This class allows to write Java types to a <code>byte[]</code>.
@@ -19,8 +15,6 @@ namespace TomP2P.Workaround
         {
             _bw = new BinaryWriter(output);
         }
-
-        public sbyte[] Buffer { get; private set; }
 
         public void WriteShort(short tcpPort)
         {
@@ -88,6 +82,11 @@ namespace TomP2P.Workaround
             }
         }
 
+        public Stream BaseStream
+        {
+            get { return _bw.BaseStream; }    
+        }
+
         public bool CanRead
         {
             get { throw new NotImplementedException(); }
@@ -95,5 +94,6 @@ namespace TomP2P.Workaround
 
         public int WriterIndex { get; private set; }
         public long ReaderIndex { get; private set; }
+        public sbyte[] Buffer { get; private set; }
     }
 }

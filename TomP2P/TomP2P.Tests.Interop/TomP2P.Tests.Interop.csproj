@@ -62,6 +62,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TomP2P.Extensions\TomP2P.Extensions.csproj">
+      <Project>{b13f4681-ac7d-4d75-ab3f-c079748f8602}</Project>
+      <Name>TomP2P.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TomP2P.Tests\TomP2P.Tests.csproj">
       <Project>{e1b50a8c-2ad1-4ef9-b805-ee133e32ca03}</Project>
       <Name>TomP2P.Tests</Name>

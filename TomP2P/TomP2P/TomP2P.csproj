@@ -43,7 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connection\ISignatureFactory.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\DataMap.cs" />
     <Compile Include="Message\Decoder.cs" />
@@ -71,12 +70,6 @@
     <Compile Include="Storage\Data.cs" />
     <Compile Include="Storage\DataBuffer.cs" />
     <Compile Include="Utils\Utils.cs" />
-    <Compile Include="Workaround\IJavaBuffer.cs" />
-    <Compile Include="Workaround\IPrivateKey.cs" />
-    <Compile Include="Workaround\IPublicKey.cs" />
-    <Compile Include="Workaround\JavaBinaryReader.cs" />
-    <Compile Include="Workaround\JavaBinaryWriter.cs" />
-    <Compile Include="Workaround\KeyPair.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NLog.config">
@@ -86,6 +79,12 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TomP2P.Extensions\TomP2P.Extensions.csproj">
+      <Project>{b13f4681-ac7d-4d75-ab3f-c079748f8602}</Project>
+      <Name>TomP2P.Extensions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

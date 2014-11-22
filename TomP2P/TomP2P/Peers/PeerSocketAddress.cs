@@ -2,7 +2,8 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using TomP2P.Workaround;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Peers
 {

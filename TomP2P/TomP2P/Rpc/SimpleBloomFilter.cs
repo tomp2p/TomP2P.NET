@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using TomP2P.Workaround;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Rpc
 {

@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using System.IO;
-using TomP2P.Workaround;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Tests.Interop
 {

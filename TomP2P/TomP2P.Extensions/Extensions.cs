@@ -6,9 +6,9 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace TomP2P
+namespace TomP2P.Extensions
 {
-    static class Extensions
+    public static class Extensions
     {
         /// <summary>
         /// Counts the leading zeros of this integer.
@@ -45,14 +45,14 @@ namespace TomP2P
 
         /// <summary>
         /// Copies the content of the buffer and returns a new instance (separate indexes).
-        /// NOTE: Changes to the respective MemoryStream instances are not mirrored as in Java Netty's ByteBuf.duplicate().
+        /// NOTE: Changes to the respective Stream instances are not mirrored as in Java Netty's ByteBuf.duplicate().
         /// </summary>
-        /// <param name="ms"></param>
+        /// <param name="s"></param>
         /// <returns></returns>
-        public static MemoryStream Duplicate(this MemoryStream ms)
+        public static Stream Duplicate(this Stream s)
         {
-            var copy = new MemoryStream(ms.Capacity);
-            ms.CopyTo(copy); // TODO make async
+            var copy = new MemoryStream();
+            s.CopyTo(copy); // TODO make async
             return copy;
         }
 
@@ -64,7 +64,7 @@ namespace TomP2P
         public static sbyte ToByte(this BitArray ba)
         {
             sbyte b = 0;
-            for (int i = 0; i < Utils.Utils.ByteBits; i++)
+            for (int i = 0; i < 8; i++)
             {
                 if (ba.Get(i))
                 {
@@ -81,12 +81,12 @@ namespace TomP2P
         /// <returns></returns>
         public static long ReadableBytes(this Stream s)
         {
-            return s.Length - s.Position; // TODO find readableBytes equivalent
+            return s.Length - s.Position;
         }
 
-        public static long ReadableBytes(this BinaryReader br)
+        public static void WriteBytes(this Stream s, sbyte[] bytes)
         {
-            return br.BaseStream.ReadableBytes();
+            //s.Write(bytes, 0, bytes.Length);
         }
 
         public static bool IsIPv4(this IPAddress ip)

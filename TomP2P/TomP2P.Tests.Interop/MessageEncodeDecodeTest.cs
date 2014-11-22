@@ -3,11 +3,12 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Storage;
-using TomP2P.Workaround;
 using Decoder = TomP2P.Message.Decoder;
+using Buffer = TomP2P.Message.Buffer;
 
 namespace TomP2P.Tests.Interop
 {
@@ -236,6 +237,41 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.NeighborSetList, m2.NeighborSetList));
+        }
+
+        [Test]
+        public void TestMessageDecodeByteBuffer()
+        {
+            // create same message object as in Java
+            var sampleBuf1 = new MemoryStream();
+            sampleBuf1.WriteBytes(_sampleBytes1);
+            sampleBuf1.WriteBytes(_sampleBytes1);
+            sampleBuf1.WriteBytes(_sampleBytes1);
+
+            var sampleBuf2 = new MemoryStream();
+            sampleBuf2.WriteBytes(_sampleBytes2);
+            sampleBuf2.WriteBytes(_sampleBytes2);
+            sampleBuf2.WriteBytes(_sampleBytes2);
+
+            var sampleBuf3 = new MemoryStream();
+            sampleBuf3.WriteBytes(_sampleBytes3);
+            sampleBuf3.WriteBytes(_sampleBytes3);
+            sampleBuf3.WriteBytes(_sampleBytes3);
+
+            var sampleBuf4 = new MemoryStream();
+            sampleBuf4.WriteBytes(_sampleBytes1);
+            sampleBuf4.WriteBytes(_sampleBytes2);
+            sampleBuf4.WriteBytes(_sampleBytes3);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetBuffer(new Buffer(sampleBuf1));
+            m.SetBuffer(new Buffer(sampleBuf2));
+            m.SetBuffer(new Buffer(sampleBuf3));
+            m.SetBuffer(new Buffer(sampleBuf4));
+            m.SetBuffer(new Buffer(sampleBuf1));
+            m.SetBuffer(new Buffer(sampleBuf2));
+            m.SetBuffer(new Buffer(sampleBuf3));
+            m.SetBuffer(new Buffer(sampleBuf4));
         }
 
         [Test]

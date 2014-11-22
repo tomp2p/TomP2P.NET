@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using TomP2P.Extensions;
 
 namespace TomP2P.Message
 {
@@ -20,7 +21,7 @@ namespace TomP2P.Message
         {
             AlreadyRead = 0;
             BackingBuffer = buffer;
-            Length = (int)buffer.Length; // TODO check if correct equivalent of java's readablebytes (2x)
+            Length = (int) buffer.ReadableBytes();
         }
 
         public Buffer AddComponent(MemoryStream slide)
@@ -38,7 +39,6 @@ namespace TomP2P.Message
         ~Buffer()
         {
             // TODO implement .NET equivalent
-            // maybe use using{} body
             throw new NotImplementedException();
         }
 
@@ -97,14 +97,14 @@ namespace TomP2P.Message
             get
             {
                 var remaining = Length - AlreadyRead;
-                var available = (int)BackingBuffer.Length;
+                var available = (int) BackingBuffer.ReadableBytes();
                 return Math.Min(remaining, available);
             }
         }
 
         public bool IsComplete
         {
-            get { return Length == BackingBuffer.Length; }
+            get { return Length == (int) BackingBuffer.ReadableBytes(); }
         }
 
         public bool IsDone
