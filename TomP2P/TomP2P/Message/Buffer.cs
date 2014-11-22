@@ -4,6 +4,8 @@ using TomP2P.Extensions;
 
 namespace TomP2P.Message
 {
+    // TODO Java Buffer uses int for Length, .NET should use long
+
     public class Buffer : IEquatable<Buffer>
     {
         public MemoryStream BackingBuffer { get; private set; }

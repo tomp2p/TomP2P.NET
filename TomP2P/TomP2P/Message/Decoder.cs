@@ -527,13 +527,12 @@ namespace TomP2P.Message
                             if (read != remaining)
                             {
                                 Logger.Debug(
-                                    "Still looking for data. Indicating that its not finished yet. Read = {0}, Size = {1}.",
+                                    "Still looking for data. Indicating that its not finished yet. Already Transferred = {0}, Size = {1}.",
                                     _buffer.AlreadyTransferred(), _bufferSize);
                                 return false;
                             }
                         }
 
-                        // TODO create ByteBuf, port not trivial
                         var buffer2 = new MemoryStream(); // TODO this is not working yet!!!
                         Message.SetBuffer(new Buffer(buffer2, _bufferSize));
                         LastContent = _contentTypes.Dequeue();

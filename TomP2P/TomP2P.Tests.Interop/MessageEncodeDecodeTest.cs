@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 using TomP2P.Peers;
@@ -248,7 +249,7 @@ namespace TomP2P.Tests.Interop
             sampleBuf1.WriteBytes(_sampleBytes1);
             sampleBuf1.WriteBytes(_sampleBytes1);
 
-            var sampleBuf2 = new MemoryStream();
+            /*var sampleBuf2 = new MemoryStream();
             sampleBuf2.WriteBytes(_sampleBytes2);
             sampleBuf2.WriteBytes(_sampleBytes2);
             sampleBuf2.WriteBytes(_sampleBytes2);
@@ -261,17 +262,26 @@ namespace TomP2P.Tests.Interop
             var sampleBuf4 = new MemoryStream();
             sampleBuf4.WriteBytes(_sampleBytes1);
             sampleBuf4.WriteBytes(_sampleBytes2);
-            sampleBuf4.WriteBytes(_sampleBytes3);
+            sampleBuf4.WriteBytes(_sampleBytes3);*/
 
-            var m = Utils2.CreateDummyMessage();
-            m.SetBuffer(new Buffer(sampleBuf1));
-            m.SetBuffer(new Buffer(sampleBuf2));
-            m.SetBuffer(new Buffer(sampleBuf3));
-            m.SetBuffer(new Buffer(sampleBuf4));
-            m.SetBuffer(new Buffer(sampleBuf1));
-            m.SetBuffer(new Buffer(sampleBuf2));
-            m.SetBuffer(new Buffer(sampleBuf3));
-            m.SetBuffer(new Buffer(sampleBuf4));
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetBuffer(new Buffer(sampleBuf1));
+            /*m1.SetBuffer(new Buffer(sampleBuf2));
+            m1.SetBuffer(new Buffer(sampleBuf3));
+            m1.SetBuffer(new Buffer(sampleBuf4));
+            m1.SetBuffer(new Buffer(sampleBuf1));
+            m1.SetBuffer(new Buffer(sampleBuf2));
+            m1.SetBuffer(new Buffer(sampleBuf3));
+            m1.SetBuffer(new Buffer(sampleBuf4));*/
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.BufferList, m2.BufferList));
+
+            // TODO implement DataBuffer and ByteBuffer decoding to finish testing
+            Assert.IsTrue(false);
         }
 
         [Test]
