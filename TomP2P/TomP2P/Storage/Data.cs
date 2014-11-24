@@ -58,6 +58,11 @@ namespace TomP2P.Storage
              : this(buffer, buffer.Length())
          {}
 
+         /// <summary>
+         /// Creates a Data object that does have the complete data, but not the complete header.
+         /// </summary>
+         /// <param name="buffer">The buffer containing the data.</param>
+         /// <param name="length">The expected length of the buffer. This does not include the header + size (2, 5 or 9).</param>
          public Data(DataBuffer buffer, int length)
          {
              Length = length;
@@ -111,6 +116,12 @@ namespace TomP2P.Storage
              : this(Utils.Utils.EmptyByteArray)
          { }
 
+         /// <summary>
+         /// Creates a Data object from an already existing buffer.
+         /// </summary>
+         /// <param name="buffer"></param>
+         /// <param name="offset"></param>
+         /// <param name="length"></param>
          public Data(sbyte[] buffer, int offset, int length)
          {
              if (buffer.Length == 0)
@@ -129,6 +140,79 @@ namespace TomP2P.Storage
          public bool IsEmpty
          {
              get { return Length == 0; }
+         }
+
+         public void EncodeHeader(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
+         {
+             var header = (int) _type; // check if works
+             if (_prepareFlag)
+             {
+                 header |= 0x02;
+             }
+             if (_flag1)
+             {
+                 header |= 0x04;
+             }
+             if (_flag2)
+             {
+                 header |= 0x08;
+             }
+             if (_ttl)
+             {
+                 header |= 0x10;
+             }
+             if (_signed && _publicKeyFlag && _protectedEntry)
+             {
+                 header |= (0x20 | 0x40);
+             }
+             else if (_signed && _publicKeyFlag)
+             {
+                 header |= 0x40;
+             }
+             else if (_publicKeyFlag)
+             {
+                 header |= 0x20;
+             }
+             if (_basedOnFlag)
+             {
+                 header |= 0x80;
+             }
+             switch (_type)
+             {
+                 case DataType.Small:
+                     buffer.WriteByte((sbyte) header); // TODO check if works
+                     buffer.WriteByte((sbyte) Length);
+                     break;
+                 case DataType.Large:
+                     buffer.WriteByte((sbyte) header); // TODO check if works
+                     buffer.WriteInt(Length);
+                     break;
+                 default:
+                     throw new ArgumentException("Unknown DataType.");
+             }
+             if (_ttl)
+             {
+                 buffer.WriteInt(_ttlSeconds);
+             }
+             if (_basedOnFlag)
+             {
+                 buffer.WriteByte((sbyte) (_basedOnSet.Count() -1)); // TODO check if works
+                 foreach (var basedOn in _basedOnSet)
+                 {
+                     buffer.WriteBytes(basedOn.ToByteArray());
+                 }
+             }
+             if (_publicKeyFlag)
+             {
+                 if (_publicKey == null)
+                 {
+                     buffer.WriteShort(0);
+                 }
+                 else
+                 {
+                     signatureFactory.EncodePublicKey(_publicKey, buffer);
+                 }
+             }
          }
 
          public Number160 Hash()
@@ -154,11 +238,6 @@ namespace TomP2P.Storage
          public long ExpirationMillis
          {
              get { throw new InvalidOperationException();}
-         }
-
-         public void EncodeHeader(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
-         {
-             throw new NotImplementedException();
          }
 
          public bool EncodeBuffer(JavaBinaryWriter buffer)

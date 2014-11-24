@@ -9,8 +9,6 @@ namespace TomP2P.Peers
     /// </summary>
     public sealed class Number160 : IComparable<Number160>, IEquatable<Number160>
     {
-        // TODO serialVersionUID equivalent required?
-
         // This key has ALWAYS 160 bit. Do not change.
         public const int Bits = 160;
 
@@ -141,7 +139,6 @@ namespace TomP2P.Peers
             _val = new int[IntArraySize];
             for (int i = length + offset - 1, j = ByteArraySize - 1, k = 0; i >= offset; i--, j--, k++)
             {
-                // TODO test
                 _val[j >> 2] |= (val[i] & ByteMask) << ((k%4) << 3);
             }
         }
@@ -210,7 +207,7 @@ namespace TomP2P.Peers
         public sbyte[] ToByteArray()
         {
             var result = new sbyte[ByteArraySize];
-            ToByteArray(result, 0); // TODO check if the result variable has been modified
+            ToByteArray(result, 0);
             return result;
         }
 
@@ -222,7 +219,6 @@ namespace TomP2P.Peers
         /// <returns>The offset being read.</returns>
         public int ToByteArray(sbyte[] me, int offset)
         {
-            // TODO check if references are updated
             if (offset + ByteArraySize > me.Length)
             {
                 throw new SystemException("Array too small.");
@@ -250,7 +246,7 @@ namespace TomP2P.Peers
             var sb = new StringBuilder("0x");
             for (int i = 0; i < IntArraySize; i++)
             {
-                ToHex(_val[i], removeZero, sb); // TODO check if reference works
+                ToHex(_val[i], removeZero, sb);
                 if (removeZero && _val[i] != 0)
                 {
                     removeZero = false;
@@ -284,19 +280,19 @@ namespace TomP2P.Peers
 
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(obj, null))
+            if (ReferenceEquals(obj, null))
             {
                 return false;
             }
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
             {
                 return true;
             }
-            if (this.GetType() != obj.GetType())
+            if (GetType() != obj.GetType())
             {
                 return false;
             }
-            return this.Equals(obj as Number160);
+            return Equals(obj as Number160);
 
         }
 

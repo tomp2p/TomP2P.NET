@@ -10,6 +10,11 @@ namespace TomP2P.Storage
 {
     public class DataBuffer
     {
+        public DataBuffer()
+        {
+            
+        }
+
         public DataBuffer(sbyte[] buffer, int offset, int length)
         {
             throw new NotImplementedException();

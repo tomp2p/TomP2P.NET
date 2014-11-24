@@ -16,9 +16,22 @@ namespace TomP2P.Extensions.Workaround
             _bw = new BinaryWriter(output);
         }
 
-        public void WriteShort(short tcpPort)
+        /// <summary>
+        /// Writes a 2-byte short to the current stream and advances the stream position by 2 bytes.
+        /// </summary>
+        /// <param name="value"></param>
+        public void WriteShort(short value)
         {
-            throw new NotImplementedException();
+            // TODO check if correct
+            // NOTE: _bw.Write(short) would write in little-endian fashion (.NET)
+
+            // shift short bits to their position and cast to byte
+            var b1 = value >> 8;
+            var b2 = value;
+
+            // write bytes in big-endian fashion (Java)
+            _bw.Write(b1);
+            _bw.Write(b2);
         }
 
         /// <summary>
@@ -27,7 +40,7 @@ namespace TomP2P.Extensions.Workaround
         /// <param name="value"></param>
         public void WriteInt(int value)
         {
-            // NOTE: _br.Write(int) would write in little-endian fashion (.NET)
+            // NOTE: _bw.Write(int) would write in little-endian fashion (.NET)
             
             // shift int bits to their position and cast to byte
             var b1 = (byte) (value >> 24);
@@ -44,7 +57,7 @@ namespace TomP2P.Extensions.Workaround
 
         public void WriteLong(long value)
         {
-            // NOTE: _br.Write(long) would write in little-endian fashion (.NET)
+            // NOTE: _bw.Write(long) would write in little-endian fashion (.NET)
 
             // shift long bits to their position and cast to byte
             var b1 = (byte) (value >> 56);
