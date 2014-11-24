@@ -49,7 +49,7 @@ namespace TomP2P.Storage
          private IPrivateKey _privateKey; // TODO make transient
 
          // never serialized over the network in this object
-         private long _validFromMillis;
+         public long ValidFromMillis { private set; get; }
          private ISignatureFactory _signatureFactory;
          private Number160 _hash;
          private bool _meta;
@@ -68,7 +68,7 @@ namespace TomP2P.Storage
              Length = length;
              _type = Length < MaxByteSize ? DataType.Small : DataType.Large;
              _buffer = buffer;
-             _validFromMillis = Convenient.CurrentTimeMillis();
+             ValidFromMillis = Convenient.CurrentTimeMillis();
          }
 
          /// <summary>
@@ -99,7 +99,7 @@ namespace TomP2P.Storage
 
              Length = length;
              _buffer = new DataBuffer();
-             _validFromMillis = Convenient.CurrentTimeMillis();
+             ValidFromMillis = Convenient.CurrentTimeMillis();
          }
 
          public Data(Object obj)
@@ -134,7 +134,7 @@ namespace TomP2P.Storage
              }
              Length = length;
              _type = Length < MaxByteSize ? DataType.Small : DataType.Large;
-             _validFromMillis = Convenient.CurrentTimeMillis();
+             ValidFromMillis = Convenient.CurrentTimeMillis();
          }
 
          public bool IsEmpty
@@ -215,6 +215,109 @@ namespace TomP2P.Storage
              }
          }
 
+         // TODO use correct buffer
+         public bool EncodeBuffer(MemoryStream buf)
+         {
+             int already = _buffer.AlreadyTransferred();
+             int remaining = Length - already;
+
+             if (remaining == 0)
+             {
+                 // already finished
+                 return true;
+             }
+
+             _buffer.TransferTo(buf);
+             return _buffer.AlreadyTransferred() == Length;
+         }
+
+         public void EncodeDone(JavaBinaryWriter buf, ISignatureFactory signatureFactory)
+         {
+             EncodeDone(buf, signatureFactory, null);
+         }
+
+         public void EncodeDone(JavaBinaryWriter buf, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
+         {
+             if (_signed)
+             {
+                 if (_signature == null && _privateKey != null)
+                 {
+                     _signature = signatureFactory.Sign(_privateKey, _buffer.ToJavaBinaryWriter());
+                 }
+                 else if (_signature == null && messagePrivateKey != null)
+                 {
+                     _signature = signatureFactory.Sign(messagePrivateKey, _buffer.ToJavaBinaryWriter());
+                 }
+                 else if (_signature == null)
+                 {
+                     throw new ArgumentException("A private key is required to sign.");
+                 }
+                 _signature.Write(buf);
+             }
+         }
+
+         // TODO getter for buffer (maybe both)
+
+         public Object Object
+         {
+             get
+             {
+                 // TODO implement
+                 throw new NotImplementedException();
+             }
+         }
+
+         public Data SetValidFromMillis(long validFromMillis)
+         {
+             ValidFromMillis = validFromMillis;
+             return this;
+         }
+
+         public Data SignNow(KeyPair keyPair, ISignatureFactory signatureFactory)
+         {
+             return SignNow(keyPair, signatureFactory, false);
+         }
+
+         public Data ProtectEntryNow(KeyPair keyPair, ISignatureFactory signatureFactory)
+         {
+             return SignNow(keyPair, signatureFactory, true);
+         }
+
+         private Data SignNow(KeyPair keyPair, ISignatureFactory signatureFactory, bool isProtectedEntry)
+         {
+             if (_signature == null)
+             {
+                 _signature = signatureFactory.Sign(keyPair.PrivateKey, _buffer.ToJavaBinaryWriter());
+                 _signed = true;
+                 _publicKey = keyPair.PublicKey;
+                 _publicKeyFlag = true;
+                 _protectedEntry = isProtectedEntry;
+             }
+             return this;
+         }
+
+         public Data SignNow(IPrivateKey privateKey, ISignatureFactory signatureFactory)
+         {
+             return SignNow(privateKey, signatureFactory, false);
+         }
+
+         public Data ProtectEntryNow(IPrivateKey privateKey, ISignatureFactory signatureFactory)
+         {
+             return SignNow(privateKey, signatureFactory, true);
+         }
+
+         private Data SignNow(IPrivateKey privateKey, ISignatureFactory signatureFactory, bool isProtectedEntry)
+         {
+             if (_signature == null)
+             {
+                 _signature = signatureFactory.Sign(privateKey, _buffer.ToJavaBinaryWriter());
+                 _signed = true;
+                 _publicKeyFlag = true;
+                 _protectedEntry = isProtectedEntry;
+             }
+             return this;
+         }
+
          public Number160 Hash()
          {
              throw new NotImplementedException();
@@ -241,11 +344,6 @@ namespace TomP2P.Storage
          }
 
          public bool EncodeBuffer(JavaBinaryWriter buffer)
-         {
-             throw new NotImplementedException();
-         }
-
-         public void EncodeDone(JavaBinaryWriter buffer, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
          {
              throw new NotImplementedException();
          }
