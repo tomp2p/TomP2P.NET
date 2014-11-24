@@ -43,7 +43,7 @@ namespace TomP2P.Storage
 
          // can be added later
          private ISignatureCodec _signature;
-         private int _ttlSeconds = -1;
+         public int TtlSeconds { private set; get; }
          private IEnumerable<Number160> _basedOnSet = new List<Number160>(0);
          private IPublicKey _publicKey;
          private IPrivateKey _privateKey; // TODO make transient
@@ -69,6 +69,7 @@ namespace TomP2P.Storage
              _type = Length < MaxByteSize ? DataType.Small : DataType.Large;
              _buffer = buffer;
              ValidFromMillis = Convenient.CurrentTimeMillis();
+             TtlSeconds = -1;
          }
 
          /// <summary>
@@ -100,6 +101,7 @@ namespace TomP2P.Storage
              Length = length;
              _buffer = new DataBuffer();
              ValidFromMillis = Convenient.CurrentTimeMillis();
+             TtlSeconds = -1;
          }
 
          public Data(Object obj)
@@ -135,6 +137,7 @@ namespace TomP2P.Storage
              Length = length;
              _type = Length < MaxByteSize ? DataType.Small : DataType.Large;
              ValidFromMillis = Convenient.CurrentTimeMillis();
+             TtlSeconds = -1;
          }
 
          public bool IsEmpty
@@ -192,7 +195,7 @@ namespace TomP2P.Storage
              }
              if (_ttl)
              {
-                 buffer.WriteInt(_ttlSeconds);
+                 buffer.WriteInt(TtlSeconds);
              }
              if (_basedOnFlag)
              {
@@ -318,6 +321,70 @@ namespace TomP2P.Storage
              return this;
          }
 
+         public Data Sign(KeyPair keyPair)
+         {
+             return Sign(keyPair, false);
+         }
+
+         public Data ProtectEntry(KeyPair keyPair, bool isProtectedEntry)
+         {
+             return Sign(keyPair, true);
+         }
+
+         private Data Sign(KeyPair keyPair, bool isProtectedEntry)
+         {
+             _signed = true;
+             _privateKey = keyPair.PrivateKey;
+             _publicKey = keyPair.PublicKey;
+             _publicKeyFlag = true;
+             _protectedEntry = isProtectedEntry;
+             return this;
+         }
+
+         public Data Sign()
+         {
+             return Sign((IPrivateKey)null, false);
+         }
+
+         public Data Sign(IPrivateKey privateKey)
+         {
+             return Sign(privateKey, false);
+         }
+
+         public Data ProtectEntry()
+         {
+             return Sign((IPrivateKey)null, true);
+         }
+
+         public Data ProtectEntry(IPrivateKey privateKey)
+         {
+             return Sign(privateKey, true);
+         }
+
+         private Data Sign(IPrivateKey privateKey, bool isProtectedEntry)
+         {
+             _signed = true;
+             _privateKey = privateKey;
+             _publicKeyFlag = true;
+             _protectedEntry = isProtectedEntry;
+             return this;
+         }
+
+         public long ExpirationMillis
+         {
+             get
+             {
+                 return TtlSeconds <= 0 ? Convenient.JavaLongMaxValue : ValidFromMillis + (TtlSeconds * 1000L);
+             }
+         }
+
+         public Data SetTtlSeconds(int ttlSeconds)
+         {
+             TtlSeconds = ttlSeconds;
+             _ttl = true;
+             return this;
+         }
+
          public Number160 Hash()
          {
              throw new NotImplementedException();
@@ -331,16 +398,6 @@ namespace TomP2P.Storage
          public Data DuplicateMeta()
          {
              throw new NotImplementedException();
-         }
-
-         public Data SetTtlSeconds(int ttlSeconds)
-         {
-             throw new NotImplementedException();
-         }
-
-         public long ExpirationMillis
-         {
-             get { throw new InvalidOperationException();}
          }
 
          public bool EncodeBuffer(JavaBinaryWriter buffer)
