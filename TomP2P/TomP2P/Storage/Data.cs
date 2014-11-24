@@ -18,7 +18,7 @@ namespace TomP2P.Storage
     /// It is reasonable to create the hash on the remote peer, but not on the local peer. 
     /// The remote peer uses the hash to tell the other peers, which version is stored and it's used quite often.
     /// </summary>
-    public class Data
+    public class Data : IEquatable<Data>
     {
         private const int MaxByteSize = 256;
 
@@ -263,6 +263,7 @@ namespace TomP2P.Storage
         }
 
         // TODO getter for buffer (maybe both)
+        // TODO implement toByteBuffers()
 
         public Object Object
         {
@@ -572,11 +573,24 @@ namespace TomP2P.Storage
             return data;
         }
 
-
-
-        public Number160 Hash()
+        public sbyte[] ToBytes()
         {
-            throw new NotImplementedException();
+            var buf = _buffer.ToJavaBinaryReader();
+            var me = new sbyte[buf.ReadableBytes];
+            buf.ReadBytes(me);
+            return me;
+        }
+
+        public Number160 Hash
+        {
+            get
+            {
+                if (_hash == null)
+                {
+                    _hash = Utils.Utils.MakeShaHash(_buffer.ToJavaBinaryReader()); // TODO maybe another "stream/buffer" should be used
+                }
+                return _hash;
+            }
         }
 
         public bool EncodeBuffer(JavaBinaryWriter buffer)
@@ -602,6 +616,62 @@ namespace TomP2P.Storage
                 .Append(",hasPK:").Append(PublicKey != null)
                 .Append(",h:").Append(Signature).Append("]");
             return sb.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as Data);
+        }
+
+        public bool Equals(Data other)
+        {
+            // ignore TTL -> it's still the same data even if TTL is different
+            if (other.IsSigned != IsSigned || other._basedOnFlag != _basedOnFlag
+                || other.IsProtectedEntry != IsProtectedEntry || other.HasPublicKey != HasPublicKey
+                || other.IsFlag1 != IsFlag1 || other.IsFlag2 != IsFlag2 || other.HasPrepareFlag != HasPrepareFlag)
+            {
+                return false;
+            }
+            if (other._type != _type || other.Length != Length)
+            {
+                return false;
+            }
+            // This is a slow operation, use with care!
+            return Utils.Utils.Equals(other.BasedOnSet, BasedOnSet) && Utils.Utils.Equals(other.Signature, Signature)
+                   && other._buffer.Equals(_buffer);
+        }
+
+        public override int GetHashCode()
+        {
+            var ba = new BitArray(8);
+            ba.Set(0, IsSigned);
+            ba.Set(1, _ttl);
+            ba.Set(2, _basedOnFlag);
+            ba.Set(3, IsProtectedEntry);
+            ba.Set(4, HasPublicKey);
+            ba.Set(5, IsFlag1);
+            ba.Set(6, IsFlag2);
+            ba.Set(7, HasPrepareFlag);
+
+            int hashCode = ba.GetHashCode() ^ TtlSeconds ^ (int) _type ^ Length; // TODO check if works
+            foreach (var basedOn in BasedOnSet)
+            {
+                hashCode = hashCode ^ basedOn.GetHashCode();
+            }
+            // this is a slow operation, use with care
+            return hashCode ^ _buffer.GetHashCode();
         }
 
         public static Data DecodeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)

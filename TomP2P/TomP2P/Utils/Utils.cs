@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
+using TomP2P.Peers;
 using TomP2P.Storage;
 
 namespace TomP2P.Utils
@@ -21,6 +25,12 @@ namespace TomP2P.Utils
         public const int LongByteSize = 8;      //  64 bits
 
         public static readonly byte[] EmptyByteArray = new byte[0];
+
+        public new static bool Equals(Object a, Object b)
+        {
+            // TODO check if works
+            return (a == b) || (a != null && a.Equals(b));
+        }
 
         public static bool IsSameSets<T>(IEnumerable<T> set1, IEnumerable<T> set2)
         {
@@ -101,5 +111,17 @@ namespace TomP2P.Utils
             return new IPAddress(tmp);
         }
 
+        public static Number160 MakeShaHash(JavaBinaryReader br)
+        {
+            // see http://stackoverflow.com/questions/6843698/calculating-sha-1-hashes-in-java-and-c-sharp
+            // TODO implement
+            // TODO check if works
+            byte[] buffer = Convenient.ReadFully(br.BaseStream, 0);
+
+            var md = SHA1.Create();
+            byte[] digest = md.ComputeHash(buffer); // stream could be passed
+
+            return new Number160(digest.ToSByteArray()); // TODO make unit test
+        }
     }
 }

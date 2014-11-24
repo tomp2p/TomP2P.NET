@@ -111,5 +111,19 @@ namespace TomP2P.Extensions
 
             return unsigned;
         }
+
+        /// <summary>
+        /// Converts a byte[] to sbyte[].
+        /// </summary>
+        /// <param name="unsigned">The byte[] to be converted.</param>
+        /// <returns>The converted sbyte[].</returns>
+        public static sbyte[] ToSByteArray(this byte[] unsigned)
+        {
+            // TODO test
+            sbyte[] signed = new sbyte[unsigned.Length];
+            Buffer.BlockCopy(unsigned, 0, signed, 0, unsigned.Length);
+
+            return signed;
+        }
     }
 }

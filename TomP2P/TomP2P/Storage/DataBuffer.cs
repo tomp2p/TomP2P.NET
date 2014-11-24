@@ -46,6 +46,11 @@ namespace TomP2P.Storage
             throw new NotImplementedException();
         }
 
+        public JavaBinaryReader ToJavaBinaryReader()
+        {
+            throw new NotImplementedException();
+        }
+
         public void ResetAlreadyTransferred()
         {
             throw new NotImplementedException();

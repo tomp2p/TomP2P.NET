@@ -293,7 +293,6 @@ namespace TomP2P.Peers
                 return false;
             }
             return Equals(obj as Number160);
-
         }
 
         public bool Equals(Number160 other)
