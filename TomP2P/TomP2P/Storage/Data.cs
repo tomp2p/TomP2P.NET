@@ -144,11 +144,6 @@ namespace TomP2P.Storage
             BasedOnSet = new List<Number160>(0);
         }
 
-        public bool IsEmpty
-        {
-            get { return Length == 0; }
-        }
-
         public void EncodeHeader(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
         {
             var header = (int)_type; // check if works
@@ -223,7 +218,7 @@ namespace TomP2P.Storage
         }
 
         // TODO use correct buffer
-        public bool EncodeBuffer(JavaBinaryWriter buf)
+        public bool EncodeBuffer(JavaBinaryWriter buffer)
         {
             int already = _buffer.AlreadyTransferred();
             int remaining = Length - already;
@@ -234,16 +229,16 @@ namespace TomP2P.Storage
                 return true;
             }
 
-            _buffer.TransferTo(buf);
+            _buffer.TransferTo(buffer);
             return _buffer.AlreadyTransferred() == Length;
         }
 
-        public void EncodeDone(JavaBinaryWriter buf, ISignatureFactory signatureFactory)
+        public void EncodeDone(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
         {
-            EncodeDone(buf, signatureFactory, null);
+            EncodeDone(buffer, signatureFactory, null);
         }
 
-        public void EncodeDone(JavaBinaryWriter buf, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
+        public void EncodeDone(JavaBinaryWriter buffer, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
         {
             if (IsSigned)
             {
@@ -259,7 +254,7 @@ namespace TomP2P.Storage
                 {
                     throw new ArgumentException("A private key is required to sign.");
                 }
-                Signature.Write(buf);
+                Signature.Write(buffer);
             }
         }
 
@@ -394,9 +389,9 @@ namespace TomP2P.Storage
         /// <summary>
         /// Add data to the buffer.
         /// </summary>
-        /// <param name="buf">The buffer to append.</param>
+        /// <param name="buffer">The buffer to append.</param>
         /// <returns></returns>
-        public bool DecodeBuffer(JavaBinaryReader buf) // TODO use correct buffer
+        public bool DecodeBuffer(JavaBinaryReader buffer)
         {
             int already = _buffer.AlreadyTransferred();
             int remaining = Length - already;
@@ -408,7 +403,7 @@ namespace TomP2P.Storage
 
             // make sure it gets not garbage collected. But we need to keep track of
             // it and when this object gets collected, we need to release the buffer
-            int transfered = _buffer.TransferFrom(buf, remaining);
+            int transfered = _buffer.TransferFrom(buffer, remaining);
             return transfered == remaining;
         }
 
@@ -439,42 +434,43 @@ namespace TomP2P.Storage
             return true;
         }
 
-        public bool Verify(ISignatureFactory signatureFactory)
+        public Data Sign()
         {
-            return Verify(PublicKey, signatureFactory);
+            return Sign((IPrivateKey)null, false);
         }
 
-        public bool Verify(IPublicKey publicKey, ISignatureFactory signatureFactory)
+        public Data Sign(KeyPair keyPair)
         {
-            return signatureFactory.Verify(publicKey, _buffer.ToJavaBinaryReader(), Signature);
+            return Sign(keyPair, false);
         }
 
-        // TODO getter for buffer (maybe both)
-        // TODO implement toByteBuffers()
-
-        public Object Object
+        private Data Sign(KeyPair keyPair, bool isProtectedEntry)
         {
-            get
-            {
-                // TODO implement
-                throw new NotImplementedException();
-            }
+            IsSigned = true;
+            PrivateKey = keyPair.PrivateKey;
+            PublicKey = keyPair.PublicKey;
+            HasPublicKey = true;
+            IsProtectedEntry = isProtectedEntry;
+            return this;
         }
 
-        public Data SetValidFromMillis(long validFromMillis)
+        public Data Sign(IPrivateKey privateKey)
         {
-            ValidFromMillis = validFromMillis;
+            return Sign(privateKey, false);
+        }
+
+        private Data Sign(IPrivateKey privateKey, bool isProtectedEntry)
+        {
+            IsSigned = true;
+            PrivateKey = privateKey;
+            HasPublicKey = true;
+            IsProtectedEntry = isProtectedEntry;
             return this;
         }
 
         public Data SignNow(KeyPair keyPair, ISignatureFactory signatureFactory)
         {
             return SignNow(keyPair, signatureFactory, false);
-        }
-
-        public Data ProtectEntryNow(KeyPair keyPair, ISignatureFactory signatureFactory)
-        {
-            return SignNow(keyPair, signatureFactory, true);
         }
 
         private Data SignNow(KeyPair keyPair, ISignatureFactory signatureFactory, bool isProtectedEntry)
@@ -495,11 +491,6 @@ namespace TomP2P.Storage
             return SignNow(privateKey, signatureFactory, false);
         }
 
-        public Data ProtectEntryNow(IPrivateKey privateKey, ISignatureFactory signatureFactory)
-        {
-            return SignNow(privateKey, signatureFactory, true);
-        }
-
         private Data SignNow(IPrivateKey privateKey, ISignatureFactory signatureFactory, bool isProtectedEntry)
         {
             if (Signature == null)
@@ -512,35 +503,18 @@ namespace TomP2P.Storage
             return this;
         }
 
-        public Data Sign(KeyPair keyPair)
+        public bool Verify(ISignatureFactory signatureFactory)
         {
-            return Sign(keyPair, false);
+            return Verify(PublicKey, signatureFactory);
         }
 
-        public Data ProtectEntry(KeyPair keyPair, bool isProtectedEntry)
+        public bool Verify(IPublicKey publicKey, ISignatureFactory signatureFactory)
         {
-            return Sign(keyPair, true);
+            return signatureFactory.Verify(publicKey, _buffer.ToJavaBinaryReader(), Signature);
         }
 
-        private Data Sign(KeyPair keyPair, bool isProtectedEntry)
-        {
-            IsSigned = true;
-            PrivateKey = keyPair.PrivateKey;
-            PublicKey = keyPair.PublicKey;
-            HasPublicKey = true;
-            IsProtectedEntry = isProtectedEntry;
-            return this;
-        }
-
-        public Data Sign()
-        {
-            return Sign((IPrivateKey)null, false);
-        }
-
-        public Data Sign(IPrivateKey privateKey)
-        {
-            return Sign(privateKey, false);
-        }
+        // TODO getter for buffer (maybe both)
+        // TODO implement toByteBuffers()
 
         public Data ProtectEntry()
         {
@@ -552,28 +526,19 @@ namespace TomP2P.Storage
             return Sign(privateKey, true);
         }
 
-        private Data Sign(IPrivateKey privateKey, bool isProtectedEntry)
+        public Data ProtectEntry(KeyPair keyPair, bool isProtectedEntry)
         {
-            IsSigned = true;
-            PrivateKey = privateKey;
-            HasPublicKey = true;
-            IsProtectedEntry = isProtectedEntry;
-            return this;
+            return Sign(keyPair, true);
         }
 
-        public long ExpirationMillis
+        public Data ProtectEntryNow(KeyPair keyPair, ISignatureFactory signatureFactory)
         {
-            get
-            {
-                return TtlSeconds <= 0 ? Convenient.JavaLongMaxValue : ValidFromMillis + (TtlSeconds * 1000L);
-            }
+            return SignNow(keyPair, signatureFactory, true);
         }
 
-        public Data SetTtlSeconds(int ttlSeconds)
+        public Data ProtectEntryNow(IPrivateKey privateKey, ISignatureFactory signatureFactory)
         {
-            TtlSeconds = ttlSeconds;
-            _ttl = true;
-            return this;
+            return SignNow(privateKey, signatureFactory, true);
         }
 
         public Data AddBasedOn(Number160 basedOn)
@@ -583,16 +548,17 @@ namespace TomP2P.Storage
             return this;
         }
 
-        public ISignatureFactory SignatureFactory
+        public Data SetTtlSeconds(int ttlSeconds)
         {
-            get
-            {
-                if (_signatureFactory == null)
-                {
-                    return new DsaSignatureFactory();
-                }
-                return _signatureFactory;
-            }
+            TtlSeconds = ttlSeconds;
+            _ttl = true;
+            return this;
+        }
+
+        public Data SetValidFromMillis(long validFromMillis)
+        {
+            ValidFromMillis = validFromMillis;
+            return this;
         }
 
         public Data SetSignatureFactory(ISignatureFactory signatureFactory)
@@ -663,11 +629,6 @@ namespace TomP2P.Storage
             IsFlag1 = isDeleted;
             IsFlag2 = isDeleted;
             return this;
-        }
-
-        public bool IsDeleted
-        {
-            get { return IsFlag1 && IsFlag2; }
         }
 
         public Data SetHasPublicKey()
@@ -768,6 +729,37 @@ namespace TomP2P.Storage
             return me;
         }
 
+        public Object Object
+        {
+            get
+            {
+                // TODO implement
+                throw new NotImplementedException();
+            }
+        }
+
+        public bool IsEmpty
+        {
+            get { return Length == 0; }
+        }
+
+        public bool IsDeleted
+        {
+            get { return IsFlag1 && IsFlag2; }
+        }
+
+        public ISignatureFactory SignatureFactory
+        {
+            get
+            {
+                if (_signatureFactory == null)
+                {
+                    return new DsaSignatureFactory();
+                }
+                return _signatureFactory;
+            }
+        }
+
         public Number160 Hash
         {
             get
@@ -777,6 +769,14 @@ namespace TomP2P.Storage
                     _hash = Utils.Utils.MakeShaHash(_buffer.ToJavaBinaryReader()); // TODO maybe another "stream/buffer" should be used
                 }
                 return _hash;
+            }
+        }
+
+        public long ExpirationMillis
+        {
+            get
+            {
+                return TtlSeconds <= 0 ? Convenient.JavaLongMaxValue : ValidFromMillis + (TtlSeconds * 1000L);
             }
         }
 
