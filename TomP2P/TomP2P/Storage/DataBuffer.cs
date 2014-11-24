@@ -10,12 +10,22 @@ namespace TomP2P.Storage
 {
     public class DataBuffer
     {
+        public DataBuffer(sbyte[] buffer, int offset, int length)
+        {
+            throw new NotImplementedException();
+        }
+
         public int AlreadyTransferred()
         {
             throw new NotImplementedException();
         }
 
         public int TransferFrom(JavaBinaryReader buffer, int remaining)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal int Length()
         {
             throw new NotImplementedException();
         }

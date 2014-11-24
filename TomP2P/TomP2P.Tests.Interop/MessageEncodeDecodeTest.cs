@@ -403,7 +403,7 @@ namespace TomP2P.Tests.Interop
             Assert.AreEqual(m1.Version, m2.Version);
             Assert.AreEqual(m1.Command, m2.Command);
             Assert.AreEqual(m1.Recipient, m2.Recipient);
-            Assert.AreEqual(m1.Type, m2.Type);
+            Assert.AreEqual(m1.DataType, m2.DataType);
             Assert.AreEqual(m1.Sender, m2.Sender);
             Assert.AreEqual(m1.Sender.TcpPort, m2.Sender.TcpPort);
             Assert.AreEqual(m1.Sender.IsFirewalledTcp, m2.Sender.IsFirewalledTcp);

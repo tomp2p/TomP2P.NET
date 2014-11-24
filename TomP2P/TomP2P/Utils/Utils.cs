@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using TomP2P.Extensions;
+using TomP2P.Storage;
 
 namespace TomP2P.Utils
 {
@@ -20,6 +19,8 @@ namespace TomP2P.Utils
         public const int ShortByteSize = 2;     //  16 bits
         public const int IntegerByteSize = 4;   //  32 bits
         public const int LongByteSize = 8;      //  64 bits
+
+        public static readonly byte[] EmptyByteArray = new byte[0];
 
         public static bool IsSameSets<T>(IEnumerable<T> set1, IEnumerable<T> set2)
         {
@@ -79,17 +80,6 @@ namespace TomP2P.Utils
             }
             return false;
         }
-
-        #region .NET specific
-
-        public static double GetCurrentMillis()
-        {
-            var jan1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            TimeSpan ts = DateTime.UtcNow - jan1970;
-            return ts.TotalMilliseconds;
-        }
-
-        #endregion
 
         public static IPAddress Inet4AddressFromBytes(sbyte[] src, long offset)
         {

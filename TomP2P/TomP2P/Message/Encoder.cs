@@ -1,6 +1,7 @@
 ﻿using System;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Storage;
 
@@ -283,7 +284,7 @@ namespace TomP2P.Message
 
             if (isReply)
             {
-                var ttl = (int) ((data.ExpirationMillis - Utils.Utils.GetCurrentMillis())/1000);
+                var ttl = (int) ((data.ExpirationMillis - Convenient.CurrentTimeMillis())/1000);
                 data.SetTtlSeconds(ttl < 0 ? 0 : ttl);
             }
 
