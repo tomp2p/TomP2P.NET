@@ -45,5 +45,15 @@ namespace TomP2P.Storage
         {
             throw new NotImplementedException();
         }
+
+        public void ResetAlreadyTransferred()
+        {
+            throw new NotImplementedException();
+        }
+
+        public DataBuffer ShallowCopy()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
