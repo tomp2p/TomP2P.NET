@@ -25,12 +25,12 @@ namespace TomP2P.Storage
             throw new NotImplementedException();
         }
 
-        public int TransferFrom(MemoryStream buffer, int remaining)
+        public int TransferFrom(JavaBinaryReader buffer, int remaining)
         {
             throw new NotImplementedException();
         }
 
-        public void TransferTo(MemoryStream buf)
+        public void TransferTo(JavaBinaryWriter buffer)
         {
             throw new NotImplementedException();
         }

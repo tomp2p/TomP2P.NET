@@ -10,6 +10,11 @@ namespace TomP2P.Connection
     /// </summary>
     public class DsaSignatureFactory : ISignatureFactory
     {
+        public void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer)
+        {
+            throw new NotImplementedException();
+        }
+
         public IPublicKey DecodePublicKey(byte[] me)
         {
             throw new NotImplementedException();
@@ -20,17 +25,12 @@ namespace TomP2P.Connection
             throw new NotImplementedException();
         }
 
-        public void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer)
-        {
-            throw new NotImplementedException();
-        }
-
         public ISignatureCodec Sign(IPrivateKey privateKey, JavaBinaryWriter buffer)
         {
             throw new NotImplementedException();
         }
 
-        public bool Verify(IPublicKey publicKey, System.IO.MemoryStream buffer, ISignatureCodec signatureEncoded)
+        public bool Verify(IPublicKey publicKey, JavaBinaryReader buffer, ISignatureCodec signatureEncoded)
         {
             throw new NotImplementedException();
         }

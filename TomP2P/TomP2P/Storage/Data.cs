@@ -223,7 +223,7 @@ namespace TomP2P.Storage
         }
 
         // TODO use correct buffer
-        public bool EncodeBuffer(MemoryStream buf)
+        public bool EncodeBuffer(JavaBinaryWriter buf)
         {
             int already = _buffer.AlreadyTransferred();
             int remaining = Length - already;
@@ -263,7 +263,7 @@ namespace TomP2P.Storage
             }
         }
 
-        public Data DeocdeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
+        public static Data DeocdeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
         {
             // 2 is the smallest packet size, we could start if we know 1 byte to
             // decode the header, but we always need
@@ -396,7 +396,7 @@ namespace TomP2P.Storage
         /// </summary>
         /// <param name="buf">The buffer to append.</param>
         /// <returns></returns>
-        public bool DecodeBuffer(MemoryStream buf) // TODO use correct buffer
+        public bool DecodeBuffer(JavaBinaryReader buf) // TODO use correct buffer
         {
             int already = _buffer.AlreadyTransferred();
             int remaining = Length - already;
@@ -844,11 +844,6 @@ namespace TomP2P.Storage
             }
             // this is a slow operation, use with care
             return hashCode ^ _buffer.GetHashCode();
-        }
-
-        public static Data DecodeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
-        {
-            throw new NotImplementedException();
         }
 
         public static DataType Type(int header)

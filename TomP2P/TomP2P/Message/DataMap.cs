@@ -63,14 +63,14 @@ namespace TomP2P.Message
             {
                 foreach (var data in BackingDataMap)
                 {
-                    result.Add(data.Key, data.Value.Hash());
+                    result.Add(data.Key, data.Value.Hash);
                 }
             }
             else if (DataMapConvert != null)
             {
                 foreach (var data in DataMapConvert)
                 {
-                    result.Add(new Number640(LocationKey, DomainKey, data.Key, VersionKey), data.Value.Hash());
+                    result.Add(new Number640(LocationKey, DomainKey, data.Key, VersionKey), data.Value.Hash);
                 }
             }
             return result;

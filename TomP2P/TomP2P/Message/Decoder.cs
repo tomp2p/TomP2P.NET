@@ -373,7 +373,7 @@ namespace TomP2P.Message
                                 
                                 _key = new Number640(locationKey, domainKey, contentKey, versionKey);
                             }
-                            _data = Data.DecodeHeader(buffer, _signatureFactory);
+                            _data = Data.DeocdeHeader(buffer, _signatureFactory);
                             if (_data == null)
                             {
                                 return false;
@@ -389,11 +389,11 @@ namespace TomP2P.Message
                                 return false;
                             }
                             // if we have signed the message, set the public key anyway, but only if we indicated so
-                            if (Message.IsSign && Message.PublicKey(0) != null && _data.HasPublicKey()
-                                && (_data.PublicKey() == null || _data.PublicKey() == PeerBuilder.EmptyPublicKey))
+                            if (Message.IsSign && Message.PublicKey(0) != null && _data.HasPublicKey
+                                && (_data.PublicKey == null || _data.PublicKey == PeerBuilder.EmptyPublicKey))
                                 // TODO check empty key condition
                             {
-                                _data.PublicKey(Message.PublicKey(0));
+                                _data.SetPublicKey(Message.PublicKey(0));
                             }
                             _data = null; // TODO why here? not in prepareFinish()?
                             _key = null;
@@ -581,7 +581,7 @@ namespace TomP2P.Message
                             var pa = new PeerAddress(buffer);
                             var ps = new PeerStatistic(pa);
 
-                            _currentTrackerData = Data.DecodeHeader(buffer, _signatureFactory);
+                            _currentTrackerData = Data.DeocdeHeader(buffer, _signatureFactory);
                             if (_currentTrackerData == null)
                             {
                                 return false;
@@ -589,7 +589,7 @@ namespace TomP2P.Message
                             _trackerData.PeerAddresses.Add(ps, _currentTrackerData);
                             if (Message.IsSign)
                             {
-                                _currentTrackerData.PublicKey(Message.PublicKey(0));
+                                _currentTrackerData.SetPublicKey(Message.PublicKey(0));
                             }
                             if (!_currentTrackerData.DecodeBuffer(buffer))
                             {
