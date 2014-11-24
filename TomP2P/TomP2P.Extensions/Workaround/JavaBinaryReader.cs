@@ -94,6 +94,31 @@ namespace TomP2P.Extensions.Workaround
             return _br.ReadByte();
         }
 
+        public int GetInt(long index)
+        {
+            // do not change reader index
+            var stream = _br.BaseStream;
+            var position = _br.BaseStream.Position;
+
+            stream.Position = index;
+            int val = ReadInt();
+
+            stream.Position = position;
+            return val;
+        }
+
+        public void GetBytes(long index, sbyte[] me)
+        {
+            // do not change reader index
+            var stream = _br.BaseStream;
+            var position = _br.BaseStream.Position;
+
+            stream.Position = index;
+            ReadBytes(me);
+
+            stream.Position = position;
+        }
+
         public ushort GetUShort(long index)
         {
             // do not change reader index
@@ -148,6 +173,15 @@ namespace TomP2P.Extensions.Workaround
         public sbyte[] Buffer
         {
             get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Increases the current ReaderIndex by the specified length.
+        /// </summary>
+        /// <param name="length"></param>
+        public void SkipBytes(int length)
+        {
+            _br.ReadBytes(length);
         }
     }
 }

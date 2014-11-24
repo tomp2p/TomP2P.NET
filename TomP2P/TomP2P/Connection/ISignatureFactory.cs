@@ -11,6 +11,8 @@ namespace TomP2P.Connection
     /// </summary>
     public interface ISignatureFactory
     {
+        void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer);
+
         /// <summary>
         /// The public key is sent over the wire, thus the decoding of it needs special handling.
         /// </summary>
@@ -20,13 +22,11 @@ namespace TomP2P.Connection
 
         IPublicKey DecodePublicKey(JavaBinaryReader buffer);
 
-        void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer);
+        ISignatureCodec Sign(IPrivateKey privateKey, JavaBinaryWriter buffer);
 
-        ISignatureCodec Sign(IPrivateKey privateKey, JavaBinaryWriter buffer); // TODO throw exception?
+        bool Verify(IPublicKey publicKey, JavaBinaryReader buffer, ISignatureCodec signatureEncoded);
 
-        bool Verify(IPublicKey publicKey, MemoryStream buffer, ISignatureCodec signatureEncoded); // TODO throw exception?
-
-        RSACryptoServiceProvider Update(IPublicKey publicKey, MemoryStream[] buffers); // TODO throw exception?
+        RSACryptoServiceProvider Update(IPublicKey publicKey, MemoryStream[] buffers);
 
         ISignatureCodec SignatureCodec { get; set; }
     }

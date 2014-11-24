@@ -9,6 +9,7 @@ using TomP2P.Connection;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
+using TomP2P.P2P;
 using TomP2P.Peers;
 
 namespace TomP2P.Storage
@@ -260,6 +261,192 @@ namespace TomP2P.Storage
                 }
                 Signature.Write(buf);
             }
+        }
+
+        public Data DeocdeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
+        {
+            // 2 is the smallest packet size, we could start if we know 1 byte to
+            // decode the header, but we always need
+            // a second byte. Thus, we are waiting for at least 2 bytes.
+            if (buffer.ReadableBytes < 2*Utils.Utils.ByteByteSize)
+            {
+                return null;
+            }
+            int header = buffer.GetUByte(buffer.ReaderIndex);
+            DataType type = Type(header);
+
+            // length
+            int length;
+            int indexLength = Utils.Utils.ByteByteSize;
+            int indexTtl;
+            switch (type)
+            {
+                case DataType.Small:
+                    length = buffer.GetUByte(buffer.ReaderIndex + indexLength);
+                    indexTtl = indexLength + Utils.Utils.ByteByteSize;
+                    break;
+                case DataType.Large:
+                    indexTtl = indexLength + Utils.Utils.IntegerByteSize;
+                    if (buffer.ReadableBytes < indexTtl)
+                    {
+                        return null;
+                    }
+                    length = buffer.GetInt(buffer.ReaderIndex + indexLength);
+                    break;
+                default:
+                    throw new ArgumentException("Unknown DataType.");
+            }
+
+            // TTL
+            int ttl;
+            int indexBasedOnNr;
+            if (CheckHasTtl(header))
+            {
+                indexBasedOnNr = indexTtl + Utils.Utils.IntegerByteSize;
+                if (buffer.ReadableBytes < indexBasedOnNr)
+                {
+                    return null;
+                }
+                ttl = buffer.GetInt(buffer.ReaderIndex + indexTtl);
+            }
+            else
+            {
+                indexBasedOnNr = indexTtl;
+                ttl = -1;
+            }
+
+            // nr basedOn + basedOn
+            int numBasedOn;
+            int indexPublicKeySize;
+            int indexBasedOn;
+            var basedOn = new List<Number160>();
+            if (CheckHasBasedOn(header))
+            {
+                // get nr of basedOn keys
+                indexBasedOn = indexBasedOnNr + Utils.Utils.ByteByteSize;
+                if (buffer.ReadableBytes < indexBasedOn)
+                {
+                    return null;
+                }
+                numBasedOn = buffer.GetUByte(buffer.ReaderIndex + indexBasedOn) + 1;
+                indexPublicKeySize = indexBasedOn + (numBasedOn*Number160.ByteArraySize);
+                if (buffer.ReadableBytes < indexPublicKeySize)
+                {
+                    return null;
+                }
+
+                // get basedOn
+                long index = buffer.ReaderIndex + indexBasedOnNr + Utils.Utils.ByteByteSize;
+                var me = new sbyte[Number160.ByteArraySize];
+                for (int i = 0; i < numBasedOn; i++)
+                {
+                    buffer.GetBytes(index, me);
+                    index += Number160.ByteArraySize;
+                    basedOn.Add(new Number160(me));
+                }
+            }
+            else
+            {
+                indexPublicKeySize = indexBasedOnNr;
+                numBasedOn = 0;
+            }
+
+            // public key + size
+            int publicKeySize;
+            int indexPublicKey;
+            int indexEnd;
+            IPublicKey publicKey;
+            if (CheckHasPublicKey(header))
+            {
+                // get public key size
+                indexPublicKey = indexPublicKeySize + Utils.Utils.ShortByteSize;
+                if (buffer.ReadableBytes < indexPublicKey)
+                {
+                    return null;
+                }
+                publicKeySize = buffer.GetUShort(buffer.ReaderIndex + indexPublicKeySize);
+                indexEnd = indexPublicKey + publicKeySize;
+                if (buffer.ReadableBytes < indexEnd)
+                {
+                    return null;
+                }
+
+                // get public key
+                buffer.SkipBytes(indexPublicKeySize);
+                publicKey = signatureFactory.DecodePublicKey(buffer);
+            }
+            else
+            {
+                publicKeySize = 0;
+                indexPublicKey = indexPublicKeySize;
+                buffer.SkipBytes(indexPublicKey);
+                publicKey = null;
+            }
+
+            // now, we have read the header and the length
+            var data = new Data(header, length);
+            data.TtlSeconds = ttl;
+            data.BasedOnSet = basedOn;
+            data.PublicKey = publicKey;
+            return data;
+        }
+
+        /// <summary>
+        /// Add data to the buffer.
+        /// </summary>
+        /// <param name="buf">The buffer to append.</param>
+        /// <returns></returns>
+        public bool DecodeBuffer(MemoryStream buf) // TODO use correct buffer
+        {
+            int already = _buffer.AlreadyTransferred();
+            int remaining = Length - already;
+            if (remaining == 0)
+            {
+                // already finished
+                return true;
+            }
+
+            // make sure it gets not garbage collected. But we need to keep track of
+            // it and when this object gets collected, we need to release the buffer
+            int transfered = _buffer.TransferFrom(buf, remaining);
+            return transfered == remaining;
+        }
+
+        public bool DecodeDone(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
+        {
+            if (IsSigned)
+            {
+                Signature = signatureFactory.SignatureCodec;
+                if (buffer.ReadableBytes < Signature.SignatureSize)
+                {
+                    return false;
+                }
+                Signature.Read(buffer);
+            }
+            return true;
+        }
+
+        public bool DecodeDone(JavaBinaryReader buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
+        {
+            if (IsSigned)
+            {
+                if (publicKey == PeerBuilder.EmptyPublicKey)
+                {
+                    PublicKey = publicKey;
+                }
+                return DecodeDone(buffer, signatureFactory);
+            }
+            return true;
+        }
+
+        public bool Verify(ISignatureFactory signatureFactory)
+        {
+            return Verify(PublicKey, signatureFactory);
+        }
+
+        public bool Verify(IPublicKey publicKey, ISignatureFactory signatureFactory)
+        {
+            return signatureFactory.Verify(publicKey, _buffer.ToJavaBinaryReader(), Signature);
         }
 
         // TODO getter for buffer (maybe both)
@@ -591,21 +778,6 @@ namespace TomP2P.Storage
                 }
                 return _hash;
             }
-        }
-
-        public bool EncodeBuffer(JavaBinaryWriter buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool DecodeBuffer(JavaBinaryReader buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool DecodeDone(JavaBinaryReader buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
-        {
-            throw new NotImplementedException();
         }
 
         public override string ToString()
