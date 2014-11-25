@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -44,19 +45,6 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
-        /// Copies the content of the buffer and returns a new instance (separate indexes).
-        /// NOTE: Changes to the respective Stream instances are not mirrored as in Java Netty's ByteBuf.duplicate().
-        /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public static Stream Duplicate(this Stream s)
-        {
-            var copy = new MemoryStream();
-            s.CopyTo(copy); // TODO make async
-            return copy;
-        }
-
-        /// <summary>
         /// Convert a BitArray to a byte. (Only takes first 8 bits.)
         /// </summary>
         /// <param name="ba"></param>
@@ -74,8 +62,31 @@ namespace TomP2P.Extensions
             return b;
         }
 
+        public static bool IsIPv4(this IPAddress ip)
+        {
+            return ip.AddressFamily == AddressFamily.InterNetwork;
+        }
+
+        public static bool IsIPv6(this IPAddress ip)
+        {
+            return ip.AddressFamily == AddressFamily.InterNetworkV6;
+        }
+
+        #region Java Netty
+
         /// <summary>
-        /// Returns the number of readable bytes. (writerPosition - readerPosition, aka Length - Position).
+        /// Equivalent to Java Netty's ByteBuf.writeBytes(byte[] src).
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="bytes"></param>
+        public static void WriteBytes(this Stream s, sbyte[] bytes)
+        {
+            s.Write(bytes.ToByteArray(), 0, bytes.Length); // TODO test
+        }
+
+        /// <summary>
+        /// Equivalent to Java Netty's ByteBuf.readableBytes().
+        /// (writerPosition - readerPosition = Length - Position).
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -84,20 +95,33 @@ namespace TomP2P.Extensions
             return s.Length - s.Position;
         }
 
-        public static void WriteBytes(this Stream s, sbyte[] bytes)
+        /// <summary>
+        /// Equivalent to Java Netty's ByteBuf.duplicate().
+        /// NOTE: Changes to the respective Stream instances are not mirrored as in Java Netty's ByteBuf.duplicate().
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static MemoryStream Duplicate(this Stream s)
         {
-            //s.Write(bytes, 0, bytes.Length);
+            var copy = new MemoryStream();
+            s.CopyTo(copy); // TODO make async
+            return copy;
         }
 
-        public static bool IsIPv4(this IPAddress ip)
+        /// <summary>
+        /// Equivalent to Java Netty's ByteBuf.slice()
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <returns></returns>
+        public static MemoryStream Slice(this MemoryStream ms)
         {
-            return ip.AddressFamily == AddressFamily.InterNetwork; // TODO test
+            byte[] data = ms.ToArray().Skip((int)ms.Position).ToArray(); // TODO test
+            return new MemoryStream(data);
         }
 
-        public static bool IsIPv6(this IPAddress ip)
-        {
-            return ip.AddressFamily == AddressFamily.InterNetworkV6; // TODO test
-        }
+        #endregion
+
+        # region Conversion
 
         /// <summary>
         /// Converts a sbyte[] to byte[].
@@ -125,5 +149,7 @@ namespace TomP2P.Extensions
 
             return signed;
         }
+
+        #endregion
     }
 }

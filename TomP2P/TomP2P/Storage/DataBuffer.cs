@@ -4,20 +4,60 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Storage
 {
     public class DataBuffer
     {
+        private readonly IList<MemoryStream> _buffers;
+
+        private int _alreadyTransferred = 0;
+
         public DataBuffer()
+            : this(1)
+        { }
+
+        public DataBuffer(int nrOfBuffers)
         {
-            
+            _buffers = new List<MemoryStream>(nrOfBuffers);
         }
 
         public DataBuffer(sbyte[] buffer, int offset, int length)
         {
-            throw new NotImplementedException();
+            _buffers = new List<MemoryStream>(1);
+
+            // TODO check, port is not trivial
+            var buf = new MemoryStream(buffer.ToByteArray(), offset, length);
+            _buffers.Add(buf);
+        }
+
+        /// <summary>
+        /// Creates a DataBuffer and adds the MemoryStream to it.
+        /// </summary>
+        /// <param name="buf"></param>
+        public DataBuffer(MemoryStream buf)
+        {
+            // TODO check, port is not trivial
+            _buffers = new List<MemoryStream>(1);
+            _buffers.Add(buf.Slice());
+            // TODO retain needed?
+        }
+
+        public DataBuffer(IList<MemoryStream> buffers)
+        {
+            _buffers = new List<MemoryStream>(_buffers.Count);
+            foreach (var buf in _buffers)
+            {
+                _buffers.Add(buf.Duplicate());
+                // TODO retain needed?
+            }
+        }
+
+        public DataBuffer Add(DataBuffer dataBuffer)
+        {
+            
         }
 
         public int AlreadyTransferred()
