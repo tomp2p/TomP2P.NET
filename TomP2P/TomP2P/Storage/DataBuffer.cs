@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -57,7 +58,25 @@ namespace TomP2P.Storage
 
         public DataBuffer Add(DataBuffer dataBuffer)
         {
-            
+            lock (_buffers)
+            {
+                foreach (var buf in dataBuffer._buffers)
+                {
+                    _buffers.Add(buf.Duplicate());
+                    // TODO retain needed?
+                }
+            }
+            return this;
+        }
+
+        public DataBuffer ShallowCopy()
+        {
+            DataBuffer db;
+            lock (_buffers)
+            {
+                db = new DataBuffer(_buffers);
+            }
+            return db;
         }
 
         public int AlreadyTransferred()
@@ -92,11 +111,6 @@ namespace TomP2P.Storage
         }
 
         public void ResetAlreadyTransferred()
-        {
-            throw new NotImplementedException();
-        }
-
-        public DataBuffer ShallowCopy()
         {
             throw new NotImplementedException();
         }
