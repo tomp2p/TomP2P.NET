@@ -69,6 +69,10 @@ namespace TomP2P.Storage
             return this;
         }
 
+        /// <summary>
+        /// From here, work with shallow copies.
+        /// </summary>
+        /// <returns>Shallow copy of this DataBuffer.</returns>
         public DataBuffer ShallowCopy()
         {
             DataBuffer db;
@@ -77,6 +81,35 @@ namespace TomP2P.Storage
                 db = new DataBuffer(_buffers);
             }
             return db;
+        }
+
+        /// <summary>
+        /// Gets the backing list of MemoryStreams.
+        /// </summary>
+        /// <returns>The backing list of MemoryStreams.</returns>
+        public IList<MemoryStream> BufferList()
+        {
+            DataBuffer copy = ShallowCopy();
+            IList<MemoryStream> buffers = new List<MemoryStream>(copy._buffers.Count);
+            foreach (var buf in copy._buffers)
+            {
+                // TODO check if works, port not trivial
+                buffers.Add(buf);
+            }
+            return buffers;
+        }
+
+        public long Length
+        {
+            get
+            {
+                long length = 0;
+                DataBuffer copy = ShallowCopy();
+                foreach (var buffer in copy._buffers)
+                {
+                    length += buffer.Position; // TODO check if correct, needs writerIndex
+                }
+            }
         }
 
         public int AlreadyTransferred()
@@ -90,11 +123,6 @@ namespace TomP2P.Storage
         }
 
         public void TransferTo(JavaBinaryWriter buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal int Length()
         {
             throw new NotImplementedException();
         }
