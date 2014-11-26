@@ -240,6 +240,28 @@ namespace TomP2P.Storage
             }
         }
 
+        public byte[] Bytes
+        {
+            get
+            {
+                var bufs = ToByteBuffer();
+                int bufsLength = bufs.Length;
+                long size = 0;
+                for (int i = 0; i < bufsLength; i++)
+                {
+                    size += bufs[i].Remaining();
+                }
 
+                byte[] retVal = new byte[size];
+                long offset = 0;
+                for (int i = 0; i < bufsLength; i++)
+                {
+                    long remaining = bufs[i].Remaining();
+                    bufs[i].Get(retVal, offset, remaining);
+                    offset += remaining;
+                }
+                return retVal;
+            }
+        }
     }
 }

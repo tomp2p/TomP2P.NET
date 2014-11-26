@@ -73,6 +73,33 @@ namespace TomP2P.Extensions
             return ip.AddressFamily == AddressFamily.InterNetworkV6;
         }
 
+        #region Java ByteBuffer
+
+        /// <summary>
+        /// Equivalent of Java's ByteBuffer.remaining().
+        /// Returns the number of elements between the current position and the limit.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static long Remaining(this Stream s)
+        {
+            return s.Length - s.Position;
+        }
+
+        /// <summary>
+        /// Equivalent of Java's ByteBuffer.get(byte[], int, int).
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <param name="dst"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        public static void Get(this MemoryStream ms, byte[] dst, long offset, long length)
+        {
+            Array.Copy(ms.ToArray(), offset, dst, 0, length);
+        }
+
+        #endregion
+
         #region Java Netty
 
         /// <summary>
@@ -93,7 +120,8 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static long ReadableBytes(this Stream s)
         {
-            return s.Length - s.Position;
+            // TODO correct when implementing a .NET ByteBuf
+            return s.Remaining();
         }
 
         /// <summary>
@@ -167,7 +195,7 @@ namespace TomP2P.Extensions
 
         #endregion
 
-        # region Conversion
+        #region Conversion
 
         /// <summary>
         /// Converts a sbyte[] to byte[].
