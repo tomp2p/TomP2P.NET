@@ -7,7 +7,7 @@ namespace TomP2P.Extensions.Workaround
     /// This class allows to read Java types that have been stored to a <code>byte[]</code>.
     /// Internally, a <see cref="BinaryReader"/> is used.
     /// </summary>
-    public class JavaBinaryReader : IJavaBuffer
+    public class JavaBinaryReader
     {
         private readonly BinaryReader _br;
 
@@ -145,43 +145,9 @@ namespace TomP2P.Extensions.Workaround
             return b;
         }
 
-        public long ReadableBytes
-        {
-            get { return _br.BaseStream.ReadableBytes(); }
-        }
-
         public Stream BaseStream
         {
             get { return _br.BaseStream; }
-        }
-
-        public bool CanRead
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public int WriterIndex
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public long ReaderIndex
-        {
-            get { return _br.BaseStream.Position; }
-        }
-
-        public sbyte[] Buffer
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Increases the current ReaderIndex by the specified length.
-        /// </summary>
-        /// <param name="length"></param>
-        public void SkipBytes(int length)
-        {
-            _br.ReadBytes(length);
         }
     }
 }

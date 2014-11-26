@@ -10,11 +10,11 @@ using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Storage
 {
-    public class DataBuffer
+    public class DataBuffer : IEquatable<DataBuffer>
     {
-        private readonly IList<MemoryStream> _buffers;
+        private readonly IList<MemoryStream> _buffers; // TODO should be an AlternativeCompositeByteBuf
 
-        private int _alreadyTransferred = 0;
+        public long AlreadyTransferred { private set; get; }
 
         public DataBuffer()
             : this(1)
@@ -54,6 +54,11 @@ namespace TomP2P.Storage
                 _buffers.Add(buf.Duplicate());
                 // TODO retain needed?
             }
+        }
+
+        ~DataBuffer()
+        {
+            // TODO release needed?
         }
 
         public DataBuffer Add(DataBuffer dataBuffer)
@@ -99,6 +104,128 @@ namespace TomP2P.Storage
             return buffers;
         }
 
+        // TODO merge the two/four, needs implementation of .NET "ByteBuf" with reader and writer
+        public JavaBinaryWriter ToJavaBinaryWriter()
+        {
+            DataBuffer copy = ShallowCopy();
+            MemoryStream[] buffers = copy._buffers.ToArray();
+
+            // TODO this most probably doesn't work
+            for (int i = 1; i < buffers.Length; i++)
+            {
+                buffers[i].CopyTo(buffers[0]);
+            }
+            return new JavaBinaryWriter(buffers[0]);
+        }
+
+        public JavaBinaryReader ToJavaBinaryReader()
+        {
+            DataBuffer copy = ShallowCopy();
+            MemoryStream[] buffers = copy._buffers.ToArray();
+
+            // TODO this most probably doesn't work
+            for (int i = 1; i < buffers.Length; i++)
+            {
+                buffers[i].CopyTo(buffers[0]);
+            }
+            return new JavaBinaryReader(buffers[0]);
+        }
+
+        public JavaBinaryWriter[] ToJavaBinaryWriters()
+        {
+            // TODO check if port is correct
+            DataBuffer copy = ShallowCopy();
+            var writers = new JavaBinaryWriter[copy._buffers.Count];
+            for (int i = 0; i < copy._buffers.Count; i++)
+            {
+                writers[i] = new JavaBinaryWriter(copy._buffers[i]);
+            }
+            return writers;
+        }
+
+        public JavaBinaryReader[] ToJavaBinaryReaders()
+        {
+            // TODO check if port is correct
+            DataBuffer copy = ShallowCopy();
+            var readers = new JavaBinaryReader[copy._buffers.Count];
+            for (int i = 0; i < copy._buffers.Count; i++)
+            {
+                readers[i] = new JavaBinaryReader(copy._buffers[i]);
+            }
+            return readers;
+        }
+
+        public MemoryStream[] ToByteBuffer()
+        {
+            DataBuffer copy = ShallowCopy();
+            return copy._buffers.ToArray();
+        }
+
+        public void TransferTo(JavaBinaryWriter buffer)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+
+            DataBuffer copy = ShallowCopy();
+            foreach (var buf in copy._buffers)
+            {
+                // TODO buf.addComponent(buffer);
+                AlreadyTransferred += buf.ReadableBytes();
+            }
+        }
+
+        public int TransferFrom(JavaBinaryReader buffer, long remaining)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+
+            var readable = buffer.ReadableBytes();
+            var index = buffer.ReaderIndex();
+            var length = Math.Min(remaining, readable);
+
+            if (length == 0)
+            {
+                return 0;
+            }
+            // Java stuff
+
+            AlreadyTransferred += Length;
+            buffer.SetReaderIndex(buffer.ReaderIndex() + length);
+            //return length;
+        }
+
+        public void ResetAlreadyTransferred()
+        {
+            AlreadyTransferred = 0;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as DataBuffer);
+        }
+
+        public bool Equals(DataBuffer other)
+        {
+            return other.ToByteBuffer().Equals(ToByteBuffer());
+        }
+
+        public override int GetHashCode()
+        {
+            return ToByteBuffer().GetHashCode();
+        }
+
         public long Length
         {
             get
@@ -109,38 +236,10 @@ namespace TomP2P.Storage
                 {
                     length += buffer.Position; // TODO check if correct, needs writerIndex
                 }
+                return length;
             }
         }
 
-        public int AlreadyTransferred()
-        {
-            throw new NotImplementedException();
-        }
 
-        public int TransferFrom(JavaBinaryReader buffer, int remaining)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void TransferTo(JavaBinaryWriter buffer)
-        {
-            throw new NotImplementedException();
-        }
-
-        // replaces toByteBuf
-        public JavaBinaryWriter ToJavaBinaryWriter()
-        {
-            throw new NotImplementedException();
-        }
-
-        public JavaBinaryReader ToJavaBinaryReader()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ResetAlreadyTransferred()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

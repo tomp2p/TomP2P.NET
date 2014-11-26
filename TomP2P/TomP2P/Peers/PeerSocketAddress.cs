@@ -107,7 +107,7 @@ namespace TomP2P.Peers
                 buffer.ReadBytes(me);
                 address = Utils.Utils.Inet6AddressFromBytes(me, 0);
             }
-            return new PeerSocketAddress(address, tcpPort, udpPort, buffer.ReaderIndex);
+            return new PeerSocketAddress(address, tcpPort, udpPort, buffer.ReaderIndex());
         }
 
         /// <summary>

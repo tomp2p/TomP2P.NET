@@ -8,7 +8,7 @@ namespace TomP2P.Message
 
     public class Buffer : IEquatable<Buffer>
     {
-        public MemoryStream BackingBuffer { get; private set; }
+        public MemoryStream BackingBuffer { get; private set; } // TODO use ByteBuf equivalent
         public int Length { get; private set; }
         public int AlreadyRead { get; private set; }
 

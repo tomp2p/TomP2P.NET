@@ -45,7 +45,7 @@ namespace TomP2P.Message
 
             // write out what we have
             // TODO chech isReadable() equivalent
-            if (buffer.CanRead && done)
+            if (buffer.IsReadable() && done)
             {
                 // check if message needs to be signed
                 if (message.IsSign)
@@ -78,7 +78,7 @@ namespace TomP2P.Message
             while ((next = Message.ContentReferences.Peek()) != null)
             {
                 // TODO check buffer equivalent
-                long start = buffer.WriterIndex;
+                long start = buffer.WriterIndex();
                 Message.Content content = next.Content;
 
                 // TODO make all writes async, also reads in decoder
@@ -227,7 +227,7 @@ namespace TomP2P.Message
                         }
                         // write length
                         int readable = b.Readable;
-                        buffer.WriteBytes(buffer.Buffer); // TODO check correctnes, port not trivial
+                        buffer.WriteBytes(b.BackingBuffer, readable); // TODO check correctnes, port not trivial
                         if (b.IncRead(readable) == b.Length)
                         {
                             Message.ContentReferences.Dequeue();
@@ -271,7 +271,7 @@ namespace TomP2P.Message
                         throw new SystemException("Unknown type: " + next.Content);
                 }
 
-                Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.WriterIndex - start);
+                Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.WriterIndex() - start);
             }
             return true;
         }
@@ -289,12 +289,12 @@ namespace TomP2P.Message
             }
 
             // TODO check again, port isn't easy
-            long startWriter = buffer.WriterIndex;
+            var startWriter = buffer.WriterIndex();
             data.EncodeHeader(buffer, _signatureFactory);
             data.EncodeBuffer(buffer);
             data.EncodeDone(buffer, _signatureFactory, Message.PrivateKey);
 
-            return buffer.WriterIndex - startWriter; // TODO remove?
+            return buffer.WriterIndex() - startWriter; // TODO remove?
         }
     }
 }

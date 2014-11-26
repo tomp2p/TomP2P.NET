@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Extensions
 {
@@ -109,7 +110,7 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
-        /// Equivalent to Java Netty's ByteBuf.slice()
+        /// Equivalent to Java Netty's ByteBuf.slice().
         /// </summary>
         /// <param name="ms"></param>
         /// <returns></returns>
@@ -117,6 +118,51 @@ namespace TomP2P.Extensions
         {
             byte[] data = ms.ToArray().Skip((int)ms.Position).ToArray(); // TODO test
             return new MemoryStream(data);
+        }
+
+        /// <summary>
+        /// Equivalent to Java Netty's ByteBuf.readerIndex(int).
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="index"></param>
+        public static void SetReaderIndex(this JavaBinaryReader reader, long index)
+        {
+            reader.BaseStream.Position = index;
+        }
+
+        public static long WriterIndex(this JavaBinaryWriter writer)
+        {
+            return writer.BaseStream.Position;
+        }
+
+        public static long ReaderIndex(this JavaBinaryReader reader)
+        {
+            return reader.BaseStream.Position;
+        }
+
+        public static void SkipBytes(this Stream s, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                s.ReadByte();
+            }
+        }
+
+        public static long ReadableBytes(this JavaBinaryReader reader)
+        {
+            return reader.BaseStream.ReadableBytes();
+        }
+
+        /// <summary>
+        /// Equivalent to Java Netty's ByteBuf.isReadable().
+        /// Returns true if and only if (this.writerIndex - this.readerIndex) is greater than 0.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <returns></returns>
+        public static bool IsReadable(this JavaBinaryWriter writer)
+        {
+            // TODO implement
+            return false;
         }
 
         #endregion

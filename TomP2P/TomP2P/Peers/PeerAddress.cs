@@ -172,7 +172,7 @@ namespace TomP2P.Peers
         /// <param name="buffer">The channel buffer to read from.</param>
         public PeerAddress(JavaBinaryReader buffer)
         {
-            long readerIndex = buffer.ReaderIndex;
+            long readerIndex = buffer.ReaderIndex();
 
             // get the type
             int options = buffer.ReadByte();
@@ -207,7 +207,7 @@ namespace TomP2P.Peers
                 PeerSocketAddresses = EmptyPeerSocketAddresses;
             }
 
-            Size = buffer.ReaderIndex - readerIndex;
+            Size = buffer.ReaderIndex() - readerIndex;
 
             Offset = -1; // not used here
             _hashCode = PeerId.GetHashCode();
