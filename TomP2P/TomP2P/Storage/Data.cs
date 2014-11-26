@@ -259,8 +259,7 @@ namespace TomP2P.Storage
         public static Data DeocdeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
         {
             // 2 is the smallest packet size, we could start if we know 1 byte to
-            // decode the header, but we always need
-            // a second byte. Thus, we are waiting for at least 2 bytes.
+            // decode the header, but we always need a second byte. Thus, we are waiting for at least 2 bytes.
             if (buffer.ReadableBytes() < 2*Utils.Utils.ByteByteSize)
             {
                 return null;

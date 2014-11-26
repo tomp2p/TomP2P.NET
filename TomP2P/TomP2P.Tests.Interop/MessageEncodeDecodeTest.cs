@@ -79,17 +79,17 @@ namespace TomP2P.Tests.Interop
             // create same message object as in Java
             IDictionary<Number640, Data> sampleMap1 = new Dictionary<Number640, Data>();
             sampleMap1.Add(_sample640_1, _sampleData1);
-            sampleMap1.Add(_sample640_1, _sampleData2);
-            sampleMap1.Add(_sample640_1, _sampleData3);
+            sampleMap1.Add(_sample640_2, _sampleData1);
+            sampleMap1.Add(_sample640_3, _sampleData1);
 
             IDictionary<Number640, Data> sampleMap2 = new Dictionary<Number640, Data>();
-            sampleMap2.Add(_sample640_2, _sampleData1);
+            sampleMap2.Add(_sample640_1, _sampleData2);
             sampleMap2.Add(_sample640_2, _sampleData2);
-            sampleMap2.Add(_sample640_2, _sampleData3);
+            sampleMap2.Add(_sample640_3, _sampleData2);
 
             IDictionary<Number640, Data> sampleMap3 = new Dictionary<Number640, Data>();
-            sampleMap3.Add(_sample640_3, _sampleData1);
-            sampleMap3.Add(_sample640_3, _sampleData2);
+            sampleMap3.Add(_sample640_1, _sampleData3);
+            sampleMap3.Add(_sample640_2, _sampleData3);
             sampleMap3.Add(_sample640_3, _sampleData3);
 
             IDictionary<Number640, Data> sampleMap4 = new Dictionary<Number640, Data>();
@@ -117,8 +117,8 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.DataMapList, m2.DataMapList));
-            
-            // TODO implement Data to finish testing
+
+            // implement Data and DataBuffer (with AlternativeCompositeByteBuf impl)
             Assert.IsTrue(false);
         }
 

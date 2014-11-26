@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace TomP2P.Extensions.Workaround
+{
+    /// <summary>
+    /// An attempt to mimick Java's AtomicInteger in .NET.
+    /// </summary>
+    public class AtomicInteger
+    {
+        private long _value;
+
+        public AtomicInteger(int initialValue)
+        {
+            _value = initialValue;
+        }
+
+        public void Set(int newValue)
+        {
+            Interlocked.Exchange(ref _value, newValue);
+        }
+
+        public int Get()
+        {
+            return (int) Interlocked.Read(ref _value);
+        }
+    }
+}

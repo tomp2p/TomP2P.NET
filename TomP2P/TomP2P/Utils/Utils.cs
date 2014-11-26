@@ -24,7 +24,7 @@ namespace TomP2P.Utils
         public const int IntegerByteSize = 4;   //  32 bits
         public const int LongByteSize = 8;      //  64 bits
 
-        public static readonly byte[] EmptyByteArray = new byte[0];
+        public static readonly sbyte[] EmptyByteArray = new sbyte[0];
 
         public new static bool Equals(Object a, Object b)
         {
