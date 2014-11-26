@@ -28,5 +28,11 @@ namespace TomP2P.Extensions.Workaround
         {
             return (int) Interlocked.Read(ref _value);
         }
+
+        public int IncrementAndGet()
+        {
+            Interlocked.Increment(ref _value);
+            return Get();
+        }
     }
 }
