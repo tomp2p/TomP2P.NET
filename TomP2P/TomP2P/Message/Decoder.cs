@@ -542,7 +542,7 @@ namespace TomP2P.Message
                         }
                         if (_trackerDataSize == -1)
                         {
-                            _trackerDataSize = buffer.ReadByte(); // unsigned byte
+                            _trackerDataSize = buffer.ReadUByte();
                         }
                         if (_trackerData == null)
                         {
@@ -567,8 +567,7 @@ namespace TomP2P.Message
                                 return false;
                             }
 
-                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
-                            int header = buffer.ReadUShort();
+                            int header = buffer.GetUShort(buffer.ReaderIndex());
                             size = PeerAddress.CalculateSize(header);
                             if (buffer.ReadableBytes() < Utils.Utils.ShortByteSize)
                             {

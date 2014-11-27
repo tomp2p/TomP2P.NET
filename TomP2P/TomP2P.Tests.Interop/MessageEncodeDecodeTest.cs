@@ -374,20 +374,32 @@ namespace TomP2P.Tests.Interop
             sampleMap3.Add(sampleStatistic4, _sampleData2);
             sampleMap3.Add(sampleStatistic5, _sampleData3);
 
-            var m = Utils2.CreateDummyMessage();
-            m.SetTrackerData(new TrackerData(sampleMap1, true));
-            m.SetTrackerData(new TrackerData(sampleMap1, false));
-            m.SetTrackerData(new TrackerData(sampleMap2, true));
-            m.SetTrackerData(new TrackerData(sampleMap2, false));
-            m.SetTrackerData(new TrackerData(sampleMap3, true));
-            m.SetTrackerData(new TrackerData(sampleMap3, false));
-            m.SetTrackerData(new TrackerData(sampleMap1, true));
-            m.SetTrackerData(new TrackerData(sampleMap1, false));
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetTrackerData(new TrackerData(sampleMap1, true));
+            m1.SetTrackerData(new TrackerData(sampleMap1, false));
+            m1.SetTrackerData(new TrackerData(sampleMap2, true));
+            m1.SetTrackerData(new TrackerData(sampleMap2, false));
+            m1.SetTrackerData(new TrackerData(sampleMap3, true));
+            m1.SetTrackerData(new TrackerData(sampleMap3, false));
+            m1.SetTrackerData(new TrackerData(sampleMap1, true));
+            m1.SetTrackerData(new TrackerData(sampleMap1, false));
 
-            // implement Data and PeerStatistics first
+            // compare Java encoded and .NET decoded objects
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.TrackerDataList, m2.TrackerDataList));
+
+            // implement Data first
             Assert.IsTrue(false);
 
             // TODO check how TrackerData should be compared (contains Map<PeerStatistic, Data>)
+        }
+
+        [Test]
+        public void TestMessageDecodeBloomFilter()
+        {
+            
         }
 
         /*/// <summary>
