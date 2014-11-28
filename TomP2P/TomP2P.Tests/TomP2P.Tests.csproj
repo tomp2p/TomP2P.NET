@@ -54,6 +54,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Extensions\InteropRandomTest.cs" />
     <Compile Include="LoggerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils2.cs" />
@@ -69,6 +70,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TomP2P.Extensions\TomP2P.Extensions.csproj">
+      <Project>{B13F4681-AC7D-4D75-AB3F-C079748F8602}</Project>
+      <Name>TomP2P.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TomP2P\TomP2P.csproj">
       <Project>{6806294c-0d0e-41e0-80c4-a17d6877f807}</Project>
       <Name>TomP2P</Name>

@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Convenient.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="InteropRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Workaround\AtomicInteger.cs" />
     <Compile Include="Workaround\AtomicLong.cs" />
