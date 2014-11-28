@@ -100,6 +100,18 @@ namespace TomP2P.Extensions.Workaround
             }
         }
 
+        /// <summary>
+        /// Fills this buffer with NUL (0x00) starting at the current writerIndex and increases the writerIndex by the specified length.
+        /// </summary>
+        /// <param name="length"></param>
+        public void WriteZero(int length)
+        {
+            for (int i = 0; i < length; i++) // TODO check if correct
+            {
+                WriteByte(0);
+            }
+        }
+
         public Stream BaseStream
         {
             get { return _bw.BaseStream; }    

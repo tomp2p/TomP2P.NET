@@ -7,6 +7,7 @@ using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 using TomP2P.Peers;
+using TomP2P.Rpc;
 using TomP2P.Storage;
 using Decoder = TomP2P.Message.Decoder;
 using Buffer = TomP2P.Message.Buffer;
@@ -399,7 +400,47 @@ namespace TomP2P.Tests.Interop
         [Test]
         public void TestMessageDecodeBloomFilter()
         {
-            
+            // create same message object as in Java
+            var sampleBf1 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf1.Add(_sample160_1);
+
+            var sampleBf2 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf2.Add(_sample160_2);
+            sampleBf2.Add(_sample160_1);
+
+            var sampleBf3 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf3.Add(_sample160_1);
+            sampleBf3.Add(_sample160_2);
+            sampleBf3.Add(_sample160_3);
+
+            var sampleBf4 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf4.Add(_sample160_1);
+            sampleBf4.Add(_sample160_2);
+            sampleBf4.Add(_sample160_3);
+            sampleBf4.Add(_sample160_4);
+
+            var sampleBf5 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf5.Add(_sample160_1);
+            sampleBf5.Add(_sample160_2);
+            sampleBf5.Add(_sample160_3);
+            sampleBf5.Add(_sample160_4);
+            sampleBf5.Add(_sample160_5);
+
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetBloomFilter(sampleBf1);
+            m1.SetBloomFilter(sampleBf2);
+            m1.SetBloomFilter(sampleBf3);
+            m1.SetBloomFilter(sampleBf4);
+            m1.SetBloomFilter(sampleBf5);
+            m1.SetBloomFilter(sampleBf1);
+            m1.SetBloomFilter(sampleBf2);
+            m1.SetBloomFilter(sampleBf3);
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.BloomFilterList, m2.BloomFilterList));
         }
 
         /*/// <summary>

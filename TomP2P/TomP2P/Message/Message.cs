@@ -546,9 +546,9 @@ namespace TomP2P.Message
             return this;
         }
 
-        public List<SimpleBloomFilter<Number160>> BloomFilterList()
+        public List<SimpleBloomFilter<Number160>> BloomFilterList
         {
-            return _bloomFilterList ?? new List<SimpleBloomFilter<Number160>>();
+            get { return _bloomFilterList ?? new List<SimpleBloomFilter<Number160>>(); }
         }
 
         public SimpleBloomFilter<Number160> BloomFilter(int index)

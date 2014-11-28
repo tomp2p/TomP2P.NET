@@ -212,8 +212,11 @@ namespace TomP2P.Message
                         {
                             return false;
                         }
-                        // TODO check port
-                        size = buffer.ReadUShort(); // uses little-endian
+                        size = buffer.GetUShort(buffer.ReaderIndex());
+                        if (buffer.ReadableBytes() < size)
+                        {
+                            return false;
+                        }
                         Message.SetBloomFilter(new SimpleBloomFilter<Number160>(buffer));
                         LastContent = _contentTypes.Dequeue();
                         break;

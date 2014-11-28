@@ -63,6 +63,34 @@ namespace TomP2P.Extensions
             return b;
         }
 
+        /// <summary>
+        /// Equivalent to Java's BitSet.toByteArray().
+        /// </summary>
+        /// <param name="ba"></param>
+        /// <returns></returns>
+        public static sbyte[] ToByteArray(this BitArray ba)
+        {
+            // TODO check if same result as with Java
+            var bytes = new sbyte[(ba.Length - 1) / 8 + 1];
+            ba.CopyTo(bytes, 0);
+            return bytes;
+        }
+
+        /// <summary>
+        /// Equivalent to Java's BitSet.flip(int, int).
+        /// Sets each bit from the specified fromIndex (inclusive) to the specified toIndex (exclusive) to the complement of its current value.
+        /// </summary>
+        /// <param name="ba"></param>
+        /// <param name="fromIndex"></param>
+        /// <param name="toIndex"></param>
+        public static void Flip(this BitArray ba, int fromIndex, int toIndex)
+        {
+            for (int i = fromIndex; i < toIndex; i++) // TODO check if works correctly
+            {
+                ba[i] = !ba[i];
+            }
+        }
+
         public static bool IsIPv4(this IPAddress ip)
         {
             return ip.AddressFamily == AddressFamily.InterNetwork;
