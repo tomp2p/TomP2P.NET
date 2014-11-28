@@ -116,10 +116,10 @@ namespace TomP2P.Rpc
         /// <returns>Always returns false.</returns>
         public bool Add(T item)
         {
-            var r = new Random(item.GetHashCode());
+            var r = new InteropRandom((ulong)item.GetHashCode());
             for (int x = 0; x < _k; x++)
             {
-                BitArray.Set(r.Next(_bitArraySize), true);
+                BitArray.Set(r.NextInt(_bitArraySize), true);
             }
             return false;
         }
@@ -157,10 +157,10 @@ namespace TomP2P.Rpc
         /// <returns>False indicates that o was definitely not added to this BloomFilter, true indicates that it probably was. The probability can be estimated using the expectedFalsePositiveProbability() method.</returns>
         public bool Contains(Object obj)
         {
-            var r = new Random(obj.GetHashCode());
+            var r = new InteropRandom((ulong)obj.GetHashCode());
             for (int x = 0; x < _k; x++)
             {
-                if (!BitArray.Get(r.Next(_bitArraySize)))
+                if (!BitArray.Get(r.NextInt(_bitArraySize)))
                 {
                     return false;
                 }
