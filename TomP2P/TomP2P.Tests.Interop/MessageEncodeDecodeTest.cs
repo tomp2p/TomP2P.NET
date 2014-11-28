@@ -514,7 +514,6 @@ namespace TomP2P.Tests.Interop
             sampleAddresses.Add(samplePsa1);
             sampleAddresses.Add(samplePsa2);
             sampleAddresses.Add(samplePsa3);
-            sampleAddresses.Add(samplePsa3);
             sampleAddresses.Add(samplePsa4);
             sampleAddresses.Add(samplePsa5);
             sampleAddresses.Add(samplePsa6);
