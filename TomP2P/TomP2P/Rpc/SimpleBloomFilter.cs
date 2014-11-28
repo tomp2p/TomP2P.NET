@@ -90,7 +90,7 @@ namespace TomP2P.Rpc
         /// <param name="buffer">The byte buffer with the data.</param>
         public SimpleBloomFilter(JavaBinaryReader buffer)
         {
-            _byteArraySize = buffer.ReadUShort() - (SizeHeaderElements - SizeHeaderLength);
+            _byteArraySize = buffer.ReadUShort() - SizeHeader;
             _bitArraySize = _byteArraySize*8;
 
             int expectedElements = buffer.ReadInt();
@@ -101,7 +101,7 @@ namespace TomP2P.Rpc
             {
                 var me = new sbyte[_byteArraySize];
                 buffer.ReadBytes(me);
-                BitArray = new BitArray((byte[])(Array) me); // TODO test if OK to pass casted byte
+                BitArray = new BitArray(me.ToByteArray());
             }
             else
             {
@@ -245,10 +245,10 @@ namespace TomP2P.Rpc
 
         public bool Equals(SimpleBloomFilter<T> other)
         {
-            return _k == other._k 
-                && _bitArraySize == other._bitArraySize
-                && ExpectedElements == other.ExpectedElements
-                && BitArray.Equals(other.BitArray);
+            return _k == other._k
+                   && _bitArraySize == other._bitArraySize
+                   && ExpectedElements == other.ExpectedElements
+                   && BitArray.Equals2(other.BitArray);
         }
 
         public override int GetHashCode()

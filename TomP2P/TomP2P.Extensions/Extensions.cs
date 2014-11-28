@@ -91,6 +91,28 @@ namespace TomP2P.Extensions
             }
         }
 
+        /// <summary>
+        /// Equivalent to Java's BitSet.equals() implementation.
+        /// </summary>
+        /// <param name="ba"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static bool Equals2(this BitArray ba, BitArray other)
+        {
+            if (ba.Length != other.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < ba.Length; i++)
+            {
+                if (ba[i] != other[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static bool IsIPv4(this IPAddress ip)
         {
             return ip.AddressFamily == AddressFamily.InterNetwork;
