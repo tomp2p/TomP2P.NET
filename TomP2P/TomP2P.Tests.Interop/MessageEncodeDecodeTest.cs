@@ -443,6 +443,52 @@ namespace TomP2P.Tests.Interop
             Assert.IsTrue(CheckIsSameList(m1.BloomFilterList, m2.BloomFilterList));
         }
 
+        [Test]
+        public void TestMessageDecodeMapKey640Byte()
+        {
+            // create same message object as in Java
+            IDictionary<Number640, sbyte> sampleMap1 = new Dictionary<Number640, sbyte>();
+            sampleMap1.Add(_sample640_1, _sampleBytes1[0]);
+            sampleMap1.Add(_sample640_2, _sampleBytes1[1]);
+            sampleMap1.Add(_sample640_3, _sampleBytes1[2]);
+
+            IDictionary<Number640, sbyte> sampleMap2 = new Dictionary<Number640, sbyte>();
+            sampleMap2.Add(_sample640_1, _sampleBytes1[3]);
+            sampleMap2.Add(_sample640_2, _sampleBytes1[4]);
+            sampleMap2.Add(_sample640_3, _sampleBytes1[5]);
+
+            IDictionary<Number640, sbyte> sampleMap3 = new Dictionary<Number640, sbyte>();
+            sampleMap3.Add(_sample640_1, _sampleBytes1[6]);
+            sampleMap3.Add(_sample640_2, _sampleBytes1[7]);
+            sampleMap3.Add(_sample640_3, _sampleBytes1[8]);
+
+            IDictionary<Number640, sbyte> sampleMap4 = new Dictionary<Number640, sbyte>();
+            sampleMap4.Add(_sample640_1, _sampleBytes1[9]);
+            sampleMap4.Add(_sample640_2, _sampleBytes1[10]);
+            sampleMap4.Add(_sample640_3, _sampleBytes1[11]);
+
+            IDictionary<Number640, sbyte> sampleMap5 = new Dictionary<Number640, sbyte>();
+            sampleMap5.Add(_sample640_1, _sampleBytes1[12]);
+            sampleMap5.Add(_sample640_2, _sampleBytes1[13]);
+            sampleMap5.Add(_sample640_3, _sampleBytes1[14]);
+
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap1));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap2));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap3));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap4));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap5));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap1));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap2));
+            m1.SetKeyMapByte(new KeyMapByte(sampleMap3));
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.KeyMapByteList, m2.KeyMapByteList));
+        }
+
         /*/// <summary>
         /// Checks if two messages are the same.
         /// </summary>
