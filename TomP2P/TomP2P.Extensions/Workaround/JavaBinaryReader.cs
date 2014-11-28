@@ -82,8 +82,8 @@ namespace TomP2P.Extensions.Workaround
             // NOTE: _br.ReadInt16() would read in little-endian fashion (.NET)
 
             // read bytes in big-endian fashion (Java)
-            sbyte b1 = ReadByte(); // Java byte is signed
-            sbyte b2 = ReadByte();
+            byte b1 = _br.ReadByte();
+            byte b2 = _br.ReadByte();
 
             // shift bytes to their position and sum up their int values
             return (ushort)((b1 << 8) + b2);

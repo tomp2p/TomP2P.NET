@@ -260,7 +260,7 @@ namespace TomP2P.Message
                         }
                         if (_peerSocketAddressSize == -1)
                         {
-                            _peerSocketAddressSize = buffer.ReadByte(); // unsigned byte
+                            _peerSocketAddressSize = buffer.ReadUByte();
                         }
                         if (_peerSocketAddresses == null)
                         {
@@ -272,8 +272,7 @@ namespace TomP2P.Message
                             {
                                 return false;
                             }
-                            // TODO check port, java's getter don't change the reader index -> mimic behaviour
-                            int header = buffer.ReadByte();
+                            int header = buffer.GetUByte(buffer.ReaderIndex());
                             bool isIPv4 = header == 0; // TODO check if works
                             size = PeerSocketAddress.Size(isIPv4);
                             if (buffer.ReadableBytes() < size + Utils.Utils.ByteByteSize)
@@ -281,7 +280,7 @@ namespace TomP2P.Message
                                 return false;
                             }
                             // skip the ipv4/ipv6 header
-                            buffer.ReadByte();
+                            buffer.BaseStream.SkipBytes(1);
                             _peerSocketAddresses.Add(PeerSocketAddress.Create(buffer, isIPv4));
                         }
                         Message.SetPeerSocketAddresses(_peerSocketAddresses);

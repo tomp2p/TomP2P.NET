@@ -489,6 +489,50 @@ namespace TomP2P.Tests.Interop
             Assert.IsTrue(CheckIsSameList(m1.KeyMapByteList, m2.KeyMapByteList));
         }
 
+        [Test]
+        public void TestMessageDecodeSetPeerSocket()
+        {
+            // create same message object as in Java
+            IPAddress sampleAddress1 = IPAddress.Parse("192.168.1.1");
+            IPAddress sampleAddress2 = IPAddress.Parse("255.255.255.255");
+            IPAddress sampleAddress3 = IPAddress.Parse("127.0.0.1");
+            IPAddress sampleAddress4 = IPAddress.Parse("0:1:2:3:4:5:6:7");
+            IPAddress sampleAddress5 = IPAddress.Parse("7:6:5:4:3:2:1:0");
+
+            var samplePsa1 = new PeerSocketAddress(sampleAddress1, 0, 0);
+            var samplePsa2 = new PeerSocketAddress(sampleAddress2, 65535, 65535);
+            var samplePsa3 = new PeerSocketAddress(sampleAddress3, 1, 1);
+            var samplePsa4 = new PeerSocketAddress(sampleAddress4, 2, 2);
+            var samplePsa5 = new PeerSocketAddress(sampleAddress5, 30, 40);
+            var samplePsa6 = new PeerSocketAddress(sampleAddress1, 88, 88);
+            var samplePsa7 = new PeerSocketAddress(sampleAddress2, 177, 177);
+            var samplePsa8 = new PeerSocketAddress(sampleAddress3, 60000, 65000);
+            var samplePsa9 = new PeerSocketAddress(sampleAddress4, 99, 100);
+            var samplePsa10 = new PeerSocketAddress(sampleAddress5, 13, 1234);
+
+            ICollection<PeerSocketAddress> sampleAddresses = new List<PeerSocketAddress>();
+            sampleAddresses.Add(samplePsa1);
+            sampleAddresses.Add(samplePsa2);
+            sampleAddresses.Add(samplePsa3);
+            sampleAddresses.Add(samplePsa3);
+            sampleAddresses.Add(samplePsa4);
+            sampleAddresses.Add(samplePsa5);
+            sampleAddresses.Add(samplePsa6);
+            sampleAddresses.Add(samplePsa7);
+            sampleAddresses.Add(samplePsa8);
+            sampleAddresses.Add(samplePsa9);
+            sampleAddresses.Add(samplePsa10);
+
+            var m1 = Utils2.CreateDummyMessage();
+            m1.SetPeerSocketAddresses(sampleAddresses);
+
+            // compare Java encoded and .NET decoded objects
+            var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
+
+            Assert.IsTrue(CheckSameContentTypes(m1, m2));
+            Assert.IsTrue(CheckIsSameList(m1.PeerSocketAddresses, m2.PeerSocketAddresses));
+        }
+
         /*/// <summary>
         /// Checks if two messages are the same.
         /// </summary>
