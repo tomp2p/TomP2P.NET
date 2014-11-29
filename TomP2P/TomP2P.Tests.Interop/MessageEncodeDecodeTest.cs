@@ -21,6 +21,8 @@ namespace TomP2P.Tests.Interop
         Long, Integer, PublicKeySignature, SetTrackerData, BloomFilter, MapKey640Byte,
         PublicKey, SetPeerSocket, User1*/
 
+        #region Sample Data
+
         // 20 bytes (Number160 length)
         static sbyte[] _sampleBytes1 = new sbyte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
         static sbyte[] _sampleBytes2 = new sbyte[] { 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
@@ -40,6 +42,10 @@ namespace TomP2P.Tests.Interop
         static Data _sampleData2 = new Data(_sampleBytes1);
         static Data _sampleData3 = new Data(_sampleBytes1);
 
+        #endregion
+
+        #region Decoding
+
         [Test]
         public void TestMessageDecodeEmpty()
         {
@@ -56,16 +62,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeKey()
         {
             // create same message object as in Java
-            var m1 = Utils2.CreateDummyMessage();
-
-            m1.SetKey(_sample160_1);
-            m1.SetKey(_sample160_2);
-            m1.SetKey(_sample160_3);
-            m1.SetKey(_sample160_4);
-            m1.SetKey(_sample160_5);
-            m1.SetKey(_sample160_1);
-            m1.SetKey(_sample160_2);
-            m1.SetKey(_sample160_3);
+            var m1 = CreateMessageKey();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -78,40 +75,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeMapKey640Data()
         {
             // create same message object as in Java
-            IDictionary<Number640, Data> sampleMap1 = new Dictionary<Number640, Data>();
-            sampleMap1.Add(_sample640_1, _sampleData1);
-            sampleMap1.Add(_sample640_2, _sampleData1);
-            sampleMap1.Add(_sample640_3, _sampleData1);
-
-            IDictionary<Number640, Data> sampleMap2 = new Dictionary<Number640, Data>();
-            sampleMap2.Add(_sample640_1, _sampleData2);
-            sampleMap2.Add(_sample640_2, _sampleData2);
-            sampleMap2.Add(_sample640_3, _sampleData2);
-
-            IDictionary<Number640, Data> sampleMap3 = new Dictionary<Number640, Data>();
-            sampleMap3.Add(_sample640_1, _sampleData3);
-            sampleMap3.Add(_sample640_2, _sampleData3);
-            sampleMap3.Add(_sample640_3, _sampleData3);
-
-            IDictionary<Number640, Data> sampleMap4 = new Dictionary<Number640, Data>();
-            sampleMap4.Add(_sample640_1, _sampleData1);
-            sampleMap4.Add(_sample640_2, _sampleData2);
-            sampleMap4.Add(_sample640_3, _sampleData3);
-
-            IDictionary<Number640, Data> sampleMap5 = new Dictionary<Number640, Data>();
-            sampleMap5.Add(_sample640_3, _sampleData1);
-            sampleMap5.Add(_sample640_2, _sampleData2);
-            sampleMap5.Add(_sample640_1, _sampleData3);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetDataMap(new DataMap(sampleMap1));
-            m1.SetDataMap(new DataMap(sampleMap2));
-            m1.SetDataMap(new DataMap(sampleMap3));
-            m1.SetDataMap(new DataMap(sampleMap4));
-            m1.SetDataMap(new DataMap(sampleMap5));
-            m1.SetDataMap(new DataMap(sampleMap1));
-            m1.SetDataMap(new DataMap(sampleMap2));
-            m1.SetDataMap(new DataMap(sampleMap3));
+            var m1 = CreateMessageMapKey640Data();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -532,6 +496,10 @@ namespace TomP2P.Tests.Interop
             Assert.IsTrue(CheckIsSameList(m1.PeerSocketAddresses, m2.PeerSocketAddresses));
         }
 
+        #endregion
+
+        #region Encoding
+
         [Test]
         public void TestMessageEncodeEmpty()
         {
@@ -545,14 +513,79 @@ namespace TomP2P.Tests.Interop
         [Test]
         public void TestMessageEncodeKey()
         {
-
+            // validate decoding in Java
+            var bytes = EncodeMessage(CreateMessageKey());
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
 
         [Test]
         public void TestMessageEncodeMapKey640Data()
         {
-
+            // validate decoding in Java
+            var bytes = EncodeMessage(CreateMessageMapKey640Data());
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
+
+        #endregion
+
+        #region Sample Message Creation
+
+        private static Message.Message CreateMessageKey()
+        {
+            var m = Utils2.CreateDummyMessage();
+            m.SetKey(_sample160_1);
+            m.SetKey(_sample160_2);
+            m.SetKey(_sample160_3);
+            m.SetKey(_sample160_4);
+            m.SetKey(_sample160_5);
+            m.SetKey(_sample160_1);
+            m.SetKey(_sample160_2);
+            m.SetKey(_sample160_3);
+            return m;
+        }
+
+        private static Message.Message CreateMessageMapKey640Data()
+        {
+            IDictionary<Number640, Data> sampleMap1 = new Dictionary<Number640, Data>();
+            sampleMap1.Add(_sample640_1, _sampleData1);
+            sampleMap1.Add(_sample640_2, _sampleData1);
+            sampleMap1.Add(_sample640_3, _sampleData1);
+
+            IDictionary<Number640, Data> sampleMap2 = new Dictionary<Number640, Data>();
+            sampleMap2.Add(_sample640_1, _sampleData2);
+            sampleMap2.Add(_sample640_2, _sampleData2);
+            sampleMap2.Add(_sample640_3, _sampleData2);
+
+            IDictionary<Number640, Data> sampleMap3 = new Dictionary<Number640, Data>();
+            sampleMap3.Add(_sample640_1, _sampleData3);
+            sampleMap3.Add(_sample640_2, _sampleData3);
+            sampleMap3.Add(_sample640_3, _sampleData3);
+
+            IDictionary<Number640, Data> sampleMap4 = new Dictionary<Number640, Data>();
+            sampleMap4.Add(_sample640_1, _sampleData1);
+            sampleMap4.Add(_sample640_2, _sampleData2);
+            sampleMap4.Add(_sample640_3, _sampleData3);
+
+            IDictionary<Number640, Data> sampleMap5 = new Dictionary<Number640, Data>();
+            sampleMap5.Add(_sample640_3, _sampleData1);
+            sampleMap5.Add(_sample640_2, _sampleData2);
+            sampleMap5.Add(_sample640_1, _sampleData3);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetDataMap(new DataMap(sampleMap1));
+            m.SetDataMap(new DataMap(sampleMap2));
+            m.SetDataMap(new DataMap(sampleMap3));
+            m.SetDataMap(new DataMap(sampleMap4));
+            m.SetDataMap(new DataMap(sampleMap5));
+            m.SetDataMap(new DataMap(sampleMap1));
+            m.SetDataMap(new DataMap(sampleMap2));
+            m.SetDataMap(new DataMap(sampleMap3));
+            return m;
+        }
+
+        #endregion
+
+        #region Utils
 
         /// <summary>
         /// Encodes a provided message into a byte array.
@@ -629,5 +662,7 @@ namespace TomP2P.Tests.Interop
             }
             return true;
         }
+
+        #endregion
     }
 }
