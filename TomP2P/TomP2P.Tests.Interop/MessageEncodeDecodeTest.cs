@@ -524,6 +524,9 @@ namespace TomP2P.Tests.Interop
             // validate decoding in Java
             var bytes = EncodeMessage(CreateMessageMapKey640Data());
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+
+            // TODO finish Data encoding/decoding implementation
+            Assert.IsTrue(false);
         }
 
         #endregion
