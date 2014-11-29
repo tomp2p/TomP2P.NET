@@ -22,7 +22,6 @@ namespace TomP2P.Message
             _signatureFactory = signatureFactory;
         }
 
-        // TODO throw exceptions?
         public bool Write(JavaBinaryWriter buffer, Message message, ISignatureCodec signatureCodec)
         {
             Message = message;
@@ -30,7 +29,6 @@ namespace TomP2P.Message
 
             if (!_header)
             {
-                // TODO check if buffer is really changed (pass-by-reference)
                 MessageHeaderCodec.EncodeHeader(buffer, message);
                 _header = true;
             }
@@ -69,13 +67,10 @@ namespace TomP2P.Message
             _resume = false;
         }
 
-        // TODO throw exception?
         private bool Loop(JavaBinaryWriter buffer)
         {
             MessageContentIndex next;
-
-            // TODO check if queue returns null if empty
-            while ((next = Message.ContentReferences.Peek()) != null)
+            while ((next = Message.ContentReferences.Peek2()) != null)
             {
                 // TODO check buffer equivalent
                 long start = buffer.WriterIndex();

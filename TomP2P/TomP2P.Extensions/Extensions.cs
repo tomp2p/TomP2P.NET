@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -43,6 +44,24 @@ namespace TomP2P.Extensions
         {
             HashAlgorithm algorithm = SHA1.Create();
             return (sbyte[])(Array)algorithm.ComputeHash(Encoding.UTF8.GetBytes(x)); // TODO test double cast
+        }
+
+        /// <summary>
+        /// Equivalent to Java's Queue.peek() that returns null if empty.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="q"></param>
+        /// <returns></returns>
+        public static T Peek2<T>(this Queue<T> q) where T : class
+        {
+            try
+            {
+                return q.Peek();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return null;
+            }
         }
 
         /// <summary>

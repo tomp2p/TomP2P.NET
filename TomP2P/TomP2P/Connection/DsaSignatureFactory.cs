@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Data;
 using System.Security.Cryptography;
+using NLog;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 
@@ -10,9 +12,18 @@ namespace TomP2P.Connection
     /// </summary>
     public class DsaSignatureFactory : ISignatureFactory
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer)
         {
-            throw new NotImplementedException();
+            var dsa = new DSACryptoServiceProvider();
+            var dsap = dsa.ExportParameters(false);
+
+
+            var rsa = new RSACryptoServiceProvider();
+            var rsap = rsa.ExportParameters(false);
+
+
         }
 
         public IPublicKey DecodePublicKey(byte[] me)

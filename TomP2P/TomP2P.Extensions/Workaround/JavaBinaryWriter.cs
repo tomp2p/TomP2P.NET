@@ -26,8 +26,8 @@ namespace TomP2P.Extensions.Workaround
             // NOTE: _bw.Write(short) would write in little-endian fashion (.NET)
 
             // shift short bits to their position and cast to byte
-            var b1 = value >> 8;
-            var b2 = value;
+            var b1 = (byte) (value >> 8);
+            var b2 = (byte) value;
 
             // write bytes in big-endian fashion (Java)
             _bw.Write(b1);

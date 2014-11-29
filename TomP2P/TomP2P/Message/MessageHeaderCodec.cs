@@ -34,7 +34,7 @@ namespace TomP2P.Message
             buffer.WriteInt(message.MessageId); // 8
             buffer.WriteByte(message.Command); // 9
             buffer.WriteBytes(message.Sender.PeerId.ToByteArray()); // 29
-            buffer.WriteShort((short) message.Sender.TcpPort); // 31    // TODO check if works
+            buffer.WriteShort((short) message.Sender.TcpPort); // 31 
             buffer.WriteShort((short) message.Sender.UdpPort); // 33
             buffer.WriteBytes(message.Recipient.PeerId.ToByteArray()); // 53
             buffer.WriteInt(EncodeContentTypes(message.ContentTypes)); // 57
