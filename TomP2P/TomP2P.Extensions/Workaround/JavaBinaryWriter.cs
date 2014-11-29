@@ -22,7 +22,6 @@ namespace TomP2P.Extensions.Workaround
         /// <param name="value"></param>
         public void WriteShort(short value)
         {
-            // TODO check if correct
             // NOTE: _bw.Write(short) would write in little-endian fashion (.NET)
 
             // shift short bits to their position and cast to byte
