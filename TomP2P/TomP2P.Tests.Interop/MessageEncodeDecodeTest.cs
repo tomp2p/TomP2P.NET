@@ -367,6 +367,36 @@ namespace TomP2P.Tests.Interop
             Assert.IsTrue(false);
         }
 
+        [Test]
+        public void TestMessageEncodeBloomFilter()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageBloomFilter());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeMapKey640Byte()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageMapKey640Byte());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeSetPeerSocket()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetPeerSocket());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
         #endregion
 
         #region Sample Message Creation

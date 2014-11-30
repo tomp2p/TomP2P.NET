@@ -138,7 +138,7 @@ namespace TomP2P.Peers
         public int ToByteArray(sbyte[] me, int offset)
         {
             var offset2 = offset;
-            me[offset2++] = (sbyte) (TcpPort >> Utils.Utils.ByteBits); // TODO check if correct
+            me[offset2++] = (sbyte) (TcpPort >> Utils.Utils.ByteBits);
             me[offset2++] = (sbyte) TcpPort;
             me[offset2++] = (sbyte) (UdpPort >> Utils.Utils.ByteBits);
             me[offset2++] = (sbyte) UdpPort;

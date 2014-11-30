@@ -96,7 +96,7 @@ namespace TomP2P.Message
                     case Message.Content.SetNeighbors:
                         var neighborSet = Message.NeighborsSet(next.Index);
                         // write length
-                        buffer.WriteByte((sbyte) neighborSet.Size); // TODO check if conversion is valid
+                        buffer.WriteByte((sbyte) neighborSet.Size);
                         foreach (var neighbor in neighborSet.Neighbors)
                         {
                             buffer.WriteBytes(neighbor.ToByteArray());
@@ -106,11 +106,11 @@ namespace TomP2P.Message
                     case Message.Content.SetPeerSocket:
                         var list = Message.PeerSocketAddresses;
                         // write length
-                        buffer.WriteByte((sbyte) list.Count); // TODO check if conversion is valid
+                        buffer.WriteByte((sbyte) list.Count);
                         foreach (var psa in list)
                         {
                             // write IP version flag
-                            buffer.WriteByte(psa.IsIPv4 ? (sbyte)0 : (sbyte)1); // TODO check if conversion is valid
+                            buffer.WriteByte(psa.IsIPv4 ? (sbyte)0 : (sbyte)1);
                             buffer.WriteBytes(psa.ToByteArray());
                         }
                         Message.ContentReferences.Dequeue();
