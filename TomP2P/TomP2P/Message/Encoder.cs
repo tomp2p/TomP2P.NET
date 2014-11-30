@@ -159,7 +159,7 @@ namespace TomP2P.Message
                                 buffer.WriteBytes(data.Key.ToByteArray());
                                 buffer.WriteBytes(dm.VersionKey.ToByteArray());
 
-                                EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest()); // TODO check reference passing
+                                EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest());
                             }
                         }
                         else
@@ -171,7 +171,7 @@ namespace TomP2P.Message
                                 buffer.WriteBytes(data.Key.ContentKey.ToByteArray());
                                 buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
 
-                                EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest()); // TODO check reference passing
+                                EncodeData(buffer, data.Value, dm.IsConvertMeta, !Message.IsRequest());
                             }
                         }
                         Message.ContentReferences.Dequeue();
@@ -271,7 +271,6 @@ namespace TomP2P.Message
             return true;
         }
 
-        // TODO throw exceptions?
         // TODO return type long instead of int?
         private long EncodeData(JavaBinaryWriter buffer, Data data, bool isConvertMeta, bool isReply)
         {

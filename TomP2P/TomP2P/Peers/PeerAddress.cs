@@ -335,7 +335,7 @@ namespace TomP2P.Peers
         public sbyte[] ToByteArray()
         {
             var me = new sbyte[Size];
-            ToByteArray(me, 0); // TODO check if references are updated
+            ToByteArray(me, 0);
             return me;
         }
 

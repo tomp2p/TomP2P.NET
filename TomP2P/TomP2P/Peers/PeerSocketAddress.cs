@@ -145,12 +145,12 @@ namespace TomP2P.Peers
 
             if (InetAddress.IsIPv4())
             {
-                Array.Copy(InetAddress.GetAddressBytes(), 0, me, offset2, Utils.Utils.IPv4Bytes); // TODO check if works
+                Array.Copy(InetAddress.GetAddressBytes().ToSByteArray(), 0, me, offset2, Utils.Utils.IPv4Bytes);
                 offset2 += Utils.Utils.IPv4Bytes;
             }
             else
             {
-                Array.Copy(InetAddress.GetAddressBytes(), 0, me, offset2, Utils.Utils.IPv6Bytes); // TODO check if works
+                Array.Copy(InetAddress.GetAddressBytes().ToSByteArray(), 0, me, offset2, Utils.Utils.IPv6Bytes);
                 offset2 += Utils.Utils.IPv6Bytes;
             }
             return offset2;

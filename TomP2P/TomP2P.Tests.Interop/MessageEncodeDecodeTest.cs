@@ -291,6 +291,26 @@ namespace TomP2P.Tests.Interop
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
 
+        [Test]
+        public void TestMessageEncodeSetKey640()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetKey640());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeSetNeighbors()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetNeighbors());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
         #endregion
 
         #region Sample Message Creation
