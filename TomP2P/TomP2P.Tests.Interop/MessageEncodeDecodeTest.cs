@@ -250,30 +250,45 @@ namespace TomP2P.Tests.Interop
         [Test]
         public void TestMessageEncodeEmpty()
         {
+            // create same message object as in Java
             var m = Utils2.CreateDummyMessage();
+            var bytes = EncodeMessage(m);
 
             // validate decoding in Java
-            var bytes = EncodeMessage(m);
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
 
         [Test]
         public void TestMessageEncodeKey()
         {
-            // validate decoding in Java
+            // create same message object as in Java
             var bytes = EncodeMessage(CreateMessageKey());
+
+            // validate decoding in Java
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
 
         [Test]
         public void TestMessageEncodeMapKey640Data()
         {
-            // validate decoding in Java
+            // create same message object as in Java
             var bytes = EncodeMessage(CreateMessageMapKey640Data());
+
+            // validate decoding in Java
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
 
             // TODO finish Data encoding/decoding implementation
             Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageEncodeMapKey640Keys()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageMapKey640Keys());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
 
         #endregion
