@@ -198,10 +198,9 @@ namespace TomP2P.Tests.Interop
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.TrackerDataList, m2.TrackerDataList));
 
-            // implement Data first
-            Assert.IsTrue(false);
-
+            // TODO implement Data first
             // TODO check how TrackerData should be compared (contains Map<PeerStatistic, Data>)
+            Assert.IsTrue(false);
         }
 
         [Test]
@@ -352,6 +351,19 @@ namespace TomP2P.Tests.Interop
         public void TestMessageEncodePublicKey()
         {
             // TODO implement
+            Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageEncodeSetTrackerData()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetTrackerData());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+
+            // TODO implement Data first
             Assert.IsTrue(false);
         }
 
