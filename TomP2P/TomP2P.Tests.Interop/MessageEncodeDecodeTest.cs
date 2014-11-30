@@ -91,33 +91,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeMapKey640Keys()
         {
             // create same message object as in Java
-            var keysMap = new SortedDictionary<Number640, ICollection<Number160>>();
-            var set = new HashSet<Number160>();
-            set.Add(_sample160_1);
-            keysMap.Add(_sample640_1, set);
-
-            set = new HashSet<Number160>();
-            set.Add(_sample160_2);
-            set.Add(_sample160_3);
-            keysMap.Add(_sample640_2, set);
-
-            set = new HashSet<Number160>();
-            set.Add(_sample160_1);
-            set.Add(_sample160_2);
-            set.Add(_sample160_3);
-            set.Add(_sample160_4);
-            set.Add(_sample160_5);
-            keysMap.Add(_sample640_3, set);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
-            m1.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            var m1 = CreateMessageMapKey640Keys();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -130,30 +104,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeSetKey640()
         {
             // create same message object as in Java
-            ICollection<Number160> sampleCollection1 = new List<Number160>();
-            sampleCollection1.Add(_sample160_1);
-            sampleCollection1.Add(_sample160_2);
-            sampleCollection1.Add(_sample160_3);
-
-            ICollection<Number160> sampleCollection2 = new List<Number160>();
-            sampleCollection2.Add(_sample160_2);
-            sampleCollection2.Add(_sample160_3);
-            sampleCollection2.Add(_sample160_4);
-
-            ICollection<Number160> sampleCollection3 = new List<Number160>();
-            sampleCollection3.Add(_sample160_3);
-            sampleCollection3.Add(_sample160_4);
-            sampleCollection3.Add(_sample160_5);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetKeyCollection(new KeyCollection(_sample160_1, _sample160_1, _sample160_1, sampleCollection1));
-            m1.SetKeyCollection(new KeyCollection(_sample160_2, _sample160_2, _sample160_2, sampleCollection2));
-            m1.SetKeyCollection(new KeyCollection(_sample160_3, _sample160_3, _sample160_3, sampleCollection3));
-            m1.SetKeyCollection(new KeyCollection(_sample160_4, _sample160_4, _sample160_4, sampleCollection1));
-            m1.SetKeyCollection(new KeyCollection(_sample160_5, _sample160_5, _sample160_5, sampleCollection2));
-            m1.SetKeyCollection(new KeyCollection(_sample160_1, _sample160_2, _sample160_3, sampleCollection3));
-            m1.SetKeyCollection(new KeyCollection(_sample160_2, _sample160_3, _sample160_4, sampleCollection1));
-            m1.SetKeyCollection(new KeyCollection(_sample160_3, _sample160_4, _sample160_5, sampleCollection2));
+            var m1 = CreateMessageSetKey640();
 
             // read Java encoded bytes
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -166,36 +117,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeSetNeighbors()
         {
             // create same message object as in Java
-            var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
-            var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
-            var sampleAddress3 = new PeerAddress(_sample160_3, IPAddress.Parse("127.0.0.1"));
-            var sampleAddress4 = new PeerAddress(_sample160_4, IPAddress.Parse("0:1:2:3:4:5:6:7"));
-            var sampleAddress5 = new PeerAddress(_sample160_5, IPAddress.Parse("7:6:5:4:3:2:1:0"));
-
-            ICollection<PeerAddress> sampleNeighbours1 = new List<PeerAddress>();
-            sampleNeighbours1.Add(sampleAddress1);
-            sampleNeighbours1.Add(sampleAddress2);
-            sampleNeighbours1.Add(sampleAddress3);
-
-            ICollection<PeerAddress> sampleNeighbours2 = new List<PeerAddress>();
-            sampleNeighbours2.Add(sampleAddress2);
-            sampleNeighbours2.Add(sampleAddress3);
-            sampleNeighbours2.Add(sampleAddress4);
-
-            ICollection<PeerAddress> sampleNeighbours3 = new List<PeerAddress>();
-            sampleNeighbours3.Add(sampleAddress3);
-            sampleNeighbours3.Add(sampleAddress4);
-            sampleNeighbours3.Add(sampleAddress5);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours3));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours3));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
-            m1.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+            var m1 = CreateMessageSetNeighbors();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -208,35 +130,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeByteBuffer()
         {
             // create same message object as in Java
-            var sampleBuf1 = new MemoryStream();
-            sampleBuf1.WriteBytes(_sampleBytes1);
-            sampleBuf1.WriteBytes(_sampleBytes1);
-            sampleBuf1.WriteBytes(_sampleBytes1);
-
-            /*var sampleBuf2 = new MemoryStream();
-            sampleBuf2.WriteBytes(_sampleBytes2);
-            sampleBuf2.WriteBytes(_sampleBytes2);
-            sampleBuf2.WriteBytes(_sampleBytes2);
-
-            var sampleBuf3 = new MemoryStream();
-            sampleBuf3.WriteBytes(_sampleBytes3);
-            sampleBuf3.WriteBytes(_sampleBytes3);
-            sampleBuf3.WriteBytes(_sampleBytes3);
-
-            var sampleBuf4 = new MemoryStream();
-            sampleBuf4.WriteBytes(_sampleBytes1);
-            sampleBuf4.WriteBytes(_sampleBytes2);
-            sampleBuf4.WriteBytes(_sampleBytes3);*/
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetBuffer(new Buffer(sampleBuf1));
-            /*m1.SetBuffer(new Buffer(sampleBuf2));
-            m1.SetBuffer(new Buffer(sampleBuf3));
-            m1.SetBuffer(new Buffer(sampleBuf4));
-            m1.SetBuffer(new Buffer(sampleBuf1));
-            m1.SetBuffer(new Buffer(sampleBuf2));
-            m1.SetBuffer(new Buffer(sampleBuf3));
-            m1.SetBuffer(new Buffer(sampleBuf4));*/
+            var m1 = CreateMessageByteBuffer();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -252,15 +146,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeLong()
         {
             // create same message object as in Java
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetLongValue(Int64.MinValue);
-            m1.SetLongValue(-256);
-            m1.SetLongValue(-128);
-            m1.SetLongValue(-1);
-            m1.SetLongValue(0);
-            m1.SetLongValue(1);
-            m1.SetLongValue(128);
-            m1.SetLongValue(Int64.MaxValue);
+            var m1 = CreateMessageLong();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -273,15 +159,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeInteger()
         {
             // create same message object as in Java
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetIntValue(Int32.MinValue);
-            m1.SetIntValue(-256);
-            m1.SetIntValue(-128);
-            m1.SetIntValue(-1);
-            m1.SetIntValue(0);
-            m1.SetIntValue(1);
-            m1.SetIntValue(128);
-            m1.SetIntValue(Int32.MaxValue);
+            var m1 = CreateMessageInteger();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -312,42 +190,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeSetTrackerData()
         {
             // create same message object as in Java
-            var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
-            var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
-            var sampleAddress3 = new PeerAddress(_sample160_3, IPAddress.Parse("127.0.0.1"));
-            var sampleAddress4 = new PeerAddress(_sample160_4, IPAddress.Parse("0:1:2:3:4:5:6:7"));
-            var sampleAddress5 = new PeerAddress(_sample160_5, IPAddress.Parse("7:6:5:4:3:2:1:0"));
-
-            var sampleStatistic1 = new PeerStatistic(sampleAddress1);
-            var sampleStatistic2 = new PeerStatistic(sampleAddress2);
-            var sampleStatistic3 = new PeerStatistic(sampleAddress3);
-            var sampleStatistic4 = new PeerStatistic(sampleAddress4);
-            var sampleStatistic5 = new PeerStatistic(sampleAddress5);
-
-            IDictionary<PeerStatistic, Data> sampleMap1 = new Dictionary<PeerStatistic, Data>();
-            sampleMap1.Add(sampleStatistic1, _sampleData1);
-            sampleMap1.Add(sampleStatistic2, _sampleData2);
-            sampleMap1.Add(sampleStatistic3, _sampleData3);
-
-            IDictionary<PeerStatistic, Data> sampleMap2 = new Dictionary<PeerStatistic, Data>();
-            sampleMap2.Add(sampleStatistic2, _sampleData1);
-            sampleMap2.Add(sampleStatistic3, _sampleData2);
-            sampleMap2.Add(sampleStatistic4, _sampleData3);
-
-            IDictionary<PeerStatistic, Data> sampleMap3 = new Dictionary<PeerStatistic, Data>();
-            sampleMap3.Add(sampleStatistic3, _sampleData1);
-            sampleMap3.Add(sampleStatistic4, _sampleData2);
-            sampleMap3.Add(sampleStatistic5, _sampleData3);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetTrackerData(new TrackerData(sampleMap1, true));
-            m1.SetTrackerData(new TrackerData(sampleMap1, false));
-            m1.SetTrackerData(new TrackerData(sampleMap2, true));
-            m1.SetTrackerData(new TrackerData(sampleMap2, false));
-            m1.SetTrackerData(new TrackerData(sampleMap3, true));
-            m1.SetTrackerData(new TrackerData(sampleMap3, false));
-            m1.SetTrackerData(new TrackerData(sampleMap1, true));
-            m1.SetTrackerData(new TrackerData(sampleMap1, false));
+            var m1 = CreateMessageSetTrackerData();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -365,40 +208,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeBloomFilter()
         {
             // create same message object as in Java
-            var sampleBf1 = new SimpleBloomFilter<Number160>(2, 5);
-            sampleBf1.Add(_sample160_1);
-
-            var sampleBf2 = new SimpleBloomFilter<Number160>(2, 5);
-            sampleBf2.Add(_sample160_2);
-            sampleBf2.Add(_sample160_1);
-
-            var sampleBf3 = new SimpleBloomFilter<Number160>(2, 5);
-            sampleBf3.Add(_sample160_1);
-            sampleBf3.Add(_sample160_2);
-            sampleBf3.Add(_sample160_3);
-
-            var sampleBf4 = new SimpleBloomFilter<Number160>(2, 5);
-            sampleBf4.Add(_sample160_1);
-            sampleBf4.Add(_sample160_2);
-            sampleBf4.Add(_sample160_3);
-            sampleBf4.Add(_sample160_4);
-
-            var sampleBf5 = new SimpleBloomFilter<Number160>(2, 5);
-            sampleBf5.Add(_sample160_1);
-            sampleBf5.Add(_sample160_2);
-            sampleBf5.Add(_sample160_3);
-            sampleBf5.Add(_sample160_4);
-            sampleBf5.Add(_sample160_5);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetBloomFilter(sampleBf1);
-            m1.SetBloomFilter(sampleBf2);
-            m1.SetBloomFilter(sampleBf3);
-            m1.SetBloomFilter(sampleBf4);
-            m1.SetBloomFilter(sampleBf5);
-            m1.SetBloomFilter(sampleBf1);
-            m1.SetBloomFilter(sampleBf2);
-            m1.SetBloomFilter(sampleBf3);
+            var m1 = CreateMessageBloomFilter();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -411,40 +221,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeMapKey640Byte()
         {
             // create same message object as in Java
-            IDictionary<Number640, sbyte> sampleMap1 = new Dictionary<Number640, sbyte>();
-            sampleMap1.Add(_sample640_1, _sampleBytes1[0]);
-            sampleMap1.Add(_sample640_2, _sampleBytes1[1]);
-            sampleMap1.Add(_sample640_3, _sampleBytes1[2]);
-
-            IDictionary<Number640, sbyte> sampleMap2 = new Dictionary<Number640, sbyte>();
-            sampleMap2.Add(_sample640_1, _sampleBytes1[3]);
-            sampleMap2.Add(_sample640_2, _sampleBytes1[4]);
-            sampleMap2.Add(_sample640_3, _sampleBytes1[5]);
-
-            IDictionary<Number640, sbyte> sampleMap3 = new Dictionary<Number640, sbyte>();
-            sampleMap3.Add(_sample640_1, _sampleBytes1[6]);
-            sampleMap3.Add(_sample640_2, _sampleBytes1[7]);
-            sampleMap3.Add(_sample640_3, _sampleBytes1[8]);
-
-            IDictionary<Number640, sbyte> sampleMap4 = new Dictionary<Number640, sbyte>();
-            sampleMap4.Add(_sample640_1, _sampleBytes1[9]);
-            sampleMap4.Add(_sample640_2, _sampleBytes1[10]);
-            sampleMap4.Add(_sample640_3, _sampleBytes1[11]);
-
-            IDictionary<Number640, sbyte> sampleMap5 = new Dictionary<Number640, sbyte>();
-            sampleMap5.Add(_sample640_1, _sampleBytes1[12]);
-            sampleMap5.Add(_sample640_2, _sampleBytes1[13]);
-            sampleMap5.Add(_sample640_3, _sampleBytes1[14]);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap1));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap2));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap3));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap4));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap5));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap1));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap2));
-            m1.SetKeyMapByte(new KeyMapByte(sampleMap3));
+            var m1 = CreateMessageMapKey640Byte();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -457,37 +234,7 @@ namespace TomP2P.Tests.Interop
         public void TestMessageDecodeSetPeerSocket()
         {
             // create same message object as in Java
-            IPAddress sampleAddress1 = IPAddress.Parse("192.168.1.1");
-            IPAddress sampleAddress2 = IPAddress.Parse("255.255.255.255");
-            IPAddress sampleAddress3 = IPAddress.Parse("127.0.0.1");
-            IPAddress sampleAddress4 = IPAddress.Parse("0:1:2:3:4:5:6:7");
-            IPAddress sampleAddress5 = IPAddress.Parse("7:6:5:4:3:2:1:0");
-
-            var samplePsa1 = new PeerSocketAddress(sampleAddress1, 0, 0);
-            var samplePsa2 = new PeerSocketAddress(sampleAddress2, 65535, 65535);
-            var samplePsa3 = new PeerSocketAddress(sampleAddress3, 1, 1);
-            var samplePsa4 = new PeerSocketAddress(sampleAddress4, 2, 2);
-            var samplePsa5 = new PeerSocketAddress(sampleAddress5, 30, 40);
-            var samplePsa6 = new PeerSocketAddress(sampleAddress1, 88, 88);
-            var samplePsa7 = new PeerSocketAddress(sampleAddress2, 177, 177);
-            var samplePsa8 = new PeerSocketAddress(sampleAddress3, 60000, 65000);
-            var samplePsa9 = new PeerSocketAddress(sampleAddress4, 99, 100);
-            var samplePsa10 = new PeerSocketAddress(sampleAddress5, 13, 1234);
-
-            ICollection<PeerSocketAddress> sampleAddresses = new List<PeerSocketAddress>();
-            sampleAddresses.Add(samplePsa1);
-            sampleAddresses.Add(samplePsa2);
-            sampleAddresses.Add(samplePsa3);
-            sampleAddresses.Add(samplePsa4);
-            sampleAddresses.Add(samplePsa5);
-            sampleAddresses.Add(samplePsa6);
-            sampleAddresses.Add(samplePsa7);
-            sampleAddresses.Add(samplePsa8);
-            sampleAddresses.Add(samplePsa9);
-            sampleAddresses.Add(samplePsa10);
-
-            var m1 = Utils2.CreateDummyMessage();
-            m1.SetPeerSocketAddresses(sampleAddresses);
+            var m1 = CreateMessageSetPeerSocket();
 
             // compare Java encoded and .NET decoded objects
             var m2 = DecodeMessage(JarRunner.RequestJavaBytes());
@@ -583,6 +330,320 @@ namespace TomP2P.Tests.Interop
             m.SetDataMap(new DataMap(sampleMap1));
             m.SetDataMap(new DataMap(sampleMap2));
             m.SetDataMap(new DataMap(sampleMap3));
+            return m;
+        }
+
+        private static Message.Message CreateMessageMapKey640Keys()
+        {
+            var keysMap = new SortedDictionary<Number640, ICollection<Number160>>();
+            var set = new HashSet<Number160>();
+            set.Add(_sample160_1);
+            keysMap.Add(_sample640_1, set);
+
+            set = new HashSet<Number160>();
+            set.Add(_sample160_2);
+            set.Add(_sample160_3);
+            keysMap.Add(_sample640_2, set);
+
+            set = new HashSet<Number160>();
+            set.Add(_sample160_1);
+            set.Add(_sample160_2);
+            set.Add(_sample160_3);
+            set.Add(_sample160_4);
+            set.Add(_sample160_5);
+            keysMap.Add(_sample640_3, set);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            m.SetKeyMap640Keys(new KeyMap640Keys(keysMap));
+            return m;
+        }
+
+        private static Message.Message CreateMessageSetKey640()
+        {
+            ICollection<Number160> sampleCollection1 = new List<Number160>();
+            sampleCollection1.Add(_sample160_1);
+            sampleCollection1.Add(_sample160_2);
+            sampleCollection1.Add(_sample160_3);
+
+            ICollection<Number160> sampleCollection2 = new List<Number160>();
+            sampleCollection2.Add(_sample160_2);
+            sampleCollection2.Add(_sample160_3);
+            sampleCollection2.Add(_sample160_4);
+
+            ICollection<Number160> sampleCollection3 = new List<Number160>();
+            sampleCollection3.Add(_sample160_3);
+            sampleCollection3.Add(_sample160_4);
+            sampleCollection3.Add(_sample160_5);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetKeyCollection(new KeyCollection(_sample160_1, _sample160_1, _sample160_1, sampleCollection1));
+            m.SetKeyCollection(new KeyCollection(_sample160_2, _sample160_2, _sample160_2, sampleCollection2));
+            m.SetKeyCollection(new KeyCollection(_sample160_3, _sample160_3, _sample160_3, sampleCollection3));
+            m.SetKeyCollection(new KeyCollection(_sample160_4, _sample160_4, _sample160_4, sampleCollection1));
+            m.SetKeyCollection(new KeyCollection(_sample160_5, _sample160_5, _sample160_5, sampleCollection2));
+            m.SetKeyCollection(new KeyCollection(_sample160_1, _sample160_2, _sample160_3, sampleCollection3));
+            m.SetKeyCollection(new KeyCollection(_sample160_2, _sample160_3, _sample160_4, sampleCollection1));
+            m.SetKeyCollection(new KeyCollection(_sample160_3, _sample160_4, _sample160_5, sampleCollection2));
+            return m;
+        }
+
+        private static Message.Message CreateMessageSetNeighbors()
+        {
+            var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
+            var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
+            var sampleAddress3 = new PeerAddress(_sample160_3, IPAddress.Parse("127.0.0.1"));
+            var sampleAddress4 = new PeerAddress(_sample160_4, IPAddress.Parse("0:1:2:3:4:5:6:7"));
+            var sampleAddress5 = new PeerAddress(_sample160_5, IPAddress.Parse("7:6:5:4:3:2:1:0"));
+
+            ICollection<PeerAddress> sampleNeighbours1 = new List<PeerAddress>();
+            sampleNeighbours1.Add(sampleAddress1);
+            sampleNeighbours1.Add(sampleAddress2);
+            sampleNeighbours1.Add(sampleAddress3);
+
+            ICollection<PeerAddress> sampleNeighbours2 = new List<PeerAddress>();
+            sampleNeighbours2.Add(sampleAddress2);
+            sampleNeighbours2.Add(sampleAddress3);
+            sampleNeighbours2.Add(sampleAddress4);
+
+            ICollection<PeerAddress> sampleNeighbours3 = new List<PeerAddress>();
+            sampleNeighbours3.Add(sampleAddress3);
+            sampleNeighbours3.Add(sampleAddress4);
+            sampleNeighbours3.Add(sampleAddress5);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours3));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours3));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours1));
+            m.SetNeighborSet(new NeighborSet(-1, sampleNeighbours2));
+            return m;
+        }
+
+        private static Message.Message CreateMessageByteBuffer()
+        {
+            var sampleBuf1 = new MemoryStream();
+            sampleBuf1.WriteBytes(_sampleBytes1);
+            sampleBuf1.WriteBytes(_sampleBytes1);
+            sampleBuf1.WriteBytes(_sampleBytes1);
+
+            /*var sampleBuf2 = new MemoryStream();
+            sampleBuf2.WriteBytes(_sampleBytes2);
+            sampleBuf2.WriteBytes(_sampleBytes2);
+            sampleBuf2.WriteBytes(_sampleBytes2);
+
+            var sampleBuf3 = new MemoryStream();
+            sampleBuf3.WriteBytes(_sampleBytes3);
+            sampleBuf3.WriteBytes(_sampleBytes3);
+            sampleBuf3.WriteBytes(_sampleBytes3);
+
+            var sampleBuf4 = new MemoryStream();
+            sampleBuf4.WriteBytes(_sampleBytes1);
+            sampleBuf4.WriteBytes(_sampleBytes2);
+            sampleBuf4.WriteBytes(_sampleBytes3);*/
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetBuffer(new Buffer(sampleBuf1));
+            /*m1.SetBuffer(new Buffer(sampleBuf2));
+            m1.SetBuffer(new Buffer(sampleBuf3));
+            m1.SetBuffer(new Buffer(sampleBuf4));
+            m1.SetBuffer(new Buffer(sampleBuf1));
+            m1.SetBuffer(new Buffer(sampleBuf2));
+            m1.SetBuffer(new Buffer(sampleBuf3));
+            m1.SetBuffer(new Buffer(sampleBuf4));*/
+            return m;
+        }
+
+        private static Message.Message CreateMessageLong()
+        {
+            var m = Utils2.CreateDummyMessage();
+            m.SetLongValue(Int64.MinValue);
+            m.SetLongValue(-256);
+            m.SetLongValue(-128);
+            m.SetLongValue(-1);
+            m.SetLongValue(0);
+            m.SetLongValue(1);
+            m.SetLongValue(128);
+            m.SetLongValue(Int64.MaxValue);
+            return m;
+        }
+
+        private static Message.Message CreateMessageInteger()
+        {
+            var m = Utils2.CreateDummyMessage();
+            m.SetIntValue(Int32.MinValue);
+            m.SetIntValue(-256);
+            m.SetIntValue(-128);
+            m.SetIntValue(-1);
+            m.SetIntValue(0);
+            m.SetIntValue(1);
+            m.SetIntValue(128);
+            m.SetIntValue(Int32.MaxValue);
+            return m;
+        }
+
+        private static Message.Message CreateMessageSetTrackerData()
+        {
+            var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
+            var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
+            var sampleAddress3 = new PeerAddress(_sample160_3, IPAddress.Parse("127.0.0.1"));
+            var sampleAddress4 = new PeerAddress(_sample160_4, IPAddress.Parse("0:1:2:3:4:5:6:7"));
+            var sampleAddress5 = new PeerAddress(_sample160_5, IPAddress.Parse("7:6:5:4:3:2:1:0"));
+
+            var sampleStatistic1 = new PeerStatistic(sampleAddress1);
+            var sampleStatistic2 = new PeerStatistic(sampleAddress2);
+            var sampleStatistic3 = new PeerStatistic(sampleAddress3);
+            var sampleStatistic4 = new PeerStatistic(sampleAddress4);
+            var sampleStatistic5 = new PeerStatistic(sampleAddress5);
+
+            IDictionary<PeerStatistic, Data> sampleMap1 = new Dictionary<PeerStatistic, Data>();
+            sampleMap1.Add(sampleStatistic1, _sampleData1);
+            sampleMap1.Add(sampleStatistic2, _sampleData2);
+            sampleMap1.Add(sampleStatistic3, _sampleData3);
+
+            IDictionary<PeerStatistic, Data> sampleMap2 = new Dictionary<PeerStatistic, Data>();
+            sampleMap2.Add(sampleStatistic2, _sampleData1);
+            sampleMap2.Add(sampleStatistic3, _sampleData2);
+            sampleMap2.Add(sampleStatistic4, _sampleData3);
+
+            IDictionary<PeerStatistic, Data> sampleMap3 = new Dictionary<PeerStatistic, Data>();
+            sampleMap3.Add(sampleStatistic3, _sampleData1);
+            sampleMap3.Add(sampleStatistic4, _sampleData2);
+            sampleMap3.Add(sampleStatistic5, _sampleData3);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetTrackerData(new TrackerData(sampleMap1, true));
+            m.SetTrackerData(new TrackerData(sampleMap1, false));
+            m.SetTrackerData(new TrackerData(sampleMap2, true));
+            m.SetTrackerData(new TrackerData(sampleMap2, false));
+            m.SetTrackerData(new TrackerData(sampleMap3, true));
+            m.SetTrackerData(new TrackerData(sampleMap3, false));
+            m.SetTrackerData(new TrackerData(sampleMap1, true));
+            m.SetTrackerData(new TrackerData(sampleMap1, false));
+            return m;
+        }
+
+        private static Message.Message CreateMessageBloomFilter()
+        {
+            var sampleBf1 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf1.Add(_sample160_1);
+
+            var sampleBf2 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf2.Add(_sample160_2);
+            sampleBf2.Add(_sample160_1);
+
+            var sampleBf3 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf3.Add(_sample160_1);
+            sampleBf3.Add(_sample160_2);
+            sampleBf3.Add(_sample160_3);
+
+            var sampleBf4 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf4.Add(_sample160_1);
+            sampleBf4.Add(_sample160_2);
+            sampleBf4.Add(_sample160_3);
+            sampleBf4.Add(_sample160_4);
+
+            var sampleBf5 = new SimpleBloomFilter<Number160>(2, 5);
+            sampleBf5.Add(_sample160_1);
+            sampleBf5.Add(_sample160_2);
+            sampleBf5.Add(_sample160_3);
+            sampleBf5.Add(_sample160_4);
+            sampleBf5.Add(_sample160_5);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetBloomFilter(sampleBf1);
+            m.SetBloomFilter(sampleBf2);
+            m.SetBloomFilter(sampleBf3);
+            m.SetBloomFilter(sampleBf4);
+            m.SetBloomFilter(sampleBf5);
+            m.SetBloomFilter(sampleBf1);
+            m.SetBloomFilter(sampleBf2);
+            m.SetBloomFilter(sampleBf3);
+            return m;
+        }
+
+        private static Message.Message CreateMessageMapKey640Byte()
+        {
+            IDictionary<Number640, sbyte> sampleMap1 = new Dictionary<Number640, sbyte>();
+            sampleMap1.Add(_sample640_1, _sampleBytes1[0]);
+            sampleMap1.Add(_sample640_2, _sampleBytes1[1]);
+            sampleMap1.Add(_sample640_3, _sampleBytes1[2]);
+
+            IDictionary<Number640, sbyte> sampleMap2 = new Dictionary<Number640, sbyte>();
+            sampleMap2.Add(_sample640_1, _sampleBytes1[3]);
+            sampleMap2.Add(_sample640_2, _sampleBytes1[4]);
+            sampleMap2.Add(_sample640_3, _sampleBytes1[5]);
+
+            IDictionary<Number640, sbyte> sampleMap3 = new Dictionary<Number640, sbyte>();
+            sampleMap3.Add(_sample640_1, _sampleBytes1[6]);
+            sampleMap3.Add(_sample640_2, _sampleBytes1[7]);
+            sampleMap3.Add(_sample640_3, _sampleBytes1[8]);
+
+            IDictionary<Number640, sbyte> sampleMap4 = new Dictionary<Number640, sbyte>();
+            sampleMap4.Add(_sample640_1, _sampleBytes1[9]);
+            sampleMap4.Add(_sample640_2, _sampleBytes1[10]);
+            sampleMap4.Add(_sample640_3, _sampleBytes1[11]);
+
+            IDictionary<Number640, sbyte> sampleMap5 = new Dictionary<Number640, sbyte>();
+            sampleMap5.Add(_sample640_1, _sampleBytes1[12]);
+            sampleMap5.Add(_sample640_2, _sampleBytes1[13]);
+            sampleMap5.Add(_sample640_3, _sampleBytes1[14]);
+
+            var m = Utils2.CreateDummyMessage();
+            m.SetKeyMapByte(new KeyMapByte(sampleMap1));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap2));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap3));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap4));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap5));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap1));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap2));
+            m.SetKeyMapByte(new KeyMapByte(sampleMap3));
+            return m;
+        }
+
+        private static Message.Message CreateMessageSetPeerSocket()
+        {
+            IPAddress sampleAddress1 = IPAddress.Parse("192.168.1.1");
+            IPAddress sampleAddress2 = IPAddress.Parse("255.255.255.255");
+            IPAddress sampleAddress3 = IPAddress.Parse("127.0.0.1");
+            IPAddress sampleAddress4 = IPAddress.Parse("0:1:2:3:4:5:6:7");
+            IPAddress sampleAddress5 = IPAddress.Parse("7:6:5:4:3:2:1:0");
+
+            var samplePsa1 = new PeerSocketAddress(sampleAddress1, 0, 0);
+            var samplePsa2 = new PeerSocketAddress(sampleAddress2, 65535, 65535);
+            var samplePsa3 = new PeerSocketAddress(sampleAddress3, 1, 1);
+            var samplePsa4 = new PeerSocketAddress(sampleAddress4, 2, 2);
+            var samplePsa5 = new PeerSocketAddress(sampleAddress5, 30, 40);
+            var samplePsa6 = new PeerSocketAddress(sampleAddress1, 88, 88);
+            var samplePsa7 = new PeerSocketAddress(sampleAddress2, 177, 177);
+            var samplePsa8 = new PeerSocketAddress(sampleAddress3, 60000, 65000);
+            var samplePsa9 = new PeerSocketAddress(sampleAddress4, 99, 100);
+            var samplePsa10 = new PeerSocketAddress(sampleAddress5, 13, 1234);
+
+            ICollection<PeerSocketAddress> sampleAddresses = new List<PeerSocketAddress>();
+            sampleAddresses.Add(samplePsa1);
+            sampleAddresses.Add(samplePsa2);
+            sampleAddresses.Add(samplePsa3);
+            sampleAddresses.Add(samplePsa4);
+            sampleAddresses.Add(samplePsa5);
+            sampleAddresses.Add(samplePsa6);
+            sampleAddresses.Add(samplePsa7);
+            sampleAddresses.Add(samplePsa8);
+            sampleAddresses.Add(samplePsa9);
+            sampleAddresses.Add(samplePsa10);
+
+            // only 1 content is set, because per content, whole list is encoded
+             var m = Utils2.CreateDummyMessage();
+            m.SetPeerSocketAddresses(sampleAddresses);
             return m;
         }
 
