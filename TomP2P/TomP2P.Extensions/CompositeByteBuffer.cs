@@ -125,13 +125,29 @@ namespace TomP2P.Extensions
                 if (bytesToSlice <= readableBytes)
                 {
                     // last component
-                    buf.w
+                    buf.SetWriterIndex(buf.ReaderIndex + bytesToSlice);
+                    slice.Add(buf);
+                    break;
                 }
                 else
                 {
                     // not the last component
+                    slice.Add(buf);
+                    bytesToSlice -= readableBytes;
+                    componentId++;
+
+                    // fetch the next component
+                    buf = _components[componentId].Buf.Duplicate();
                 }
             } while (bytesToSlice > 0);
+
+            // slice all component because only readable bytes are interesting
+            for (int i = 0; i < slice.Count; i++)
+            {
+                slice[i] = slice[i].Slice();
+            }
+
+            return slice;
         }
 
         private void CheckIndex(int index)
