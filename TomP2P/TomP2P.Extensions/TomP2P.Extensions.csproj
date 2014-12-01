@@ -45,6 +45,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="InteropRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Unpooled.cs" />
     <Compile Include="Workaround\AtomicInteger.cs" />
     <Compile Include="Workaround\AtomicLong.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />

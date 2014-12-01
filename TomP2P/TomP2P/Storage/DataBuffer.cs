@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace TomP2P.Storage
 {
     public class DataBuffer : IEquatable<DataBuffer>
     {
-        private readonly IList<MemoryStream> _buffers; // TODO should be an AlternativeCompositeByteBuf
+        private readonly IList<ByteBuf> _buffers;
 
         public long AlreadyTransferred { private set; get; }
 
@@ -22,33 +23,31 @@ namespace TomP2P.Storage
 
         public DataBuffer(int nrOfBuffers)
         {
-            _buffers = new List<MemoryStream>(nrOfBuffers);
+            _buffers = new List<ByteBuf>(nrOfBuffers);
         }
 
         public DataBuffer(sbyte[] buffer, int offset, int length)
         {
-            _buffers = new List<MemoryStream>(1);
+            _buffers = new List<ByteBuf>(1);
 
-            // TODO check, port is not trivial
-            var buf = new MemoryStream(buffer.ToByteArray(), offset, length);
-            _buffers.Add(buf);
+            // TODO implement
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Creates a DataBuffer and adds the MemoryStream to it.
         /// </summary>
         /// <param name="buf"></param>
-        public DataBuffer(MemoryStream buf)
+        public DataBuffer(ByteBuf buf)
         {
-            // TODO check, port is not trivial
-            _buffers = new List<MemoryStream>(1);
+            _buffers = new List<ByteBuf>(1);
             _buffers.Add(buf.Slice());
             // TODO retain needed?
         }
 
-        public DataBuffer(IList<MemoryStream> buffers)
+        public DataBuffer(IList<ByteBuf> buffers)
         {
-            _buffers = new List<MemoryStream>(_buffers.Count);
+            _buffers = new List<ByteBuf>(buffers.Count);
             foreach (var buf in _buffers)
             {
                 _buffers.Add(buf.Duplicate());
@@ -98,100 +97,73 @@ namespace TomP2P.Storage
             IList<MemoryStream> buffers = new List<MemoryStream>(copy._buffers.Count);
             foreach (var buf in copy._buffers)
             {
-                // TODO check if works, port not trivial
-                buffers.Add(buf);
+                foreach (var bb in buf.NioBuffers())
+                {
+                    buffers.Add(bb);
+                }
             }
             return buffers;
         }
 
         // TODO merge the two/four, needs implementation of .NET "ByteBuf" with reader and writer
-        public JavaBinaryWriter ToJavaBinaryWriter()
+        public ByteBuf ToByteBuf()
         {
+            // TODO check if works
             DataBuffer copy = ShallowCopy();
-            MemoryStream[] buffers = copy._buffers.ToArray();
-
-            // TODO this most probably doesn't work
-            for (int i = 1; i < buffers.Length; i++)
-            {
-                buffers[i].CopyTo(buffers[0]);
-            }
-            return new JavaBinaryWriter(buffers[0]);
+            return Unpooled.WrappedBuffer(copy._buffers.ToArray());
         }
 
-        public JavaBinaryReader ToJavaBinaryReader()
+        public ByteBuf[] ToByteBufs()
         {
-            DataBuffer copy = ShallowCopy();
-            MemoryStream[] buffers = copy._buffers.ToArray();
-
-            // TODO this most probably doesn't work
-            for (int i = 1; i < buffers.Length; i++)
-            {
-                buffers[i].CopyTo(buffers[0]);
-            }
-            return new JavaBinaryReader(buffers[0]);
-        }
-
-        public JavaBinaryWriter[] ToJavaBinaryWriters()
-        {
-            // TODO check if port is correct
-            DataBuffer copy = ShallowCopy();
-            var writers = new JavaBinaryWriter[copy._buffers.Count];
-            for (int i = 0; i < copy._buffers.Count; i++)
-            {
-                writers[i] = new JavaBinaryWriter(copy._buffers[i]);
-            }
-            return writers;
-        }
-
-        public JavaBinaryReader[] ToJavaBinaryReaders()
-        {
-            // TODO check if port is correct
-            DataBuffer copy = ShallowCopy();
-            var readers = new JavaBinaryReader[copy._buffers.Count];
-            for (int i = 0; i < copy._buffers.Count; i++)
-            {
-                readers[i] = new JavaBinaryReader(copy._buffers[i]);
-            }
-            return readers;
-        }
-
-        public MemoryStream[] ToByteBuffer()
-        {
+            // TODO check if works
             DataBuffer copy = ShallowCopy();
             return copy._buffers.ToArray();
         }
 
-        public void TransferTo(JavaBinaryWriter buffer)
-        {
-            // TODO implement
-            throw new NotImplementedException();
+        
 
+        public MemoryStream[] ToByteBuffer() // TODO use possible ByteBuffer wrapper
+        {
             DataBuffer copy = ShallowCopy();
-            foreach (var buf in copy._buffers)
+            return ToByteBuf().NioBuffers();
+        }
+
+        public void TransferTo(CompositeByteBuffer buf)
+        {
+            // TODO check if works
+            DataBuffer copy = ShallowCopy();
+            foreach (var buffer in copy._buffers)
             {
-                // TODO buf.addComponent(buffer);
-                AlreadyTransferred += buf.ReadableBytes();
+                buf.AddComponent(buffer);
+                AlreadyTransferred += buffer.ReadableBytes;
             }
         }
 
-        public int TransferFrom(JavaBinaryReader buffer, long remaining)
+        public int TransferFrom(CompositeByteBuffer buffer, int remaining)
         {
-            // TODO implement
-            throw new NotImplementedException();
-
-            var readable = buffer.ReadableBytes();
-            var index = buffer.ReaderIndex();
+            // TODO check if works
+            var readable = buffer.ReadableBytes;
+            var index = buffer.ReaderIndex;
             var length = Math.Min(remaining, readable);
 
             if (length == 0)
             {
                 return 0;
             }
-            // Java stuff
+
+            IList<ByteBuf> decoms = buffer.Decompose(index, length);
+            foreach (var decom in decoms)
+            {
+                lock (_buffers)
+                {
+                    // this is already a slice
+                    _buffers.Add(decom);
+                }
+            }
 
             AlreadyTransferred += Length;
-            buffer.SetReaderIndex(buffer.ReaderIndex() + length);
-            //return length;
+            buffer.SetReaderIndex(buffer.ReaderIndex + length);
+            return length;
         }
 
         public void ResetAlreadyTransferred()
@@ -226,15 +198,15 @@ namespace TomP2P.Storage
             return ToByteBuffer().GetHashCode();
         }
 
-        public long Length
+        public int Length
         {
             get
             {
-                long length = 0;
+                int length = 0;
                 DataBuffer copy = ShallowCopy();
                 foreach (var buffer in copy._buffers)
                 {
-                    length += buffer.Position; // TODO check if correct, needs writerIndex
+                    length += buffer.WriterIndex;
                 }
                 return length;
             }
