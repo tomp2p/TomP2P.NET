@@ -1,13 +1,8 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Storage
 {
@@ -29,9 +24,8 @@ namespace TomP2P.Storage
         public DataBuffer(sbyte[] buffer, int offset, int length)
         {
             _buffers = new List<ByteBuf>(1);
-
-            // TODO implement
-            throw new NotImplementedException();
+            var buf = Unpooled.WrappedBuffer(buffer, offset, length);
+            _buffers.Add(buf);
         }
 
         /// <summary>
@@ -120,11 +114,8 @@ namespace TomP2P.Storage
             return copy._buffers.ToArray();
         }
 
-        
-
         public MemoryStream[] ToByteBuffer() // TODO use possible ByteBuffer wrapper
         {
-            DataBuffer copy = ShallowCopy();
             return ToByteBuf().NioBuffers();
         }
 
