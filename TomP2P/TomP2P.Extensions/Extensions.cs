@@ -58,7 +58,7 @@ namespace TomP2P.Extensions
             {
                 return q.Peek();
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 return null;
             }

@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ByteBuf.cs" />
     <Compile Include="CompositeByteBuffer.cs" />
     <Compile Include="Convenient.cs" />
     <Compile Include="Extensions.cs" />
