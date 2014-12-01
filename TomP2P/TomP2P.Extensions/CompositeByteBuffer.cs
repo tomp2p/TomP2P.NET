@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -102,7 +103,58 @@ namespace TomP2P.Extensions
 
         public IList<ByteBuf> Decompose(int offset, int length)
         {
-            
+            CheckIndex(offset, length);
+            if (length == 0)
+            {
+                return Convenient.EmptyList<ByteBuf>();
+            }
+
+            int componentId = FindIndex(offset);
+        }
+
+        private void CheckIndex(int index)
+        {
+            if (index < 0 || index > Capacity)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "index: {0} (expected: range(0, {1}))", index, Capacity));
+            }
+        }
+
+        private void CheckIndex(int index, int fieldLength)
+        {
+            if (fieldLength < 0)
+            {
+                throw new ArgumentException("length: " + fieldLength + " (expected: >= 0)");
+            }
+            if (index < 0 || index > Capacity - fieldLength)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                    "index: {0}, length: {1} (expected: range(0, {2}))", index,
+                    fieldLength, Capacity));
+            }
+        }
+
+        private int FindIndex(int offset)
+        {
+            CheckIndex(offset);
+
+            var last = Last();
+            if (offset >= last.Offset)
+            {
+                return _components.Count - 1;
+            }
+
+            int index = _components.Count - 2;
+            for (var i = _components.ListIterator(_components.Count - 1); i.HasPrevious(); index--)
+            {
+                var c = i.Previous();
+                if (offset >= c.Offset)
+                {
+                    return index;
+                }
+            }
+            throw new Exception("should not happen");
         }
 
         private CompositeByteBuffer WriterIndex0(int writerIndex)
@@ -122,8 +174,10 @@ namespace TomP2P.Extensions
             if (readerIndex < 0 || readerIndex > _writerIndex)
             {
                 throw new IndexOutOfRangeException(String.Format("readerIndex: {0} (expected: 0 <= readerIndex <= writerIndex({1}))",
-							readerIndex, _writerIndex));
+                            readerIndex, _writerIndex));
             }
+            _readerIndex = readerIndex;
+            return this;
         }
 
         public override int ReadableBytes
@@ -160,7 +214,7 @@ namespace TomP2P.Extensions
         {
             get
             {
-                Component last = Last;
+                var last = Last();
                 return last.Offset + last.Buf.Capacity;
             }
         }
@@ -170,16 +224,23 @@ namespace TomP2P.Extensions
             throw new NotImplementedException();
         }
 
-        private Component Last
+        private Component Last()
         {
-            get
+            if (_components.Count == 0)
             {
-                if (_components.Count == 0)
-                {
-                    return EmptyComponent;
-                }
-                return _components[_components.Count - 1];
+                return EmptyComponent; // TODO doesn't work correctly yet
             }
+            return _components[_components.Count - 1];
+        }
+
+        public override ByteBuf Slice()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override MemoryStream[] NioBuffers()
+        {
+            throw new NotImplementedException();
         }
     }
 }

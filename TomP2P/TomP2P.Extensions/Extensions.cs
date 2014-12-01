@@ -65,6 +65,19 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's List.listIterator(int).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static ListIterator<T> ListIterator<T>(this IList<T> list, int index)
+        {
+            // TODO check if works
+            return new ListIterator<T>(list, index);
+        }
+
+        /// <summary>
         /// Convert a BitArray to a byte. (Only takes first 8 bits.)
         /// </summary>
         /// <param name="ba"></param>

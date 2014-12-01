@@ -23,6 +23,17 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent for Java's Collections.emptyList().
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IList<T> EmptyList<T>()
+        {
+            // see http://stackoverflow.com/questions/3894775/c-sharp-net-equivalent-for-java-collections-temptylist
+            return new T[0];
+        }
+
+        /// <summary>
         /// Reads data from a stream until the end is reached. The
         /// data is returned as a byte array. An IOException is
         /// thrown if any of the underlying IO calls fail.
