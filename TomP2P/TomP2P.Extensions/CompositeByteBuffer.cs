@@ -110,6 +110,28 @@ namespace TomP2P.Extensions
             }
 
             int componentId = FindIndex(offset);
+            IList<ByteBuf> slice = new List<ByteBuf>(_components.Count);
+
+            // the first component
+            var firstC = _components[componentId];
+            var first = firstC.Buf.Duplicate();
+            first.SetReaderIndex(offset - firstC.Offset);
+
+            var buf = first;
+            int bytesToSlice = length;
+            do
+            {
+                int readableBytes = buf.ReadableBytes;
+                if (bytesToSlice <= readableBytes)
+                {
+                    // last component
+                    buf.w
+                }
+                else
+                {
+                    // not the last component
+                }
+            } while (bytesToSlice > 0);
         }
 
         private void CheckIndex(int index)
@@ -178,6 +200,47 @@ namespace TomP2P.Extensions
             }
             _readerIndex = readerIndex;
             return this;
+        }
+
+        public override ByteBuf SetWriterIndex(int writerIndex)
+        {
+            if (writerIndex < _readerIndex || writerIndex > Capacity)
+            {
+                throw new IndexOutOfRangeException(String.Format("writerIndex: {0} (expected: readerIndex({1}) <= writerIndex <= capacity({2}))",
+                            writerIndex, _readerIndex, Capacity));
+            }
+            SetComponentWriterIndex(writerIndex);
+            return this;
+        }
+
+        private void SetComponentWriterIndex(int writerIndex)
+        {
+            int index = FindIndex(writerIndex);
+            int to = FindIndex(_writerIndex);
+            var c = _components[index];
+            int relWriterIndex = writerIndex - c.Offset;
+            c.Buf.SetWriterIndex(relWriterIndex);
+
+            if (_writerIndex < writerIndex)
+            {
+                // new writer index is larger than the old one
+                // assuming full buffers
+                for (int i = index - 1; i > to; i--)
+                {
+                    c = _components[i];
+                    c.Buf.SetWriterIndex(c.Buf.Capacity);
+                }
+                _writerIndex = writerIndex;
+            }
+            else
+            {
+                // we go back in the buffer
+                for (int i = index + 1; i < to; i++)
+                {
+                    _components[i].Buf.SetWriterIndex(0);
+                }
+                _writerIndex = writerIndex;
+            }
         }
 
         public override int ReadableBytes

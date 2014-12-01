@@ -65,5 +65,12 @@ namespace TomP2P.Extensions
         /// <param name="readerIndex"></param>
         /// <returns></returns>
         public abstract ByteBuf SetReaderIndex(int readerIndex);
+
+        /// <summary>
+        /// Sets the WriterIndex of this buffer.
+        /// </summary>
+        /// <param name="writerIndex"></param>
+        /// <returns></returns>
+        public abstract ByteBuf SetWriterIndex(int writerIndex);
     }
 }
