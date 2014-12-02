@@ -119,7 +119,7 @@ namespace TomP2P.Storage
             return ToByteBuf().NioBuffers();
         }
 
-        public void TransferTo(CompositeByteBuffer buf)
+        public void TransferTo(CompositeByteBuf buf)
         {
             // TODO check if works
             DataBuffer copy = ShallowCopy();
@@ -130,11 +130,11 @@ namespace TomP2P.Storage
             }
         }
 
-        public int TransferFrom(CompositeByteBuffer buffer, int remaining)
+        public int TransferFrom(CompositeByteBuf buf, int remaining)
         {
             // TODO check if works
-            var readable = buffer.ReadableBytes;
-            var index = buffer.ReaderIndex;
+            var readable = buf.ReadableBytes;
+            var index = buf.ReaderIndex;
             var length = Math.Min(remaining, readable);
 
             if (length == 0)
@@ -142,7 +142,7 @@ namespace TomP2P.Storage
                 return 0;
             }
 
-            IList<ByteBuf> decoms = buffer.Decompose(index, length);
+            IList<ByteBuf> decoms = buf.Decompose(index, length);
             foreach (var decom in decoms)
             {
                 lock (_buffers)
@@ -153,7 +153,7 @@ namespace TomP2P.Storage
             }
 
             AlreadyTransferred += Length;
-            buffer.SetReaderIndex(buffer.ReaderIndex + length);
+            buf.SetReaderIndex(buf.ReaderIndex + length);
             return length;
         }
 

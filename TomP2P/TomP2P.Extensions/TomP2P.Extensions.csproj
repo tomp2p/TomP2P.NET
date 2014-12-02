@@ -40,11 +40,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteBuf.cs" />
-    <Compile Include="CompositeByteBuffer.cs" />
+    <Compile Include="CompositeByteBuf.cs" />
     <Compile Include="Convenient.cs" />
+    <Compile Include="DuplicatedByteBuf.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="InteropRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SlicedByteBuf.cs" />
     <Compile Include="Unpooled.cs" />
     <Compile Include="Workaround\AtomicInteger.cs" />
     <Compile Include="Workaround\AtomicLong.cs" />

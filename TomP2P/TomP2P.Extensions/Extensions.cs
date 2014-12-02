@@ -158,6 +158,32 @@ namespace TomP2P.Extensions
         #region Java ByteBuffer
 
         /// <summary>
+        /// Equivalent of Java's ByteBuffer.put(ByteBuffer).
+        /// This method transfers the bytes remaining in the given source buffer into this
+        /// buffer. If there are more bytes remaining in the source buffer than in this
+        /// buffer, that is, if src.remaining() > remaining(), then no bytes are 
+        /// transferred and a BufferOverflowException is thrown.
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <param name="src"></param>
+        /// <returns></returns>
+        public static MemoryStream Put(this MemoryStream ms, MemoryStream src)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Equivalent of Java's Buffer.flip().
+        /// Flips this buffer. The limit is set to the current position and then the 
+        /// position is set to zero. If the mark is defined then it is discarded. 
+        /// </summary>
+        /// <param name="ms"></param>
+        public static void Flip(this MemoryStream ms)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Equivalent of Java's ByteBuffer.remaining().
         /// Returns the number of elements between the current position and the limit.
         /// </summary>

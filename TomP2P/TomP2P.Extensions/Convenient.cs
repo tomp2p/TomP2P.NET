@@ -83,5 +83,21 @@ namespace TomP2P.Extensions
             Array.Copy(buffer, ret, read);
             return ret;
         }
+
+        /// <summary>
+        /// Equivalent to Java's ByteBuffer.allocate(int).
+        /// Allocates a new MemoryStream.
+        /// </summary>
+        /// <param name="capacity"></param>
+        /// <returns></returns>
+        public static MemoryStream Allocate(int capacity)
+        {
+            if (capacity < 0)
+            {
+                throw new ArgumentException();
+            }
+            // TODO Java uses HeapByteBuffer, something similar in .NET
+            return new MemoryStream(capacity);
+        }
     }
 }

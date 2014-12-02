@@ -14,7 +14,7 @@ namespace TomP2P.Extensions
     /// by Java Netty's CompositeByteBuf, but with a slight different behavior.
     /// Only the needed parts are ported.
     /// </summary>
-    public class CompositeByteBuffer : ByteBuf
+    public class CompositeByteBuf : ByteBuf
     {
         private sealed class Component
         {
@@ -37,18 +37,14 @@ namespace TomP2P.Extensions
         private bool _freed;
 
         private readonly IList<Component> _components = new List<Component>();
-        private readonly Component EmptyComponent = new Component(null); // TODO implement EmptyBuffer
+        private readonly Component EmptyComponent = new Component(Unpooled.EmptyBuffer);
 
-        // TODO implement addComponent()
-        // TODO implement decompose()
-        // TODO implement slice()
-
-        public CompositeByteBuffer AddComponent(params ByteBuf[] buffers)
+        public CompositeByteBuf AddComponent(params ByteBuf[] buffers)
         {
             return AddComponent(false, buffers);
         }
 
-        public CompositeByteBuffer AddComponent(bool fillBuffer, params ByteBuf[] buffers)
+        public CompositeByteBuf AddComponent(bool fillBuffer, params ByteBuf[] buffers)
         {
             if (buffers == null)
             {
@@ -101,55 +97,6 @@ namespace TomP2P.Extensions
             // TODO leak close needed?
         }
 
-        public IList<ByteBuf> Decompose(int offset, int length)
-        {
-            CheckIndex(offset, length);
-            if (length == 0)
-            {
-                return Convenient.EmptyList<ByteBuf>();
-            }
-
-            int componentId = FindIndex(offset);
-            IList<ByteBuf> slice = new List<ByteBuf>(_components.Count);
-
-            // the first component
-            var firstC = _components[componentId];
-            var first = firstC.Buf.Duplicate();
-            first.SetReaderIndex(offset - firstC.Offset);
-
-            var buf = first;
-            int bytesToSlice = length;
-            do
-            {
-                int readableBytes = buf.ReadableBytes;
-                if (bytesToSlice <= readableBytes)
-                {
-                    // last component
-                    buf.SetWriterIndex(buf.ReaderIndex + bytesToSlice);
-                    slice.Add(buf);
-                    break;
-                }
-                else
-                {
-                    // not the last component
-                    slice.Add(buf);
-                    bytesToSlice -= readableBytes;
-                    componentId++;
-
-                    // fetch the next component
-                    buf = _components[componentId].Buf.Duplicate();
-                }
-            } while (bytesToSlice > 0);
-
-            // slice all component because only readable bytes are interesting
-            for (int i = 0; i < slice.Count; i++)
-            {
-                slice[i] = slice[i].Slice();
-            }
-
-            return slice;
-        }
-
         private void CheckIndex(int index)
         {
             if (index < 0 || index > Capacity)
@@ -195,7 +142,7 @@ namespace TomP2P.Extensions
             throw new Exception("should not happen");
         }
 
-        private CompositeByteBuffer WriterIndex0(int writerIndex)
+        private CompositeByteBuf WriterIndex0(int writerIndex)
         {
             if (writerIndex < _readerIndex || writerIndex > Capacity)
             {
@@ -298,9 +245,78 @@ namespace TomP2P.Extensions
             }
         }
 
+        public IList<ByteBuf> Decompose(int offset, int length)
+        {
+            CheckIndex(offset, length);
+            if (length == 0)
+            {
+                return Convenient.EmptyList<ByteBuf>();
+            }
+
+            int componentId = FindIndex(offset);
+            IList<ByteBuf> slice = new List<ByteBuf>(_components.Count);
+
+            // the first component
+            var firstC = _components[componentId];
+            var first = firstC.Buf.Duplicate();
+            first.SetReaderIndex(offset - firstC.Offset);
+
+            var buf = first;
+            int bytesToSlice = length;
+            do
+            {
+                int readableBytes = buf.ReadableBytes;
+                if (bytesToSlice <= readableBytes)
+                {
+                    // last component
+                    buf.SetWriterIndex(buf.ReaderIndex + bytesToSlice);
+                    slice.Add(buf);
+                    break;
+                }
+                else
+                {
+                    // not the last component
+                    slice.Add(buf);
+                    bytesToSlice -= readableBytes;
+                    componentId++;
+
+                    // fetch the next component
+                    buf = _components[componentId].Buf.Duplicate();
+                }
+            } while (bytesToSlice > 0);
+
+            // slice all component because only readable bytes are interesting
+            for (int i = 0; i < slice.Count; i++)
+            {
+                slice[i] = slice[i].Slice();
+            }
+
+            return slice;
+        }
+
+        public override ByteBuf Slice()
+        {
+            return Slice(_readerIndex, ReadableBytes);
+        }
+
+        public override ByteBuf Slice(int index, int length)
+        {
+            if (length == 0)
+            {
+                return Unpooled.EmptyBuffer;
+            }
+            return new SlicedByteBuf(this, index, length);
+        }
+
         public override ByteBuf Duplicate()
         {
-            throw new NotImplementedException();
+            return new DuplicatedByteBuf(this);
+        }
+
+        public override ByteBuf Unwrap()
+        {
+            // That's indeed what TomP2P's AlternativeCompositeByteBuf does...
+            return null;
         }
 
         private Component Last()
@@ -312,14 +328,88 @@ namespace TomP2P.Extensions
             return _components[_components.Count - 1];
         }
 
-        public override ByteBuf Slice()
+        public override int NioBufferCount()
         {
-            throw new NotImplementedException();
+            if (_components.Count == 1)
+            {
+                return _components[0].Buf.NioBufferCount();
+            }
+            else
+            {
+                int count = 0;
+                int componentsCount = _components.Count;
+
+                for (int i = 0; i < componentsCount; i++)
+                {
+                    var c = _components[i];
+                    count += c.Buf.NioBufferCount();
+                }
+                return count;
+            }
+        }
+
+        public override MemoryStream NioBuffer(int index, int length)
+        {
+            if (_components.Count == 1)
+            {
+                var buf = _components[0].Buf;
+                if (buf.NioBufferCount() == 1)
+                {
+                    return _components[0].Buf.NioBuffer(index, length);
+                }
+            }
+            var merged = Convenient.Allocate(length); // little-endian
+            var buffers = NioBuffers(index, length);
+
+            for (int i = 0; i < buffers.Length; i++)
+            {
+                merged.Put(buffers[i]);
+            }
+
+            merged.Flip();
+            return merged;
         }
 
         public override MemoryStream[] NioBuffers()
         {
-            throw new NotImplementedException();
+            return NioBuffers(_readerIndex, ReadableBytes);
+        }
+
+        public override MemoryStream[] NioBuffers(int index, int length)
+        {
+            CheckIndex(index, length);
+            if (length == 0)
+            {
+                return new MemoryStream[0]; // EMPTY_BYTE_BUFFERS
+            }
+
+            IList<MemoryStream> buffers = new List<MemoryStream>(_components.Count);
+            int i = FindIndex(index);
+            while (length > 0)
+            {
+                var c = _components[i];
+                var s = c.Buf;
+                int adjustment = c.Offset;
+                int localLength = Math.Min(length, s.ReadableBytes - (index - adjustment));
+
+                switch (s.NioBufferCount())
+                {
+                    case 0:
+                        throw new NotSupportedException();
+                    case 1:
+                        buffers.Add(s.NioBuffer(index - adjustment, localLength));
+                        break;
+                    default:
+                        // TODO add all
+                        break;
+                }
+
+                index += localLength;
+                length -= localLength;
+                i++;
+            }
+
+            return buffers.ToArray();
         }
     }
 }
