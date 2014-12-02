@@ -7,16 +7,9 @@ namespace TomP2P.Extensions
     {
         private static readonly MemoryStream EmptyByteBuffer = Convenient.AllocateDirect(0);
 
-        private readonly IByteBufAllocator _alloc;
-
-        public EmptyByteBuf(IByteBufAllocator alloc)
+        public EmptyByteBuf()
         {
-            if (alloc == null)
-            {
-                throw new NullReferenceException("alloc");
-            }
-            // use little-endian
-            _alloc = alloc;
+            // alloc not used
         }
 
         public override int ReadableBytes

@@ -8,12 +8,13 @@ namespace TomP2P.Extensions
 {
     public sealed class Unpooled
     {
+        private static readonly IByteBufAllocator Alloc = UnpooledByteBufAllocator.Default;
+        
         /// <summary>
         /// A buffer whose capacity is 0.
         /// </summary>
-        public static readonly ByteBuf EmptyBuffer = Alloc.Buffer(0, 0); // TODO implement
+        public static readonly ByteBuf EmptyBuffer = Alloc.Buffer(0, 0);
 
-        private static readonly IByteBufAllocator Alloc = null; // TODO implement
 
         /// <summary>
         /// Creates a new big-endian composite buffer which wraps the readable bytes of the 
