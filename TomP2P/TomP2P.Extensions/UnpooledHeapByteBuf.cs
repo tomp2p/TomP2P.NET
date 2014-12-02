@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TomP2P.Extensions
 {
-    public class UnpooledHeapByteBuf : AbstractByteBuf
+    public sealed class UnpooledHeapByteBuf : AbstractByteBuf
     {
         private readonly IByteBufAllocator _alloc;
         private sbyte[] _array;
@@ -37,7 +37,7 @@ namespace TomP2P.Extensions
 
             _alloc = alloc;
             SetArray(initialArray);
-            SetIndex(readerIndex, writerIndex); // TODO fix
+            SetIndex(readerIndex, writerIndex);
         }
 
         private void SetArray(sbyte[] initialArray)
