@@ -99,5 +99,20 @@ namespace TomP2P.Extensions
             // TODO Java uses HeapByteBuffer, something similar in .NET
             return new MemoryStream(capacity);
         }
+
+        /// <summary>
+        /// Equivalent to Java's ByteBuffer.allocateDirect(int).
+        /// Allocates a new direct byte buffer. 
+        /// The new buffer's position will be zero, its limit will be its capacity, 
+        /// its mark will be undefined, and each of its elements will be initialized to
+        /// zero. Whether or not it has a backing array is unspecified.
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public static MemoryStream AllocateDirect(int p)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
     }
 }

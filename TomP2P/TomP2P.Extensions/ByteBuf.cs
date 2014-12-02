@@ -67,11 +67,11 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public abstract ByteBuf Unwrap();
 
-        /*/// <summary>
+        /// <summary>
         /// Exposes this buffer's sub-region as a MemoryStream.
         /// </summary>
         /// <returns></returns>
-        public abstract MemoryStream NioBuffer();*/
+        public abstract MemoryStream NioBuffer();
 
         /// <summary>
         /// Exposes this buffer's sub-region as a MemoryStream.

@@ -8,7 +8,10 @@ namespace TomP2P.Extensions
 {
     public sealed class Unpooled
     {
-        public static readonly ByteBuf EmptyBuffer = null; // TODO implement
+        /// <summary>
+        /// A buffer whose capacity is 0.
+        /// </summary>
+        public static readonly ByteBuf EmptyBuffer = Alloc.Buffer(0, 0); // TODO implement
 
         private static readonly IByteBufAllocator Alloc = null; // TODO implement
 
