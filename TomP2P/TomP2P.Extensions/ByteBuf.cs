@@ -32,9 +32,17 @@ namespace TomP2P.Extensions
         /// </summary>
         public abstract bool IsWriteable { get; }
 
-        public abstract int ReaderIndex { get; }
+        public abstract int ReaderIndex { get; protected set; } // TODO protected?
 
-        public abstract int WriterIndex { get; }
+        public abstract int WriterIndex { get; protected set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="readerIndex"></param>
+        /// <param name="writerIndex"></param>
+        /// <returns></returns>
+        public abstract ByteBuf SetIndex(int readerIndex, int writerIndex);
 
         /// <summary>
         /// Returns the number of bytes (octets) this buffer can contain.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace TomP2P.Extensions
         /// <summary>
         /// A buffer whose capacity is 0.
         /// </summary>
-        public static readonly ByteBuf EmptyBuffer = Alloc.Buffer(0, 0);
+        public static readonly ByteBuf EmptyBuffer = new EmptyByteBuf(); // Alloc.Buffer(0, 0);
 
 
         /// <summary>
@@ -74,6 +75,20 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Creates a new big-endian buffer which wraps the specified array.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static ByteBuf WrappedBuffer(sbyte[] array)
+        {
+            if (array.Length == 0)
+            {
+                return EmptyBuffer;
+            }
+            return new UnpooledHeadByteBuf(Alloc, array, array.Length);
+        }
+
+        /// <summary>
         /// Creates a new big-endian buffer which wraps the sub-region of the specified array.
         /// </summary>
         /// <param name="array"></param>
@@ -82,8 +97,16 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static ByteBuf WrappedBuffer(sbyte[] array, int offset, int length)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            if (length == 0)
+            {
+                return EmptyBuffer;
+            }
+
+            if (offset == 0 && length == array.Length)
+            {
+                return WrappedBuffer(array);
+            }
+            return WrappedBuffer(array).Slice
         }
     }
 }

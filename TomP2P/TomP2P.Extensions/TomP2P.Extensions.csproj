@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractByteBuf.cs" />
     <Compile Include="ByteBuf.cs" />
     <Compile Include="AlternativeCompositeByteBuf.cs" />
     <Compile Include="CompositeByteBuf.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="SlicedByteBuf.cs" />
     <Compile Include="Unpooled.cs" />
     <Compile Include="UnpooledByteBufAllocator.cs" />
+    <Compile Include="UnpooledHeadByteBuf.cs" />
     <Compile Include="Workaround\AtomicInteger.cs" />
     <Compile Include="Workaround\AtomicLong.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />

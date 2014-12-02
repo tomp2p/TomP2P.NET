@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace TomP2P.Extensions
 {
-    public class CompositeByteBuf : ByteBuf
+    public class CompositeByteBuf : AbstractByteBuf
     {
         private readonly IByteBufAllocator _alloc;
         private readonly bool _direct;
         private readonly int _maxNumComponents;
 
         public CompositeByteBuf(IByteBufAllocator alloc, bool direct, int maxNumComponents, params ByteBuf[] buffers)
+            : base(Int32.MaxValue)
         {
             if (alloc == null)
             {
