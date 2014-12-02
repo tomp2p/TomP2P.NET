@@ -119,7 +119,7 @@ namespace TomP2P.Storage
             return ToByteBuf().NioBuffers();
         }
 
-        public void TransferTo(CompositeByteBuf buf)
+        public void TransferTo(AlternativeCompositeByteBuf buf)
         {
             // TODO check if works
             DataBuffer copy = ShallowCopy();
@@ -130,7 +130,7 @@ namespace TomP2P.Storage
             }
         }
 
-        public int TransferFrom(CompositeByteBuf buf, int remaining)
+        public int TransferFrom(AlternativeCompositeByteBuf buf, int remaining)
         {
             // TODO check if works
             var readable = buf.ReadableBytes;
