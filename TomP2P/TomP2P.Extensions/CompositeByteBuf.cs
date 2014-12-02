@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TomP2P.Extensions
 {
+    // TODO finish implementation
     public class CompositeByteBuf : AbstractByteBuf
     {
         private readonly IByteBufAllocator _alloc;

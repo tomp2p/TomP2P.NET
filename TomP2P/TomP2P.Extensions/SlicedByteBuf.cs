@@ -1,28 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TomP2P.Extensions
 {
-    public class SlicedByteBuf : ByteBuf
+    public sealed class SlicedByteBuf : AbstractDerivedByteBuf
     {
-        // AbstractByteBuf
-        private int _maxCapacity;
-
         private readonly ByteBuf _buffer;
         private readonly int _adjustment;
         private readonly int _length;
 
         public SlicedByteBuf(ByteBuf buffer, int index, int length)
+            : base(length)
         {
-            // AbstractByteBuf
-            if (length < 0)
+            if (index < 0 || index > buffer.Capacity - length)
             {
-                throw new ArgumentException("maxCapacity: " + length + " (expected: >= 0)");
+                throw new IndexOutOfRangeException(buffer + ".slice(" + index + ", " + length + ')');
             }
-            _maxCapacity = length;
 
             if (buffer is SlicedByteBuf)
             {
@@ -40,72 +37,51 @@ namespace TomP2P.Extensions
                 _adjustment = index;
             }
             _length = length;
-            SetWriterIndex(length); // TODO fix
+            SetWriterIndex(length);
         }
 
-        public override int ReadableBytes
+        public override ByteBuf Unwrap()
         {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override int WriteableBytes
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool IsReadable
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool IsWriteable
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override int ReaderIndex
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override int WriterIndex
-        {
-            get { throw new NotImplementedException(); }
+            return _buffer;
         }
 
         public override int Capacity
         {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override ByteBuf Slice()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override ByteBuf Slice(int index, int length)
-        {
-            throw new NotImplementedException();
+            get { return _length; }
         }
 
         public override ByteBuf Duplicate()
         {
-            throw new NotImplementedException();
+            ByteBuf duplicate = _buffer.Slice(_adjustment, _length);
+            duplicate.SetIndex(ReaderIndex, WriterIndex);
+            return duplicate;
         }
 
-        public override System.IO.MemoryStream[] NioBuffers()
+        public override ByteBuf Slice(int index, int length)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, length);
+            if (length == 0)
+            {
+                return Unpooled.EmptyBuffer;
+            }
+            return _buffer.Slice(index + _adjustment, length);
         }
 
-        public override ByteBuf SetReaderIndex(int readerIndex)
+        public override int NioBufferCount()
         {
-            throw new NotImplementedException();
+            return _buffer.NioBufferCount();
         }
 
-        public override ByteBuf SetWriterIndex(int writerIndex)
+        public override MemoryStream NioBuffer(int index, int length)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, length);
+            return _buffer.NioBuffer(index + _adjustment, length);
+        }
+
+        public override MemoryStream[] NioBuffers(int index, int length)
+        {
+            CheckIndex(index, length);
+            return _buffer.NioBuffers(index + _adjustment, length);
         }
     }
 }

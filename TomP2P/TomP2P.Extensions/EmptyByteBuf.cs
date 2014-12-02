@@ -42,7 +42,19 @@ namespace TomP2P.Extensions
             get { return 0; }
         }
 
+        public override ByteBuf SetIndex(int readerIndex, int writerIndex)
+        {
+            CheckIndex(readerIndex);
+            CheckIndex(writerIndex);
+            return this;
+        }
+
         public override int Capacity
+        {
+            get { return 0; }
+        }
+
+        public override int MaxCapacity
         {
             get { return 0; }
         }
@@ -55,28 +67,6 @@ namespace TomP2P.Extensions
         public override ByteBuf Slice(int index, int length)
         {
             return CheckIndex(index, length);
-        }
-
-        private ByteBuf CheckIndex(int index)
-        {
-            if (index != 0)
-            {
-                throw new IndexOutOfRangeException();
-            }
-            return this;
-        }
-
-        private ByteBuf CheckIndex(int index, int length)
-        {
-            if (length < 0)
-            {
-                throw new ArgumentException("length: " + length);
-            }
-            if (index != 0 || length != 0)
-            {
-                throw new IndexOutOfRangeException();
-            }
-            return this;
         }
 
         public override ByteBuf Duplicate()
@@ -124,6 +114,28 @@ namespace TomP2P.Extensions
         public override ByteBuf SetWriterIndex(int writerIndex)
         {
             return CheckIndex(writerIndex);
+        }
+
+        private ByteBuf CheckIndex(int index)
+        {
+            if (index != 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            return this;
+        }
+
+        private ByteBuf CheckIndex(int index, int length)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentException("length: " + length);
+            }
+            if (index != 0 || length != 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            return this;
         }
     }
 }

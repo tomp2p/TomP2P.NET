@@ -32,9 +32,9 @@ namespace TomP2P.Extensions
         /// </summary>
         public abstract bool IsWriteable { get; }
 
-        public abstract int ReaderIndex { get; protected set; } // TODO protected?
+        public abstract int ReaderIndex { get; }
 
-        public abstract int WriterIndex { get; protected set; }
+        public abstract int WriterIndex { get; }
 
         /// <summary>
         /// 
@@ -48,6 +48,11 @@ namespace TomP2P.Extensions
         /// Returns the number of bytes (octets) this buffer can contain.
         /// </summary>
         public abstract int Capacity { get; }
+
+        /// <summary>
+        /// Returns the maximum allowed capacity of this buffer.
+        /// </summary>
+        public abstract int MaxCapacity { get; }
 
         /// <summary>
         /// Returns a slice of this buffer's readable bytes.

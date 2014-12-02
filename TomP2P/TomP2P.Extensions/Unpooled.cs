@@ -85,7 +85,7 @@ namespace TomP2P.Extensions
             {
                 return EmptyBuffer;
             }
-            return new UnpooledHeadByteBuf(Alloc, array, array.Length);
+            return new UnpooledHeapByteBuf(Alloc, array, array.Length);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace TomP2P.Extensions
             {
                 return WrappedBuffer(array);
             }
-            return WrappedBuffer(array).Slice
+            return WrappedBuffer(array).Slice(offset, length);
         }
     }
 }

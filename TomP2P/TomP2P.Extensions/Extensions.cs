@@ -184,6 +184,24 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent of Java's ByteBuffer.slice().
+        /// Creates a new byte buffer whose content is a shared subsequence of this buffer's content.
+        /// The content of the new buffer will start at this buffer's current position. Changes to 
+        /// this buffer's content will be visible in the new buffer, and vice versa; the two buffers'
+        /// position, limit, and mark values will be independent. 
+        /// The new buffer's position will be zero, its capacity and its limit will be the number of
+        /// bytes remaining in this buffer, and its mark will be undefined. The new buffer will be 
+        /// direct if, and only if, this buffer is direct, and it will be read-only if, and only if, 
+        /// this buffer is read-only.
+        /// </summary>
+        /// <param name="ms"></param>
+        /// <returns></returns>
+        public static MemoryStream Slice(this MemoryStream ms)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Equivalent of Java's ByteBuffer.remaining().
         /// Returns the number of elements between the current position and the limit.
         /// </summary>
@@ -208,7 +226,7 @@ namespace TomP2P.Extensions
 
         #endregion
 
-        #region Java Netty
+        /*#region Java Netty
 
         /// <summary>
         /// Equivalent to Java Netty's ByteBuf.writeBytes(byte[] src).
@@ -301,7 +319,7 @@ namespace TomP2P.Extensions
             return false;
         }
 
-        #endregion
+        #endregion*/
 
         #region Conversion
 
