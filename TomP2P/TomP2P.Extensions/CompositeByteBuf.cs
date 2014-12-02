@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TomP2P.Extensions
 {
@@ -103,7 +100,7 @@ namespace TomP2P.Extensions
                 return new MemoryStream[0]; // EMPTY_BYTE_BUFFERS<
             }
 
-            IList<MemoryStream> buffers = new List<MemoryStream>(_components.Count);
+            var buffers = new List<MemoryStream>(_components.Count);
             int i = ToComponentIndex(index);
             while (length > 0)
             {
@@ -114,13 +111,13 @@ namespace TomP2P.Extensions
                 switch (s.NioBufferCount())
                 {
                     case 0:
-                        throw new InvalidOperationException();
+                        throw new NotSupportedException();
                     case 1:
                         buffers.Add(s.NioBuffer(index - adjustment, localLength));
                         break;
                     default:
-                        // TODO implement
-                        Collections.addAll(buffers, s.NioBuffers(index - adjustment, localLength));
+                        buffers.AddRange(s.NioBuffers(index - adjustment, localLength));
+                        break;
                 }
 
                 index += localLength;

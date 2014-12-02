@@ -383,7 +383,7 @@ namespace TomP2P.Extensions
                 return new MemoryStream[0]; // EMPTY_BYTE_BUFFERS
             }
 
-            IList<MemoryStream> buffers = new List<MemoryStream>(_components.Count);
+            var buffers = new List<MemoryStream>(_components.Count);
             int i = FindIndex(index);
             while (length > 0)
             {
@@ -400,7 +400,7 @@ namespace TomP2P.Extensions
                         buffers.Add(s.NioBuffer(index - adjustment, localLength));
                         break;
                     default:
-                        // TODO add all
+                        buffers.AddRange(s.NioBuffers(index - adjustment, localLength));
                         break;
                 }
 
