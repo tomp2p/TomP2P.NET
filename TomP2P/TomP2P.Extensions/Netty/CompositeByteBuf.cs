@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace TomP2P.Extensions
+namespace TomP2P.Extensions.Netty
 {
     public class CompositeByteBuf : AbstractByteBuf
     {

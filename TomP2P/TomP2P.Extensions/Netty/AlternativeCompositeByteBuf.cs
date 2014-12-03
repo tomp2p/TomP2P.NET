@@ -1,13 +1,8 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TomP2P.Extensions
+namespace TomP2P.Extensions.Netty
 {
     /// <summary>
     /// Equivalent of Java TomP2P's AlternativeCompositeByteBuf, which is heavily inspired 

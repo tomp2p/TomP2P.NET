@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace TomP2P.Extensions
+namespace TomP2P.Extensions.Netty
 {
     public class EmptyByteBuf : ByteBuf
     {

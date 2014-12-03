@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Storage
 {
