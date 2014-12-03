@@ -27,6 +27,8 @@ namespace TomP2P.Extensions.Netty
             }
         }
 
+        private static readonly IByteBufAllocator ALLOC = UnpooledByteBufAllocator.Default;
+
         private int _readerIndex;
         private int _writerIndex;
         private bool _freed;
@@ -34,6 +36,15 @@ namespace TomP2P.Extensions.Netty
         private readonly IList<Component> _components = new List<Component>();
         private readonly Component EmptyComponent = new Component(Unpooled.EmptyBuffer);
         private readonly IByteBufAllocator _alloc; // TODO initialize
+        private readonly bool _direct;
+
+        public AlternativeCompositeByteBuf(IByteBufAllocator alloc, bool direct, params ByteBuf[] buffers)
+        {
+		    _alloc = alloc;
+		    _direct = direct;
+		    AddComponent(buffers);
+            // TODO leak needed? leak = leakDetector.open(this);
+	    }
 
         public void Deallocate()
         {
@@ -737,6 +748,22 @@ namespace TomP2P.Extensions.Netty
                         "srcIndex: {0}, length: {1} (expected: range(0, {2}))",
                         srcIndex, length, srcCapacity));
             }
+        }
+
+        public static AlternativeCompositeByteBuf CompBuffer()
+        {
+            return CompBuffer(false);
+        }
+
+        public static AlternativeCompositeByteBuf CompBuffer(bool direct)
+        {
+            return CompBuffer(ALLOC, direct);
+        }
+
+        public static AlternativeCompositeByteBuf CompBuffer(IByteBufAllocator alloc, bool direct,
+            params ByteBuf[] buffers)
+        {
+            return new AlternativeCompositeByteBuf(alloc, direct, buffers);
         }
     }
 }
