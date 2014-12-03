@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
@@ -8,22 +9,22 @@ namespace TomP2P.Message
 
     public class Buffer : IEquatable<Buffer>
     {
-        public MemoryStream BackingBuffer { get; private set; } // TODO use ByteBuf equivalent
+        public ByteBuf BackingBuffer { get; private set; }
         public int Length { get; private set; }
         public int AlreadyRead { get; private set; }
 
-        public Buffer(MemoryStream buffer, int length)
+        public Buffer(ByteBuf buffer, int length)
         {
             AlreadyRead = 0;
             BackingBuffer = buffer;
             Length = length;
         }
 
-        public Buffer(MemoryStream buffer)
+        public Buffer(ByteBuf buffer)
         {
             AlreadyRead = 0;
             BackingBuffer = buffer;
-            Length = (int) buffer.ReadableBytes();
+            Length = buffer.ReadableBytes;
         }
 
         public Buffer AddComponent(MemoryStream slide)
@@ -99,14 +100,14 @@ namespace TomP2P.Message
             get
             {
                 var remaining = Length - AlreadyRead;
-                var available = (int) BackingBuffer.ReadableBytes();
+                var available = (int) BackingBuffer.ReadableBytes;
                 return Math.Min(remaining, available);
             }
         }
 
         public bool IsComplete
         {
-            get { return Length == (int) BackingBuffer.ReadableBytes(); }
+            get { return Length == (int) BackingBuffer.ReadableBytes; }
         }
 
         public bool IsDone

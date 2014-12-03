@@ -1,4 +1,5 @@
-﻿using TomP2P.Extensions.Workaround;
+﻿using TomP2P.Extensions.Netty;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Message
 {
@@ -8,9 +9,9 @@ namespace TomP2P.Message
 
         ISignatureCodec Decode(byte[] encodedData); // TODO throws exception?
 
-        ISignatureCodec Write(JavaBinaryWriter buffer);
+        ISignatureCodec Write(ByteBuf buffer);
 
-        ISignatureCodec Read(JavaBinaryReader buffer);
+        ISignatureCodec Read(ByteBuf buffer);
 
         int SignatureSize { get; set; }
     }

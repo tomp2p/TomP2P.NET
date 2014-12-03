@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using TomP2P.Connection;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 using TomP2P.P2P;
@@ -142,7 +143,7 @@ namespace TomP2P.Storage
             BasedOnSet = new List<Number160>(0);
         }
 
-        public void EncodeHeader(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
+        public void EncodeHeader(AlternativeCompositeByteBuf buffer, ISignatureFactory signatureFactory)
         {
             var header = (int)_type; // check if works
             if (HasPrepareFlag)
@@ -215,8 +216,7 @@ namespace TomP2P.Storage
             }
         }
 
-        // TODO use correct buffer
-        public bool EncodeBuffer(JavaBinaryWriter buffer)
+        public bool EncodeBuffer(AlternativeCompositeByteBuf buffer)
         {
             var already = _buffer.AlreadyTransferred;
             var remaining = Length - already;
@@ -231,22 +231,22 @@ namespace TomP2P.Storage
             return _buffer.AlreadyTransferred == Length;
         }
 
-        public void EncodeDone(JavaBinaryWriter buffer, ISignatureFactory signatureFactory)
+        public void EncodeDone(AlternativeCompositeByteBuf buffer, ISignatureFactory signatureFactory)
         {
             EncodeDone(buffer, signatureFactory, null);
         }
 
-        public void EncodeDone(JavaBinaryWriter buffer, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
+        public void EncodeDone(AlternativeCompositeByteBuf buffer, ISignatureFactory signatureFactory, IPrivateKey messagePrivateKey)
         {
             if (IsSigned)
             {
                 if (Signature == null && PrivateKey != null)
                 {
-                    Signature = signatureFactory.Sign(PrivateKey, _buffer.ToJavaBinaryWriter());
+                    Signature = signatureFactory.Sign(PrivateKey, _buffer.ToByteBuf());
                 }
                 else if (Signature == null && messagePrivateKey != null)
                 {
-                    Signature = signatureFactory.Sign(messagePrivateKey, _buffer.ToJavaBinaryWriter());
+                    Signature = signatureFactory.Sign(messagePrivateKey, _buffer.ToByteBuf());
                 }
                 else if (Signature == null)
                 {

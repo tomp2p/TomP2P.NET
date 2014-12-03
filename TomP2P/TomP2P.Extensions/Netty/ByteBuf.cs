@@ -152,7 +152,13 @@ namespace TomP2P.Extensions.Netty
 
         public abstract ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length);
 
+        public abstract ByteBuf WriteBytes(ByteBuf src, int length);
+
+        public abstract ByteBuf WriteBytes(ByteBuf src, int srcIndex, int length);
+
         public abstract ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length);
+
+        public abstract ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length);
 
         #endregion
 

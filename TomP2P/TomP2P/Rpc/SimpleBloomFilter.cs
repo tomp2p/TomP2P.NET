@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
 
@@ -189,7 +190,7 @@ namespace TomP2P.Rpc
         /// Converts data to a byte buffer. The first two bytes contain the size of this simple bloom filter. Thus, the bloom filter can only be of length 65536.
         /// </summary>
         /// <param name="buffer"></param>
-        public void ToByteBuffer(JavaBinaryWriter buffer)
+        public void ToByteBuffer(AlternativeCompositeByteBuf buffer)
         {
             sbyte[] tmp = BitArray.ToByteArray();
             int currentByteArraySize = tmp.Length;

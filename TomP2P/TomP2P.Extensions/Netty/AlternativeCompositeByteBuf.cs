@@ -551,9 +551,54 @@ namespace TomP2P.Extensions.Netty
             return this;
         }
 
+        public override ByteBuf WriteBytes(ByteBuf src, int length)
+        {
+            if (length > src.ReadableBytes)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                                "length({0}) exceeds src.readableBytes({1}) where src is: {2}",
+                                length, src.ReadableBytes, src));
+            }
+            WriteBytes(src, src.ReaderIndex, length);
+            src.SetReaderIndex(src.ReaderIndex + length);
+            return this;
+        }
+
+        public override ByteBuf WriteBytes(ByteBuf src, int srcIndex, int length)
+        {
+            EnsureWritable0(length, true);
+            SetBytes(WriterIndex, src, srcIndex, length);
+            IncreaseComponentWriterIndex(length);
+            return this;
+        }
+
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
             CheckSrcIndex(index, length, srcIndex, src.Length);
+            if (length == 0)
+            {
+                return this;
+            }
+
+            int i = FindIndex(index);
+            while (length > 0)
+            {
+                Component c = _components[i];
+                ByteBuf s = c.Buf;
+                int adjustment = c.Offset;
+                int localLength = Math.Min(length, s.WriteableBytes);
+                s.SetBytes(index - adjustment, src, srcIndex, localLength);
+                index += localLength;
+                srcIndex += localLength;
+                length -= localLength;
+                i++;
+            }
+            return this;
+        }
+
+        public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
+        {
+            CheckSrcIndex(index, length, srcIndex, src.Capacity);
             if (length == 0)
             {
                 return this;
@@ -750,7 +795,7 @@ namespace TomP2P.Extensions.Netty
             {
                 return c.Buf.GetLong(index - c.Offset);
             }
-                // big-endian only
+            // big-endian only
             else
             {
                 return (GetInt(index) & 0xffffffffL) << 32 | GetInt(index + 4) & 0xffffffffL; // TODO check
@@ -889,14 +934,14 @@ namespace TomP2P.Extensions.Netty
 
         private void CheckDstIndex(int index, int length, int dstIndex, int dstCapacity)
         {
-		    CheckIndex(index, length);
-		    if (dstIndex < 0 || dstIndex > dstCapacity - length)
+            CheckIndex(index, length);
+            if (dstIndex < 0 || dstIndex > dstCapacity - length)
             {
-			    throw new IndexOutOfRangeException(String.Format(
-					    "dstIndex: {0}, length: {1} (expected: range(0, {2}))",
-					    dstIndex, length, dstCapacity));
-		    }
-	    }
+                throw new IndexOutOfRangeException(String.Format(
+                        "dstIndex: {0}, length: {1} (expected: range(0, {2}))",
+                        dstIndex, length, dstCapacity));
+            }
+        }
 
         private void CheckReadableBytes(int minimumReadableBytes)
         {

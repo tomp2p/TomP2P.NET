@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 
@@ -11,7 +12,7 @@ namespace TomP2P.Connection
     /// </summary>
     public interface ISignatureFactory
     {
-        void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer);
+        void EncodePublicKey(IPublicKey publicKey, ByteBuf buffer);
 
         /// <summary>
         /// The public key is sent over the wire, thus the decoding of it needs special handling.
@@ -20,11 +21,11 @@ namespace TomP2P.Connection
         /// <returns>The decoded public key.</returns>
         IPublicKey DecodePublicKey(byte[] me);
 
-        IPublicKey DecodePublicKey(JavaBinaryReader buffer);
+        IPublicKey DecodePublicKey(ByteBuf buffer);
 
-        ISignatureCodec Sign(IPrivateKey privateKey, JavaBinaryWriter buffer);
+        ISignatureCodec Sign(IPrivateKey privateKey, ByteBuf buffer);
 
-        bool Verify(IPublicKey publicKey, JavaBinaryReader buffer, ISignatureCodec signatureEncoded);
+        bool Verify(IPublicKey publicKey, ByteBuf buffer, ISignatureCodec signatureEncoded);
 
         RSACryptoServiceProvider Update(IPublicKey publicKey, MemoryStream[] buffers);
 

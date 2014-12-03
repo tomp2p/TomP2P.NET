@@ -43,8 +43,7 @@ namespace TomP2P.Message
             Logger.Debug("Message encoded {0}.", message);
 
             // write out what we have
-            // TODO chech isReadable() equivalent
-            if (buffer.IsReadable() && done)
+            if (buffer.IsReadable && done)
             {
                 // check if message needs to be signed
                 if (message.IsSign)
@@ -68,18 +67,15 @@ namespace TomP2P.Message
             _resume = false;
         }
 
-        private bool Loop(JavaBinaryWriter buffer)
+        private bool Loop(AlternativeCompositeByteBuf buffer)
         {
             MessageContentIndex next;
             while ((next = Message.ContentReferences.Peek2()) != null)
             {
-                // TODO check buffer equivalent
-                long start = buffer.WriterIndex();
+                long start = buffer.WriterIndex;
                 Message.Content content = next.Content;
 
                 // TODO make all writes async, also reads in decoder
-                // TODO use BinaryWriter, also in decoder
-                // TODO what happens if null is serialized? exception?
                 switch (content)
                 {
                     case Message.Content.Key:
@@ -267,13 +263,12 @@ namespace TomP2P.Message
                         throw new SystemException("Unknown type: " + next.Content);
                 }
 
-                Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.WriterIndex() - start);
+                Logger.Debug("Wrote in encoder for {0} {1}.", content, buffer.WriterIndex - start);
             }
             return true;
         }
 
-        // TODO return type long instead of int?
-        private long EncodeData(JavaBinaryWriter buffer, Data data, bool isConvertMeta, bool isReply)
+        private void EncodeData(AlternativeCompositeByteBuf buffer, Data data, bool isConvertMeta, bool isReply)
         {
             data = isConvertMeta ? data.DuplicateMeta() : data.Duplicate();
 
@@ -283,13 +278,9 @@ namespace TomP2P.Message
                 data.SetTtlSeconds(ttl < 0 ? 0 : ttl);
             }
 
-            // TODO check again, port isn't easy
-            var startWriter = buffer.WriterIndex();
             data.EncodeHeader(buffer, _signatureFactory);
             data.EncodeBuffer(buffer);
             data.EncodeDone(buffer, _signatureFactory, Message.PrivateKey);
-
-            return buffer.WriterIndex() - startWriter; // TODO remove?
         }
     }
 }
