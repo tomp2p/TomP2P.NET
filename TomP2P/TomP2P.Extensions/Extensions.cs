@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -179,7 +178,8 @@ namespace TomP2P.Extensions
             }
             var bytes = new byte[src.Remaining()];
             Array.Copy(src.GetBuffer(), src.Position, bytes, 0, src.Remaining());
-            
+            MemoryStream s = new MemoryStream();
+
             ms.Write(bytes, 0, bytes.Length);
             return ms;
         }

@@ -158,6 +158,34 @@ namespace TomP2P.Extensions.Netty
 
         #region Reads
 
+        public abstract sbyte ReadByte();
+
+        public abstract byte ReadUByte();
+
+        public abstract sbyte GetByte(int index);
+
+        public abstract byte GetUByte(int index);
+
+        public abstract short ReadShort();
+
+        public abstract ushort ReadUShort();
+
+        public abstract short GetShort(int index);
+
+        public abstract int ReadInt();
+
+        public abstract int GetInt(int index);
+
+        public abstract long ReadLong();
+
+        public abstract long GetLong(int index);
+
+        public abstract ByteBuf ReadBytes(sbyte[] dst);
+
+        public abstract ByteBuf ReadBytes(sbyte[] dst, int dstIndex, int length);
+
+        public abstract ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length);
+
         #endregion
     }
 }

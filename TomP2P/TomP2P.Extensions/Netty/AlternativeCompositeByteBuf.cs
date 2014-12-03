@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace TomP2P.Extensions.Netty
 {
@@ -40,11 +41,11 @@ namespace TomP2P.Extensions.Netty
 
         public AlternativeCompositeByteBuf(IByteBufAllocator alloc, bool direct, params ByteBuf[] buffers)
         {
-		    _alloc = alloc;
-		    _direct = direct;
-		    AddComponent(buffers);
+            _alloc = alloc;
+            _direct = direct;
+            AddComponent(buffers);
             // TODO leak needed? leak = leakDetector.open(this);
-	    }
+        }
 
         public void Deallocate()
         {
@@ -448,6 +449,8 @@ namespace TomP2P.Extensions.Netty
 
         #region Writes
 
+        // TODO write in BIG-ENDIAN only, now its little-endian
+
         public override ByteBuf WriteByte(int value)
         {
             EnsureWritable0(1, true);
@@ -658,6 +661,140 @@ namespace TomP2P.Extensions.Netty
 
         #region Reads
 
+        public override sbyte ReadByte()
+        {
+            CheckReadableBytes(1);
+            int i = ReaderIndex;
+            sbyte b = GetByte(i);
+            _readerIndex = i + 1;
+            return b;
+        }
+
+        public override byte ReadUByte()
+        {
+            return Convert.ToByte(ReadByte()); // TODO check
+        }
+
+        public override sbyte GetByte(int index)
+        {
+            var c = FindComponent(index);
+            return c.Buf.GetByte(index - c.Offset);
+        }
+
+        public override byte GetUByte(int index)
+        {
+            return Convert.ToByte(GetByte(index)); // TODO check
+        }
+
+        public override short ReadShort()
+        {
+            CheckReadableBytes(2);
+            short v = GetShort(ReaderIndex);
+            _readerIndex += 2;
+            return v;
+        }
+
+        public override ushort ReadUShort()
+        {
+            return Convert.ToUInt16(ReadShort()); // TODO check
+        }
+
+        public override short GetShort(int index)
+        {
+            var c = FindComponent(index);
+            if (index + 2 <= c.EndOffset)
+            {
+                return c.Buf.GetShort(index - c.Offset);
+            }
+            // big-endian only
+            else
+            {
+                return (short)((GetByte(index) & 0xff) << 8 | GetByte(index + 1) & 0xff); // TODO check
+            }
+        }
+
+        public override int ReadInt()
+        {
+            CheckReadableBytes(4);
+            int v = GetInt(ReaderIndex);
+            _readerIndex += 4;
+            return v;
+        }
+
+        public override int GetInt(int index)
+        {
+            var c = FindComponent(index);
+            if (index + 4 <= c.EndOffset)
+            {
+                return c.Buf.GetInt(index - c.Offset);
+            }
+            // big-endian only
+            else
+            {
+                return (GetShort(index) & 0xffff) << 16 | GetShort(index + 2) & 0xffff; // TODO check
+            }
+        }
+
+        public override long ReadLong()
+        {
+            CheckReadableBytes(8);
+            long v = GetLong(ReaderIndex);
+            _readerIndex += 8;
+            return v;
+        }
+
+        public override long GetLong(int index)
+        {
+            var c = FindComponent(index);
+            if (index + 8 <= c.EndOffset)
+            {
+                return c.Buf.GetLong(index - c.Offset);
+            }
+                // big-endian only
+            else
+            {
+                return (GetInt(index) & 0xffffffffL) << 32 | GetInt(index + 4) & 0xffffffffL; // TODO check
+            }
+        }
+
+        public override ByteBuf ReadBytes(sbyte[] dst)
+        {
+            ReadBytes(dst, 0, dst.Length);
+            return this;
+        }
+
+        public override ByteBuf ReadBytes(sbyte[] dst, int dstIndex, int length)
+        {
+            CheckReadableBytes(length);
+            GetBytes(ReaderIndex, dst, dstIndex, length);
+            _readerIndex += length;
+            return this;
+        }
+
+        public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
+        {
+            CheckDstIndex(index, length, dstIndex, dst.Length);
+            if (length == 0)
+            {
+                return this;
+            }
+
+            int i = FindIndex(index);
+            while (length > 0)
+            {
+                Component c = _components[i];
+                ByteBuf s = c.Buf;
+                int adjustment = c.Offset;
+                int localLength = Math.Min(length, s.ReadableBytes - (index - adjustment));
+                s.GetBytes(index - adjustment, dst, dstIndex, localLength);
+                index += localLength;
+                dstIndex += localLength;
+                length -= localLength;
+                i++;
+            }
+            return this;
+        }
+
         #endregion
 
         private int FindIndex(int offset)
@@ -747,6 +884,32 @@ namespace TomP2P.Extensions.Netty
                 throw new IndexOutOfRangeException(String.Format(
                         "srcIndex: {0}, length: {1} (expected: range(0, {2}))",
                         srcIndex, length, srcCapacity));
+            }
+        }
+
+        private void CheckDstIndex(int index, int length, int dstIndex, int dstCapacity)
+        {
+		    CheckIndex(index, length);
+		    if (dstIndex < 0 || dstIndex > dstCapacity - length)
+            {
+			    throw new IndexOutOfRangeException(String.Format(
+					    "dstIndex: {0}, length: {1} (expected: range(0, {2}))",
+					    dstIndex, length, dstCapacity));
+		    }
+	    }
+
+        private void CheckReadableBytes(int minimumReadableBytes)
+        {
+            if (minimumReadableBytes < 0)
+            {
+                throw new ArgumentException("minimumReadableBytes: "
+                        + minimumReadableBytes + " (expected: >= 0)");
+            }
+            if (ReaderIndex > WriterIndex - minimumReadableBytes)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "readerIndex({0}) + length({1}) exceeds writerIndex({2}): {3}",
+                        ReaderIndex, minimumReadableBytes, WriterIndex, this));
             }
         }
 
