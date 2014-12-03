@@ -34,6 +34,46 @@ namespace TomP2P.Extensions.Netty
         private readonly IList<Component> _components = new List<Component>();
         private readonly Component EmptyComponent = new Component(Unpooled.EmptyBuffer);
 
+        public void Deallocate()
+        {
+            if (_freed)
+            {
+                return;
+            }
+            _freed = true;
+            // TODO release needed?
+            /*foreach (var c in _components)
+            {
+                c.Buf.Release();
+            }*/
+            _components.Clear();
+
+            // TODO leak close needed?
+        }
+
+        private Component Last()
+        {
+            if (_components.Count == 0)
+            {
+                return EmptyComponent; // TODO doesn't work correctly yet
+            }
+            return _components[_components.Count - 1];
+        }
+
+        public override int Capacity
+        {
+            get
+            {
+                var last = Last();
+                return last.Offset + last.Buf.Capacity;
+            }
+        }
+
+        public override int MaxCapacity
+        {
+            get { return Int32.MaxValue; }
+        }
+
         public AlternativeCompositeByteBuf AddComponent(params ByteBuf[] buffers)
         {
             return AddComponent(false, buffers);
@@ -75,78 +115,9 @@ namespace TomP2P.Extensions.Netty
             return this;
         }
 
-        public void Deallocate()
+        public override int ReaderIndex
         {
-            if (_freed)
-            {
-                return;
-            }
-            _freed = true;
-            // TODO release needed?
-            /*foreach (var c in _components)
-            {
-                c.Buf.Release();
-            }*/
-            _components.Clear();
-
-            // TODO leak close needed?
-        }
-
-        private void CheckIndex(int index)
-        {
-            if (index < 0 || index > Capacity)
-            {
-                throw new IndexOutOfRangeException(String.Format(
-                        "index: {0} (expected: range(0, {1}))", index, Capacity));
-            }
-        }
-
-        private void CheckIndex(int index, int fieldLength)
-        {
-            if (fieldLength < 0)
-            {
-                throw new ArgumentException("length: " + fieldLength + " (expected: >= 0)");
-            }
-            if (index < 0 || index > Capacity - fieldLength)
-            {
-                throw new IndexOutOfRangeException(String.Format(
-                    "index: {0}, length: {1} (expected: range(0, {2}))", index,
-                    fieldLength, Capacity));
-            }
-        }
-
-        private int FindIndex(int offset)
-        {
-            CheckIndex(offset);
-
-            var last = Last();
-            if (offset >= last.Offset)
-            {
-                return _components.Count - 1;
-            }
-
-            int index = _components.Count - 2;
-            for (var i = _components.ListIterator(_components.Count - 1); i.HasPrevious(); index--)
-            {
-                var c = i.Previous();
-                if (offset >= c.Offset)
-                {
-                    return index;
-                }
-            }
-            throw new Exception("should not happen");
-        }
-
-        private AlternativeCompositeByteBuf WriterIndex0(int writerIndex)
-        {
-            if (writerIndex < _readerIndex || writerIndex > Capacity)
-            {
-                throw new IndexOutOfRangeException(String.Format(
-                            "writerIndex: {0} (expected: readerIndex({1}) <= writerIndex <= capacity({2}))",
-                            writerIndex, _readerIndex, Capacity));
-            }
-            _writerIndex = writerIndex;
-            return this;
+            get { return _readerIndex; }
         }
 
         public override ByteBuf SetReaderIndex(int readerIndex)
@@ -160,13 +131,31 @@ namespace TomP2P.Extensions.Netty
             return this;
         }
 
+        public override int WriterIndex
+        {
+            get { return _writerIndex; }
+        }
+
         public override ByteBuf SetWriterIndex(int writerIndex)
         {
             if (writerIndex < _readerIndex || writerIndex > Capacity)
             {
                 throw new IndexOutOfRangeException(String.Format("writerIndex: {0} (expected: readerIndex({1}) <= writerIndex <= capacity({2}))",
-                            writerIndex, _readerIndex, Capacity));
+                    writerIndex, _readerIndex, Capacity));
             }
+            SetComponentWriterIndex(writerIndex);
+            return this;
+        }
+
+        public override ByteBuf SetIndex(int readerIndex, int writerIndex)
+        {
+            if (readerIndex < 0 || readerIndex > writerIndex || writerIndex > Capacity)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                            "readerIndex: {0}, writerIndex: {1} (expected: 0 <= readerIndex <= writerIndex <= capacity({2}))",
+                            readerIndex, writerIndex, Capacity));
+            }
+            _readerIndex = readerIndex;
             SetComponentWriterIndex(writerIndex);
             return this;
         }
@@ -206,11 +195,6 @@ namespace TomP2P.Extensions.Netty
             get { return _writerIndex - _readerIndex; }
         }
 
-        public override int WriteableBytes
-        {
-            get { return Capacity - _writerIndex; }
-        }
-
         public override bool IsReadable
         {
             get { return _writerIndex > _readerIndex; }
@@ -221,25 +205,12 @@ namespace TomP2P.Extensions.Netty
             get { return Capacity > _writerIndex; }
         }
 
-        public override int ReaderIndex
+        public override ByteBuf Unwrap()
         {
-            get { return _readerIndex; }
+            // That's indeed what TomP2P's AlternativeCompositeByteBuf does...
+            return null;
         }
-
-        public override int WriterIndex
-        {
-            get { return _writerIndex; }
-        }
-
-        public override int Capacity
-        {
-            get
-            {
-                var last = Last();
-                return last.Offset + last.Buf.Capacity;
-            }
-        }
-
+        
         public IList<ByteBuf> Decompose(int offset, int length)
         {
             CheckIndex(offset, length);
@@ -308,19 +279,9 @@ namespace TomP2P.Extensions.Netty
             return new DuplicatedByteBuf(this);
         }
 
-        public override ByteBuf Unwrap()
+        public override int WriteableBytes
         {
-            // That's indeed what TomP2P's AlternativeCompositeByteBuf does...
-            return null;
-        }
-
-        private Component Last()
-        {
-            if (_components.Count == 0)
-            {
-                return EmptyComponent; // TODO doesn't work correctly yet
-            }
-            return _components[_components.Count - 1];
+            get { return Capacity - _writerIndex; }
         }
 
         public override int NioBufferCount()
@@ -341,6 +302,11 @@ namespace TomP2P.Extensions.Netty
                 }
                 return count;
             }
+        }
+
+        public override MemoryStream NioBuffer()
+        {
+            return NioBuffer(ReaderIndex, ReadableBytes);
         }
 
         public override MemoryStream NioBuffer(int index, int length)
@@ -405,6 +371,63 @@ namespace TomP2P.Extensions.Netty
             }
 
             return buffers.ToArray();
+        }
+
+        private int FindIndex(int offset)
+        {
+            CheckIndex(offset);
+
+            var last = Last();
+            if (offset >= last.Offset)
+            {
+                return _components.Count - 1;
+            }
+
+            int index = _components.Count - 2;
+            for (var i = _components.ListIterator(_components.Count - 1); i.HasPrevious(); index--)
+            {
+                var c = i.Previous();
+                if (offset >= c.Offset)
+                {
+                    return index;
+                }
+            }
+            throw new Exception("should not happen");
+        }
+
+        private AlternativeCompositeByteBuf WriterIndex0(int writerIndex)
+        {
+            if (writerIndex < _readerIndex || writerIndex > Capacity)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                    "writerIndex: {0} (expected: readerIndex({1}) <= writerIndex <= capacity({2}))",
+                    writerIndex, _readerIndex, Capacity));
+            }
+            _writerIndex = writerIndex;
+            return this;
+        }
+
+        private void CheckIndex(int index)
+        {
+            if (index < 0 || index > Capacity)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                    "index: {0} (expected: range(0, {1}))", index, Capacity));
+            }
+        }
+
+        private void CheckIndex(int index, int fieldLength)
+        {
+            if (fieldLength < 0)
+            {
+                throw new ArgumentException("length: " + fieldLength + " (expected: >= 0)");
+            }
+            if (index < 0 || index > Capacity - fieldLength)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                    "index: {0}, length: {1} (expected: range(0, {2}))", index,
+                    fieldLength, Capacity));
+            }
         }
     }
 }
