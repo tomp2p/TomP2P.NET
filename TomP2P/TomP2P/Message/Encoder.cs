@@ -2,6 +2,7 @@
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Storage;
 
@@ -22,7 +23,7 @@ namespace TomP2P.Message
             _signatureFactory = signatureFactory;
         }
 
-        public bool Write(JavaBinaryWriter buffer, Message message, ISignatureCodec signatureCodec)
+        public bool Write(AlternativeCompositeByteBuf buffer, Message message, ISignatureCodec signatureCodec)
         {
             Message = message;
             Logger.Debug("Message for outbound {0}.", message);

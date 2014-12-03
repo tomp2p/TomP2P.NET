@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Net;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
 
@@ -25,7 +26,7 @@ namespace TomP2P.Message
         /// </summary>
         /// <param name="buffer">The buffer to encode to.</param>
         /// <param name="message">The message with the header that will be encoded.</param>
-        public static void EncodeHeader(JavaBinaryWriter buffer, Message message)
+        public static void EncodeHeader(AlternativeCompositeByteBuf buffer, Message message)
         {
             // TODO add log statemet, also in Java version
             int versionAndType = message.Version << 4 | ((int)message.Type & Utils.Utils.Mask0F); // TODO check if ordinal works

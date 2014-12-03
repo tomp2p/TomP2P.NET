@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace TomP2P.Extensions.Netty
 {
@@ -7,6 +8,11 @@ namespace TomP2P.Extensions.Netty
     /// </summary>
     public abstract class ByteBuf
     {
+        /// <summary>
+        /// Returns the IByteBufAllocator which created this buffer.
+        /// </summary>
+        public abstract IByteBufAllocator Alloc { get; }
+
         /// <summary>
         /// Returns the number of readable bytes which is equal to WriterIndex - ReaderIndex.
         /// </summary>
@@ -123,5 +129,35 @@ namespace TomP2P.Extensions.Netty
         /// <param name="writerIndex"></param>
         /// <returns></returns>
         public abstract ByteBuf SetWriterIndex(int writerIndex);
+
+        #region Writes
+
+        public abstract ByteBuf WriteByte(int value);
+
+        public abstract ByteBuf SetByte(int index, int value);
+
+        public abstract ByteBuf WriteShort(int value);
+
+        public abstract ByteBuf SetShort(int index, int value);
+
+        public abstract ByteBuf WriteInt(int value);
+
+        public abstract ByteBuf SetInt(int index, int value);
+
+        public abstract ByteBuf WriteLong(long value);
+
+        public abstract ByteBuf SetLong(int index, long value);
+
+        public abstract ByteBuf WriteBytes(sbyte[] src);
+
+        public abstract ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length);
+
+        public abstract ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length);
+
+        #endregion
+
+        #region Reads
+
+        #endregion
     }
 }

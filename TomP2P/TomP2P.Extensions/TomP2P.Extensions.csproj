@@ -50,6 +50,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Netty\IByteBufAllocator.cs" />
     <Compile Include="InteropRandom.cs" />
+    <Compile Include="Netty\UnpooledDirectByteBuf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Netty\SlicedByteBuf.cs" />
     <Compile Include="Netty\Unpooled.cs" />

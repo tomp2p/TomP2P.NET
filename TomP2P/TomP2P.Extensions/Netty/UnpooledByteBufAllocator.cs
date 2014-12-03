@@ -25,5 +25,47 @@ namespace TomP2P.Extensions.Netty
             }
             return new EmptyByteBuf();
         }
+
+        // from AbstractByteBufAllocator
+        public ByteBuf DirectBuffer(int initialCapacity)
+        {
+            return DirectBuffer(initialCapacity, Int32.MaxValue);
+        }
+
+        // from AbstractByteBufAllocator
+        public ByteBuf DirectBuffer(int initialCapacity, int maxCapacity)
+        {
+            if (initialCapacity == 0 && maxCapacity == 0)
+            {
+                return new EmptyByteBuf();
+            }
+            Validate(initialCapacity, maxCapacity);
+            return NewDirectBuffer(initialCapacity, maxCapacity);
+        }
+
+        private ByteBuf NewDirectBuffer(int initialCapacity, int maxCapacity)
+        {
+            ByteBuf buf;
+            // just return an UnpooledDirectByteBuf
+            buf = new UnpooledDirectByteBuf(this, initialCapacity, maxCapacity);
+
+            // TODO toLeadAwareBuffer() needed?
+            return buf;
+        }
+
+        // from AbstractByteBufAllocator
+        private static void Validate(int initialCapacity, int maxCapacity)
+        {
+            if (initialCapacity < 0)
+            {
+                throw new ArgumentException("initialCapacity: " + initialCapacity + " (expectd: 0+)");
+            }
+            if (initialCapacity > maxCapacity)
+            {
+                throw new ArgumentException(String.Format(
+                        "initialCapacity: {0} (expected: not greater than maxCapacity({1})",
+                        initialCapacity, maxCapacity));
+            }
+        }
     }
 }

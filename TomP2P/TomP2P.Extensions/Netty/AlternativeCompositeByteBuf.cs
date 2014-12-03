@@ -33,6 +33,7 @@ namespace TomP2P.Extensions.Netty
 
         private readonly IList<Component> _components = new List<Component>();
         private readonly Component EmptyComponent = new Component(Unpooled.EmptyBuffer);
+        private readonly IByteBufAllocator _alloc; // TODO initialize
 
         public void Deallocate()
         {
@@ -67,6 +68,67 @@ namespace TomP2P.Extensions.Netty
                 var last = Last();
                 return last.Offset + last.Buf.Capacity;
             }
+        }
+
+        // not overridden
+        public AlternativeCompositeByteBuf SetCapacity(int newCapacity, bool fillBuffer)
+        {
+            if (newCapacity < 0 || newCapacity > MaxCapacity)
+            {
+                throw new ArgumentException("newCapacity: " + newCapacity);
+            }
+
+            int oldCapacity = Capacity;
+            if (newCapacity > oldCapacity)
+            {
+                // need more storage
+                int paddingLength = newCapacity - oldCapacity;
+                AddComponent(fillBuffer, AllocBuffer(paddingLength));
+            }
+            else if (newCapacity < oldCapacity)
+            {
+                // remove storage
+                int bytesToTrim = oldCapacity - newCapacity;
+                for (var i = _components.ListIterator(_components
+                        .Count); i.HasPrevious(); )
+                {
+                    Component c = i.Previous();
+                    if (bytesToTrim >= c.Buf.Capacity)
+                    {
+                        bytesToTrim -= c.Buf.Capacity;
+                        i.Remove();
+                        // TODO c.Buf.Release(); needed?
+                        continue;
+                    }
+                    Component newC = new Component(c.Buf.Slice(0, c.Buf.Capacity - bytesToTrim));
+                    newC.Offset = c.Offset;
+                    i.Set(newC);
+                    break;
+                }
+            }
+
+            if (ReaderIndex > newCapacity)
+            {
+                SetIndex(newCapacity, newCapacity);
+            }
+            else if (WriterIndex > newCapacity)
+            {
+                SetWriterIndex(newCapacity);
+            }
+
+            return this;
+        }
+
+        private ByteBuf AllocBuffer(int capacity)
+        {
+            // TODO direct ok?
+            // just use direct buffer
+            return Alloc.DirectBuffer(capacity);
+        }
+
+        public override IByteBufAllocator Alloc
+        {
+            get { return _alloc; }
         }
 
         public override int MaxCapacity
@@ -210,7 +272,7 @@ namespace TomP2P.Extensions.Netty
             // That's indeed what TomP2P's AlternativeCompositeByteBuf does...
             return null;
         }
-        
+
         public IList<ByteBuf> Decompose(int offset, int length)
         {
             CheckIndex(offset, length);
@@ -373,6 +435,220 @@ namespace TomP2P.Extensions.Netty
             return buffers.ToArray();
         }
 
+        #region Writes
+
+        public override ByteBuf WriteByte(int value)
+        {
+            EnsureWritable0(1, true);
+            SetByte(WriterIndex, value);
+            IncreaseComponentWriterIndex(1);
+            return this;
+        }
+
+        public override ByteBuf SetByte(int index, int value)
+        {
+            var c = FindComponent(index);
+            c.Buf.SetByte(index - c.Offset, value);
+            return this;
+        }
+
+        public override ByteBuf WriteShort(int value)
+        {
+            EnsureWritable0(2, true);
+            SetShort(WriterIndex, value);
+            IncreaseComponentWriterIndex(2);
+            return this;
+        }
+
+        public override ByteBuf SetShort(int index, int value)
+        {
+            var c = FindComponent(index);
+            if (index + 2 <= c.EndOffset)
+            {
+                c.Buf.SetShort(index - c.Offset, value);
+            }
+            // little-endian only
+            else
+            {
+                SetByte(index, (byte)value);
+                SetByte(index + 1, (byte)(value >> 8));
+            }
+            return this;
+        }
+
+        public override ByteBuf WriteInt(int value)
+        {
+            EnsureWritable0(4, true);
+            SetInt(WriterIndex, value);
+            IncreaseComponentWriterIndex(4);
+            return this;
+        }
+
+        public override ByteBuf SetInt(int index, int value)
+        {
+            var c = FindComponent(index);
+            if (index + 4 <= c.EndOffset)
+            {
+                c.Buf.SetInt(index - c.Offset, value);
+            }
+            // little-endian only
+            else
+            {
+                SetShort(index, (short)value);
+                SetShort(index + 2, (short)(value >> 16));
+            }
+            return this;
+        }
+
+        public override ByteBuf WriteLong(long value)
+        {
+            EnsureWritable0(8, true);
+            SetLong(WriterIndex, value);
+            IncreaseComponentWriterIndex(8);
+            return this;
+        }
+
+        public override ByteBuf SetLong(int index, long value)
+        {
+            var c = FindComponent(index);
+            if (index + 8 <= c.EndOffset)
+            {
+                c.Buf.SetLong(index - c.Offset, value);
+            }
+            // little-endian only
+            else
+            {
+                SetInt(index, (int)value);
+                SetInt(index + 4, (int)(value >> 32));
+            }
+            return this;
+        }
+
+        public override ByteBuf WriteBytes(sbyte[] src)
+        {
+            return WriteBytes(src, 0, src.Length);
+        }
+
+        public override ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length)
+        {
+            EnsureWritable0(length, true);
+            SetBytes(WriterIndex, src, srcIndex, length);
+            IncreaseComponentWriterIndex(length);
+            return this;
+        }
+
+        public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
+        {
+            CheckSrcIndex(index, length, srcIndex, src.Length);
+            if (length == 0)
+            {
+                return this;
+            }
+
+            int i = FindIndex(index);
+            while (length > 0)
+            {
+                Component c = _components[i];
+                ByteBuf s = c.Buf;
+                int adjustment = c.Offset;
+                int localLength = Math.Min(length, s.WriteableBytes);
+                s.SetBytes(index - adjustment, src, srcIndex, localLength);
+                index += localLength;
+                srcIndex += localLength;
+                length -= localLength;
+                i++;
+            }
+            return this;
+        }
+
+        private void IncreaseComponentWriterIndex(int increase)
+        {
+            int maxIncrease = 0;
+            int currentIncrease = increase;
+            int index = FindIndex(WriterIndex);
+            while (maxIncrease < increase)
+            {
+                Component c = _components[index];
+                int writable = c.Buf.WriteableBytes;
+                writable = Math.Min(writable, currentIncrease);
+                c.Buf.SetWriterIndex(c.Buf.WriterIndex + writable);
+                currentIncrease -= writable;
+                maxIncrease += writable;
+                index++;
+            }
+            _writerIndex += increase;
+        }
+
+        public AlternativeCompositeByteBuf EnsureWritable0(int minWritableBytes, bool fillBuffer)
+        {
+            if (minWritableBytes < 0)
+            {
+                throw new ArgumentException(String.Format(
+                        "minWritableBytes: {0} (expected: >= 0)", minWritableBytes));
+            }
+
+            if (minWritableBytes <= WriteableBytes)
+            {
+                return this;
+            }
+
+            if (minWritableBytes > MaxCapacity - WriterIndex)
+            {
+                throw new IndexOutOfRangeException(
+                        String.Format(
+                                "writerIndex({0}) + minWritableBytes({1}) exceeds maxCapacity({2}): {3}",
+                                WriterIndex, minWritableBytes, MaxCapacity, this));
+            }
+
+            // normalize the current capacity to the power of 2.
+            int newCapacity = CalculateNewCapacity(WriterIndex + minWritableBytes);
+
+            // Adjust to the new capacity.
+            SetCapacity(newCapacity, fillBuffer);
+            return this;
+        }
+
+        private int CalculateNewCapacity(int minNewCapacity)
+        {
+            int maxCapacity = MaxCapacity;
+            int threshold = 1048576 * 4; // 4 MiB page
+
+            if (minNewCapacity == threshold)
+            {
+                return threshold;
+            }
+
+            // If over threshold, do not double but just increase by threshold.
+            if (minNewCapacity > threshold)
+            {
+                int newCapacity = minNewCapacity / threshold * threshold;
+                if (newCapacity > maxCapacity - threshold)
+                {
+                    newCapacity = maxCapacity;
+                }
+                else
+                {
+                    newCapacity += threshold;
+                }
+                return newCapacity;
+            }
+
+            // Not over threshold. Double up to 4 MiB, starting from 64.
+            int newCapacity2 = 64;
+            while (newCapacity2 < minNewCapacity)
+            {
+                newCapacity2 <<= 1;
+            }
+
+            return Math.Min(newCapacity2, maxCapacity);
+        }
+
+        #endregion
+
+        #region Reads
+
+        #endregion
+
         private int FindIndex(int offset)
         {
             CheckIndex(offset);
@@ -392,6 +668,28 @@ namespace TomP2P.Extensions.Netty
                     return index;
                 }
             }
+            throw new Exception("should not happen");
+        }
+
+        private Component FindComponent(int offset)
+        {
+            CheckIndex(offset);
+
+            var last = Last();
+            if (offset >= last.Offset)
+            {
+                return last;
+            }
+
+            for (var i = _components.ListIterator(_components.Count - 1); i.HasPrevious(); )
+            {
+                Component c = i.Previous();
+                if (offset >= c.Offset)
+                {
+                    return c;
+                }
+            }
+
             throw new Exception("should not happen");
         }
 
@@ -427,6 +725,17 @@ namespace TomP2P.Extensions.Netty
                 throw new IndexOutOfRangeException(String.Format(
                     "index: {0}, length: {1} (expected: range(0, {2}))", index,
                     fieldLength, Capacity));
+            }
+        }
+
+        private void CheckSrcIndex(int index, int length, int srcIndex, int srcCapacity)
+        {
+            CheckIndex(index, length);
+            if (srcIndex < 0 || srcIndex > srcCapacity - length)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "srcIndex: {0}, length: {1} (expected: range(0, {2}))",
+                        srcIndex, length, srcCapacity));
             }
         }
     }

@@ -10,10 +10,12 @@ namespace TomP2P.Extensions.Workaround
     /// Equivalent of Java's ListIterator.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ListIterator<T>
+    public class ListIterator<T> where T : class
     {
         private readonly IList<T> _list; 
         private int _index;
+
+        private T _previous = null;
 
         /// <summary>
         /// Returns a list iterator over the elements in this list (in proper sequence), 
@@ -54,6 +56,25 @@ namespace TomP2P.Extensions.Workaround
         {
             // TODO check if works
             return _list[_index - 1];
+        }
+        /// <summary>
+        /// Removes from the list the last element that was returned by Previous.
+        /// </summary>
+        public void Remove()
+        {
+            // TODO check if works
+            _list.Remove(_previous);
+            _previous = null;
+        }
+
+        /// <summary>
+        /// Replaces the last element returned by Previous with the specified element.
+        /// </summary>
+        /// <param name="t"></param>
+        public void Set(T t)
+        {
+            // TODO check if works
+            _list[_list.IndexOf(_previous)] = t;
         }
     }
 }

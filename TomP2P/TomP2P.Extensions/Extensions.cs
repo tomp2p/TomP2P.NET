@@ -71,7 +71,7 @@ namespace TomP2P.Extensions
         /// <param name="list"></param>
         /// <param name="index"></param>
         /// <returns></returns>
-        public static ListIterator<T> ListIterator<T>(this IList<T> list, int index)
+        public static ListIterator<T> ListIterator<T>(this IList<T> list, int index) where T : class
         {
             // TODO check if works
             return new ListIterator<T>(list, index);
@@ -259,7 +259,7 @@ namespace TomP2P.Extensions
         {
             // TODO correct when implementing a .NET ByteBuf
             return s.Remaining();
-        }
+        }*/
 
         /// <summary>
         /// Equivalent to Java Netty's ByteBuf.duplicate().
@@ -275,6 +275,29 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's Buffer.limit(int).
+        /// Sets this buffer's limit.  If the position is larger than the new limit 
+        /// then it is set to the new limit.
+        /// </summary>
+        /// <param name="mjs"></param>
+        /// <param name="newLimit"></param>
+        /// <returns></returns>
+        public static MemoryStream Limit(this MemoryStream ms, int newLimit)
+        {
+            // TODO check if correct
+            if (newLimit > ms.Capacity || newLimit < 0)
+            {
+                throw new ArgumentException();
+            }
+            ms.SetLength(newLimit);
+            if (ms.Position > ms.Length)
+            {
+                ms.Position = ms.Length;
+            }
+            return ms;
+        }
+
+        /*/// <summary>
         /// Equivalent to Java Netty's ByteBuf.slice().
         /// </summary>
         /// <param name="ms"></param>
