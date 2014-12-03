@@ -159,45 +159,56 @@ namespace TomP2P.Extensions
 
         /// <summary>
         /// Equivalent of Java's ByteBuffer.put(ByteBuffer).
-        /// This method transfers the bytes remaining in the given source buffer into this
-        /// buffer. If there are more bytes remaining in the source buffer than in this
-        /// buffer, that is, if src.remaining() > remaining(), then no bytes are 
-        /// transferred and a BufferOverflowException is thrown.
+        /// This method transfers the bytes remaining in the given source buffer into this buffer. 
+        /// If there are more bytes remaining in the source buffer than in this buffer, that is, 
+        /// if src.remaining() > remaining(), then no bytes are transferred and an overflow exception
+        /// is thrown.
+        /// Otherwise, this method copies n = src.remaining() bytes from the given buffer into this 
+        /// buffer, starting at each buffer's current position. The positions of both buffers are 
+        /// then incremented by n. 
         /// </summary>
         /// <param name="ms"></param>
         /// <param name="src"></param>
         /// <returns></returns>
         public static MemoryStream Put(this MemoryStream ms, MemoryStream src)
         {
-            throw new NotImplementedException();
+            // TODO check if works
+            if (src.Remaining() > ms.Remaining())
+            {
+                throw new OverflowException("src.remaining() > ms.remaining()");
+            }
+            var bytes = new byte[src.Remaining()];
+            Array.Copy(src.GetBuffer(), src.Position, bytes, 0, src.Remaining());
+            
+            ms.Write(bytes, 0, bytes.Length);
+            return ms;
         }
 
         /// <summary>
         /// Equivalent of Java's Buffer.flip().
         /// Flips this buffer. The limit is set to the current position and then the 
-        /// position is set to zero. If the mark is defined then it is discarded. 
+        /// position is set to zero.
         /// </summary>
         /// <param name="ms"></param>
         public static void Flip(this MemoryStream ms)
         {
-            throw new NotImplementedException();
+            // TODO check if works
+            ms.SetLength(ms.Position);
+            ms.Position = 0;
         }
 
         /// <summary>
         /// Equivalent of Java's ByteBuffer.slice().
         /// Creates a new byte buffer whose content is a shared subsequence of this buffer's content.
-        /// The content of the new buffer will start at this buffer's current position. Changes to 
-        /// this buffer's content will be visible in the new buffer, and vice versa; the two buffers'
-        /// position, limit, and mark values will be independent. 
+        /// The content of the new buffer will start at this buffer's current position.
         /// The new buffer's position will be zero, its capacity and its limit will be the number of
-        /// bytes remaining in this buffer, and its mark will be undefined. The new buffer will be 
-        /// direct if, and only if, this buffer is direct, and it will be read-only if, and only if, 
-        /// this buffer is read-only.
+        /// bytes remaining in this buffer, and its mark will be undefined.
         /// </summary>
         /// <param name="ms"></param>
         /// <returns></returns>
         public static MemoryStream Slice(this MemoryStream ms)
         {
+            // TODO hard to port!
             throw new NotImplementedException();
         }
 

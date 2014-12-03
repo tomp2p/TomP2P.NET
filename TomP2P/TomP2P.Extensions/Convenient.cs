@@ -96,7 +96,7 @@ namespace TomP2P.Extensions
             {
                 throw new ArgumentException();
             }
-            // TODO Java uses HeapByteBuffer, something similar in .NET
+            // TODO Java uses HeapByteBuffer, something similar in .NET?
             return new MemoryStream(capacity);
         }
 
@@ -107,12 +107,16 @@ namespace TomP2P.Extensions
         /// its mark will be undefined, and each of its elements will be initialized to
         /// zero. Whether or not it has a backing array is unspecified.
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="capacity"></param>
         /// <returns></returns>
-        public static MemoryStream AllocateDirect(int p)
+        public static MemoryStream AllocateDirect(int capacity)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            if (capacity < 0)
+            {
+                throw new ArgumentException();
+            }
+            // TODO Java uses DirectByteBuffer, something similar in .NET?
+            return new MemoryStream(capacity);
         }
 
         /// <summary>
