@@ -72,7 +72,6 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static ListIterator<T> ListIterator<T>(this IList<T> list, int index) where T : class
         {
-            // TODO check if works
             return new ListIterator<T>(list, index);
         }
 
@@ -172,13 +171,12 @@ namespace TomP2P.Extensions
         public static MemoryStream Put(this MemoryStream ms, MemoryStream src)
         {
             // TODO check if works
-            if (src.Remaining() > ms.Remaining())
+            /*if (src.Remaining() > ms.Remaining())
             {
                 throw new OverflowException("src.remaining() > ms.remaining()");
-            }
+            }*/
             var bytes = new byte[src.Remaining()];
-            Array.Copy(src.GetBuffer(), src.Position, bytes, 0, src.Remaining());
-            MemoryStream s = new MemoryStream();
+            Array.Copy(src.ToArray(), src.Position, bytes, 0, src.Remaining());
 
             ms.Write(bytes, 0, bytes.Length);
             return ms;
@@ -199,6 +197,7 @@ namespace TomP2P.Extensions
 
         /// <summary>
         /// Equivalent of Java's ByteBuffer.slice().
+        /// Attention: bytes are copied!
         /// Creates a new byte buffer whose content is a shared subsequence of this buffer's content.
         /// The content of the new buffer will start at this buffer's current position.
         /// The new buffer's position will be zero, its capacity and its limit will be the number of
@@ -208,8 +207,12 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static MemoryStream Slice(this MemoryStream ms)
         {
-            // TODO hard to port!
-            throw new NotImplementedException();
+            // in contrast to Java's version, the bytes are copied, not referenced
+            // check http://stackoverflow.com/questions/1646193/why-does-memorystream-getbuffer-always-throw
+            var bytes = new byte[ms.Remaining()];
+            Array.Copy(ms.ToArray(), 0, bytes, 0, bytes.Length);
+            var slice = new MemoryStream(bytes);
+            return slice;
         }
 
         /// <summary>

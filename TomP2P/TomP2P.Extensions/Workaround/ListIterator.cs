@@ -40,7 +40,6 @@ namespace TomP2P.Extensions.Workaround
         /// <returns></returns>
         public bool HasPrevious()
         {
-            // TODO check if works
             try
             {
                 Previous();
@@ -50,12 +49,16 @@ namespace TomP2P.Extensions.Workaround
             {
                 return false;
             }
+            finally
+            {
+                // Previous() decreased the index
+                _index++;
+            }
         }
 
         public T Previous()
         {
-            // TODO check if works
-            return _list[_index - 1];
+            return _list[_index-- - 1];
         }
         /// <summary>
         /// Removes from the list the last element that was returned by Previous.

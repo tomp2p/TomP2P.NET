@@ -133,8 +133,9 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static MemoryStream Wrap(sbyte[] array, int offset, int length)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            // TODO check if correct
+            var ms = new MemoryStream(array.ToByteArray(), offset, length);
+            return ms;
         }
     }
 }

@@ -70,9 +70,6 @@ namespace TomP2P.Tests.Interop
         [Test]
         public void TestEncodeByte()
         {
-            //var ms = new MemoryStream();
-            //var buffer = new JavaBinaryWriter(ms);
-
             var buffer = AlternativeCompositeByteBuf.CompBuffer();
 
             // Java byte is signed
@@ -80,8 +77,6 @@ namespace TomP2P.Tests.Interop
             {
                 buffer.WriteByte((sbyte) i);
             }
-
-            //byte[] bytes = ms.GetBuffer();
 
             var bytes = InteropUtil.ExtractBytes(buffer);
 
