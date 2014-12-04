@@ -54,6 +54,11 @@ namespace TomP2P.Extensions.Netty
             get { return 0; }
         }
 
+        public override ByteBuf SetCapacity(int newCapacity)
+        {
+            throw new NotImplementedException();
+        }
+
         public override int MaxCapacity
         {
             get { return 0; }
@@ -301,6 +306,11 @@ namespace TomP2P.Extensions.Netty
         }
 
         public override ByteBuf WriteZero(int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf EnsureWriteable(int minWritableBytes)
         {
             throw new NotImplementedException();
         }

@@ -143,8 +143,6 @@ namespace TomP2P.Extensions.Netty
             }
         }
 
-        #region Not Implemented
-
         public override ByteBuf WriteByte(int value)
         {
             EnsureWriteable(1);
@@ -392,8 +390,6 @@ namespace TomP2P.Extensions.Netty
             }
             return this;
         }
-
-        #endregion
 
         public override ByteBuf EnsureWriteable(int minWritableBytes)
         {

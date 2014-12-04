@@ -72,6 +72,11 @@ namespace TomP2P.Extensions.Netty
             get { return _capacity; }
         }
 
+        public override ByteBuf SetCapacity(int newCapacity)
+        {
+            throw new NotImplementedException();
+        }
+
         public override IByteBufAllocator Alloc
         {
             get { return _alloc; }
@@ -80,6 +85,21 @@ namespace TomP2P.Extensions.Netty
         public override int NioBufferCount()
         {
             return 1;
+        }
+
+        public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
+        {
+            throw new NotImplementedException();
         }
 
         public override MemoryStream[] NioBuffers(int index, int length)
@@ -99,6 +119,46 @@ namespace TomP2P.Extensions.Netty
         public override ByteBuf Unwrap()
         {
             return null;
+        }
+
+        protected override void _setByte(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void _setShort(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void _setInt(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void _setLong(int index, long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override sbyte _getByte(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override short _getShort(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int _getInt(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override long _getLong(int index)
+        {
+            throw new NotImplementedException();
         }
     }
 }

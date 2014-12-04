@@ -4,7 +4,7 @@ namespace TomP2P.Extensions.Netty
 {
     public sealed class UnpooledByteBufAllocator : IByteBufAllocator
     {
-        // TODO preferdirect?? needed?
+        // TODO prefer direct?? needed?
         public static readonly UnpooledByteBufAllocator Default = new UnpooledByteBufAllocator(true);
 
         private readonly bool _directByDefault;
@@ -13,8 +13,7 @@ namespace TomP2P.Extensions.Netty
         public UnpooledByteBufAllocator(bool preferDirect)
         {
             // from AbstractByteBufAllocator
-            _directByDefault = preferDirect; // TODO PlatformDependent needed??
-            _emptyBuf = new EmptyByteBuf(); // alloc not used
+            
         }
 
         public ByteBuf Buffer(int initialCapacity, int maxCapacity)

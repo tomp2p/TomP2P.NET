@@ -138,9 +138,11 @@ namespace TomP2P.Extensions.Netty
 
         private ByteBuf AllocBuffer(int capacity)
         {
-            // TODO direct ok?
-            // just use direct buffer
-            return Alloc.DirectBuffer(capacity);
+            if (_direct)
+            {
+                return Alloc.DirectBuffer(capacity);
+            }
+            return Alloc.HeapBuffer(capacity);
         }
 
         public override IByteBufAllocator Alloc

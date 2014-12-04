@@ -38,6 +38,11 @@ namespace TomP2P.Extensions.Netty
             // TODO leak detector needed?
         }
 
+        public override IByteBufAllocator Alloc
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         public override int Capacity
         {
             get
@@ -49,6 +54,11 @@ namespace TomP2P.Extensions.Netty
                 return _components[_components.Count - 1]._endOffset;
 
             }
+        }
+
+        public override ByteBuf SetCapacity(int newCapacity)
+        {
+            throw new NotImplementedException();
         }
 
         public override int NioBufferCount()
@@ -68,6 +78,21 @@ namespace TomP2P.Extensions.Netty
                 }
                 return count;
             }
+        }
+
+        public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
+        {
+            throw new NotImplementedException();
         }
 
         public override MemoryStream NioBuffer(int index, int length)
@@ -151,6 +176,46 @@ namespace TomP2P.Extensions.Netty
         public override MemoryStream[] NioBuffers()
         {
             return NioBuffers(ReaderIndex, ReadableBytes);
+        }
+
+        protected override void _setByte(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void _setShort(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void _setInt(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void _setLong(int index, long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override sbyte _getByte(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override short _getShort(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override int _getInt(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override long _getLong(int index)
+        {
+            throw new NotImplementedException();
         }
 
         // TODO implement deallocate?
