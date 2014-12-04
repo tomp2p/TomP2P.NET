@@ -461,5 +461,23 @@ namespace TomP2P.Extensions.Netty
                         ReaderIndex, minimumReadableBytes, WriterIndex, this));
             }
         }
+
+        protected void CheckSrcIndex(int index, int length, int srcIndex, int srcCapacity)
+        {
+            CheckIndex(index, length);
+            if (srcIndex < 0 || srcIndex > srcCapacity - length) {
+                throw new IndexOutOfRangeException(String.Format(
+                        "srcIndex: {0}, length: {1} (expected: range(0, {2}))", srcIndex, length, srcCapacity));
+            }
+        }
+
+        protected void CheckDstIndex(int index, int length, int dstIndex, int dstCapacity)
+        {
+            CheckIndex(index, length);
+            if (dstIndex < 0 || dstIndex > dstCapacity - length) {
+                throw new IndexOutOfRangeException(String.Format(
+                        "dstIndex: {0}, length: {1} (expected: range(0, {2}))", dstIndex, length, dstCapacity));
+            }
+        }
     }
 }
