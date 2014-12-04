@@ -787,7 +787,7 @@ namespace TomP2P.Tests.Interop
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
             encoder.Write(buf, message, null);
 
-            return ExtractBytes(buf);
+            return InteropUtil.ExtractBytes(buf);
         }
 
         /// <summary>
@@ -809,16 +809,6 @@ namespace TomP2P.Tests.Interop
             decoder.Decode(buf, message.Recipient.CreateSocketTcp(), message.Sender.CreateSocketTcp());
 
             return decoder.Message;
-        }
-
-        private static byte[] ExtractBytes(AlternativeCompositeByteBuf buf)
-        {
-            var buffer = buf.NioBuffer();
-            buffer.Position = 0;
-
-            var bytes = new byte[buffer.Remaining()];
-            buffer.Get(bytes, 0, bytes.Length);
-            return bytes;
         }
 
         /// <summary>
