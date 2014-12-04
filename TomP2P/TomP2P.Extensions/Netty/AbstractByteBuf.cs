@@ -145,171 +145,325 @@ namespace TomP2P.Extensions.Netty
 
         #region Not Implemented
 
-        public override IByteBufAllocator Alloc
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         public override ByteBuf WriteByte(int value)
         {
-            throw new NotImplementedException();
+            EnsureWriteable(1);
+            SetByte(_writerIndex++, value);
+            return this;
         }
 
         public override ByteBuf SetByte(int index, int value)
         {
-            throw new NotImplementedException();
+            CheckIndex(index);
+            _setByte(index, value);
+            return this;
         }
+
+        protected abstract void _setByte(int index, int value);
 
         public override ByteBuf WriteShort(int value)
         {
-            throw new NotImplementedException();
+            EnsureWriteable(2);
+            _setShort(WriterIndex, value);
+            _writerIndex += 2;
+            return this;
         }
 
         public override ByteBuf SetShort(int index, int value)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, 2);
+            _setShort(index, value);
+            return this;
         }
+
+        protected abstract void _setShort(int index, int value);
 
         public override ByteBuf WriteInt(int value)
         {
-            throw new NotImplementedException();
+            EnsureWriteable(4);
+            _setInt(WriterIndex, value);
+            _writerIndex += 4;
+            return this;
         }
 
         public override ByteBuf SetInt(int index, int value)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, 4);
+            _setInt(index, value);
+            return this;
         }
+
+        protected abstract void _setInt(int index, int value);
 
         public override ByteBuf WriteLong(long value)
         {
-            throw new NotImplementedException();
+            EnsureWriteable(8);
+            _setLong(WriterIndex, value);
+            _writerIndex += 8;
+            return this;
         }
 
         public override ByteBuf SetLong(int index, long value)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, 8);
+            _setLong(index, value);
+            return this;
         }
+
+        protected abstract void _setLong(int index, long value);
 
         public override ByteBuf WriteBytes(sbyte[] src)
         {
-            throw new NotImplementedException();
+            return WriteBytes(src, 0, src.Length);
         }
 
         public override ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
+            EnsureWriteable(length);
+            SetBytes(WriterIndex, src, srcIndex, length);
+            _writerIndex += length;
+            return this;
         }
 
         public override ByteBuf WriteBytes(ByteBuf src, int length)
         {
-            throw new NotImplementedException();
+            if (length > src.ReadableBytes)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "length({0}) exceeds src.readableBytes({1}) where src is: {2}", length, src.ReadableBytes, src));
+            }
+            WriteBytes(src, src.ReaderIndex, length);
+            src.SetReaderIndex(src.ReaderIndex + length);
+            return this;
         }
 
         public override ByteBuf WriteBytes(ByteBuf src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
-        }
-
-        public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
-        {
-            throw new NotImplementedException();
+            EnsureWriteable(length);
+            SetBytes(WriterIndex, src, srcIndex, length);
+            _writerIndex += length;
+            return this;
         }
 
         public override sbyte ReadByte()
         {
-            throw new NotImplementedException();
+            CheckReadableBytes(1);
+            int i = ReaderIndex;
+            sbyte b = GetByte(i);
+            _readerIndex = i + 1;
+            return b;
         }
 
         public override byte ReadUByte()
         {
-            throw new NotImplementedException();
+            return Convert.ToByte(ReadByte());
         }
 
         public override sbyte GetByte(int index)
         {
-            throw new NotImplementedException();
+            CheckIndex(index);
+            return _getByte(index);
         }
+
+        protected abstract sbyte _getByte(int index);
 
         public override byte GetUByte(int index)
         {
-            throw new NotImplementedException();
+            return Convert.ToByte(GetByte(index));
         }
 
         public override short ReadShort()
         {
-            throw new NotImplementedException();
+            CheckReadableBytes(2);
+            short v = _getShort(ReaderIndex);
+            _readerIndex += 2;
+            return v;
         }
 
         public override ushort ReadUShort()
         {
-            throw new NotImplementedException();
+            return Convert.ToUInt16(ReadShort());
         }
 
         public override short GetShort(int index)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, 2);
+            return _getShort(index);
         }
 
         public override ushort GetUShort(int index)
         {
-            throw new NotImplementedException();
+            return Convert.ToUInt16(GetShort(index));
         }
+
+        protected abstract short _getShort(int index);
 
         public override int ReadInt()
         {
-            throw new NotImplementedException();
+            CheckReadableBytes(4);
+            int v = _getInt(ReaderIndex);
+            _readerIndex += 4;
+            return v;
         }
 
         public override int GetInt(int index)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, 4);
+            return _getInt(index);
         }
+
+        protected abstract int _getInt(int index);
 
         public override long ReadLong()
         {
-            throw new NotImplementedException();
+            CheckReadableBytes(8);
+            long v = _getLong(ReaderIndex);
+            _readerIndex += 8;
+            return v;
         }
 
         public override long GetLong(int index)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, 8);
+            return _getLong(index);
         }
+
+        protected abstract long _getLong(int index);
 
         public override ByteBuf ReadBytes(sbyte[] dst)
         {
-            throw new NotImplementedException();
+            return ReadBytes(dst, 0, dst.Length);
         }
 
         public override ByteBuf ReadBytes(sbyte[] dst, int dstIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckReadableBytes(length);
+            GetBytes(ReaderIndex, dst, dstIndex, length);
+            _readerIndex += length;
+            return this;
         }
 
         public override ByteBuf GetBytes(int index, sbyte[] dst)
         {
-            throw new NotImplementedException();
-        }
-
-        public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
-        {
-            throw new NotImplementedException();
+            return GetBytes(index, dst, 0, dst.Length);
         }
 
         public override ByteBuf SkipBytes(int length)
         {
-            throw new NotImplementedException();
+            CheckReadableBytes(length);
+
+            int newReaderIndex = ReaderIndex + length;
+            if (newReaderIndex > WriterIndex)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "length: {0} (expected: readerIndex({1}) + length <= writerIndex({2}))",
+                        length, ReaderIndex, WriterIndex));
+            }
+            _readerIndex = newReaderIndex;
+            return this;
         }
 
         public override ByteBuf WriteZero(int length)
         {
-            throw new NotImplementedException();
+            if (length == 0)
+            {
+                return this;
+            }
+
+            EnsureWriteable(length);
+            CheckIndex(WriterIndex, length);
+
+            int nLong = length >> 3;
+            int nBytes = length & 7;
+            for (int i = nLong; i > 0; i --) {
+                WriteLong(0);
+            }
+            if (nBytes == 4) {
+                WriteInt(0);
+            } else if (nBytes < 4) {
+                for (int i = nBytes; i > 0; i --) {
+                    WriteByte((byte) 0);
+                }
+            } else {
+                WriteInt(0);
+                for (int i = nBytes - 4; i > 0; i --) {
+                    WriteByte((byte) 0);
+                }
+            }
+            return this;
         }
 
         #endregion
+
+        public override ByteBuf EnsureWriteable(int minWritableBytes)
+        {
+            // TODO ensureAccessible();
+            if (minWritableBytes < 0)
+            {
+                throw new ArgumentException(String.Format(
+                        "minWritableBytes: {0} (expected: >= 0)", minWritableBytes));
+            }
+
+            if (minWritableBytes <= WriteableBytes)
+            {
+                return this;
+            }
+
+            if (minWritableBytes > MaxCapacity - WriterIndex)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "writerIndex({0}) + minWritableBytes({1}) exceeds maxCapacity({2}): {3}",
+                        WriterIndex, minWritableBytes, MaxCapacity, this));
+            }
+
+            // Normalize the current capacity to the power of 2.
+            int newCapacity = CalculateNewCapacity(WriterIndex + minWritableBytes);
+
+            // Adjust to the new capacity.
+            SetCapacity(newCapacity);
+            return this;
+        }
+
+        private int CalculateNewCapacity(int minNewCapacity)
+        {
+            int maxCapacity = MaxCapacity;
+            int threshold = 1048576 * 4; // 4 MiB page
+
+            if (minNewCapacity == threshold) {
+                return threshold;
+            }
+
+            // If over threshold, do not double but just increase by threshold.
+            if (minNewCapacity > threshold) {
+                int newCapacity = minNewCapacity / threshold * threshold;
+                if (newCapacity > maxCapacity - threshold) {
+                    newCapacity = maxCapacity;
+                } else {
+                    newCapacity += threshold;
+                }
+                return newCapacity;
+            }
+
+            // Not over threshold. Double up to 4 MiB, starting from 64.
+            int newCapacity2 = 64;
+            while (newCapacity2 < minNewCapacity) {
+                newCapacity2 <<= 1;
+            }
+
+            return Math.Min(newCapacity2, maxCapacity);
+        }
+
+        protected void CheckReadableBytes(int minimumReadableBytes)
+        {
+            // TODO ensureAccessible();
+            if (minimumReadableBytes < 0) {
+                throw new ArgumentException("minimumReadableBytes: " + minimumReadableBytes + " (expected: >= 0)");
+            }
+            if (ReaderIndex > WriterIndex - minimumReadableBytes) {
+                throw new IndexOutOfRangeException(String.Format(
+                        "readerIndex({0}) + length({1}) exceeds writerIndex({2}): {3}",
+                        ReaderIndex, minimumReadableBytes, WriterIndex, this));
+            }
+        }
     }
 }

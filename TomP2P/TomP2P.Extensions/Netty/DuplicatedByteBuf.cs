@@ -20,6 +20,11 @@ namespace TomP2P.Extensions.Netty
             SetIndex(buffer.ReaderIndex, buffer.WriterIndex);
         }
 
+        public override IByteBufAllocator Alloc
+        {
+            get { return _buffer.Alloc; }
+        }
+
         public override ByteBuf Unwrap()
         {
             return _buffer;

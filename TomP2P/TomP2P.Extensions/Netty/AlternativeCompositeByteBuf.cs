@@ -82,6 +82,11 @@ namespace TomP2P.Extensions.Netty
             }
         }
 
+        public override ByteBuf SetCapacity(int newCapacity)
+        {
+            return SetCapacity(newCapacity, false);
+        }
+
         // not overridden
         public AlternativeCompositeByteBuf SetCapacity(int newCapacity, bool fillBuffer)
         {
@@ -636,35 +641,6 @@ namespace TomP2P.Extensions.Netty
             _writerIndex += increase;
         }
 
-        public AlternativeCompositeByteBuf EnsureWritable0(int minWritableBytes, bool fillBuffer)
-        {
-            if (minWritableBytes < 0)
-            {
-                throw new ArgumentException(String.Format(
-                        "minWritableBytes: {0} (expected: >= 0)", minWritableBytes));
-            }
-
-            if (minWritableBytes <= WriteableBytes)
-            {
-                return this;
-            }
-
-            if (minWritableBytes > MaxCapacity - WriterIndex)
-            {
-                throw new IndexOutOfRangeException(
-                        String.Format(
-                                "writerIndex({0}) + minWritableBytes({1}) exceeds maxCapacity({2}): {3}",
-                                WriterIndex, minWritableBytes, MaxCapacity, this));
-            }
-
-            // normalize the current capacity to the power of 2.
-            int newCapacity = CalculateNewCapacity(WriterIndex + minWritableBytes);
-
-            // Adjust to the new capacity.
-            SetCapacity(newCapacity, fillBuffer);
-            return this;
-        }
-
         private int CalculateNewCapacity(int minNewCapacity)
         {
             int maxCapacity = MaxCapacity;
@@ -906,6 +882,40 @@ namespace TomP2P.Extensions.Netty
         }
 
         #endregion
+
+        public override ByteBuf EnsureWriteable(int minWritableBytes)
+        {
+            return EnsureWritable0(minWritableBytes, false);
+        }
+
+        public AlternativeCompositeByteBuf EnsureWritable0(int minWritableBytes, bool fillBuffer)
+        {
+            if (minWritableBytes < 0)
+            {
+                throw new ArgumentException(String.Format(
+                    "minWritableBytes: {0} (expected: >= 0)", minWritableBytes));
+            }
+
+            if (minWritableBytes <= WriteableBytes)
+            {
+                return this;
+            }
+
+            if (minWritableBytes > MaxCapacity - WriterIndex)
+            {
+                throw new IndexOutOfRangeException(
+                    String.Format(
+                        "writerIndex({0}) + minWritableBytes({1}) exceeds maxCapacity({2}): {3}",
+                        WriterIndex, minWritableBytes, MaxCapacity, this));
+            }
+
+            // normalize the current capacity to the power of 2.
+            int newCapacity = CalculateNewCapacity(WriterIndex + minWritableBytes);
+
+            // Adjust to the new capacity.
+            SetCapacity(newCapacity, fillBuffer);
+            return this;
+        }
 
         private int FindIndex(int offset)
         {

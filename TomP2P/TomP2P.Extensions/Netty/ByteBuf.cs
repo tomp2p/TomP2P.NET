@@ -50,6 +50,8 @@ namespace TomP2P.Extensions.Netty
         /// </summary>
         public abstract int Capacity { get; }
 
+        public abstract ByteBuf SetCapacity(int newCapacity);
+
         /// <summary>
         /// Returns the maximum allowed capacity of this buffer.
         /// </summary>
@@ -216,5 +218,7 @@ namespace TomP2P.Extensions.Netty
         public abstract ByteBuf WriteZero(int length);
 
         #endregion
+
+        public abstract ByteBuf EnsureWriteable(int minWritableBytes);
     }
 }
