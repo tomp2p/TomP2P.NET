@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Data;
+using System.IO;
 using System.Security.Cryptography;
 using NLog;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 
@@ -14,7 +15,7 @@ namespace TomP2P.Connection
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public void EncodePublicKey(IPublicKey publicKey, JavaBinaryWriter buffer)
+        public void EncodePublicKey(IPublicKey publicKey, ByteBuf buffer)
         {
             var dsa = new DSACryptoServiceProvider();
             var dsap = dsa.ExportParameters(false);
@@ -31,22 +32,22 @@ namespace TomP2P.Connection
             throw new NotImplementedException();
         }
 
-        public IPublicKey DecodePublicKey(JavaBinaryReader buffer)
+        public IPublicKey DecodePublicKey(ByteBuf buffer)
         {
             throw new NotImplementedException();
         }
 
-        public ISignatureCodec Sign(IPrivateKey privateKey, JavaBinaryWriter buffer)
+        public ISignatureCodec Sign(IPrivateKey privateKey, ByteBuf buffer)
         {
             throw new NotImplementedException();
         }
 
-        public bool Verify(IPublicKey publicKey, JavaBinaryReader buffer, ISignatureCodec signatureEncoded)
+        public bool Verify(IPublicKey publicKey, ByteBuf buffer, ISignatureCodec signatureEncoded)
         {
             throw new NotImplementedException();
         }
 
-        public RSACryptoServiceProvider Update(IPublicKey publicKey, System.IO.MemoryStream[] buffers)
+        public RSACryptoServiceProvider Update(IPublicKey publicKey, MemoryStream[] buffers)
         {
             throw new NotImplementedException();
         }

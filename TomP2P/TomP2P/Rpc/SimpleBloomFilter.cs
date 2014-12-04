@@ -89,7 +89,7 @@ namespace TomP2P.Rpc
         /// Constructs a SimpleBloomFilter out of existing data.
         /// </summary>
         /// <param name="buffer">The byte buffer with the data.</param>
-        public SimpleBloomFilter(JavaBinaryReader buffer)
+        public SimpleBloomFilter(AlternativeCompositeByteBuf buffer)
         {
             _byteArraySize = buffer.ReadUShort() - SizeHeader;
             _bitArraySize = _byteArraySize*8;

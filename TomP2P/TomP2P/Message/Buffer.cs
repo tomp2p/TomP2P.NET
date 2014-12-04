@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
@@ -80,18 +79,15 @@ namespace TomP2P.Message
                 return false;
             }
             // TODO check correctness of porting
-            var b1 = BackingBuffer.Duplicate();
-            var b2 = other.BackingBuffer.Duplicate();
-            b1.Position = 0;
-            b2.Position = 0;
+            var b1 = BackingBuffer.Duplicate().SetReaderIndex(0);
+            var b2 = other.BackingBuffer.Duplicate().SetReaderIndex(0);
 
             return b1.Equals(b2);
         }
 
         public override int GetHashCode()
         {
-            var b = BackingBuffer.Duplicate();
-            b.Position = 0;
+            var b = BackingBuffer.Duplicate().SetReaderIndex(0);
             return b.GetHashCode() ^ Length;
         }
 

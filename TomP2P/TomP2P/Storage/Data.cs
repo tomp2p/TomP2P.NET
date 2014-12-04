@@ -256,15 +256,15 @@ namespace TomP2P.Storage
             }
         }
 
-        public static Data DeocdeHeader(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
+        public static Data DeocdeHeader(AlternativeCompositeByteBuf buffer, ISignatureFactory signatureFactory)
         {
             // 2 is the smallest packet size, we could start if we know 1 byte to
             // decode the header, but we always need a second byte. Thus, we are waiting for at least 2 bytes.
-            if (buffer.ReadableBytes() < 2*Utils.Utils.ByteByteSize)
+            if (buffer.ReadableBytes < 2*Utils.Utils.ByteByteSize)
             {
                 return null;
             }
-            int header = buffer.GetUByte(buffer.ReaderIndex());
+            int header = buffer.GetUByte(buffer.ReaderIndex);
             DataType type = Type(header);
 
             // length
@@ -274,16 +274,16 @@ namespace TomP2P.Storage
             switch (type)
             {
                 case DataType.Small:
-                    length = buffer.GetUByte(buffer.ReaderIndex() + indexLength);
+                    length = buffer.GetUByte(buffer.ReaderIndex + indexLength);
                     indexTtl = indexLength + Utils.Utils.ByteByteSize;
                     break;
                 case DataType.Large:
                     indexTtl = indexLength + Utils.Utils.IntegerByteSize;
-                    if (buffer.ReadableBytes() < indexTtl)
+                    if (buffer.ReadableBytes < indexTtl)
                     {
                         return null;
                     }
-                    length = buffer.GetInt(buffer.ReaderIndex() + indexLength);
+                    length = buffer.GetInt(buffer.ReaderIndex + indexLength);
                     break;
                 default:
                     throw new ArgumentException("Unknown DataType.");
@@ -295,11 +295,11 @@ namespace TomP2P.Storage
             if (CheckHasTtl(header))
             {
                 indexBasedOnNr = indexTtl + Utils.Utils.IntegerByteSize;
-                if (buffer.ReadableBytes() < indexBasedOnNr)
+                if (buffer.ReadableBytes < indexBasedOnNr)
                 {
                     return null;
                 }
-                ttl = buffer.GetInt(buffer.ReaderIndex() + indexTtl);
+                ttl = buffer.GetInt(buffer.ReaderIndex + indexTtl);
             }
             else
             {
@@ -316,19 +316,19 @@ namespace TomP2P.Storage
             {
                 // get nr of basedOn keys
                 indexBasedOn = indexBasedOnNr + Utils.Utils.ByteByteSize;
-                if (buffer.ReadableBytes() < indexBasedOn)
+                if (buffer.ReadableBytes < indexBasedOn)
                 {
                     return null;
                 }
-                numBasedOn = buffer.GetUByte(buffer.ReaderIndex() + indexBasedOn) + 1;
+                numBasedOn = buffer.GetUByte(buffer.ReaderIndex + indexBasedOn) + 1;
                 indexPublicKeySize = indexBasedOn + (numBasedOn*Number160.ByteArraySize);
-                if (buffer.ReadableBytes() < indexPublicKeySize)
+                if (buffer.ReadableBytes < indexPublicKeySize)
                 {
                     return null;
                 }
 
                 // get basedOn
-                long index = buffer.ReaderIndex() + indexBasedOnNr + Utils.Utils.ByteByteSize;
+                int index = buffer.ReaderIndex + indexBasedOnNr + Utils.Utils.ByteByteSize;
                 var me = new sbyte[Number160.ByteArraySize];
                 for (int i = 0; i < numBasedOn; i++)
                 {
@@ -352,26 +352,26 @@ namespace TomP2P.Storage
             {
                 // get public key size
                 indexPublicKey = indexPublicKeySize + Utils.Utils.ShortByteSize;
-                if (buffer.ReadableBytes() < indexPublicKey)
+                if (buffer.ReadableBytes < indexPublicKey)
                 {
                     return null;
                 }
-                publicKeySize = buffer.GetUShort(buffer.ReaderIndex() + indexPublicKeySize);
+                publicKeySize = buffer.GetUShort(buffer.ReaderIndex + indexPublicKeySize);
                 indexEnd = indexPublicKey + publicKeySize;
-                if (buffer.ReadableBytes() < indexEnd)
+                if (buffer.ReadableBytes < indexEnd)
                 {
                     return null;
                 }
 
                 // get public key
-                buffer.BaseStream.SkipBytes(indexPublicKeySize);
+                buffer.SkipBytes(indexPublicKeySize);
                 publicKey = signatureFactory.DecodePublicKey(buffer);
             }
             else
             {
                 publicKeySize = 0;
                 indexPublicKey = indexPublicKeySize;
-                buffer.BaseStream.SkipBytes(indexPublicKey);
+                buffer.SkipBytes(indexPublicKey);
                 publicKey = null;
             }
 
@@ -388,10 +388,10 @@ namespace TomP2P.Storage
         /// </summary>
         /// <param name="buffer">The buffer to append.</param>
         /// <returns></returns>
-        public bool DecodeBuffer(JavaBinaryReader buffer)
+        public bool DecodeBuffer(AlternativeCompositeByteBuf buffer)
         {
-            var already = _buffer.AlreadyTransferred;
-            var remaining = Length - already;
+            int already = _buffer.AlreadyTransferred;
+            int remaining = Length - already;
             if (remaining == 0)
             {
                 // already finished
@@ -404,12 +404,12 @@ namespace TomP2P.Storage
             return transfered == remaining;
         }
 
-        public bool DecodeDone(JavaBinaryReader buffer, ISignatureFactory signatureFactory)
+        public bool DecodeDone(AlternativeCompositeByteBuf buffer, ISignatureFactory signatureFactory)
         {
             if (IsSigned)
             {
                 Signature = signatureFactory.SignatureCodec;
-                if (buffer.ReadableBytes() < Signature.SignatureSize)
+                if (buffer.ReadableBytes < Signature.SignatureSize)
                 {
                     return false;
                 }
@@ -418,7 +418,7 @@ namespace TomP2P.Storage
             return true;
         }
 
-        public bool DecodeDone(JavaBinaryReader buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
+        public bool DecodeDone(AlternativeCompositeByteBuf buffer, IPublicKey publicKey, ISignatureFactory signatureFactory)
         {
             if (IsSigned)
             {
@@ -474,7 +474,7 @@ namespace TomP2P.Storage
         {
             if (Signature == null)
             {
-                Signature = signatureFactory.Sign(keyPair.PrivateKey, _buffer.ToJavaBinaryWriter());
+                Signature = signatureFactory.Sign(keyPair.PrivateKey, _buffer.ToByteBuf());
                 IsSigned = true;
                 PublicKey = keyPair.PublicKey;
                 HasPublicKey = true;
@@ -492,7 +492,7 @@ namespace TomP2P.Storage
         {
             if (Signature == null)
             {
-                Signature = signatureFactory.Sign(privateKey, _buffer.ToJavaBinaryWriter());
+                Signature = signatureFactory.Sign(privateKey, _buffer.ToByteBuf());
                 IsSigned = true;
                 HasPublicKey = true;
                 IsProtectedEntry = isProtectedEntry;
@@ -507,7 +507,7 @@ namespace TomP2P.Storage
 
         public bool Verify(IPublicKey publicKey, ISignatureFactory signatureFactory)
         {
-            return signatureFactory.Verify(publicKey, _buffer.ToJavaBinaryReader(), Signature);
+            return signatureFactory.Verify(publicKey, _buffer.ToByteBuf(), Signature);
         }
 
         // TODO getter for buffer (maybe both)
@@ -720,8 +720,8 @@ namespace TomP2P.Storage
 
         public sbyte[] ToBytes()
         {
-            var buf = _buffer.ToJavaBinaryReader();
-            var me = new sbyte[buf.ReadableBytes()];
+            var buf = _buffer.ToByteBuf();
+            var me = new sbyte[buf.ReadableBytes];
             buf.ReadBytes(me);
             return me;
         }
@@ -763,7 +763,7 @@ namespace TomP2P.Storage
             {
                 if (_hash == null)
                 {
-                    _hash = Utils.Utils.MakeShaHash(_buffer.ToJavaBinaryReader()); // TODO maybe another "stream/buffer" should be used
+                    _hash = Utils.Utils.MakeShaHash(_buffer.ToByteBuf());
                 }
                 return _hash;
             }

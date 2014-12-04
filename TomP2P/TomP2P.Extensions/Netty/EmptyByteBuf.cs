@@ -137,5 +137,174 @@ namespace TomP2P.Extensions.Netty
             }
             return this;
         }
+
+        #region Not Implemented
+
+        public override IByteBufAllocator Alloc
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override ByteBuf WriteByte(int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetByte(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteShort(int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetShort(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteInt(int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetInt(int index, int value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteLong(long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetLong(int index, long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteBytes(sbyte[] src)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteBytes(ByteBuf src, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteBytes(ByteBuf src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override sbyte ReadByte()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override byte ReadUByte()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override sbyte GetByte(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override byte GetUByte(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override short ReadShort()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ushort ReadUShort()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override short GetShort(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ushort GetUShort(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int ReadInt()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetInt(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override long ReadLong()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override long GetLong(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf ReadBytes(sbyte[] dst)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf ReadBytes(sbyte[] dst, int dstIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf GetBytes(int index, sbyte[] dst)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf SkipBytes(int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ByteBuf WriteZero(int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

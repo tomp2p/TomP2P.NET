@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Peers
@@ -170,9 +171,9 @@ namespace TomP2P.Peers
         /// Creates a peer address from a byte buffer.
         /// </summary>
         /// <param name="buffer">The channel buffer to read from.</param>
-        public PeerAddress(JavaBinaryReader buffer)
+        public PeerAddress(AlternativeCompositeByteBuf buffer)
         {
-            long readerIndex = buffer.ReaderIndex();
+            long readerIndex = buffer.ReaderIndex;
 
             // get the type
             int options = buffer.ReadByte();
@@ -207,7 +208,7 @@ namespace TomP2P.Peers
                 PeerSocketAddresses = EmptyPeerSocketAddresses;
             }
 
-            Size = buffer.ReaderIndex() - readerIndex;
+            Size = buffer.ReaderIndex - readerIndex;
 
             Offset = -1; // not used here
             _hashCode = PeerId.GetHashCode();

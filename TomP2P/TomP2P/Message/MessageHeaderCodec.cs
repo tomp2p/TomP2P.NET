@@ -1,7 +1,6 @@
 ﻿using NLog;
 using System.Net;
 using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
 
 namespace TomP2P.Message
@@ -52,7 +51,7 @@ namespace TomP2P.Message
         /// <param name="recipientSocket">The recipientSocket of the message.</param>
         /// <param name="senderSocket">The senderSocket of the packet, which has been set in the socket class.</param> // TODO check if true
         /// <returns>The partial message where only the header fields are set.</returns>
-        public static Message DecodeHeader(JavaBinaryReader buffer, IPEndPoint recipientSocket, IPEndPoint senderSocket)
+        public static Message DecodeHeader(AlternativeCompositeByteBuf buffer, IPEndPoint recipientSocket, IPEndPoint senderSocket)
         {
             Logger.Debug("Decode message. Recipient: {0}, Sender: {1}", recipientSocket, senderSocket);
 
@@ -135,7 +134,7 @@ namespace TomP2P.Message
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        private static Number160 ReadId(JavaBinaryReader buffer)
+        private static Number160 ReadId(AlternativeCompositeByteBuf buffer)
         {
             var me = new sbyte[Number160.ByteArraySize];
             buffer.ReadBytes(me);

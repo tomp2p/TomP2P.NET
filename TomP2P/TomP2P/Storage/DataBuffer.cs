@@ -11,7 +11,7 @@ namespace TomP2P.Storage
     {
         private readonly IList<ByteBuf> _buffers;
 
-        public long AlreadyTransferred { private set; get; }
+        public int AlreadyTransferred { private set; get; }
 
         public DataBuffer()
             : this(1)

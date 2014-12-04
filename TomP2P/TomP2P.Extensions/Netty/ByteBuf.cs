@@ -178,6 +178,8 @@ namespace TomP2P.Extensions.Netty
 
         public abstract short GetShort(int index);
 
+        public abstract ushort GetUShort(int index);
+
         public abstract int ReadInt();
 
         public abstract int GetInt(int index);
@@ -190,7 +192,28 @@ namespace TomP2P.Extensions.Netty
 
         public abstract ByteBuf ReadBytes(sbyte[] dst, int dstIndex, int length);
 
+        public abstract ByteBuf GetBytes(int index, sbyte[] dst);
+
         public abstract ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length);
+
+        #endregion
+
+        #region Stream Operations
+
+        /// <summary>
+        /// Increases the current ReaderIndex by the specified length in this buffer.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public abstract ByteBuf SkipBytes(int length);
+
+        /// <summary>
+        /// Fills this buffer with NUL (0x00) starting at the current WriterIndex and
+        /// increases the WriterIndex by the specified length.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public abstract ByteBuf WriteZero(int length);
 
         #endregion
     }

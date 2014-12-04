@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Workaround;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Peers
 {
@@ -88,7 +87,7 @@ namespace TomP2P.Peers
         /// <param name="buffer">The buffer.</param>
         /// <param name="isIPv4">Whether the address is IPv4 or IPv6.</param>
         /// <returns>The <see cref="PeerSocketAddress"/> and the new offset.</returns>
-        public static PeerSocketAddress Create(JavaBinaryReader buffer, bool isIPv4)
+        public static PeerSocketAddress Create(AlternativeCompositeByteBuf buffer, bool isIPv4)
         {
             int tcpPort = buffer.ReadUShort();
             int udpPort = buffer.ReadUShort();
@@ -107,7 +106,7 @@ namespace TomP2P.Peers
                 buffer.ReadBytes(me);
                 address = Utils.Utils.Inet6AddressFromBytes(me, 0);
             }
-            return new PeerSocketAddress(address, tcpPort, udpPort, buffer.ReaderIndex());
+            return new PeerSocketAddress(address, tcpPort, udpPort, buffer.ReaderIndex);
         }
 
         /// <summary>

@@ -758,6 +758,11 @@ namespace TomP2P.Extensions.Netty
             }
         }
 
+        public override ushort GetUShort(int index)
+        {
+            return Convert.ToUInt16(GetShort(index)); // TODO check
+        }
+
         public override int ReadInt()
         {
             CheckReadableBytes(4);
@@ -816,6 +821,11 @@ namespace TomP2P.Extensions.Netty
             return this;
         }
 
+        public override ByteBuf GetBytes(int index, sbyte[] dst)
+        {
+            return GetBytes(index, dst, 0, dst.Length);
+        }
+
         public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
         {
             CheckDstIndex(index, length, dstIndex, dst.Length);
@@ -838,6 +848,55 @@ namespace TomP2P.Extensions.Netty
                 i++;
             }
             return this;
+        }
+
+        #endregion
+
+        #region Stream Operations
+
+        public override ByteBuf SkipBytes(int length)
+        {
+            CheckReadableBytes(length);
+
+            int newReaderIndex = ReaderIndex + length;
+            if (newReaderIndex > WriterIndex)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                                "length: {0} (expected: readerIndex({1}) + length <= writerIndex({2}))",
+                                length, ReaderIndex, WriterIndex));
+            }
+            _readerIndex = newReaderIndex;
+            return this;
+        }
+
+        public override ByteBuf WriteZero(int length)
+        {
+            if (length == 0)
+            {
+			    return this;
+		    }
+
+		    EnsureWritable0(length, true);
+		    CheckIndex(WriterIndex, length);
+
+		    int nLong = length >> 3;
+		    int nBytes = length & 7;
+		    for (int i = nLong; i > 0; i--) {
+			    WriteLong(0);
+		    }
+		    if (nBytes == 4) {
+			    WriteInt(0);
+		    } else if (nBytes < 4) {
+			    for (int i = nBytes; i > 0; i--) {
+				    WriteByte((byte) 0);
+			    }
+		    } else {
+			    WriteInt(0);
+			    for (int i = nBytes - 4; i > 0; i--) {
+				    WriteByte((byte) 0);
+			    }
+		    }
+		    return this;
         }
 
         #endregion
@@ -972,6 +1031,11 @@ namespace TomP2P.Extensions.Netty
             params ByteBuf[] buffers)
         {
             return new AlternativeCompositeByteBuf(alloc, direct, buffers);
+        }
+
+        public static AlternativeCompositeByteBuf CompBuffer(params ByteBuf[] buffers)
+        {
+            return CompBuffer(ALLOC, false, buffers);
         }
     }
 }

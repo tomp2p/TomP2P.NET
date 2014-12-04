@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
 using TomP2P.Storage;
@@ -111,17 +112,20 @@ namespace TomP2P.Utils
             return new IPAddress(tmp);
         }
 
-        public static Number160 MakeShaHash(JavaBinaryReader br)
+        public static Number160 MakeShaHash(ByteBuf buf)
         {
+            throw new NotImplementedException();
+
             // see http://stackoverflow.com/questions/6843698/calculating-sha-1-hashes-in-java-and-c-sharp
             // TODO implement
             // TODO check if works
-            byte[] buffer = Convenient.ReadFully(br.BaseStream, 0);
+            /*byte[] buffer = Convenient.ReadFully(br.BaseStream, 0);
 
             var md = SHA1.Create();
             byte[] digest = md.ComputeHash(buffer); // stream could be passed
 
             return new Number160(digest.ToSByteArray()); // TODO make unit test
+            */
         }
     }
 }
