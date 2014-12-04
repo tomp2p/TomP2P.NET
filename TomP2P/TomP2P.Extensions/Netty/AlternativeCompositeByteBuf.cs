@@ -449,8 +449,6 @@ namespace TomP2P.Extensions.Netty
 
         #region Writes
 
-        // TODO write in BIG-ENDIAN only, now its little-endian
-
         public override ByteBuf WriteByte(int value)
         {
             EnsureWritable0(1, true);
@@ -481,11 +479,11 @@ namespace TomP2P.Extensions.Netty
             {
                 c.Buf.SetShort(index - c.Offset, value);
             }
-            // little-endian only
+            // big-endian only
             else
             {
-                SetByte(index, (byte)value);
-                SetByte(index + 1, (byte)(value >> 8));
+                SetByte(index, (byte)(value >> 8));
+                SetByte(index + 1, (byte)value);
             }
             return this;
         }
@@ -505,11 +503,11 @@ namespace TomP2P.Extensions.Netty
             {
                 c.Buf.SetInt(index - c.Offset, value);
             }
-            // little-endian only
+            // big-endian only
             else
             {
-                SetShort(index, (short)value);
-                SetShort(index + 2, (short)(value >> 16));
+                SetShort(index, (short)(value >> 16));
+                SetShort(index + 2, (short)value);
             }
             return this;
         }
@@ -529,11 +527,11 @@ namespace TomP2P.Extensions.Netty
             {
                 c.Buf.SetLong(index - c.Offset, value);
             }
-            // little-endian only
+            // big-endian only
             else
             {
-                SetInt(index, (int)value);
-                SetInt(index + 4, (int)(value >> 32));
+                SetInt(index, (int)(value >> 32));
+                SetInt(index + 4, (int)value);
             }
             return this;
         }
@@ -873,30 +871,38 @@ namespace TomP2P.Extensions.Netty
         {
             if (length == 0)
             {
-			    return this;
-		    }
+                return this;
+            }
 
-		    EnsureWritable0(length, true);
-		    CheckIndex(WriterIndex, length);
+            EnsureWritable0(length, true);
+            CheckIndex(WriterIndex, length);
 
-		    int nLong = length >> 3;
-		    int nBytes = length & 7;
-		    for (int i = nLong; i > 0; i--) {
-			    WriteLong(0);
-		    }
-		    if (nBytes == 4) {
-			    WriteInt(0);
-		    } else if (nBytes < 4) {
-			    for (int i = nBytes; i > 0; i--) {
-				    WriteByte((byte) 0);
-			    }
-		    } else {
-			    WriteInt(0);
-			    for (int i = nBytes - 4; i > 0; i--) {
-				    WriteByte((byte) 0);
-			    }
-		    }
-		    return this;
+            int nLong = length >> 3;
+            int nBytes = length & 7;
+            for (int i = nLong; i > 0; i--)
+            {
+                WriteLong(0);
+            }
+            if (nBytes == 4)
+            {
+                WriteInt(0);
+            }
+            else if (nBytes < 4)
+            {
+                for (int i = nBytes; i > 0; i--)
+                {
+                    WriteByte((byte)0);
+                }
+            }
+            else
+            {
+                WriteInt(0);
+                for (int i = nBytes - 4; i > 0; i--)
+                {
+                    WriteByte((byte)0);
+                }
+            }
+            return this;
         }
 
         #endregion

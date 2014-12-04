@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.IO;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Tests.Interop
@@ -13,8 +14,10 @@ namespace TomP2P.Tests.Interop
         [Test]
         public void TestEncodeInt()
         {
-            var ms = new MemoryStream();
-            var buffer = new JavaBinaryWriter(ms);
+            //var ms = new MemoryStream();
+            //var buffer = new JavaBinaryWriter(ms);
+
+            AlternativeCompositeByteBuf buffer = AlternativeCompositeByteBuf.CompBuffer();
 
             buffer.WriteInt(int.MinValue);  //-2147483648
             buffer.WriteInt(-256);
@@ -30,7 +33,9 @@ namespace TomP2P.Tests.Interop
             buffer.WriteInt(256);
             buffer.WriteInt(int.MaxValue);  // 2147483647
 
-            byte[] bytes = ms.GetBuffer();
+            //byte[] bytes = ms.GetBuffer();
+
+            var bytes = InteropUtil.ExtractBytes(buffer);
 
             bool interopResult = JarRunner.WriteBytesAndTestInterop(bytes);
             Assert.IsTrue(interopResult);

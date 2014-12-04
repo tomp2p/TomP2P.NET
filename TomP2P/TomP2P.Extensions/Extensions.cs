@@ -216,11 +216,11 @@ namespace TomP2P.Extensions
         /// Equivalent of Java's ByteBuffer.remaining().
         /// Returns the number of elements between the current position and the limit.
         /// </summary>
-        /// <param name="s"></param>
+        /// <param name="ms"></param>
         /// <returns></returns>
-        public static long Remaining(this Stream s)
+        public static long Remaining(this MemoryStream ms)
         {
-            return s.Length - s.Position;
+            return ms.Length - ms.Position;
         }
 
         /// <summary>
