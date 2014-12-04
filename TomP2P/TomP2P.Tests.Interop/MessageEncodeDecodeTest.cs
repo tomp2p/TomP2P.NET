@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 using TomP2P.Peers;
@@ -552,7 +553,7 @@ namespace TomP2P.Tests.Interop
 
         private static Message.Message CreateMessageByteBuffer()
         {
-            var sampleBuf1 = new MemoryStream();
+            /*var sampleBuf1 = new MemoryStream();
             sampleBuf1.WriteBytes(_sampleBytes1);
             sampleBuf1.WriteBytes(_sampleBytes1);
             sampleBuf1.WriteBytes(_sampleBytes1);
@@ -573,7 +574,7 @@ namespace TomP2P.Tests.Interop
             sampleBuf4.WriteBytes(_sampleBytes3);*/
 
             var m = Utils2.CreateDummyMessage();
-            m.SetBuffer(new Buffer(sampleBuf1));
+            /*m.SetBuffer(new Buffer(sampleBuf1));
             /*m1.SetBuffer(new Buffer(sampleBuf2));
             m1.SetBuffer(new Buffer(sampleBuf3));
             m1.SetBuffer(new Buffer(sampleBuf4));
@@ -779,13 +780,14 @@ namespace TomP2P.Tests.Interop
         /// <returns>The encoded message as byte array.</returns>
         private static byte[] EncodeMessage(Message.Message message)
         {
-            var ms = new MemoryStream();
-            var buffer = new JavaBinaryWriter(ms);
+            //var ms = new MemoryStream();
+            //var buffer = new JavaBinaryWriter(ms);
 
             var encoder = new Encoder(null);
-            encoder.Write(buffer, message, null);
+            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+            encoder.Write(buf, message, null);
 
-            return ms.GetBuffer();
+            return ExtractBytes(buf);
         }
 
         /// <summary>
@@ -795,16 +797,28 @@ namespace TomP2P.Tests.Interop
         /// <returns>The .NET message version.</returns>
         private static Message.Message DecodeMessage(byte[] bytes)
         {
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
+            //var ms = new MemoryStream(bytes);
+            //var br = new JavaBinaryReader(ms);
 
             var decoder = new Decoder(null);
 
             // create dummy sender for decoding
             var message = Utils2.CreateDummyMessage();
-            decoder.Decode(br, message.Recipient.CreateSocketTcp(), message.Sender.CreateSocketTcp());
+            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
+            decoder.Decode(buf, message.Recipient.CreateSocketTcp(), message.Sender.CreateSocketTcp());
 
             return decoder.Message;
+        }
+
+        private static byte[] ExtractBytes(AlternativeCompositeByteBuf buf)
+        {
+            var buffer = buf.NioBuffer();
+            buffer.Position = 0;
+
+            var bytes = new byte[buffer.Remaining()];
+            buffer.Get(bytes, 0, bytes.Length);
+            return bytes;
         }
 
         /// <summary>
