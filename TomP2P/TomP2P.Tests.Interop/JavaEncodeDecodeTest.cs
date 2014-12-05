@@ -160,26 +160,63 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
+        public void TestDecodeShort()
+        {
+            var bytes = JarRunner.RequestJavaBytes();
+
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
+
+            short val1 = buf.ReadShort();
+            short val2 = buf.ReadShort();
+            short val3 = buf.ReadShort();
+            short val4 = buf.ReadShort();
+            short val5 = buf.ReadShort();
+            short val6 = buf.ReadShort();
+            short val7 = buf.ReadShort();
+            short val8 = buf.ReadShort();
+            short val9 = buf.ReadShort();
+            short val10 = buf.ReadShort();
+            short val11 = buf.ReadShort();
+            short val12 = buf.ReadShort();
+            short val13 = buf.ReadShort();
+
+            Assert.IsTrue(val1 == short.MinValue);
+            Assert.IsTrue(val2 == -256);
+            Assert.IsTrue(val3 == -255);
+            Assert.IsTrue(val4 == -128);
+            Assert.IsTrue(val5 == -127);
+            Assert.IsTrue(val6 == -1);
+            Assert.IsTrue(val7 == 0);
+            Assert.IsTrue(val8 == 1);
+            Assert.IsTrue(val9 == 127);
+            Assert.IsTrue(val10 == 128);
+            Assert.IsTrue(val11 == 255);
+            Assert.IsTrue(val12 == 256);
+            Assert.IsTrue(val13 == short.MaxValue);
+        }
+
+        [Test]
         public void TestDecodeInt()
         {
             var bytes = JarRunner.RequestJavaBytes();
 
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
 
-            int val1 = br.ReadInt();
-            int val2 = br.ReadInt();
-            int val3 = br.ReadInt();
-            int val4 = br.ReadInt();
-            int val5 = br.ReadInt();
-            int val6 = br.ReadInt();
-            int val7 = br.ReadInt();
-            int val8 = br.ReadInt();
-            int val9 = br.ReadInt();
-            int val10 = br.ReadInt();
-            int val11 = br.ReadInt();
-            int val12 = br.ReadInt();
-            int val13 = br.ReadInt();
+            int val1 = buf.ReadInt();
+            int val2 = buf.ReadInt();
+            int val3 = buf.ReadInt();
+            int val4 = buf.ReadInt();
+            int val5 = buf.ReadInt();
+            int val6 = buf.ReadInt();
+            int val7 = buf.ReadInt();
+            int val8 = buf.ReadInt();
+            int val9 = buf.ReadInt();
+            int val10 = buf.ReadInt();
+            int val11 = buf.ReadInt();
+            int val12 = buf.ReadInt();
+            int val13 = buf.ReadInt();
 
             Assert.IsTrue(val1 == int.MinValue);
             Assert.IsTrue(val2 == -256);
