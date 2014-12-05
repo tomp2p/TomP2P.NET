@@ -65,7 +65,6 @@ namespace TomP2P.Extensions.Workaround
         /// </summary>
         public void Remove()
         {
-            // TODO check if works
             _list.Remove(_previous);
             _previous = null;
         }

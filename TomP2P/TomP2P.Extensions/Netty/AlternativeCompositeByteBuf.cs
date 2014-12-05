@@ -717,7 +717,8 @@ namespace TomP2P.Extensions.Netty
 
         public override ushort ReadUShort()
         {
-            return Convert.ToUInt16(ReadShort()); // TODO check
+            var s = ReadShort() & 0xFFFF; // 11111111 11111111
+            return (ushort) s;
         }
 
         public override short GetShort(int index)
@@ -736,7 +737,8 @@ namespace TomP2P.Extensions.Netty
 
         public override ushort GetUShort(int index)
         {
-            return Convert.ToUInt16(GetShort(index)); // TODO check
+            var s = GetShort(index) & 0xFFFF; // 11111111 11111111
+            return (ushort) s;
         }
 
         public override int ReadInt()

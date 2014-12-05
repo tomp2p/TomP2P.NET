@@ -75,7 +75,6 @@ namespace TomP2P.Message
                 long start = buffer.WriterIndex;
                 Message.Content content = next.Content;
 
-                // TODO make all writes async, also reads in decoder
                 switch (content)
                 {
                     case Message.Content.Key:

@@ -2,16 +2,13 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using TomP2P.Storage;
 using Decoder = TomP2P.Message.Decoder;
-using Buffer = TomP2P.Message.Buffer;
 
 namespace TomP2P.Tests.Interop
 {
@@ -42,6 +39,161 @@ namespace TomP2P.Tests.Interop
         static Data _sampleData1 = new Data(_sampleBytes1);
         static Data _sampleData2 = new Data(_sampleBytes1);
         static Data _sampleData3 = new Data(_sampleBytes1);
+
+        #endregion
+
+        #region Encoding
+
+        [Test]
+        public void TestMessageEncodeEmpty()
+        {
+            // create same message object as in Java
+            var m = Utils2.CreateDummyMessage();
+            var bytes = EncodeMessage(m);
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeKey()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageKey());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeMapKey640Data()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageMapKey640Data());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+
+            // TODO finish Data encoding/decoding implementation
+            Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageEncodeMapKey640Keys()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageMapKey640Keys());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeSetKey640()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetKey640());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeSetNeighbors()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetNeighbors());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeByteBuffer()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageByteBuffer());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeLong()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageLong());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeInteger()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageInteger());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodePublicKeySignature()
+        {
+            // TODO implement
+            Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageEncodePublicKey()
+        {
+            // TODO implement
+            Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageEncodeSetTrackerData()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetTrackerData());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+
+            // TODO implement Data first
+            Assert.IsTrue(false);
+        }
+
+        [Test]
+        public void TestMessageEncodeBloomFilter()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageBloomFilter());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeMapKey640Byte()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageMapKey640Byte());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
+
+        [Test]
+        public void TestMessageEncodeSetPeerSocket()
+        {
+            // create same message object as in Java
+            var bytes = EncodeMessage(CreateMessageSetPeerSocket());
+
+            // validate decoding in Java
+            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
+        }
 
         #endregion
 
@@ -241,161 +393,6 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.PeerSocketAddresses, m2.PeerSocketAddresses));
-        }
-
-        #endregion
-
-        #region Encoding
-
-        [Test]
-        public void TestMessageEncodeEmpty()
-        {
-            // create same message object as in Java
-            var m = Utils2.CreateDummyMessage();
-            var bytes = EncodeMessage(m);
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeKey()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageKey());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeMapKey640Data()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageMapKey640Data());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-
-            // TODO finish Data encoding/decoding implementation
-            Assert.IsTrue(false);
-        }
-
-        [Test]
-        public void TestMessageEncodeMapKey640Keys()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageMapKey640Keys());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeSetKey640()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageSetKey640());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeSetNeighbors()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageSetNeighbors());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeByteBuffer()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageByteBuffer());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeLong()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageLong());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeInteger()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageInteger());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodePublicKeySignature()
-        {
-            // TODO implement
-            Assert.IsTrue(false);
-        }
-
-        [Test]
-        public void TestMessageEncodePublicKey()
-        {
-            // TODO implement
-            Assert.IsTrue(false);
-        }
-
-        [Test]
-        public void TestMessageEncodeSetTrackerData()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageSetTrackerData());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-
-            // TODO implement Data first
-            Assert.IsTrue(false);
-        }
-
-        [Test]
-        public void TestMessageEncodeBloomFilter()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageBloomFilter());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeMapKey640Byte()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageMapKey640Byte());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-        }
-
-        [Test]
-        public void TestMessageEncodeSetPeerSocket()
-        {
-            // create same message object as in Java
-            var bytes = EncodeMessage(CreateMessageSetPeerSocket());
-
-            // validate decoding in Java
-            Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
         }
 
         #endregion
@@ -780,9 +777,6 @@ namespace TomP2P.Tests.Interop
         /// <returns>The encoded message as byte array.</returns>
         private static byte[] EncodeMessage(Message.Message message)
         {
-            //var ms = new MemoryStream();
-            //var buffer = new JavaBinaryWriter(ms);
-
             var encoder = new Encoder(null);
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
             encoder.Write(buf, message, null);
@@ -797,9 +791,6 @@ namespace TomP2P.Tests.Interop
         /// <returns>The .NET message version.</returns>
         private static Message.Message DecodeMessage(byte[] bytes)
         {
-            //var ms = new MemoryStream(bytes);
-            //var br = new JavaBinaryReader(ms);
-
             var decoder = new Decoder(null);
 
             // create dummy sender for decoding

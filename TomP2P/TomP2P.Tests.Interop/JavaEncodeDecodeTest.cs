@@ -1,9 +1,6 @@
-﻿using System;
-using NUnit.Framework;
-using System.IO;
+﻿using NUnit.Framework;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Tests.Interop
 {
