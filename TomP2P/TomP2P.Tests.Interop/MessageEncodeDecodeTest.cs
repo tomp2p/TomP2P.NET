@@ -37,8 +37,8 @@ namespace TomP2P.Tests.Interop
         static Number640 _sample640_3 = new Number640(Number160.MaxValue, new Number160(_sampleBytes3), new Number160(_sampleBytes2), new Number160(_sampleBytes1));
 
         static Data _sampleData1 = new Data(_sampleBytes1);
-        static Data _sampleData2 = new Data(_sampleBytes1);
-        static Data _sampleData3 = new Data(_sampleBytes1);
+        static Data _sampleData2 = new Data(_sampleBytes2);
+        static Data _sampleData3 = new Data(_sampleBytes3);
 
         #endregion
 
@@ -73,9 +73,6 @@ namespace TomP2P.Tests.Interop
 
             // validate decoding in Java
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-
-            // TODO finish Data encoding/decoding implementation
-            Assert.IsTrue(false);
         }
 
         [Test]
