@@ -130,7 +130,7 @@ namespace TomP2P.Storage
         {
             if (buffer.Length == 0)
             {
-                _buffer = new DataBuffer();
+                _buffer = new DataBuffer(0);
             }
             else
             {
@@ -145,7 +145,7 @@ namespace TomP2P.Storage
 
         public void EncodeHeader(AlternativeCompositeByteBuf buffer, ISignatureFactory signatureFactory)
         {
-            var header = (int)_type; // check if works
+            int header = (int)_type; // TODO check if works
             if (HasPrepareFlag)
             {
                 header |= 0x02;

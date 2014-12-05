@@ -43,7 +43,7 @@ namespace TomP2P.Storage
         public DataBuffer(IList<ByteBuf> buffers)
         {
             _buffers = new List<ByteBuf>(buffers.Count);
-            foreach (var buf in _buffers)
+            foreach (var buf in buffers)
             {
                 _buffers.Add(buf.Duplicate());
                 // TODO retain needed?

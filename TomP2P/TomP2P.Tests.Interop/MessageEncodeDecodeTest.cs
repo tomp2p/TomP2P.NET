@@ -42,6 +42,26 @@ namespace TomP2P.Tests.Interop
 
         #endregion
 
+        #region Tmp Testing
+
+        [Test]
+	    public void EncodeSampleData()
+        {
+		    sbyte[] sampleBytes2 = new sbyte[] { 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+		    Data data = new Data(sampleBytes2);
+		
+		    IDictionary<Number640, Data> sampleMap1 = new Dictionary<Number640, Data>();
+		    sampleMap1.Add(Number640.Zero, data);
+		
+		    var m = Utils2.CreateDummyMessage();
+		    m.SetDataMap(new DataMap(sampleMap1));
+		
+		    // encode
+            EncodeMessage(m);
+        }
+
+        #endregion
+
         #region Encoding
 
         [Test]
