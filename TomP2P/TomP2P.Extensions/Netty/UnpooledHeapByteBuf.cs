@@ -108,16 +108,7 @@ namespace TomP2P.Extensions.Netty
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
             CheckSrcIndex(index, length, srcIndex, src.Length);
-
-            try
-            {
-                Array.Copy(src, srcIndex, _array, index, length);
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
+            Array.Copy(src, srcIndex, _array, index, length);
             return this;
         }
 
