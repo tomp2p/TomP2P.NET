@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace TomP2P.Extensions.Netty
@@ -107,7 +108,16 @@ namespace TomP2P.Extensions.Netty
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
             CheckSrcIndex(index, length, srcIndex, src.Length);
-            Array.Copy(src, srcIndex, _array, index, length);
+
+            try
+            {
+                Array.Copy(src, srcIndex, _array, index, length);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
             return this;
         }
 

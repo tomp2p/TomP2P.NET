@@ -212,7 +212,8 @@ namespace TomP2P.Extensions.Netty
 
         public override ByteBuf WriteBytes(sbyte[] src)
         {
-            return WriteBytes(src, 0, src.Length);
+            WriteBytes(src, 0, src.Length);
+            return this;
         }
 
         public override ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length)
