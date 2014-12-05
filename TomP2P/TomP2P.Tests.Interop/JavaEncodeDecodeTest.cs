@@ -50,6 +50,31 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
+        public void TestEncodeShort()
+        {
+            AlternativeCompositeByteBuf buffer = AlternativeCompositeByteBuf.CompBuffer();
+
+            buffer.WriteShort(short.MinValue); // -32,768
+            buffer.WriteShort(-256);
+            buffer.WriteShort(-255);
+            buffer.WriteShort(-128);
+            buffer.WriteShort(-127);
+            buffer.WriteShort(-1);
+            buffer.WriteShort(0);
+            buffer.WriteShort(1);
+            buffer.WriteShort(127);
+            buffer.WriteShort(128);
+            buffer.WriteShort(255);
+            buffer.WriteShort(256);
+            buffer.WriteShort(short.MaxValue);  // 32,767
+
+            var bytes = InteropUtil.ExtractBytes(buffer);
+
+            bool interopResult = JarRunner.WriteBytesAndTestInterop(bytes);
+            Assert.IsTrue(interopResult);
+        }
+
+        [Test]
         public void TestEncodeInt()
         {
             AlternativeCompositeByteBuf buffer = AlternativeCompositeByteBuf.CompBuffer();
