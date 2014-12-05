@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using System.IO;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 
@@ -129,13 +130,13 @@ namespace TomP2P.Tests.Interop
         {
             var bytes = JarRunner.RequestJavaBytes();
 
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
 
             // Java byte is signed
             for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++) // -128 ... 127
             {
-                sbyte b = br.ReadByte();
+                sbyte b = buf.ReadByte();
                 Assert.IsTrue(i == b);
             }
         }
