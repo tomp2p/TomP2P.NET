@@ -122,7 +122,6 @@ namespace TomP2P.Storage
 
         public void TransferTo(AlternativeCompositeByteBuf buf)
         {
-            // TODO check if works
             DataBuffer copy = ShallowCopy();
             foreach (var buffer in copy._buffers)
             {
