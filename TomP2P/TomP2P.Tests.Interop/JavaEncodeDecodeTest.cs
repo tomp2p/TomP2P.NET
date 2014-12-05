@@ -146,12 +146,12 @@ namespace TomP2P.Tests.Interop
         {
             var bytes = JarRunner.RequestJavaBytes();
 
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
 
             // Java byte is signed
             var byteArray = new sbyte[256];
-            br.ReadBytes(byteArray);
+            buf.ReadBytes(byteArray);
 
             for (int i = 0, b = sbyte.MinValue; i <= sbyte.MaxValue; i++, b++) // -128 ... 127
             {
