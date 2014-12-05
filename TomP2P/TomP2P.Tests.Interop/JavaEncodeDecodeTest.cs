@@ -238,22 +238,22 @@ namespace TomP2P.Tests.Interop
         {
             var bytes = JarRunner.RequestJavaBytes();
 
-            var ms = new MemoryStream(bytes);
-            var br = new JavaBinaryReader(ms);
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
 
-            long val1 = br.ReadLong();
-            long val2 = br.ReadLong();
-            long val3 = br.ReadLong();
-            long val4 = br.ReadLong();
-            long val5 = br.ReadLong();
-            long val6 = br.ReadLong();
-            long val7 = br.ReadLong();
-            long val8 = br.ReadLong();
-            long val9 = br.ReadLong();
-            long val10 = br.ReadLong();
-            long val11 = br.ReadLong();
-            long val12 = br.ReadLong();
-            long val13 = br.ReadLong();
+            long val1 = buf.ReadLong();
+            long val2 = buf.ReadLong();
+            long val3 = buf.ReadLong();
+            long val4 = buf.ReadLong();
+            long val5 = buf.ReadLong();
+            long val6 = buf.ReadLong();
+            long val7 = buf.ReadLong();
+            long val8 = buf.ReadLong();
+            long val9 = buf.ReadLong();
+            long val10 = buf.ReadLong();
+            long val11 = buf.ReadLong();
+            long val12 = buf.ReadLong();
+            long val13 = buf.ReadLong();
 
             Assert.IsTrue(val1 == long.MinValue);
             Assert.IsTrue(val2 == -256);
