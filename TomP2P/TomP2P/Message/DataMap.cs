@@ -97,19 +97,19 @@ namespace TomP2P.Message
 
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(obj, null))
+            if (ReferenceEquals(obj, null))
             {
                 return false;
             }
-            if (Object.ReferenceEquals(this, obj))
+            if (ReferenceEquals(this, obj))
             {
                 return true;
             }
-            if (this.GetType() != obj.GetType())
+            if (GetType() != obj.GetType())
             {
                 return false;
             }
-            return this.Equals(obj as DataMap);
+            return Equals(obj as DataMap);
         }
 
         public bool Equals(DataMap other)
@@ -117,7 +117,7 @@ namespace TomP2P.Message
             IDictionary<Number640, Data> dm2 = Convert(this);
             IDictionary<Number640, Data> dm3 = Convert(other);
 
-            bool t1 = Utils.Utils.IsSameSets(dm2.Keys, dm3.Keys); // TODO test
+            bool t1 = Utils.Utils.IsSameSets(dm2.Keys, dm3.Keys);
             bool t2 = Utils.Utils.IsSameSets(dm2.Values, dm3.Values);
             return t1 && t2;
         }

@@ -181,11 +181,11 @@ namespace TomP2P.Storage
             switch (_type)
             {
                 case DataType.Small:
-                    buffer.WriteByte((sbyte)header); // TODO check if works
+                    buffer.WriteByte((sbyte)header); // TODO remove cast
                     buffer.WriteByte((sbyte)Length);
                     break;
                 case DataType.Large:
-                    buffer.WriteByte((sbyte)header); // TODO check if works
+                    buffer.WriteByte((sbyte)header); // TODO remove cast
                     buffer.WriteInt(Length);
                     break;
                 default:
@@ -197,7 +197,7 @@ namespace TomP2P.Storage
             }
             if (_basedOnFlag)
             {
-                buffer.WriteByte((sbyte)(BasedOnSet.Count() - 1)); // TODO check if works
+                buffer.WriteByte((sbyte)(BasedOnSet.Count() - 1)); // TODO remove cast
                 foreach (var basedOn in BasedOnSet)
                 {
                     buffer.WriteBytes(basedOn.ToByteArray());
@@ -818,6 +818,11 @@ namespace TomP2P.Storage
                 return false;
             }
             // This is a slow operation, use with care!
+            bool t1 = other.BasedOnSet.SequenceEqual(BasedOnSet); // TODO improve performance
+            bool t2 = Utils.Utils.Equals(other.Signature, Signature);
+            bool t3 = other._buffer.Equals(_buffer);
+            return t1 && t2 && t3;
+
             return Utils.Utils.Equals(other.BasedOnSet, BasedOnSet) && Utils.Utils.Equals(other.Signature, Signature)
                    && other._buffer.Equals(_buffer);
         }

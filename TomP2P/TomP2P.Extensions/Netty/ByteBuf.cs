@@ -6,7 +6,7 @@ namespace TomP2P.Extensions.Netty
     /// <summary>
     /// Equivalent of Java Netty's ByteBuf.
     /// </summary>
-    public abstract class ByteBuf
+    public abstract class ByteBuf : IEquatable<ByteBuf>
     {
         /// <summary>
         /// Returns the IByteBufAllocator which created this buffer.
@@ -220,5 +220,22 @@ namespace TomP2P.Extensions.Netty
         #endregion
 
         public abstract ByteBuf EnsureWriteable(int minWritableBytes);
+
+        /// <summary>
+        /// Determines if the content of the specified buffer is identical to the content of this array.
+        /// 'Identical' here means: the size of the contents of the two buffers are same and every single 
+        /// byte of the content of the two buffers are same.
+        /// Please note that it does not compare ReaderIndex nor WriterIndex. 
+        /// This method also returns false for null and an object which is not an instance of ByteBuf type.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public abstract override bool Equals(object obj);
+
+        /// <summary>
+        /// Returns a hash code which was calculated from the content of this buffer.
+        /// </summary>
+        /// <returns></returns>
+        public abstract override int GetHashCode();
     }
 }

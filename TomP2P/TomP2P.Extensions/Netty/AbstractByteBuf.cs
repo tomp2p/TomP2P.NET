@@ -3,7 +3,7 @@ using System.IO;
 
 namespace TomP2P.Extensions.Netty
 {
-    public abstract class AbstractByteBuf : ByteBuf
+    public abstract class AbstractByteBuf : ByteBuf, IEquatable<ByteBuf>
     {
         private int _readerIndex;
         private int _writerIndex;
@@ -479,6 +479,33 @@ namespace TomP2P.Extensions.Netty
                 throw new IndexOutOfRangeException(String.Format(
                         "dstIndex: {0}, length: {1} (expected: range(0, {2}))", dstIndex, length, dstCapacity));
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as ByteBuf);
+        }
+
+        public bool Equals(AbstractByteBuf other)
+        {
+            return ByteBufUtil.Equals(this, other);
+        }
+
+        public override int GetHashCode()
+        {
+            return ByteBufUtil.HashCode(this);
         }
     }
 }

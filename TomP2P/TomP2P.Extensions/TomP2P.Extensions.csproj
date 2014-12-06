@@ -44,6 +44,7 @@
     <Compile Include="Netty\AbstractDerivedByteBuf.cs" />
     <Compile Include="Netty\ByteBuf.cs" />
     <Compile Include="Netty\AlternativeCompositeByteBuf.cs" />
+    <Compile Include="Netty\ByteBufUtil.cs" />
     <Compile Include="Netty\CompositeByteBuf.cs" />
     <Compile Include="Convenient.cs" />
     <Compile Include="Netty\DuplicatedByteBuf.cs" />

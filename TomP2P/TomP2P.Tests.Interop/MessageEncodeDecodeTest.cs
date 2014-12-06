@@ -232,9 +232,6 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.DataMapList, m2.DataMapList));
-
-            // implement Data and DataBuffer (with AlternativeCompositeByteBuf impl)
-            Assert.IsTrue(false);
         }
 
         [Test]

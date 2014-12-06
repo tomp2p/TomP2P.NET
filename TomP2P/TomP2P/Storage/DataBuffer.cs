@@ -181,7 +181,8 @@ namespace TomP2P.Storage
 
         public bool Equals(DataBuffer other)
         {
-            return other.ToByteBuffer().Equals(ToByteBuffer());
+
+            return other.ToByteBuf().Equals(ToByteBuf());
         }
 
         public override int GetHashCode()

@@ -9,7 +9,7 @@ namespace TomP2P.Extensions.Netty
     /// by Java Netty's AlternativeCompositeByteBuf, but with a slight different behavior.
     /// Only the needed parts are ported.
     /// </summary>
-    public class AlternativeCompositeByteBuf : ByteBuf
+    public class AlternativeCompositeByteBuf : ByteBuf, IEquatable<ByteBuf>
     {
         private sealed class Component
         {
@@ -1056,6 +1056,33 @@ namespace TomP2P.Extensions.Netty
         public static AlternativeCompositeByteBuf CompBuffer(params ByteBuf[] buffers)
         {
             return CompBuffer(ALLOC, false, buffers);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as ByteBuf);
+        }
+
+        public bool Equals(ByteBuf other)
+        {
+            return ByteBufUtil.Equals(this, other);
+        }
+
+        public override int GetHashCode()
+        {
+            return ByteBufUtil.HashCode(this);
         }
     }
 }
