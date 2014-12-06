@@ -498,7 +498,7 @@ namespace TomP2P.Extensions.Netty
             return Equals(obj as ByteBuf);
         }
 
-        public bool Equals(AbstractByteBuf other)
+        public override bool Equals(ByteBuf other)
         {
             return ByteBufUtil.Equals(this, other);
         }

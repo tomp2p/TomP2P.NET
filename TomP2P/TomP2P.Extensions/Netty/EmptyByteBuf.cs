@@ -315,6 +315,21 @@ namespace TomP2P.Extensions.Netty
             throw new NotImplementedException();
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is ByteBuf && !((ByteBuf) obj).IsReadable;
+        }
+
+        public override bool Equals(ByteBuf other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetHashCode()
+        {
+            return 0;
+        }
+
         #endregion
     }
 }

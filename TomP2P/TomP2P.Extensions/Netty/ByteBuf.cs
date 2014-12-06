@@ -232,6 +232,8 @@ namespace TomP2P.Extensions.Netty
         /// <returns></returns>
         public abstract override bool Equals(object obj);
 
+        public abstract bool Equals(ByteBuf other);
+
         /// <summary>
         /// Returns a hash code which was calculated from the content of this buffer.
         /// </summary>
