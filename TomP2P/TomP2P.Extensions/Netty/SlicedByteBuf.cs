@@ -75,42 +75,42 @@ namespace TomP2P.Extensions.Netty
 
         protected override void _setByte(int index, int value)
         {
-            throw new NotImplementedException();
+            _buffer.SetByte(index + _adjustment, value);
         }
 
         protected override void _setShort(int index, int value)
         {
-            throw new NotImplementedException();
+            _buffer.SetShort(index + _adjustment, value);
         }
 
         protected override void _setInt(int index, int value)
         {
-            throw new NotImplementedException();
+            _buffer.SetInt(index + _adjustment, value);
         }
 
         protected override void _setLong(int index, long value)
         {
-            throw new NotImplementedException();
+            _buffer.SetLong(index + _adjustment, value);
         }
 
         protected override sbyte _getByte(int index)
         {
-            throw new NotImplementedException();
+            return _buffer.GetByte(index + _adjustment);
         }
 
         protected override short _getShort(int index)
         {
-            throw new NotImplementedException();
+            return _buffer.GetShort(index + _adjustment);
         }
 
         protected override int _getInt(int index)
         {
-            throw new NotImplementedException();
+            return _buffer.GetInt(index + _adjustment);
         }
 
         protected override long _getLong(int index)
         {
-            throw new NotImplementedException();
+            return _buffer.GetLong(index + _adjustment);
         }
 
         public override int NioBufferCount()
@@ -120,17 +120,23 @@ namespace TomP2P.Extensions.Netty
 
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, length);
+            _buffer.SetBytes(index + _adjustment, src, srcIndex, length);
+            return this;
         }
 
         public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, length);
+            _buffer.SetBytes(index + _adjustment, src, srcIndex, length);
+            return this;
         }
 
         public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckIndex(index, length);
+            _buffer.GetBytes(index + _adjustment, dst, dstIndex, length);
+            return this;
         }
 
         public override MemoryStream NioBuffer(int index, int length)

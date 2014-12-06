@@ -100,7 +100,6 @@ namespace TomP2P.Storage
             return buffers;
         }
 
-        // TODO merge the two/four, needs implementation of .NET "ByteBuf" with reader and writer
         public ByteBuf ToByteBuf()
         {
             // TODO check if works
