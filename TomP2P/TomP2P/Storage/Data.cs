@@ -818,13 +818,9 @@ namespace TomP2P.Storage
                 return false;
             }
             // This is a slow operation, use with care!
-            bool t1 = other.BasedOnSet.SequenceEqual(BasedOnSet); // TODO improve performance
-            bool t2 = Utils.Utils.Equals(other.Signature, Signature);
-            bool t3 = other._buffer.Equals(_buffer);
-            return t1 && t2 && t3;
-
-            return Utils.Utils.Equals(other.BasedOnSet, BasedOnSet) && Utils.Utils.Equals(other.Signature, Signature)
-                   && other._buffer.Equals(_buffer);
+            return other.BasedOnSet.ScrambledEquals(BasedOnSet)
+                && Utils.Utils.Equals(other.Signature, Signature)
+                && other._buffer.Equals(_buffer);
         }
 
         public override int GetHashCode()

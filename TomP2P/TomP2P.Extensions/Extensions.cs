@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -73,6 +74,36 @@ namespace TomP2P.Extensions
         public static ListIterator<T> ListIterator<T>(this IList<T> list, int index) where T : class
         {
             return new ListIterator<T>(list, index);
+        }
+
+        public static bool ScrambledEquals<T>(this IEnumerable<T> list1, IEnumerable<T> list2)
+        {
+            // TODO check if works
+            // from http://stackoverflow.com/questions/3669970/compare-two-listt-objects-for-equality-ignoring-order
+            var cnt = new Dictionary<T, int>();
+            foreach (T s in list1)
+            {
+                if (cnt.ContainsKey(s))
+                {
+                    cnt[s]++;
+                }
+                else
+                {
+                    cnt.Add(s, 1);
+                }
+            }
+            foreach (T s in list2)
+            {
+                if (cnt.ContainsKey(s))
+                {
+                    cnt[s]--;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return cnt.Values.All(c => c == 0);
         }
 
         /// <summary>
