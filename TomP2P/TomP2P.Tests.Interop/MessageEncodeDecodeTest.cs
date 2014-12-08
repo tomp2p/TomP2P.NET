@@ -157,9 +157,6 @@ namespace TomP2P.Tests.Interop
 
             // validate decoding in Java
             Assert.IsTrue(JarRunner.WriteBytesAndTestInterop(bytes));
-
-            // TODO implement Data first
-            Assert.IsTrue(false);
         }
 
         [Test]
@@ -344,10 +341,6 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.TrackerDataList, m2.TrackerDataList));
-
-            // TODO implement Data first
-            // TODO check how TrackerData should be compared (contains Map<PeerStatistic, Data>)
-            Assert.IsTrue(false);
         }
 
         [Test]
@@ -409,6 +402,8 @@ namespace TomP2P.Tests.Interop
 
         private static Message.Message CreateMessageMapKey640Data()
         {
+            // TODO create Data objects with BasedOn keys and other properties
+
             IDictionary<Number640, Data> sampleMap1 = new Dictionary<Number640, Data>();
             sampleMap1.Add(_sample640_1, _sampleData1);
             sampleMap1.Add(_sample640_2, _sampleData1);

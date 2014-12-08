@@ -818,7 +818,7 @@ namespace TomP2P.Storage
                 return false;
             }
             // This is a slow operation, use with care!
-            return other.BasedOnSet.ScrambledEquals(BasedOnSet)
+            return other.BasedOnSet.ScrambledEquals(BasedOnSet) // TODO check if wrks with based-on keys
                 && Utils.Utils.Equals(other.Signature, Signature)
                 && other._buffer.Equals(_buffer);
         }

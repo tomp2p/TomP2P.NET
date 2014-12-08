@@ -238,10 +238,11 @@ namespace TomP2P.Message
                     case Message.Content.SetTrackerData:
                         var td = Message.TrackerData(next.Index);
                         // write length
-                        buffer.WriteByte((sbyte) td.PeerAddresses.Count); // TODO check if conversion is valid
+                        buffer.WriteByte((sbyte) td.PeerAddresses.Count); // TODO remove cast
                         foreach (var data in td.PeerAddresses)
                         {
-                            buffer.WriteBytes(data.Key.PeerAddress.ToByteArray());
+                            var me = data.Key.PeerAddress.ToByteArray();
+                            buffer.WriteBytes(me);
 
                             var d = data.Value.Duplicate();
                             EncodeData(buffer, d, false, !Message.IsRequest());

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TomP2P.Peers;
@@ -6,7 +7,7 @@ using TomP2P.Storage;
 
 namespace TomP2P.Message
 {
-    public class TrackerData
+    public class TrackerData : IEquatable<TrackerData>
     {
         private static readonly Data EmptyData = new Data(0, 0);
 
@@ -63,6 +64,34 @@ namespace TomP2P.Message
                 sb.Append("p:").Append(_peerAddresses);
             }
             return sb.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as TrackerData);
+        }
+
+        public bool Equals(TrackerData other)
+        {
+            return Utils.Utils.IsSameSets(other.PeerAddresses.Keys, PeerAddresses.Keys)
+                   && Utils.Utils.IsSameSets(other.PeerAddresses.Values, PeerAddresses.Values);
+        }
+
+        public override int GetHashCode()
+        {
+            return PeerAddresses.GetHashCode();
         }
 
         public IDictionary<PeerStatistic, Data> PeerAddresses
