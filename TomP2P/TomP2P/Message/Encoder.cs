@@ -218,7 +218,7 @@ namespace TomP2P.Message
                         }
                         // write length
                         int readable = b.Readable;
-                        buffer.WriteBytes(b.BackingBuffer, readable); // TODO check correctnes, port not trivial
+                        buffer.WriteBytes(b.BackingBuffer, readable);
                         if (b.IncRead(readable) == b.Length)
                         {
                             Message.ContentReferences.Dequeue();

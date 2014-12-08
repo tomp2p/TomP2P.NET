@@ -129,7 +129,17 @@ namespace TomP2P.Extensions.Netty
 
         public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckSrcIndex(index, length, srcIndex, src.Capacity);
+            // avoid check for memory address
+            if (src.HasArray())
+            {
+                SetBytes(index, src.Array(), src.ArrayOffset() + srcIndex, length);
+            }
+            else
+            {
+                src.GetBytes(srcIndex, _array, index, length);
+            }
+            return this;
         }
 
         public override int NioBufferCount()
