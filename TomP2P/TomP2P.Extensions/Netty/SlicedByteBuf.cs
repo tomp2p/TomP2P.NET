@@ -56,6 +56,21 @@ namespace TomP2P.Extensions.Netty
             throw new NotImplementedException();
         }
 
+        public override bool HasArray()
+        {
+            return _buffer.HasArray();
+        }
+
+        public override sbyte[] Array()
+        {
+            return _buffer.Array();
+        }
+
+        public override int ArrayOffset()
+        {
+            return _buffer.ArrayOffset() + _adjustment;
+        }
+
         public override ByteBuf Duplicate()
         {
             ByteBuf duplicate = _buffer.Slice(_adjustment, _length);

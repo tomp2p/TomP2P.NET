@@ -82,6 +82,21 @@ namespace TomP2P.Extensions.Netty
             get { return _alloc; }
         }
 
+        public override bool HasArray()
+        {
+            return false;
+        }
+
+        public override sbyte[] Array()
+        {
+            throw new NotSupportedException("direct buffer");
+        }
+
+        public override int ArrayOffset()
+        {
+            throw new NotSupportedException("direct buffer");
+        }
+
         public override int NioBufferCount()
         {
             return 1;

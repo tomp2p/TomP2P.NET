@@ -539,35 +539,37 @@ namespace TomP2P.Tests.Interop
 
         private static Message.Message CreateMessageByteBuffer()
         {
-            /*var sampleBuf1 = new MemoryStream();
-            sampleBuf1.WriteBytes(_sampleBytes1);
-            sampleBuf1.WriteBytes(_sampleBytes1);
-            sampleBuf1.WriteBytes(_sampleBytes1);
+            // write some random bytes
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
 
-            /*var sampleBuf2 = new MemoryStream();
-            sampleBuf2.WriteBytes(_sampleBytes2);
-            sampleBuf2.WriteBytes(_sampleBytes2);
-            sampleBuf2.WriteBytes(_sampleBytes2);
+            for (int i = 0; i < 300; i++)
+            {
+                switch (i%3)
+                {
+                    case 0:
+                        buf.WriteBytes(_sampleBytes1);
+                        break;
+                    case 1:
+                        buf.WriteBytes(_sampleBytes2);
+                        break;
+                    case 2:
+                        buf.WriteBytes(_sampleBytes3);
+                        break;
+                }
+            }
 
-            var sampleBuf3 = new MemoryStream();
-            sampleBuf3.WriteBytes(_sampleBytes3);
-            sampleBuf3.WriteBytes(_sampleBytes3);
-            sampleBuf3.WriteBytes(_sampleBytes3);
-
-            var sampleBuf4 = new MemoryStream();
-            sampleBuf4.WriteBytes(_sampleBytes1);
-            sampleBuf4.WriteBytes(_sampleBytes2);
-            sampleBuf4.WriteBytes(_sampleBytes3);*/
+            // decompose buffer and use the resulting 8 ByteBufs in the list
+            var decoms = buf.Decompose(0, buf.ReadableBytes);
 
             var m = Utils2.CreateDummyMessage();
-            /*m.SetBuffer(new Buffer(sampleBuf1));
-            /*m1.SetBuffer(new Buffer(sampleBuf2));
-            m1.SetBuffer(new Buffer(sampleBuf3));
-            m1.SetBuffer(new Buffer(sampleBuf4));
-            m1.SetBuffer(new Buffer(sampleBuf1));
-            m1.SetBuffer(new Buffer(sampleBuf2));
-            m1.SetBuffer(new Buffer(sampleBuf3));
-            m1.SetBuffer(new Buffer(sampleBuf4));*/
+            m.SetBuffer(new Message.Buffer(decoms[0]));
+            m.SetBuffer(new Message.Buffer(decoms[1]));
+            m.SetBuffer(new Message.Buffer(decoms[2]));
+            m.SetBuffer(new Message.Buffer(decoms[3]));
+            m.SetBuffer(new Message.Buffer(decoms[4]));
+            m.SetBuffer(new Message.Buffer(decoms[5]));
+            m.SetBuffer(new Message.Buffer(decoms[6]));
+            m.SetBuffer(new Message.Buffer(decoms[7]));
             return m;
         }
 

@@ -80,6 +80,21 @@ namespace TomP2P.Extensions.Netty
             }
         }
 
+        public override bool HasArray()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override sbyte[] Array()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int ArrayOffset()
+        {
+            throw new NotImplementedException();
+        }
+
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
             throw new NotImplementedException();

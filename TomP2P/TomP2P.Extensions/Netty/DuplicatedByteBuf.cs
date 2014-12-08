@@ -20,6 +20,21 @@ namespace TomP2P.Extensions.Netty
             SetIndex(buffer.ReaderIndex, buffer.WriterIndex);
         }
 
+        public override bool HasArray()
+        {
+            return _buffer.HasArray();
+        }
+
+        public override sbyte[] Array()
+        {
+            return _buffer.Array();
+        }
+
+        public override int ArrayOffset()
+        {
+            return _buffer.ArrayOffset();
+        }
+
         public override ByteBuf Unwrap()
         {
             return _buffer;

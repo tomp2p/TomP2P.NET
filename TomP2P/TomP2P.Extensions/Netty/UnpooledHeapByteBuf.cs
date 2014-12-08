@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace TomP2P.Extensions.Netty
@@ -63,7 +62,7 @@ namespace TomP2P.Extensions.Netty
 
         public override ByteBuf SetCapacity(int newCapacity)
         {
-            // TODO< ensureAccessible();
+            // TODO ensureAccessible();
             if (newCapacity < 0 || newCapacity > MaxCapacity)
             {
                 throw new ArgumentException("newCapacity: " + newCapacity);
@@ -73,7 +72,7 @@ namespace TomP2P.Extensions.Netty
             if (newCapacity > oldCapacity)
             {
                 sbyte[] newArray = new sbyte[newCapacity];
-                Array.Copy(_array, 0, newArray, 0, _array.Length);
+                System.Array.Copy(_array, 0, newArray, 0, _array.Length);
                 SetArray(newArray);
             }
             else if (newCapacity < oldCapacity)
@@ -87,7 +86,7 @@ namespace TomP2P.Extensions.Netty
                     {
                         SetWriterIndex(writerIndex = newCapacity);
                     }
-                    Array.Copy(_array, readerIndex, newArray, readerIndex, writerIndex - readerIndex);
+                    System.Array.Copy(_array, readerIndex, newArray, readerIndex, writerIndex - readerIndex);
                 }
                 else
                 {
@@ -98,17 +97,33 @@ namespace TomP2P.Extensions.Netty
             return this;
         }
 
+        public override bool HasArray()
+        {
+            return true;
+        }
+
+        public override sbyte[] Array()
+        {
+            // TODO ensureAccessible();
+            return _array;
+        }
+
+        public override int ArrayOffset()
+        {
+            return 0;
+        }
+
         public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
         {
             CheckDstIndex(index, length, dstIndex, dst.Length);
-            Array.Copy(_array, index, dst, dstIndex, length);
+            System.Array.Copy(_array, index, dst, dstIndex, length);
             return this;
         }
 
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
             CheckSrcIndex(index, length, srcIndex, src.Length);
-            Array.Copy(src, srcIndex, _array, index, length);
+            System.Array.Copy(src, srcIndex, _array, index, length);
             return this;
         }
 

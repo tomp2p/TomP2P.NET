@@ -42,6 +42,21 @@ namespace TomP2P.Extensions.Netty
             get { return 0; }
         }
 
+        public override bool HasArray()
+        {
+            return true;
+        }
+
+        public override sbyte[] Array()
+        {
+            return new sbyte[0];
+        }
+
+        public override int ArrayOffset()
+        {
+            return 0;
+        }
+
         public override ByteBuf SetIndex(int readerIndex, int writerIndex)
         {
             CheckIndex(readerIndex);

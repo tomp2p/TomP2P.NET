@@ -285,6 +285,33 @@ namespace TomP2P.Extensions.Netty
             get { return Capacity > _writerIndex; }
         }
 
+        public override bool HasArray()
+        {
+            if (_components.Count == 1)
+            {
+                return _components[0].Buf.HasArray();
+            }
+            return false;
+        }
+
+        public override sbyte[] Array()
+        {
+            if (_components.Count == 1)
+            {
+                return _components[0].Buf.Array();
+            }
+            throw new NotSupportedException();
+        }
+
+        public override int ArrayOffset()
+        {
+            if (_components.Count == 1)
+            {
+                return _components[0].Buf.ArrayOffset();
+            }
+            throw new NotSupportedException();
+        }
+
         public override ByteBuf Unwrap()
         {
             // That's indeed what TomP2P's AlternativeCompositeByteBuf does...

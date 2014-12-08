@@ -132,6 +132,25 @@ namespace TomP2P.Extensions.Netty
         /// <returns></returns>
         public abstract ByteBuf SetWriterIndex(int writerIndex);
 
+        /// <summary>
+        /// Returns true if and only if this buffer has a backing byte array. 
+        /// If this method returns true, you can safely call Array() and ArrayOffset().
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool HasArray();
+
+        /// <summary>
+        /// Returns the backing array of this buffer.
+        /// </summary>
+        /// <returns></returns>
+        public abstract sbyte[] Array();
+
+        /// <summary>
+        /// Returns the offset of the first byte within the backing byte array of this buffer.
+        /// </summary>
+        /// <returns></returns>
+        public abstract int ArrayOffset();
+
         #region Writes
 
         public abstract ByteBuf WriteByte(int value);
