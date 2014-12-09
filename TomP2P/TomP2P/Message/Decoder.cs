@@ -340,7 +340,7 @@ namespace TomP2P.Message
                         }
                         if (_dataMap == null)
                         {
-                            _dataMap = new DataMap(new Dictionary<Number640, Data>(2*_mapSize));
+                            _dataMap = new DataMap(new Dictionary<Number640, Data>(2 * _mapSize));
                         }
                         if (_data != null)
                         {
@@ -372,7 +372,7 @@ namespace TomP2P.Message
                                 var contentKey = new Number160(me);
                                 buffer.ReadBytes(me);
                                 var versionKey = new Number160(me);
-                                
+
                                 _key = new Number640(locationKey, domainKey, contentKey, versionKey);
                             }
                             _data = Data.DeocdeHeader(buffer, _signatureFactory);
@@ -393,7 +393,7 @@ namespace TomP2P.Message
                             // if we have signed the message, set the public key anyway, but only if we indicated so
                             if (Message.IsSign && Message.PublicKey(0) != null && _data.HasPublicKey
                                 && (_data.PublicKey == null || _data.PublicKey == PeerBuilder.EmptyPublicKey))
-                                // TODO check empty key condition
+                            // TODO check empty key condition
                             {
                                 _data.SetPublicKey(Message.PublicKey(0));
                             }
@@ -418,7 +418,7 @@ namespace TomP2P.Message
                         if (_keyMap640Keys == null)
                         {
                             _keyMap640Keys = new KeyMap640Keys(new SortedDictionary<Number640, ICollection<Number160>>());
-                                // TODO check TreeMap equivalent
+                            // TODO check TreeMap equivalent
                         }
 
                         const int meta = 4 * Number160.ByteArraySize;
@@ -432,7 +432,7 @@ namespace TomP2P.Message
                             size = buffer.GetUByte(buffer.ReaderIndex + meta);
 
                             if (buffer.ReadableBytes <
-                                meta + Utils.Utils.ByteByteSize + (size*Number160.ByteArraySize))
+                                meta + Utils.Utils.ByteByteSize + (size * Number160.ByteArraySize))
                             {
                                 return false;
                             }
@@ -474,7 +474,7 @@ namespace TomP2P.Message
                         }
                         if (_keyMapByte == null)
                         {
-                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, sbyte>(2*_keyMapByteSize));
+                            _keyMapByte = new KeyMapByte(new Dictionary<Number640, sbyte>(2 * _keyMapByteSize));
                         }
 
                         for (int i = _keyMapByte.Size; i < _keyMapByteSize; i++)
@@ -516,8 +516,8 @@ namespace TomP2P.Message
                             _buffer = new DataBuffer();
                         }
 
-                        var already = _buffer.AlreadyTransferred;
-                        var remaining = _bufferSize - already;
+                        int already = _buffer.AlreadyTransferred;
+                        int remaining = _bufferSize - already;
                         // already finished
                         if (remaining != 0)
                         {
@@ -549,7 +549,7 @@ namespace TomP2P.Message
                         }
                         if (_trackerData == null)
                         {
-                            _trackerData = new TrackerData(new Dictionary<PeerStatistic, Data>(2*_trackerDataSize));
+                            _trackerData = new TrackerData(new Dictionary<PeerAddress, Data>(2 * _trackerDataSize));
                         }
                         if (_currentTrackerData != null)
                         {
@@ -577,14 +577,13 @@ namespace TomP2P.Message
                                 return false;
                             }
                             var pa = new PeerAddress(buffer);
-                            var ps = new PeerStatistic(pa);
 
                             _currentTrackerData = Data.DeocdeHeader(buffer, _signatureFactory);
                             if (_currentTrackerData == null)
                             {
                                 return false;
                             }
-                            _trackerData.PeerAddresses.Add(ps, _currentTrackerData);
+                            _trackerData.PeerAddresses.Add(pa, _currentTrackerData);
                             if (Message.IsSign)
                             {
                                 _currentTrackerData.SetPublicKey(Message.PublicKey(0));

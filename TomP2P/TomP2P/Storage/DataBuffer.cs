@@ -132,9 +132,9 @@ namespace TomP2P.Storage
         public int TransferFrom(AlternativeCompositeByteBuf buf, int remaining)
         {
             // TODO check if works
-            var readable = buf.ReadableBytes;
-            var index = buf.ReaderIndex;
-            var length = Math.Min(remaining, readable);
+            int readable = buf.ReadableBytes;
+            int index = buf.ReaderIndex;
+            int length = Math.Min(remaining, readable);
 
             if (length == 0)
             {
@@ -149,6 +149,7 @@ namespace TomP2P.Storage
                     // this is already a slice
                     _buffers.Add(decom);
                 }
+                // TODO retain?
             }
 
             AlreadyTransferred += Length;

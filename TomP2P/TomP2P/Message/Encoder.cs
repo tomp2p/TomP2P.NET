@@ -241,7 +241,7 @@ namespace TomP2P.Message
                         buffer.WriteByte((sbyte) td.PeerAddresses.Count); // TODO remove cast
                         foreach (var data in td.PeerAddresses)
                         {
-                            var me = data.Key.PeerAddress.ToByteArray();
+                            var me = data.Key.ToByteArray();
                             buffer.WriteBytes(me);
 
                             var d = data.Value.Duplicate();

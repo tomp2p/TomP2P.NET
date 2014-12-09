@@ -11,30 +11,33 @@ namespace TomP2P.Message
     {
         private static readonly Data EmptyData = new Data(0, 0);
 
-        private readonly IDictionary<PeerStatistic, Data> _peerAddresses;
+        private readonly IDictionary<PeerAddress, Data> _peerAddresses;
         public bool CouldProvideMoreData { get; private set; }
 
-        public TrackerData(IDictionary<PeerStatistic, Data> peerAddresses)
+        public TrackerData(IDictionary<PeerAddress, Data> peerAddresses)
             : this(peerAddresses, false)
         { }
 
-        public TrackerData(IDictionary<PeerStatistic, Data> peerAddresses, bool couldProvideMoreData)
+        public TrackerData(IDictionary<PeerAddress, Data> peerAddresses, bool couldProvideMoreData)
         {
+            if (peerAddresses == null)
+            {
+                throw new ArgumentException("Peer addresses must be set.");
+            }
             _peerAddresses = peerAddresses;
             CouldProvideMoreData = couldProvideMoreData;
         }
 
-        public void Put(PeerStatistic remotePeer, Data attachment)
+        public void Put(PeerAddress remotePeer, Data attachment)
         {
-            // TODO possible NullPointerException
             _peerAddresses.Add(remotePeer, attachment ?? EmptyData);
         }
 
-        public KeyValuePair<PeerStatistic, Data>? Remove(Number160 remotePeerId)
+        public KeyValuePair<PeerAddress, Data>? Remove(Number160 remotePeerId)
         {
             // TODO check if LINQ is calculated multiple times (2x)
             // TODO this might throw an exception (removing from current iteration) (2x)
-            foreach (var peerAddress in _peerAddresses.Where(peerAddress => peerAddress.Key.PeerAddress.PeerId.Equals(remotePeerId)))
+            foreach (var peerAddress in _peerAddresses.Where(peerAddress => peerAddress.Key.PeerId.Equals(remotePeerId)))
             {
                 _peerAddresses.Remove(peerAddress);
                 return peerAddress;
@@ -44,12 +47,12 @@ namespace TomP2P.Message
 
         public bool ContainsKey(Number160 key)
         {
-            return _peerAddresses.Any(peerAddress => peerAddress.Key.PeerAddress.PeerId.Equals(key));
+            return _peerAddresses.Any(peerAddress => peerAddress.Key.PeerId.Equals(key));
         }
 
-        public KeyValuePair<PeerStatistic, Data>? Get(Number160 key)
+        public KeyValuePair<PeerAddress, Data>? Get(Number160 key)
         {
-            foreach (var peerAddress in _peerAddresses.Where(peerAddress => peerAddress.Key.PeerAddress.PeerId.Equals(key)))
+            foreach (var peerAddress in _peerAddresses.Where(peerAddress => peerAddress.Key.PeerId.Equals(key)))
             {
                 return peerAddress;
             }
@@ -59,10 +62,7 @@ namespace TomP2P.Message
         public override string ToString()
         {
             var sb = new StringBuilder("tdata:");
-            if (_peerAddresses != null)
-            {
-                sb.Append("p:").Append(_peerAddresses);
-            }
+            sb.Append("p:").Append(_peerAddresses);
             return sb.ToString();
         }
 
@@ -91,12 +91,21 @@ namespace TomP2P.Message
 
         public override int GetHashCode()
         {
-            return PeerAddresses.GetHashCode();
+            int hashCode = 31;
+            foreach (var entry in PeerAddresses)
+            {
+                hashCode ^= entry.Key.GetHashCode();
+                if (entry.Value != null)
+                {
+                    hashCode ^= entry.Value.GetHashCode();
+                }
+            }
+            return hashCode;
         }
 
-        public IDictionary<PeerStatistic, Data> PeerAddresses
+        public IDictionary<PeerAddress, Data> PeerAddresses
         {
-            get { return _peerAddresses ?? new Dictionary<PeerStatistic, Data>(); }
+            get { return _peerAddresses; }
         }
 
         public int Size

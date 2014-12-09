@@ -281,9 +281,6 @@ namespace TomP2P.Tests.Interop
 
             Assert.IsTrue(CheckSameContentTypes(m1, m2));
             Assert.IsTrue(CheckIsSameList(m1.BufferList, m2.BufferList));
-
-            // TODO implement DataBuffer and ByteBuffer decoding to finish testing
-            Assert.IsTrue(false);
         }
 
         [Test]

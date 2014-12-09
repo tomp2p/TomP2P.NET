@@ -78,7 +78,6 @@ namespace TomP2P.Message
             {
                 return false;
             }
-            // TODO check correctness of porting
             var b1 = BackingBuffer.Duplicate().SetReaderIndex(0);
             var b2 = other.BackingBuffer.Duplicate().SetReaderIndex(0);
 
