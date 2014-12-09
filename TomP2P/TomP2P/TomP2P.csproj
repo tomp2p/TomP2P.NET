@@ -45,6 +45,7 @@
     <Compile Include="Connection\DsaSignatureFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
     <Compile Include="Message\Buffer.cs" />
+    <Compile Include="Message\CompByteBufAllocator.cs" />
     <Compile Include="Message\DataMap.cs" />
     <Compile Include="Message\Decoder.cs" />
     <Compile Include="Message\Encoder.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Message\NeighborSet.cs" />
     <Compile Include="Message\MessageContentIndex.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
+    <Compile Include="Message\TomP2POutbound.cs" />
     <Compile Include="Message\TrackerData.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\Number160.cs" />

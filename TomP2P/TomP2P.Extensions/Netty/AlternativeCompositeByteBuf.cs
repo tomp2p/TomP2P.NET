@@ -1069,6 +1069,11 @@ namespace TomP2P.Extensions.Netty
             return CompBuffer(false);
         }
 
+        public static AlternativeCompositeByteBuf CompDirectBuffer()
+        {
+            return CompBuffer(true);
+        }
+
         public static AlternativeCompositeByteBuf CompBuffer(bool direct)
         {
             return CompBuffer(ALLOC, direct);
