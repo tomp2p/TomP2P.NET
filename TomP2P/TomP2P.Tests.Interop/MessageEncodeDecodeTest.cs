@@ -606,26 +606,20 @@ namespace TomP2P.Tests.Interop
             var sampleAddress4 = new PeerAddress(_sample160_4, IPAddress.Parse("0:1:2:3:4:5:6:7"));
             var sampleAddress5 = new PeerAddress(_sample160_5, IPAddress.Parse("7:6:5:4:3:2:1:0"));
 
-            var sampleStatistic1 = new PeerStatistic(sampleAddress1);
-            var sampleStatistic2 = new PeerStatistic(sampleAddress2);
-            var sampleStatistic3 = new PeerStatistic(sampleAddress3);
-            var sampleStatistic4 = new PeerStatistic(sampleAddress4);
-            var sampleStatistic5 = new PeerStatistic(sampleAddress5);
+            IDictionary<PeerAddress, Data> sampleMap1 = new Dictionary<PeerAddress, Data>();
+            sampleMap1.Add(sampleAddress1, _sampleData1);
+            sampleMap1.Add(sampleAddress2, _sampleData2);
+            sampleMap1.Add(sampleAddress3, _sampleData3);
 
-            IDictionary<PeerStatistic, Data> sampleMap1 = new Dictionary<PeerStatistic, Data>();
-            sampleMap1.Add(sampleStatistic1, _sampleData1);
-            sampleMap1.Add(sampleStatistic2, _sampleData2);
-            sampleMap1.Add(sampleStatistic3, _sampleData3);
+            IDictionary<PeerAddress, Data> sampleMap2 = new Dictionary<PeerAddress, Data>();
+            sampleMap2.Add(sampleAddress2, _sampleData1);
+            sampleMap2.Add(sampleAddress3, _sampleData2);
+            sampleMap2.Add(sampleAddress4, _sampleData3);
 
-            IDictionary<PeerStatistic, Data> sampleMap2 = new Dictionary<PeerStatistic, Data>();
-            sampleMap2.Add(sampleStatistic2, _sampleData1);
-            sampleMap2.Add(sampleStatistic3, _sampleData2);
-            sampleMap2.Add(sampleStatistic4, _sampleData3);
-
-            IDictionary<PeerStatistic, Data> sampleMap3 = new Dictionary<PeerStatistic, Data>();
-            sampleMap3.Add(sampleStatistic3, _sampleData1);
-            sampleMap3.Add(sampleStatistic4, _sampleData2);
-            sampleMap3.Add(sampleStatistic5, _sampleData3);
+            IDictionary<PeerAddress, Data> sampleMap3 = new Dictionary<PeerAddress, Data>();
+            sampleMap3.Add(sampleAddress3, _sampleData1);
+            sampleMap3.Add(sampleAddress4, _sampleData2);
+            sampleMap3.Add(sampleAddress5, _sampleData3);
 
             var m = Utils2.CreateDummyMessage();
             m.SetTrackerData(new TrackerData(sampleMap1, true));
