@@ -12,6 +12,12 @@ namespace TomP2P.Futures
     /// </summary>
     public class FutureResponse
     {
+        public bool IsCompleted()
+        {
+            // TODO in Java, this method is implemented in BaseFutureImpl
+            throw new NotImplementedException();
+        }
+
         public bool IsFailed()
         {
             // TODO in Java, this method is implemented in BaseFutureImpl
@@ -23,5 +29,6 @@ namespace TomP2P.Futures
             // TODO in Java, this method is implemented in BaseFutureImpl
             throw new NotImplementedException();
         }
+
     }
 }
