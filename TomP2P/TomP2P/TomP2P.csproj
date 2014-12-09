@@ -42,10 +42,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\ChannelClientConfiguration.cs" />
+    <Compile Include="Connection\Dispatcher.cs" />
     <Compile Include="Connection\DsaSignatureFactory.cs" />
     <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
+    <Compile Include="Connection\PeerConnection.cs" />
     <Compile Include="Connection\Sender.cs" />
+    <Compile Include="Futures\FutureResponse.cs" />
     <Compile Include="Futures\PeerException.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\CompByteBufAllocator.cs" />

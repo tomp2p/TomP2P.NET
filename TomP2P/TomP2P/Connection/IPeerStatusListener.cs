@@ -1,4 +1,5 @@
-﻿using TomP2P.Peers;
+﻿using TomP2P.Futures;
+using TomP2P.Peers;
 
 namespace TomP2P.Connection
 {

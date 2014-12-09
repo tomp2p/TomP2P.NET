@@ -15,6 +15,8 @@ namespace TomP2P.Connection
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly IList<IPeerStatusListener> _peerStatusListeners;
-
+        private readonly ChannelClientConfiguration _channelClientConfiguration;
+        private readonly Dispatcher _dispatcher;
+        private readonly Random _random;
     }
 }
