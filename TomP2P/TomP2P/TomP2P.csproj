@@ -43,7 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connection\DsaSignatureFactory.cs" />
+    <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
+    <Compile Include="Connection\Sender.cs" />
+    <Compile Include="Futures\PeerException.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\CompByteBufAllocator.cs" />
     <Compile Include="Message\DataMap.cs" />
