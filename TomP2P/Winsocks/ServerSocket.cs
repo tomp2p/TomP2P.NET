@@ -41,7 +41,7 @@ namespace Winsocks
 
         static void Main(string[] args)
         {
-            string txtMessage = "Server: ServerResponse";
+            string txtMessage = "Server: ServerResponse.";
             int localPort = 5150;
             int sendCount = 10;
             int bufferSize = 4096;
