@@ -88,6 +88,81 @@ namespace TomP2P.Connection
             throw new NotImplementedException();
         }
 
-        private IChannelFuture SendTcpPeerConnection(PeerConnection peerConnection, )
+        private IChannelFuture SendTcpPeerConnection(PeerConnection peerConnection, IChannelHandler handler,
+            ChannelCreator channelCreator, FutureResponse futureResponse)
+        {
+            // if the channel gets closed, the future should get notified
+            IChannelFuture channelFuture = peerConnection.ChannelFuture();
+
+            // channelCreater can be null if we don't need to create any channels
+            if (channelCreator != null)
+            {
+                channelCreator.SetupCloseListener(channelFuture, futureResponse);
+            }
+            IChannelPipeline pipeline = channelFuture.Channel().Pipeline();
+
+            // we need to replace the handler if this comes from the peer that
+            // created a peerConnection, otherwise we need to add a handler
+            AddOrReplace(pipeline, "dispatcher", "handler", handler);
+
+            // TODO uncomments needed?
+            return channelFuture;
+        }
+
+        private bool AddOrReplace(IChannelPipeline pipeline, string before, string name, IChannelHandler channelHandler)
+        {
+            IList<string> names = pipeline.Names();
+            if (names.Contains(name))
+            {
+                pipeline.Replace(name, name, channelHandler);
+                return false;
+            }
+            else
+            {
+                if (before == null)
+                {
+                    pipeline.AddFirst(name, channelHandler);
+                }
+                else
+                {
+                    pipeline.AddBefore(before, name, channelHandler);
+                }
+                return true;
+            }
+        }
+
+        private void AfterConnect(FutureResponse futureResponse, Message.Message message, IChannelFuture channelFuture,
+            bool fireAndForget)
+        {
+            if (channelFuture == null)
+            {
+                futureResponse.Failed("Could not create a " + (message.IsUdp ? "UDP" : "TCP") + " channel.");
+                return;
+            }
+            Logger.Debug("About to connect to {0} with channel {1}, ff={2}.", message.Recipient, channelFuture.Channel(), fireAndForget);
+            ICancel connectCancel = CreateCancel(channelFuture);
+            
+            // TODO implement rest of this method
+            throw new NotImplementedException();
+        }
+
+        private static ICancel CreateCancel(IChannelFuture channelFuture)
+        {
+            return new AnonymousCancel(channelFuture);
+        }
+
+        private class AnonymousCancel : ICancel
+        {
+            private readonly IChannelFuture _channelFuture;
+            public AnonymousCancel(IChannelFuture channelFuture)
+            {
+                _channelFuture = channelFuture;
+            }
+
+            public void Cancel()
+            {
+                _channelFuture.Cancel(true);
+            }
+        }
     }
 }

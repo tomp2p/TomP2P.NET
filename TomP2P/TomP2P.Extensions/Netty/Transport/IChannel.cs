@@ -9,5 +9,7 @@ namespace TomP2P.Extensions.Netty.Transport
     public interface IChannel
     {
         bool IsActive();
+
+        IChannelPipeline Pipeline();
     }
 }

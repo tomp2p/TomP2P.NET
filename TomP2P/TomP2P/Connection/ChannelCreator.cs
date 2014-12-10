@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TomP2P.Extensions.Netty.Transport;
+using TomP2P.Futures;
 
 namespace TomP2P.Connection
 {
@@ -12,5 +14,14 @@ namespace TomP2P.Connection
     /// </summary>
     public class ChannelCreator
     {
+        /// <summary>
+        /// Setup the close listener for a channel that was already created.
+        /// </summary>
+        /// <param name="channelFuture"></param>
+        /// <param name="futureResponse"></param>
+        public void SetupCloseListener(IChannelFuture channelFuture, FutureResponse futureResponse)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

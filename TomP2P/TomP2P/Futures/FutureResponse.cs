@@ -30,5 +30,10 @@ namespace TomP2P.Futures
             throw new NotImplementedException();
         }
 
+        public void Failed(string failed)
+        {
+            // TODO in Java, this method is implemented in BaseFutureImpl
+            throw new NotImplementedException();
+        }
     }
 }
