@@ -242,7 +242,7 @@ namespace Winsocks
         public static void PrintUsage()
         {
             Console.WriteLine(
-                "\nExecutable_file_name [-| bind-address);] [-m message] [-n count] [-p port] [-t tcp|udp] [-x size]");
+                "\nExecutable_file_name [-| bind-address] [-m message] [-n count] [-p port] [-t tcp|udp] [-x size]");
             Console.WriteLine("-| bind-address   local address to bind to");
             Console.WriteLine("-m message        text message to format into send buffer");
             Console.WriteLine("-n count          number of times to send a message");

@@ -737,7 +737,7 @@
         </xs:attribute>
         <xs:attribute name="dbHost" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>Database host name. If the ConnectionString is not provided this value will be used to construct the "Server=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database host name. If the ConnectionString is not provided this value will be used to construct the "SyncServer=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbPassword" type="SimpleLayoutAttribute">
@@ -1369,7 +1369,7 @@
         </xs:attribute>
         <xs:attribute name="clientId" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>Client ID.</xs:documentation>
+            <xs:documentation>SyncClient ID.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="includeEventProperties" type="xs:boolean">
@@ -1427,7 +1427,7 @@
           <xs:element name="replaceNewlineWithBrTagInHtml" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="priority" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="timeout" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="smtpServer" minOccurs="0" maxOccurs="1" type="Layout" />
+          <xs:element name="smtpSyncServer" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="smtpAuthentication" minOccurs="0" maxOccurs="1" type="NLog.Targets.SmtpAuthenticationMode" />
           <xs:element name="smtpUserName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="smtpPassword" minOccurs="0" maxOccurs="1" type="Layout" />
@@ -1515,9 +1515,9 @@
             <xs:documentation>Indicates the SMTP client timeout.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="smtpServer" type="SimpleLayoutAttribute">
+        <xs:attribute name="smtpSyncServer" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SMTP Server to be used for sending.</xs:documentation>
+            <xs:documentation>SMTP SyncServer to be used for sending.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="smtpAuthentication" type="NLog.Targets.SmtpAuthenticationMode">
@@ -1542,7 +1542,7 @@
         </xs:attribute>
         <xs:attribute name="smtpPort" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Port number that SMTP Server is listening on.</xs:documentation>
+            <xs:documentation>Port number that SMTP SyncServer is listening on.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="useSystemNetMailSettings" type="xs:boolean">
