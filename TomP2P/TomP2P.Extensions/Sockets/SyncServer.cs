@@ -23,48 +23,76 @@ namespace TomP2P.Extensions.Sockets
         private SocketType _socketType; // TCP: Stream, UDP: Dgram
         private ProtocolType _protocolType; // TCP: Tcp, UDP: Udp
 
+        public byte[] SendBuffer { get; set; }
+        public byte[] RecvBuffer { get; set; }
+
         public void Start()
         {
-            byte[] bytes = new byte[_bufferSize];
-
-            // establish the local endpoint for the socket
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(_hostName);
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEp = new IPEndPoint(ipAddress, _serverPort);
-
-            // create a TCP/IP socket
-            Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            // bind the socket to the local endpoint and listen for incoming connections
             try
             {
-                listener.Bind(localEp);
-                listener.Listen(10); // TODO select optimal backlog
 
-                while (true)
+                // establish the local endpoint for the socket
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(_hostName);
+                IPAddress localAddress = ipHostInfo.AddressList[0];
+                IPEndPoint localEp = new IPEndPoint(localAddress, _serverPort);
+
+                // create a TCP/IP server socket
+                Socket listener = new Socket(localAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                Socket handler = null;
+
+                // BINDING
+                try
                 {
-                    Socket handler = listener.Accept(); // blocking
+                    listener.Bind(localEp);
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Binding failed.");
+                }
 
-                    // incoming connection needs to be processed
+                // LISTENING
+                try
+                {
+                    // TCP only
+                    listener.Listen(10); // TODO find appropriate backlog
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Listening failed.");
+                }
+
+                // ACCEPTING (RECEIVING)
+                try
+                {
+                    handler = listener.Accept(); // blocking
+
                     while (true)
                     {
-                        // TODO prepare receive buffer
-                        bytes = new byte[_bufferSize];
+                        int bytesRecv = handler.Receive(RecvBuffer);
 
-                        int bytesRec = handler.Receive(bytes);
-
-                        // TODO detect end
-                        if (bytesRec == 0)
+                        if (bytesRecv == 0)
                         {
                             break;
                         }
                     }
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Accepting/Receiving failed.");
+                }
 
-                    // return response
-                    // TODO prepare send buffer
-                    handler.Send(bytes);
+                // SENDING
+                try
+                {
+                    handler.Send(SendBuffer);
+
+                    // shutdown handler/client-connection
                     handler.Shutdown(SocketShutdown.Send);
                     handler.Close();
+                }
+                catch (Exception)
+                {
+                    throw new Exception("Sending failed.");
                 }
             }
             catch (Exception ex)
