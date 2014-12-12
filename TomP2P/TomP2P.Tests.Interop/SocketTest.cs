@@ -17,18 +17,21 @@ namespace TomP2P.Tests.Interop
         {
             // create sample msg
             var msg = MessageEncodeDecodeTest.CreateMessageInteger();
+            var bytes = MessageEncodeDecodeTest.EncodeMessage(msg);
 
             // start server socket on a separate thread
-            var t = new Thread(new SyncServer().Start);
-            t.Start();
+            var server = new SyncServer();
+            server.SendBuffer = new byte[bytes.Length];
+            server.RecvBuffer = new byte[bytes.Length];
+
+            new Thread(server.StartTcp).Start();
 
             // start client socket
             var client = new SyncClient();
-            var bytes = MessageEncodeDecodeTest.EncodeMessage(msg);
             client.SendBuffer = bytes;
             client.RecvBuffer = new byte[bytes.Length];
 
-            client.Start();
+            client.StartTcp();
 
             Assert.AreEqual(client.SendBuffer, client.RecvBuffer);
         }

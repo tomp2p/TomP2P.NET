@@ -26,7 +26,7 @@ namespace TomP2P.Extensions.Sockets
         public byte[] SendBuffer { get; set; }
         public byte[] RecvBuffer { get; set; }
 
-        public void Start()
+        public void StartTcp()
         {
             try
             {
@@ -80,6 +80,9 @@ namespace TomP2P.Extensions.Sockets
                 {
                     throw new Exception("Accepting/Receiving failed.");
                 }
+
+                // Manipulate Data
+                SendBuffer = RecvBuffer;
 
                 // SENDING
                 try

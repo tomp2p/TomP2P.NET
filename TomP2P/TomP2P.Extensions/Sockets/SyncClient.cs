@@ -25,7 +25,7 @@ namespace TomP2P.Extensions.Sockets
         public byte[] SendBuffer { get; set; }
         public byte[] RecvBuffer { get; set; }
 
-        public void Start()
+        public void StartTcp()
         {
             try
             {
