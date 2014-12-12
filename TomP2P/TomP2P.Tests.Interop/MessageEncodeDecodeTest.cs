@@ -584,7 +584,7 @@ namespace TomP2P.Tests.Interop
             return m;
         }
 
-        private static Message.Message CreateMessageInteger()
+        public static Message.Message CreateMessageInteger()
         {
             var m = Utils2.CreateDummyMessage();
             m.SetIntValue(Int32.MinValue);
@@ -757,7 +757,7 @@ namespace TomP2P.Tests.Interop
         /// </summary>
         /// <param name="message">The message to be encoded.</param>
         /// <returns>The encoded message as byte array.</returns>
-        private static byte[] EncodeMessage(Message.Message message)
+        public static byte[] EncodeMessage(Message.Message message)
         {
             var encoder = new Encoder(null);
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
@@ -771,7 +771,7 @@ namespace TomP2P.Tests.Interop
         /// </summary>
         /// <param name="bytes">The message bytes from Java encoding.</param>
         /// <returns>The .NET message version.</returns>
-        private static Message.Message DecodeMessage(byte[] bytes)
+        public static Message.Message DecodeMessage(byte[] bytes)
         {
             var decoder = new Decoder(null);
 
