@@ -39,7 +39,25 @@ namespace TomP2P.Tests.Interop
         [Test]
         public void UdpSocketTest()
         {
-            
+            // create sample msg
+            var msg = MessageEncodeDecodeTest.CreateMessageInteger();
+            var bytes = MessageEncodeDecodeTest.EncodeMessage(msg);
+
+            // start server socket on a separate thread
+            var server = new SyncServer();
+            server.SendBuffer = new byte[bytes.Length];
+            server.RecvBuffer = new byte[bytes.Length];
+
+            new Thread(server.StartUdp).Start();
+
+            // start client socket
+            var client = new SyncClient();
+            client.SendBuffer = bytes;
+            client.RecvBuffer = new byte[bytes.Length];
+
+            client.StartUdp();
+
+            Assert.AreEqual(client.SendBuffer, client.RecvBuffer);
         }
     }
 }
