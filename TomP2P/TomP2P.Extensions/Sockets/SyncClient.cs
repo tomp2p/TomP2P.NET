@@ -14,13 +14,8 @@ namespace TomP2P.Extensions.Sockets
     /// </summary>
     public class SyncClient
     {
-        private const int _bufferSize = 1024;
         private string _hostName = "localhost"; // or IPAddress 127.0.0.1
-        private short _serverPort = 5150;
-
-        // TODO make client protocol-generic
-        private SocketType _socketType; // TCP: Stream, UDP: Dgram
-        private ProtocolType _protocolType; // TCP: Tcp, UDP: Udp
+        private short _serverPort = 5151;
 
         public byte[] SendBuffer { get; set; }
         public byte[] RecvBuffer { get; set; }
@@ -109,14 +104,14 @@ namespace TomP2P.Extensions.Sockets
 
                 // CONNECT
                 // try each address
-                foreach (var address in ipHostInfo.AddressList)
+                foreach (var serverAddress in ipHostInfo.AddressList)
                 {
                     // create a UDP/IP socket
-                    client = new Socket(address.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                    client = new Socket(serverAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                     try
                     {
-                        remoteEp = new IPEndPoint(address, _serverPort);
-                        client.Connect(remoteEp);
+                        remoteEp = new IPEndPoint(serverAddress, _serverPort);
+                        //client.Connect(remoteEp); // TODO needed?
                         break;
                     }
                     catch (SocketException)
@@ -155,15 +150,14 @@ namespace TomP2P.Extensions.Sockets
                         if (bytesRecv == 0)
                         {
                             // shutdown client
-                            // TODO sender.Shutdown(SocketShutdown.Send); needed?
                             client.Close();
                             break;
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new Exception("Receiving failed.");
+                    throw new Exception("Receiving failed.", ex);
                 }
             }
             catch (Exception ex)

@@ -23,34 +23,26 @@ namespace TomP2P.Extensions.Sockets
         /// </summary>
         public const int SioUdpConnreset = -1744830452;
 
-        private int _bufferSize = 1024;
-        private string _hostName = "localhost"; // or IPAddress 127.0.0.1
-        private short _serverPort = 5150;
-
-        // TODO make server protocol-generic
-        private SocketType _socketType; // TCP: Stream, UDP: Dgram
-        private ProtocolType _protocolType; // TCP: Tcp, UDP: Udp
 
         public byte[] SendBuffer { get; set; }
         public byte[] RecvBuffer { get; set; }
+
+        static IPAddress _localAddress = IPAddress.Any;
+        static private short _serverPort = 5151;
+        IPEndPoint _localEp = new IPEndPoint(_localAddress, _serverPort);
 
         public void StartTcp()
         {
             try
             {
-                // establish the local endpoint for the socket
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(_hostName);
-                IPAddress localAddress = ipHostInfo.AddressList[0];
-                IPEndPoint localEp = new IPEndPoint(localAddress, _serverPort);
-
                 // create a TCP/IP server socket
-                Socket server = new Socket(localAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                Socket server = new Socket(_localAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 Socket handler = null;
 
                 // BINDING
                 try
                 {
-                    server.Bind(localEp);
+                    server.Bind(_localEp);
                 }
                 catch (Exception)
                 {
@@ -68,6 +60,7 @@ namespace TomP2P.Extensions.Sockets
                     throw new Exception("Listening failed.");
                 }
 
+                // TODO servicing loop
                 // ACCEPTING (RECEIVING)
                 try
                 {
@@ -115,32 +108,24 @@ namespace TomP2P.Extensions.Sockets
         {
             try
             {
-
-                // establish the local endpoint for the socket
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(_hostName);
-                IPAddress localAddress = ipHostInfo.AddressList[0];
-                IPEndPoint localEp = new IPEndPoint(localAddress, _serverPort);
-                IPEndPoint senderAddress = new IPEndPoint(localAddress, 0);
-
                 // create a UDP/IP server socket
-                Socket server = new Socket(localAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                Socket handler = null;
+                Socket server = new Socket(_localAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
 
                 // BINDING
                 try
                 {
-                    server.Bind(localEp);
+                    server.Bind(_localEp);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    throw new Exception("Binding failed.");
+                    throw new Exception("Binding failed.", ex);
                 }
 
                 // IOControl
                 try
                 {
                     // TODO needed?
-                    byte[] optionIn = new byte[] {0, 0, 0, 1}; // true
+                    byte[] optionIn = new byte[] { 0, 0, 0, 1 }; // true
                     server.IOControl(SioUdpConnreset, optionIn, null);
                 }
                 catch (Exception)
@@ -148,39 +133,50 @@ namespace TomP2P.Extensions.Sockets
                     throw new Exception("IOControl failed.");
                 }
 
-                // RECEIVING
-                try
+                // service clients in a loop
+                IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint remoteEp = (EndPoint) sender;
+                while (true)
                 {
-                    EndPoint ep = senderAddress;
-                    server.ReceiveFrom(RecvBuffer, ref ep);
-                }
-                catch (Exception)
-                {
-                    throw new Exception("Receiving failed.");
-                }
-
-                // Manipulate Data
-                SendBuffer = RecvBuffer;
-
-                // SENDING
-                try
-                {
-                    int bytesRecv = server.SendTo(SendBuffer, senderAddress);
-
-                    // send zero byte datagrams to indicate end
-                    // multiple packets are send to raise the pronbability that the client gets one
-                    for (int i = 0; i < 3; i++)
+                    // RECEIVING
+                    try
                     {
-                        server.SendTo(SendBuffer, 0, 0, SocketFlags.None, senderAddress);
-                        Thread.Sleep(250);
+                        int bytesRecv = server.ReceiveFrom(RecvBuffer, ref remoteEp);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Receiving failed.", ex);
                     }
 
-                    // TODO close socket? server needs to remain available though
+                    // Manipulate Data
+                    SendBuffer = RecvBuffer;
+
+                    // SENDING
+                    try
+                    {
+                        //while (true)
+                        //{
+                        // multiple packets are send to raise the probability that the client gets one
+
+                        for (int i = 0; i < 10; i++)
+                        {
+                            int bytesSent = server.SendTo(SendBuffer, remoteEp);
+                        }
+
+                        // send zero byte datagrams to indicate end
+                        for (int i = 0; i < 10; i++)
+                        {
+                            server.SendTo(SendBuffer, 0, 0, SocketFlags.None, remoteEp);
+                            // TODO thread sleep?
+                        }
+                        //}
+                    }
+                    catch (Exception)
+                    {
+                        throw new Exception("Sending failed.");
+                    }
                 }
-                catch (Exception)
-                {
-                    throw new Exception("Sending failed.");
-                }
+
             }
             catch (Exception ex)
             {
