@@ -13,7 +13,7 @@ namespace TomP2P.Tests.Interop
     public class SocketTest
     {
         [Test]
-        public void SendReceiveMessageTest()
+        public void TcpSocketTest()
         {
             // create sample msg
             var msg = MessageEncodeDecodeTest.CreateMessageInteger();
@@ -34,6 +34,12 @@ namespace TomP2P.Tests.Interop
             client.StartTcp();
 
             Assert.AreEqual(client.SendBuffer, client.RecvBuffer);
+        }
+
+        [Test]
+        public void UdpSocketTest()
+        {
+            
         }
     }
 }
