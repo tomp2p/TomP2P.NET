@@ -27,7 +27,7 @@ namespace TomP2P.Extensions.Sockets
         public byte[] SendBuffer { get; set; }
         public byte[] RecvBuffer { get; set; }
 
-        static IPAddress _localAddress = IPAddress.Any;
+        private static IPAddress _localAddress = IPAddress.Any; // wildcard
         static private short _serverPort = 5151;
         IPEndPoint _localEp = new IPEndPoint(_localAddress, _serverPort);
 
@@ -164,11 +164,11 @@ namespace TomP2P.Extensions.Sockets
                         }
 
                         // send zero byte datagrams to indicate end
-                        for (int i = 0; i < 10; i++)
+                        /*for (int i = 0; i < 10; i++)
                         {
                             server.SendTo(SendBuffer, 0, 0, SocketFlags.None, remoteEp);
                             // TODO thread sleep?
-                        }
+                        }*/
                         //}
                     }
                     catch (Exception)

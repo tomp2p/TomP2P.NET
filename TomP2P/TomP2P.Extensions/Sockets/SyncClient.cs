@@ -111,7 +111,9 @@ namespace TomP2P.Extensions.Sockets
                     try
                     {
                         remoteEp = new IPEndPoint(serverAddress, _serverPort);
-                        //client.Connect(remoteEp); // TODO needed?
+
+                        // since response from server is expected, bind to wilcard
+                        client.Bind(new IPEndPoint(IPAddress.Any, 0));
                         break;
                     }
                     catch (SocketException)
@@ -140,9 +142,9 @@ namespace TomP2P.Extensions.Sockets
                 // RECEIVE
                 try
                 {
-                    while (true)
-                    {
-                        var fromEp = new IPEndPoint(remoteEp.Address, 0); // any available port
+                    //while (true)
+                    //{
+                        var fromEp = new IPEndPoint(remoteEp.Address, 0); // TODO any available port?
                         EndPoint ep = fromEp;
                         int bytesRecv = client.ReceiveFrom(RecvBuffer, ref ep); // blocking
 
@@ -151,9 +153,9 @@ namespace TomP2P.Extensions.Sockets
                         {
                             // shutdown client
                             client.Close();
-                            break;
+                            //break;
                         }
-                    }
+                    //}
                 }
                 catch (Exception ex)
                 {
