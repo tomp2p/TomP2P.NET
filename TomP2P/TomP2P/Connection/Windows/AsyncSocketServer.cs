@@ -7,7 +7,12 @@ namespace TomP2P.Connection.Windows
 {
     // inspired by http://msdn.microsoft.com/en-us/library/system.net.sockets.socketasynceventargs.aspx
 
-    public class AsyncServer
+    /// <summary>
+    /// Implements the connection logic for an asynchronous socket server.
+    /// After accepting a client connection, all data read from the client is sent back to it.
+    /// The read/echo pattern is continued until the client disconnects.
+    /// </summary>
+    public class AsyncSocketServer
     {
         private int _nrOfConnections;
         private int _clientCount;
@@ -20,7 +25,7 @@ namespace TomP2P.Connection.Windows
         private readonly Semaphore _semaphoreAcceptedClients;
         // TODO use Mutex to synchronize server execution?
 
-        public AsyncServer(int nrOfConnections, int bufferSize)
+        public AsyncSocketServer(int nrOfConnections, int bufferSize)
         {
             _nrOfConnections = nrOfConnections;
             _bufferSize = bufferSize;

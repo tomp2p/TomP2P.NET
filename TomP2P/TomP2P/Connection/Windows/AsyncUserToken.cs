@@ -12,7 +12,7 @@ namespace TomP2P.Connection.Windows
     /// </summary>
     public sealed class AsyncUserToken : IDisposable
     {
-        private Socket _connection;
+        private readonly Socket _connection;
         private byte[] _buffer;
 
         public AsyncUserToken(Socket connection, int bufferSize)
