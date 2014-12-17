@@ -76,12 +76,18 @@ namespace TomP2P.Connection.Windows
             _client.Disconnect(false);
         }
 
-        public void SendReceive(object message)
+        public byte[] SendReceive(byte[] bytes)
         {
+            if (bytes.Length > BufferSize)
+            {
+                throw new ArgumentOutOfRangeException("bytes", "Buffer overflow on client side.");
+            }
+
             if (_isConnected)
             {
                 // create a buffer to send
-                var sendBuffer = new byte[BufferSize]; // TODO take bytes from the message
+                var sendBuffer = new byte[BufferSize];
+                Array.Copy(bytes, sendBuffer, bytes.Length);
 
                 // prepare send/receive operations
                 var completeArgs = new SocketAsyncEventArgs();
@@ -97,7 +103,9 @@ namespace TomP2P.Connection.Windows
                 WaitHandle.WaitAll(AutoSendReceiveEvents);
 
                 // return data from SocketAsyncEventArgs buffer
-                return; // TODO completeArgs.Buffer, completeArgs.Offset, completeArgs.BytesTransferred
+                var recvBuffer = new byte[BufferSize];
+                Array.Copy(completeArgs.Buffer, completeArgs.Offset, recvBuffer, 0, completeArgs.BytesTransferred);
+                return recvBuffer;
             }
             throw new SocketException((int) SocketError.NotConnected);
         }
