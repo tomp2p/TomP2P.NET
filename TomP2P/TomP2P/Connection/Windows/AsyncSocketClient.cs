@@ -19,7 +19,7 @@ namespace TomP2P.Connection.Windows
 
         private readonly Socket _client;
         private readonly IPEndPoint _hostEndpoint;
-        private const int BufferSize = 10000; // TODO set appropriate value
+        public int BufferSize { get; private set; }
 
         private bool _isConnected;
 
@@ -38,14 +38,17 @@ namespace TomP2P.Connection.Windows
         /// To start the send/receive processing, call Connect() followed by SendReceive().
         /// </summary>
         /// <param name="hostName">Name of the host where the <see cref="AsyncSocketServer"/> is running.</param>
-        /// <param name="port">Number of the port of the <see cref="AsyncSocketServer"/>.</param>
-        public AsyncSocketClient(string hostName, int port)
+        /// <param name="hostPort">Port number of the host where the <see cref="AsyncSocketServer"/> is running.</param>
+        /// <param name="bufferSize"></param>
+        public AsyncSocketClient(string hostName, int hostPort, int bufferSize)
         {
+            BufferSize = bufferSize;
+
             IPHostEntry hostInfo = Dns.GetHostEntry(hostName);
 
             // instantiate the client endpoint and socket
             // TODO try all addresses of the host
-            _hostEndpoint = new IPEndPoint(hostInfo.AddressList[0], port); // TODO correct address? or Length-1?
+            _hostEndpoint = new IPEndPoint(hostInfo.AddressList[hostInfo.AddressList.Length-1], hostPort); // TODO client should iterate through addresses
             _client = new Socket(_hostEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp); // TODO make UDP
         }
 

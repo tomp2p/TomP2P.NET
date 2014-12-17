@@ -46,7 +46,7 @@ namespace TomP2P.Connection.Windows
             Array.Copy(_buffer, sendBuffer, _bufferSize);
 
             args.SetBuffer(sendBuffer, 0, _buffer.Length);
-            _buffer = null;
+            //_buffer.Clear();
         }
 
         public void Dispose()

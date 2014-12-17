@@ -16,7 +16,7 @@ namespace TomP2P.Connection.Windows
     {
         private int _nrOfConnections;
         private int _clientCount;
-        private int _bufferSize;
+        public int BufferSize { get; private set; }
         private BufferManager _bufferManager;
         private const int OpsToPreAlloc = 2;    // read, write
 
@@ -28,8 +28,8 @@ namespace TomP2P.Connection.Windows
         public AsyncSocketServer(int nrOfConnections, int bufferSize)
         {
             _nrOfConnections = nrOfConnections;
-            _bufferSize = bufferSize;
-            _bufferManager = new BufferManager(_bufferSize * nrOfConnections * OpsToPreAlloc, _bufferSize);
+            BufferSize = bufferSize;
+            _bufferManager = new BufferManager(BufferSize * nrOfConnections * OpsToPreAlloc, BufferSize);
             _pool = new SocketAsyncEventArgsPool(_nrOfConnections);
             _semaphoreAcceptedClients = new Semaphore(_nrOfConnections, _nrOfConnections);
 
@@ -150,7 +150,7 @@ namespace TomP2P.Connection.Windows
                     {
                         // get the socket for the accepted client connection and put it
                         // into the user token
-                        readEventArgs.UserToken = new AsyncUserToken(socket, _bufferSize);
+                        readEventArgs.UserToken = new AsyncUserToken(socket, BufferSize);
 
                         Interlocked.Increment(ref _clientCount);
 

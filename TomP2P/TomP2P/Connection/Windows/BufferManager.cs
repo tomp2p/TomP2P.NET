@@ -27,14 +27,9 @@ namespace TomP2P.Connection.Windows
         {
             _nrOfBytes = nrOfBytes;
             _bufferSize = bufferSize;
+            _buffer = new byte[_nrOfBytes];
             _currentIndex = 0;
             _freeIndexPool = new Stack<int>();
-        }
-
-        public void Init()
-        {
-            // TODO move to c'tor
-            _buffer = new byte[_nrOfBytes];
         }
 
         /// <summary>
