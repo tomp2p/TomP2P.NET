@@ -18,6 +18,10 @@ namespace TomP2P.Connection.Windows
             _pool = new Stack<SocketAsyncEventArgs>(capacity);
         }
 
+        /// <summary>
+        /// Adds a SocketAsyncEventArgs object to the pool.
+        /// </summary>
+        /// <param name="item"></param>
         public void Push(SocketAsyncEventArgs item)
         {
             if (item == null)
@@ -30,11 +34,20 @@ namespace TomP2P.Connection.Windows
             }
         }
 
+        /// <summary>
+        /// Removes and returns the SocketAsyncEventArgs object from the pool.
+        /// Returns null if no more object is in the pool.
+        /// </summary>
+        /// <returns></returns>
         public SocketAsyncEventArgs Pop()
         {
             lock (_pool)
             {
-                return _pool.Pop();
+                if (_pool.Count > 0)
+                {
+                    return _pool.Pop();
+                }
+                return null;
             }
         }
 
