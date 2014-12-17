@@ -52,6 +52,7 @@
     <Compile Include="Connection\PeerConnection.cs" />
     <Compile Include="Connection\Sender.cs" />
     <Compile Include="Connection\Windows\AsyncServer.cs" />
+    <Compile Include="Connection\Windows\AsyncUserToken.cs" />
     <Compile Include="Connection\Windows\BufferManager.cs" />
     <Compile Include="Connection\Windows\SocketAsyncEventArgsPool.cs" />
     <Compile Include="Futures\FutureResponse.cs" />
