@@ -9,6 +9,8 @@ namespace TomP2P.Connection.Windows
 {
     // inspired by http://msdn.microsoft.com/en-us/library/bb517542.aspx
 
+    // TODO use .NET's BufferManager
+
     /// <summary>
     /// Single large buffer which can be divided up and assigned to SocketAsyncEventArgs objects
     /// for use with each socket IO operation.
@@ -16,20 +18,20 @@ namespace TomP2P.Connection.Windows
     /// </summary>
     public class BufferManager
     {
-        private int _nrOfBytes;
-        private int _bufferSize;
+        private int _nrOfBytes; // total number of bytes controlled by the buffer pool
         private byte[] _buffer;
-
         private Stack<int> _freeIndexPool;
         private int _currentIndex;
+        private int _bufferSize;
 
         public BufferManager(int nrOfBytes, int bufferSize)
         {
             _nrOfBytes = nrOfBytes;
-            _bufferSize = bufferSize;
-            _buffer = new byte[_nrOfBytes];
             _currentIndex = 0;
+            _bufferSize = bufferSize;
             _freeIndexPool = new Stack<int>();
+
+            _buffer = new byte[_nrOfBytes];
         }
 
         /// <summary>
@@ -55,7 +57,7 @@ namespace TomP2P.Connection.Windows
         }
 
         /// <summary>
-        /// Renoves the buffer from a SocketAsyncEventArgs object. This frees the buffer back
+        /// Removes the buffer from a SocketAsyncEventArgs object. This frees the buffer back
         /// to the buffer pool.
         /// </summary>
         /// <param name="args"></param>

@@ -23,15 +23,16 @@ namespace TomP2P.Connection.Windows
         private Socket _serverSocket;
         private readonly SocketAsyncEventArgsPool _pool;
         private readonly Semaphore _semaphoreAcceptedClients;
-        // TODO use Mutex to synchronize server execution?
+        private static Mutex _mutex = new Mutex(); // to synchronize server execution
 
         public AsyncSocketServer(int nrOfConnections, int bufferSize)
         {
             _nrOfConnections = nrOfConnections;
+            _clientCount = 0;
             BufferSize = bufferSize;
-            _bufferManager = new BufferManager(BufferSize * nrOfConnections * OpsToPreAlloc, BufferSize);
-            _pool = new SocketAsyncEventArgsPool(_nrOfConnections);
-            _semaphoreAcceptedClients = new Semaphore(_nrOfConnections, _nrOfConnections);
+            //_bufferManager = new BufferManager(BufferSize * nrOfConnections * OpsToPreAlloc, BufferSize);
+            _pool = new SocketAsyncEventArgsPool(nrOfConnections);
+            _semaphoreAcceptedClients = new Semaphore(nrOfConnections, nrOfConnections);
 
             // pre-allocate pool of reusable SocketAsyncEventArgs
             for (int i = 0; i < _nrOfConnections; i++)
@@ -40,7 +41,8 @@ namespace TomP2P.Connection.Windows
                 rwArg.Completed += IO_Completed;
 
                 // assign a byte buffer from the buffer pool
-                _bufferManager.AssignBuffer(rwArg);
+                //_bufferManager.AssignBuffer(rwArg);
+                rwArg.SetBuffer(new byte[BufferSize], 0, BufferSize);
 
                 // add SocketAsyncEventArgs to the pool
                 _pool.Push(rwArg);
@@ -55,6 +57,8 @@ namespace TomP2P.Connection.Windows
         {
             // TODO this is TCP only atm, support UDP too
             _serverSocket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocket.ReceiveBufferSize = BufferSize;
+            _serverSocket.SendBufferSize = BufferSize;
 
             // bind
             if (localEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
@@ -72,13 +76,14 @@ namespace TomP2P.Connection.Windows
             // listen
             if (_serverSocket.ProtocolType == ProtocolType.Tcp)
             {
-                _serverSocket.Listen(10); // TODO find appropriate backlog
+                _serverSocket.Listen(_nrOfConnections); 
             }
 
             // accept
             StartAccept(null);
 
-            // TODO use Mutex.WaitOne()?
+            // block current thread to receive incoming messages
+            _mutex.WaitOne();
         }
 
         /// <summary>
@@ -87,7 +92,7 @@ namespace TomP2P.Connection.Windows
         public void Stop()
         {
             _serverSocket.Close();
-            // TODO use Mutex.ReleaseMutex()?
+            _mutex.ReleaseMutex();
         }
 
         private void StartAccept(SocketAsyncEventArgs acceptEventArgs)
@@ -134,7 +139,6 @@ namespace TomP2P.Connection.Windows
 
         private void Accept_Completed(object sender, SocketAsyncEventArgs args)
         {
-            // TODO why not merge with the others?
             ProcessAccept(args);
         }
 
@@ -161,11 +165,15 @@ namespace TomP2P.Connection.Windows
                             ProcessReceive(readEventArgs);
                         }
                     }
+                    else
+                    {
+                        throw new Exception("There are no more available sockets to allocate.");
+                    }
                 }
                 catch (SocketException ex)
                 {
-                    // TODO Console.WriteLine("Error when processing data received from {0}:\r\n{1}", token.Connection.RemoteEndPoint, ex.ToString());
-                    throw;
+                    var token = args.UserToken as AsyncUserToken;
+                    throw new Exception(String.Format("Error when processing data received from {0}:\r\n{1}", token.Connection.RemoteEndPoint, ex));
                 }
                 catch (Exception ex)
                 {
@@ -267,8 +275,8 @@ namespace TomP2P.Connection.Windows
             }
 
             // decrement the counter keeping track of the total number of clients
-            Interlocked.Decrement(ref _clientCount);
             _semaphoreAcceptedClients.Release();
+            Interlocked.Decrement(ref _clientCount);
 
             // free the SocketAsyncEventArgs so it can be reused
             _pool.Push(args);

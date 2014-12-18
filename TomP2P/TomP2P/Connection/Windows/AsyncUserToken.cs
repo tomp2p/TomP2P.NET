@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows
@@ -9,14 +10,12 @@ namespace TomP2P.Connection.Windows
     public sealed class AsyncUserToken : IDisposable
     {
         private readonly Socket _connection;
-        private readonly int _bufferSize;
         private byte[] _buffer;
 
         public AsyncUserToken(Socket connection, int bufferSize)
         {
             _connection = connection;
-            _bufferSize = bufferSize;
-            _buffer = new byte[_bufferSize];
+            _buffer = new byte[bufferSize];
         }
 
         /// <summary>
@@ -25,9 +24,7 @@ namespace TomP2P.Connection.Windows
         /// <param name="args"></param>
         public void SetData(SocketAsyncEventArgs args)
         {
-            var bytesRecv = args.BytesTransferred;
-
-            if (bytesRecv > _bufferSize)
+            if (args.BytesTransferred > _buffer.Length)
             {
                 throw new ArgumentOutOfRangeException("args", "Buffer overflow on server side.");   
             }
@@ -42,11 +39,13 @@ namespace TomP2P.Connection.Windows
         public void ProcessData(SocketAsyncEventArgs args)
         {
             // echo
-            var sendBuffer = new byte[_bufferSize];
-            Array.Copy(_buffer, sendBuffer, _bufferSize);
+            var sendBuffer = new byte[_buffer.Length];
+            Array.Copy(_buffer, sendBuffer, _buffer.Length);
 
-            args.SetBuffer(sendBuffer, 0, _buffer.Length);
-            //_buffer.Clear();
+            args.SetBuffer(sendBuffer, 0, sendBuffer.Length);
+            
+            // clear buffer, so it can receive more data from a keep-alive connection client
+            _buffer = new byte[_buffer.Length];
         }
 
         public void Dispose()
@@ -58,6 +57,7 @@ namespace TomP2P.Connection.Windows
             }
             catch (Exception)
             {
+                // throw if client has closed, so it isn't necessary to catch
             }
             finally
             {

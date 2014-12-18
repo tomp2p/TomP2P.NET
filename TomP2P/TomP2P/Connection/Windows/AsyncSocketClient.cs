@@ -48,7 +48,7 @@ namespace TomP2P.Connection.Windows
 
             // instantiate the client endpoint and socket
             // TODO try all addresses of the host
-            _hostEndpoint = new IPEndPoint(hostInfo.AddressList[hostInfo.AddressList.Length-1], hostPort); // TODO client should iterate through addresses
+            _hostEndpoint = new IPEndPoint(hostInfo.AddressList[hostInfo.AddressList.Length - 1], hostPort); // TODO client should iterate through addresses
             _client = new Socket(_hostEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp); // TODO make UDP
         }
 
@@ -93,24 +93,26 @@ namespace TomP2P.Connection.Windows
                 Array.Copy(bytes, sendBuffer, bytes.Length);
 
                 // prepare send/receive operations
-                var completeArgs = new SocketAsyncEventArgs();
-                completeArgs.SetBuffer(sendBuffer, 0, sendBuffer.Length);
-                completeArgs.UserToken = _client;
-                completeArgs.RemoteEndPoint = _hostEndpoint;
-                completeArgs.Completed += Send_Completed;
+                using (var completeArgs = new SocketAsyncEventArgs())
+                {
+                    completeArgs.SetBuffer(sendBuffer, 0, sendBuffer.Length);
+                    completeArgs.UserToken = _client;
+                    completeArgs.RemoteEndPoint = _hostEndpoint;
+                    completeArgs.Completed += Send_Completed;
 
-                // start async send
-                _client.SendAsync(completeArgs);
+                    // start async send
+                    _client.SendAsync(completeArgs);
 
-                // wait for the send/receive completion
-                WaitHandle.WaitAll(AutoSendReceiveEvents);
+                    // wait for the send/receive completion
+                    WaitHandle.WaitAll(AutoSendReceiveEvents);
 
-                // return data from SocketAsyncEventArgs buffer
-                var recvBuffer = new byte[BufferSize];
-                Array.Copy(completeArgs.Buffer, completeArgs.Offset, recvBuffer, 0, completeArgs.BytesTransferred);
-                return recvBuffer;
+                    // return data from SocketAsyncEventArgs buffer
+                    var recvBuffer = new byte[BufferSize];
+                    Array.Copy(completeArgs.Buffer, completeArgs.Offset, recvBuffer, 0, completeArgs.BytesTransferred);
+                    return recvBuffer;
+                }
             }
-            throw new SocketException((int) SocketError.NotConnected);
+            throw new SocketException((int)SocketError.NotConnected);
         }
 
         private void Connect_Completed(object sender, SocketAsyncEventArgs args)
@@ -125,7 +127,7 @@ namespace TomP2P.Connection.Windows
         private void Send_Completed(object sender, SocketAsyncEventArgs args)
         {
             // signal the end of send
-            AutoSendReceiveEvents[ReceiveOperation].Set(); // TODO not vice-versa?
+            AutoSendReceiveEvents[ReceiveOperation].Set();
 
             if (args.SocketError == SocketError.Success)
             {
@@ -174,7 +176,7 @@ namespace TomP2P.Connection.Windows
                     }
                 }
             }
-            throw new SocketException((int) args.SocketError);
+            throw new SocketException((int)args.SocketError);
         }
 
         public void Dispose()

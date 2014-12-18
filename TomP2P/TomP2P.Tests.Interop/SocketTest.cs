@@ -37,7 +37,7 @@ namespace TomP2P.Tests.Interop
 
             Assert.AreEqual(client.SendBuffer, client.RecvBuffer);
         }
-        
+
         [Test]
         public void UdpSocketTest()
         {
@@ -66,9 +66,9 @@ namespace TomP2P.Tests.Interop
         public void TcpAsyncSocketTest()
         {
             var r = new Random();
-            const int iterations = 10;
+            const int iterations = 3;
             const int nrOfClients = 2;
-            const int bufferSize = 256;
+            const int bufferSize = 10;
             const string serverName = "localhost";
             const int serverPort = 5151;
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
@@ -78,33 +78,35 @@ namespace TomP2P.Tests.Interop
             new Thread(() => server.Start(serverEp)).Start();
 
             // prepare async clients
-            var clients = new AsyncSocketClient[nrOfClients];
-            var tasks = new Task[clients.Length];
-            var results = new bool[clients.Length][];
-            for (int i = 0; i < clients.Length; i++)
+            var tasks = new Task[nrOfClients];
+            var results = new bool[nrOfClients][];
+            for (int i = 0; i < nrOfClients; i++)
             {
-                clients[i] = new AsyncSocketClient(serverName, serverPort, bufferSize);
                 results[i] = new bool[iterations];
             }
 
             // run the async clients on separate threads
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < nrOfClients; i++)
             {
                 int i1 = i;
                 var t = Task.Run(() =>
                 {
-                    clients[i1].Connect();
-
-                    // iterations
-                    for (int j = 0; j < iterations; j++)
+                    using (var client = new AsyncSocketClient(serverName, serverPort, bufferSize))
                     {
-                        var sendBytes = new byte[bufferSize];
-                        r.NextBytes(sendBytes);
-                        var recvBytes = clients[i1].SendReceive(sendBytes);
-                        results[i1][j] = sendBytes.SequenceEqual(recvBytes);
-                    }
+                        client.Connect();
 
-                    clients[i1].Disconnect();
+                        // iterations
+                        for (int j = 0; j < iterations; j++)
+                        {
+                            var sendBytes = new byte[bufferSize];
+                            r.NextBytes(sendBytes);
+                            var recvBytes = client.SendReceive(sendBytes);
+                            var res = sendBytes.SequenceEqual(recvBytes);
+                            results[i1][j] = res;
+                        }
+
+                        client.Disconnect();
+                    }
                 });
                 tasks[i] = t;
             }
@@ -112,7 +114,7 @@ namespace TomP2P.Tests.Interop
             // await all tasks
             Task.WaitAll(tasks);
 
-            // TODO stop server
+            server.Stop();
 
             // check all results for true
             for (int i = 0; i < results.Length; i++)
