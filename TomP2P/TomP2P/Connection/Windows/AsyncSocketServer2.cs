@@ -60,21 +60,25 @@ namespace TomP2P.Connection.Windows
 
         private async Task AcceptClientConnection(ClientToken token)
         {
+            // reset token for reuse
             token.Reset();
-            await _serverSocket.AcceptAsync().ContinueWith(t => ProcessAccept(t.Result, token));
+            token.ClientHandler = await _serverSocket.AcceptAsync();
+            await ProcessAccept(token);
         }
 
-        private async Task ProcessAccept(Socket handler, ClientToken token)
+        private async Task ProcessAccept(ClientToken token)
         {
+            Socket handler = token.ClientHandler;
+
             // as soon as client is connected, post a receive to the connection
             if (handler.Connected)
             {
                 try
                 {
                     int recvBytes = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
-                    await ProcessReceive(recvBytes, handler, token);
+                    await ProcessReceive(recvBytes, token);
 
-                    // accept next client connection request
+                    // accept next client connection request, reuse token
                     await AcceptClientConnection(token);
                 }
                 catch (Exception ex)
@@ -88,8 +92,10 @@ namespace TomP2P.Connection.Windows
             }
         }
 
-        private async Task ProcessReceive(int bytesRecv, Socket handler, ClientToken token)
+        private async Task ProcessReceive(int bytesRecv, ClientToken token)
         {
+            Socket handler = token.ClientHandler;
+
             // check if remote host closed the connection
             if (bytesRecv > 0)
             {
@@ -102,10 +108,17 @@ namespace TomP2P.Connection.Windows
                         Array.Copy(token.RecvBuffer, token.SendBuffer, BufferSize);
 
                         await handler.SendAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None);
-                    }
 
-                    // read next block of data sent by the client
-                    await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler, token));
+                        // read next block of data sent by the client
+                        var bytesRecv2 = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
+                        await ProcessReceive(bytesRecv2, token);
+                    }
+                    else
+                    {
+                        // read next block of data sent by the client
+                        var bytesRecv2 = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
+                        await ProcessReceive(bytesRecv2, token);
+                    }
                 }
                 catch (Exception)
                 {

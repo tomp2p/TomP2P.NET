@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows
 {
     public class ClientToken
     {
-        public byte[] SendBuffer;
-        public byte[] RecvBuffer;
+        public Socket ClientHandler;
+        public byte[] SendBuffer { get; private set; }
+        public byte[] RecvBuffer { get; private set; }
 
         public ClientToken(int bufferSize)
         {
@@ -19,6 +16,7 @@ namespace TomP2P.Connection.Windows
 
         public void Reset()
         {
+            ClientHandler = null;
             SendBuffer = new byte[SendBuffer.Length];
             RecvBuffer = new byte[RecvBuffer.Length];
         }

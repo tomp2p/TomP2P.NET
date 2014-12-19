@@ -130,7 +130,7 @@ namespace TomP2P.Tests.Interop
         public void TcpAsyncSocket2Test()
         {
             var r = new Random();
-            const int iterations = 1;
+            const int iterations = 3;
             const int nrOfClients = 4;
             const int bufferSize = 10;
 
@@ -176,6 +176,8 @@ namespace TomP2P.Tests.Interop
 
             // await all tasks
             Task.WaitAll(tasks);
+
+            // TODO shutdown server
 
             // check all results for true
             for (int i = 0; i < results.Length; i++)
