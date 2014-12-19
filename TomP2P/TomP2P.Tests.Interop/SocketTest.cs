@@ -130,7 +130,7 @@ namespace TomP2P.Tests.Interop
         public void TcpAsyncSocket2Test()
         {
             var r = new Random();
-            const int iterations = 1;
+            const int iterations = 3;
             const int nrOfClients = 1;
             const int bufferSize = 10;
             const string serverName = "localhost";

@@ -102,10 +102,13 @@ namespace TomP2P.Connection.Windows
                     if (handler.Available == 0)
                     {
                         // return / send back
-                        // TODO process data
+                        // TODO process data, maybe use abstract method
                         Array.Copy(_recvBuffer, _sendBuffer, _recvBuffer.Length);
 
                         await handler.SendAsync(_sendBuffer, 0, _sendBuffer.Length, SocketFlags.None);
+
+                        // read next block of data sent by the client
+                        await handler.ReceiveAsync(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler));
                     }
                     else
                     {
@@ -121,11 +124,12 @@ namespace TomP2P.Connection.Windows
             }
             else
             {
-                CloseClientSocket(handler);
+                // no bytes were sent, client is done sending
+                CloseHandlerSocket(handler);
             }
         }
 
-        private void CloseClientSocket(Socket handler)
+        private void CloseHandlerSocket(Socket handler)
         {
             // TODO make UDP
             try
