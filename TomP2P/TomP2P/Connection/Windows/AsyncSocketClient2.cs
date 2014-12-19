@@ -39,12 +39,12 @@ namespace TomP2P.Connection.Windows
 
         public async Task<byte[]> SendAsync()
         {
-            
+            throw new NotImplementedException();
         }
 
         public async Task<byte[]> ReceiveAsync()
         {
-            
+            throw new NotImplementedException();
         }
     }
 }

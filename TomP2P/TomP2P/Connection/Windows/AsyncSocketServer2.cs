@@ -12,6 +12,8 @@ namespace TomP2P.Connection.Windows
 {
     public class AsyncSocketServer2
     {
+        // TODO use buffers
+
         private Socket _serverSocket;
         private readonly int _bufferSize;
 
@@ -61,13 +63,11 @@ namespace TomP2P.Connection.Windows
             // TODO when to set ContinueWith?
             // TODO handle MaxNrOfClients
 
-
-
             _serverSocket.AcceptAsync().ContinueWith(t => ProcessAccept(t.Result));
-
+            //await ProcessAccept(handler);
         }
 
-        private async void ProcessAccept(Socket handler)
+        private async Task ProcessAccept(Socket handler)
         {
             // as soon as client is connected, post a receive to the connection
             if (handler.Connected)
