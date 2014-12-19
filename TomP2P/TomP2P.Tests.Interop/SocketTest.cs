@@ -130,9 +130,17 @@ namespace TomP2P.Tests.Interop
         public void TcpAsyncSocket2Test()
         {
             var r = new Random();
-            const int iterations = 3;
-            const int nrOfClients = 1;
-            const int bufferSize = 10;
+            const int iterations = 1;
+            const int nrOfClients = 2;
+            const int bufferSize = 1000;
+
+            var tasks = new Task[nrOfClients];
+            var results = new bool[nrOfClients][];
+            for (int i = 0; i < nrOfClients; i++)
+            {
+                results[i] = new bool[iterations];
+            }
+
             const string serverName = "localhost";
             const int serverPort = 5151;
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
@@ -140,14 +148,6 @@ namespace TomP2P.Tests.Interop
             // start server socket on a separate thread
             var server = new AsyncSocketServer2(bufferSize);
             new Thread(() => server.Start(serverEp)).Start();
-
-            // prepare async clients
-            var tasks = new Task[nrOfClients];
-            var results = new bool[nrOfClients][];
-            for (int i = 0; i < nrOfClients; i++)
-            {
-                results[i] = new bool[iterations];
-            }
 
             // run the async clients on separate threads
             for (int i = 0; i < nrOfClients; i++)
@@ -159,6 +159,7 @@ namespace TomP2P.Tests.Interop
                     await client.ConnectAsync();
                     for (int j = 0; j < iterations; j++)
                     {
+                        // send random bytes and expect same bytes as echo
                         var sendBytes = new byte[bufferSize];
                         var recvBytes = new byte[bufferSize];
                         r.NextBytes(sendBytes);
