@@ -57,6 +57,7 @@
     <Compile Include="Connection\Windows\AsyncSocketServer2.cs" />
     <Compile Include="Connection\Windows\AsyncUserToken.cs" />
     <Compile Include="Connection\Windows\BufferManager.cs" />
+    <Compile Include="Connection\Windows\ClientToken.cs" />
     <Compile Include="Connection\Windows\SocketAsyncEventArgsPool.cs" />
     <Compile Include="Futures\FutureResponse.cs" />
     <Compile Include="Futures\ICancel.cs" />
