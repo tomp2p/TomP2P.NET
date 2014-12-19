@@ -131,7 +131,7 @@ namespace TomP2P.Tests.Interop
         {
             var r = new Random();
             const int iterations = 1;
-            const int nrOfClients = 2;
+            const int nrOfClients = 4;
             const int bufferSize = 10;
 
             var tasks = new Task[nrOfClients];
@@ -146,7 +146,7 @@ namespace TomP2P.Tests.Interop
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
 
             // start server socket on a separate thread
-            var server = new AsyncSocketServer2(bufferSize);
+            var server = new AsyncSocketServer2(nrOfClients, bufferSize);
             new Thread(() => server.Start(serverEp)).Start();
 
             // run the async clients on separate threads

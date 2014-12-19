@@ -13,14 +13,14 @@ namespace TomP2P.Connection.Windows
     public class AsyncSocketServer2
     {
         private Socket _serverSocket;
+        public int MaxNrOfClients { get; private set; }
         public int BufferSize { get; private set; }
-
-        public const int MaxNrOfClients = 4;
 
         private static readonly Mutex Mutex = new Mutex(); // to synchronize server execution
 
-        public AsyncSocketServer2(int bufferSize)
+        public AsyncSocketServer2(int maxNrOfClients, int bufferSize)
         {
+            MaxNrOfClients = maxNrOfClients;
             BufferSize = bufferSize;
         }
 
@@ -101,17 +101,11 @@ namespace TomP2P.Connection.Windows
                         // TODO process data, maybe use abstract method
                         Array.Copy(token.RecvBuffer, token.SendBuffer, BufferSize);
 
-                        await handler.SendAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
+                        await handler.SendAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None);
+                    }
 
-                        // read next block of data sent by the client
-                        await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler, token));
-                    }
-                    else
-                    {
-                        // TODO remove redundancy
-                        // read next block of data sent by the client
-                        await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler, token));
-                    }
+                    // read next block of data sent by the client
+                    await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler, token));
                 }
                 catch (Exception)
                 {
