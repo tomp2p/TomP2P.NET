@@ -127,7 +127,7 @@ namespace TomP2P.Tests.Interop
         }*/
 
         [Test]
-        public void TcpAsyncSocket2Test()
+        public void TcpAsyncSocketTest()
         {
             var r = new Random();
             const int iterations = 100;
@@ -155,16 +155,16 @@ namespace TomP2P.Tests.Interop
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new AsyncSocketClient2(serverName, serverPort);
-                    await client.ConnectAsync();
+                    var client = new AsyncSocketClient2();
+                    await client.ConnectAsync(serverName, serverPort);
                     for (int j = 0; j < iterations; j++)
                     {
                         // send random bytes and expect same bytes as echo
                         var sendBytes = new byte[bufferSize];
                         var recvBytes = new byte[bufferSize];
                         r.NextBytes(sendBytes);
-                        await client.SendAsync(sendBytes);
-                        await client.ReceiveAsync(recvBytes);
+                        await client.SendTcpAsync(sendBytes);
+                        await client.ReceiveTcpAsync(recvBytes);
 
                         var res = sendBytes.SequenceEqual(recvBytes);
                         results[i1][j] = res;

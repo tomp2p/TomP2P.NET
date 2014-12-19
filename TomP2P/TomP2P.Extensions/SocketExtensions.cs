@@ -101,8 +101,8 @@ namespace TomP2P.Extensions
 
             socket.BeginReceive(buffer, offset, size, socketFlags, ar =>
             {
-                var t = (TaskCompletionSource<int>) ar.AsyncState;
-                var s = (Socket) t.Task.AsyncState;
+                var t = (TaskCompletionSource<int>)ar.AsyncState;
+                var s = (Socket)t.Task.AsyncState;
                 try
                 {
                     t.TrySetResult(s.EndReceive(ar));
@@ -113,6 +113,57 @@ namespace TomP2P.Extensions
                 }
             }, tcs);
             return tcs.Task;
+        }
+
+        public static Task<int> SendToAsync(this Socket socket, byte[] buffer, int offset, int size,
+            SocketFlags socketFlags, EndPoint remoteEp)
+        {
+            var tcs = new TaskCompletionSource<int>(socket);
+
+            socket.BeginSendTo(buffer, offset, size, socketFlags, remoteEp, ar =>
+            {
+                var t = (TaskCompletionSource<int>)ar.AsyncState;
+                var s = (Socket)t.Task.AsyncState;
+                try
+                {
+                    t.TrySetResult(s.EndSendTo(ar));
+                }
+                catch (Exception ex)
+                {
+                    t.TrySetException(ex);
+                }
+            }, tcs);
+            return tcs.Task;
+        }
+
+        private static EndPoint _remoteEp;
+
+        public static Task<int> ReceiveFromAsync(this Socket socket, byte[] buffer, int offset, int size,
+            SocketFlags socketFlags, ref EndPoint remoteEp)
+        {
+            var tcs = new TaskCompletionSource<int>(socket);
+            _remoteEp = remoteEp;
+
+            socket.BeginReceiveFrom(buffer, offset, size, socketFlags, ref remoteEp, BeginReceiveFromCallback, tcs);
+            return tcs.Task;
+        }
+
+        private static void BeginReceiveFromCallback(IAsyncResult ar)
+        {
+            var t = (TaskCompletionSource<int>)ar.AsyncState;
+            var s = (Socket)t.Task.AsyncState;
+            try
+            {
+                t.TrySetResult(s.EndReceiveFrom(ar, ref _remoteEp));
+            }
+            catch (Exception ex)
+            {
+                t.TrySetException(ex);
+            }
+            finally
+            {
+                _remoteEp = null;
+            }
         }
     }
 }
