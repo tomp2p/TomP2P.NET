@@ -15,18 +15,18 @@ namespace TomP2P.Connection.Windows
         // TODO use buffers
 
         private Socket _serverSocket;
-        private readonly int _bufferSize;
+        public int BufferSize { get; private set; }
         private readonly byte[] _sendBuffer;
         private readonly byte[] _recvBuffer;
 
         public const int MaxNrOfClients = 4;
         private int _clientsCount = 0;
 
-        private static Mutex _mutex = new Mutex(); // to synchronize server execution
+        private static readonly Mutex Mutex = new Mutex(); // to synchronize server execution
 
         public AsyncSocketServer2(int bufferSize)
         {
-            _bufferSize = bufferSize;
+            BufferSize = bufferSize;
             _sendBuffer = new byte[bufferSize];
             _recvBuffer = new byte[bufferSize];
         }
@@ -59,7 +59,7 @@ namespace TomP2P.Connection.Windows
             AcceptLoop();
 
             // block current thread to receive incoming messages
-            _mutex.WaitOne();
+            Mutex.WaitOne();
         }
 
         private async Task AcceptLoop()
@@ -148,7 +148,7 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
-            _mutex.ReleaseMutex();
+            Mutex.ReleaseMutex();
         }
     }
 }
