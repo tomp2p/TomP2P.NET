@@ -130,7 +130,7 @@ namespace TomP2P.Tests.Interop
         public void TcpAsyncSocket2Test()
         {
             var r = new Random();
-            const int iterations = 3;
+            const int iterations = 1;
             const int nrOfClients = 1;
             const int bufferSize = 10;
             const string serverName = "localhost";
@@ -157,22 +157,32 @@ namespace TomP2P.Tests.Interop
                 {
                     var client = new AsyncSocketClient2(serverName, serverPort, bufferSize);
                     await client.ConnectAsync();
+                    for (int j = 0; j < iterations; j++)
+                    {
+                        var sendBytes = new byte[bufferSize];
+                        var recvBytes = new byte[bufferSize];
+                        r.NextBytes(sendBytes);
+                        await client.SendAsync(sendBytes);
+                        await client.ReceiveAsync(recvBytes);
+
+                        var res = sendBytes.SequenceEqual(recvBytes);
+                        results[i1][j] = res;
+                    }
                 });
                 tasks[i] = t;
             }
 
             // await all tasks
             Task.WaitAll(tasks);
-            var res = 42;
 
-            /*// check all results for true
+            // check all results for true
             for (int i = 0; i < results.Length; i++)
             {
                 for (int j = 0; j < results[i].Length; j++)
                 {
                     Assert.IsTrue(results[i][j]);
                 }
-            }*/
+            }
         }
     }
 }

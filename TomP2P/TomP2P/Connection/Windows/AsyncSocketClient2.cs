@@ -37,14 +37,14 @@ namespace TomP2P.Connection.Windows
             await _client.DisconnectAsync(false);
         }
 
-        public async Task<byte[]> SendAsync()
+        public async Task<int> SendAsync(byte[] buffer)
         {
-            throw new NotImplementedException();
+            return await _client.SendAsync(buffer, 0, buffer.Length, SocketFlags.None);
         }
 
-        public async Task<byte[]> ReceiveAsync()
+        public async Task<int> ReceiveAsync(byte[] buffer)
         {
-            throw new NotImplementedException();
+            return await _client.ReceiveAsync(buffer, 0, buffer.Length, SocketFlags.None);
         }
     }
 }

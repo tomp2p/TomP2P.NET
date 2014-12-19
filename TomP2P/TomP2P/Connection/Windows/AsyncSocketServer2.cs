@@ -16,6 +16,8 @@ namespace TomP2P.Connection.Windows
 
         private Socket _serverSocket;
         private readonly int _bufferSize;
+        private readonly byte[] _sendBuffer;
+        private readonly byte[] _recvBuffer;
 
         public const int MaxNrOfClients = 4;
         private int _clientsCount = 0;
@@ -25,6 +27,8 @@ namespace TomP2P.Connection.Windows
         public AsyncSocketServer2(int bufferSize)
         {
             _bufferSize = bufferSize;
+            _sendBuffer = new byte[bufferSize];
+            _recvBuffer = new byte[bufferSize];
         }
 
         public void Start(IPEndPoint localEndPoint)
@@ -63,8 +67,8 @@ namespace TomP2P.Connection.Windows
             // TODO when to set ContinueWith?
             // TODO handle MaxNrOfClients
 
+            // TODO enqueue tasks
             _serverSocket.AcceptAsync().ContinueWith(t => ProcessAccept(t.Result));
-            //await ProcessAccept(handler);
         }
 
         private async Task ProcessAccept(Socket handler)
@@ -74,7 +78,8 @@ namespace TomP2P.Connection.Windows
             {
                 try
                 {
-                    await handler.ReceiveAsync(new byte[0], 0, 0, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler));
+                    int recvBytes = await handler.ReceiveAsync(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None);
+                    await ProcessReceive(recvBytes, handler);
                 }
                 catch (Exception ex)
                 {
@@ -87,7 +92,7 @@ namespace TomP2P.Connection.Windows
             }
         }
 
-        private async void ProcessReceive(int bytesRecv, Socket handler)
+        private async Task ProcessReceive(int bytesRecv, Socket handler)
         {
             // check if remote host closed the connection
             if (bytesRecv > 0)
@@ -97,12 +102,15 @@ namespace TomP2P.Connection.Windows
                     if (handler.Available == 0)
                     {
                         // return / send back
-                        await handler.SendAsync(new byte[0], 0, 0, SocketFlags.None);
+                        // TODO process data
+                        Array.Copy(_recvBuffer, _sendBuffer, _recvBuffer.Length);
+
+                        await handler.SendAsync(_sendBuffer, 0, _sendBuffer.Length, SocketFlags.None);
                     }
                     else
                     {
                         // read next block of data sent by the client
-                        await handler.ReceiveAsync(new byte[0], 0, 0, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler));
+                        await handler.ReceiveAsync(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None).ContinueWith(t => ProcessReceive(t.Result, handler));
                     }
                 }
                 catch (Exception)
