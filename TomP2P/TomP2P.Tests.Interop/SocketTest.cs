@@ -168,6 +168,7 @@ namespace TomP2P.Tests.Interop
                         var res = sendBytes.SequenceEqual(recvBytes);
                         results[i1][j] = res;
                     }
+                    await client.DisconnectAsync();
                 });
                 tasks[i] = t;
             }
