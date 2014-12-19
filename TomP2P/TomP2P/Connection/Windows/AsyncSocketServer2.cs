@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 using TomP2P.Extensions;
 
 namespace TomP2P.Connection.Windows
 {
     public class AsyncSocketServer2
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         private Socket _serverSocket;
         public int MaxNrOfClients { get; private set; }
         public int BufferSize { get; private set; }
@@ -77,19 +77,25 @@ namespace TomP2P.Connection.Windows
                 {
                     int recvBytes = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
                     await ProcessReceive(recvBytes, token);
-
-                    // accept next client connection request, reuse token
-                    await AcceptClientConnection(token);
                 }
                 catch (Exception ex)
                 {
-                    throw ex; // TODO message
+                    throw new Exception(String.Format("Error when processing data received from {0}:\r\n{1}", handler.RemoteEndPoint, ex));
                 }
+
+                // accept next client connection request, reuse token
+                await AcceptClientConnection(token);
             }
             else
             {
                 throw new SocketException((int)SocketError.NotConnected);
             }
+        }
+
+        private async Task Receive(ClientToken token)
+        {
+            var t = token.ClientHandler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
+            await ProcessReceive(t.Result, token);
         }
 
         private async Task ProcessReceive(int bytesRecv, ClientToken token)
@@ -110,20 +116,17 @@ namespace TomP2P.Connection.Windows
                         await handler.SendAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None);
 
                         // read next block of data sent by the client
-                        var bytesRecv2 = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
-                        await ProcessReceive(bytesRecv2, token);
+                        await Receive(token);
                     }
                     else
                     {
                         // read next block of data sent by the client
-                        var bytesRecv2 = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
-                        await ProcessReceive(bytesRecv2, token);
+                        await Receive(token);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // TODO close connection
-                    throw;
+                    ProcessError(ex, token);
                 }
             }
             else
@@ -131,6 +134,14 @@ namespace TomP2P.Connection.Windows
                 // no bytes were sent, client is done sending
                 CloseHandlerSocket(handler);
             }
+        }
+
+        private void ProcessError(Exception ex, ClientToken token)
+        {
+            var localEp = token.ClientHandler.LocalEndPoint as IPEndPoint;
+            Logger.Error("Error with involved endpoint {0}.\r\n{1}", localEp, ex);
+
+            CloseHandlerSocket(token.ClientHandler);
         }
 
         private void CloseHandlerSocket(Socket handler)
