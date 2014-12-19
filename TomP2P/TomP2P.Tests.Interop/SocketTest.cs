@@ -177,7 +177,7 @@ namespace TomP2P.Tests.Interop
             // await all tasks
             Task.WaitAll(tasks);
 
-            // TODO shutdown server
+            server.Stop();
 
             // check all results for true
             for (int i = 0; i < results.Length; i++)
