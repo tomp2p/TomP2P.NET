@@ -68,6 +68,7 @@
     <Compile Include="Netty\Buffer\Unpooled.cs" />
     <Compile Include="Netty\Buffer\UnpooledByteBufAllocator.cs" />
     <Compile Include="Netty\Buffer\UnpooledHeapByteBuf.cs" />
+    <Compile Include="SocketExtensions.cs" />
     <Compile Include="Sockets\SyncClient.cs" />
     <Compile Include="Sockets\SyncServer.cs" />
     <Compile Include="Workaround\AtomicInteger.cs" />

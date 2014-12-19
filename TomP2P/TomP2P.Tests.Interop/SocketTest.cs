@@ -125,5 +125,69 @@ namespace TomP2P.Tests.Interop
                 }
             }
         }
+
+        [Test]
+        public void TcpAsyncSocket2Test()
+        {
+            var r = new Random();
+            const int iterations = 3;
+            const int nrOfClients = 2;
+            const int bufferSize = 10;
+            const string serverName = "localhost";
+            const int serverPort = 5151;
+            var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
+
+            // start server socket on a separate thread
+            var server = new AsyncSocketServer(nrOfClients, bufferSize);
+            new Thread(() => server.Start(serverEp)).Start();
+
+            // prepare async clients
+            var tasks = new Task[nrOfClients];
+            var results = new bool[nrOfClients][];
+            for (int i = 0; i < nrOfClients; i++)
+            {
+                results[i] = new bool[iterations];
+            }
+
+            // run the async clients on separate threads
+            for (int i = 0; i < nrOfClients; i++)
+            {
+                int i1 = i;
+                var t = Task.Run(() =>
+                {
+                    using (var client = new AsyncSocketClient(serverName, serverPort, bufferSize))
+                    {
+                        client.Connect();
+
+                        // iterations
+                        for (int j = 0; j < iterations; j++)
+                        {
+                            var sendBytes = new byte[bufferSize];
+                            r.NextBytes(sendBytes);
+                            var recvBytes = client.SendReceive(sendBytes);
+                            var res = sendBytes.SequenceEqual(recvBytes);
+                            results[i1][j] = res;
+                        }
+
+                        client.Disconnect();
+                    }
+                });
+                tasks[i] = t;
+            }
+
+            // await all tasks
+            Task.WaitAll(tasks);
+
+            server.Stop();
+
+            // check all results for true
+            for (int i = 0; i < results.Length; i++)
+            {
+                for (int j = 0; j < results[i].Length; j++)
+                {
+                    Assert.IsTrue(results[i][j]);
+                }
+            }
+        }
     }
 }
