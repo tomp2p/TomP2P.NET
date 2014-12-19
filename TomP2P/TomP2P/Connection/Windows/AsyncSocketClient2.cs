@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Extensions;
 
@@ -13,12 +9,9 @@ namespace TomP2P.Connection.Windows
     {
         private readonly Socket _client;
         private readonly IPEndPoint _hostEndpoint;
-        private readonly int _bufferSize;
 
-        public AsyncSocketClient2(string hostName, int hostPort, int bufferSize)
+        public AsyncSocketClient2(string hostName, int hostPort)
         {
-            _bufferSize = bufferSize;
-
             IPHostEntry hostInfo = Dns.GetHostEntry(hostName);
 
             // instantiate the client endpoint and socket

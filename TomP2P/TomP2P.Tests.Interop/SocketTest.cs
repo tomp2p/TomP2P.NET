@@ -155,7 +155,7 @@ namespace TomP2P.Tests.Interop
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new AsyncSocketClient2(serverName, serverPort, bufferSize);
+                    var client = new AsyncSocketClient2(serverName, serverPort);
                     await client.ConnectAsync();
                     for (int j = 0; j < iterations; j++)
                     {
