@@ -132,7 +132,7 @@ namespace TomP2P.Tests.Interop
             var r = new Random();
             const int iterations = 1;
             const int nrOfClients = 2;
-            const int bufferSize = 1000;
+            const int bufferSize = 10;
 
             var tasks = new Task[nrOfClients];
             var results = new bool[nrOfClients][];

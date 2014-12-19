@@ -55,20 +55,19 @@ namespace TomP2P.Connection.Windows
                 _serverSocket.Listen(MaxNrOfClients);
             }
 
-            // accept
-            AcceptLoop();
+            // accept MaxNrOfClients simultaneous connections
+            for (int i = 0; i < MaxNrOfClients; i++)
+            {
+                AcceptClientConnection();
+            }
 
             // block current thread to receive incoming messages
-            Mutex.WaitOne();
+            Mutex.WaitOne(); // TODO needed?
         }
 
-        private async Task AcceptLoop()
+        private async Task AcceptClientConnection()
         {
-            // TODO when to set ContinueWith?
-            // TODO handle MaxNrOfClients
-
-            // TODO enqueue tasks
-            _serverSocket.AcceptAsync().ContinueWith(t => ProcessAccept(t.Result));
+            await _serverSocket.AcceptAsync().ContinueWith(t => ProcessAccept(t.Result));
         }
 
         private async Task ProcessAccept(Socket handler)
@@ -80,6 +79,9 @@ namespace TomP2P.Connection.Windows
                 {
                     int recvBytes = await handler.ReceiveAsync(_recvBuffer, 0, _recvBuffer.Length, SocketFlags.None);
                     await ProcessReceive(recvBytes, handler);
+
+                    // accept next client connection request
+                    await AcceptClientConnection();
                 }
                 catch (Exception ex)
                 {
@@ -148,6 +150,7 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
+            _serverSocket.Close();
             Mutex.ReleaseMutex();
         }
     }
