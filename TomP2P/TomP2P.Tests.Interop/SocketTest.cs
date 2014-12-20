@@ -191,13 +191,13 @@ namespace TomP2P.Tests.Interop
             }
         }
 
-        /*[Test]
+        [Test]
         public void UdpAsyncSocketTest()
         {
             var r = new Random();
-            const int iterations = 100;
-            const int nrOfClients = 5;
-            const int bufferSize = 1000;
+            const int iterations = 1;
+            const int nrOfClients = 1;
+            const int bufferSize = 10;
 
             var tasks = new Task[nrOfClients];
             var results = new bool[nrOfClients][];
@@ -212,7 +212,7 @@ namespace TomP2P.Tests.Interop
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
 
             // start server socket on a separate thread
-            var server = new AsyncServerSocket(serverEp, nrOfClients, bufferSize);
+            var server = new UdpServerSocket(serverEp, nrOfClients, bufferSize);
             new Thread(server.Start).Start();
 
             // run the async clients on separate threads
@@ -221,7 +221,7 @@ namespace TomP2P.Tests.Interop
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new AsyncClientSocket(new IPEndPoint(IPAddress.Any, clientPort + i1));
+                    var client = new udp(new IPEndPoint(IPAddress.Any, clientPort + i1));
                     await client.ConnectAsync(serverName, serverPort);
                     for (int j = 0; j < iterations; j++)
                     {
@@ -254,6 +254,6 @@ namespace TomP2P.Tests.Interop
                     Assert.IsTrue(results[i][j]);
                 }
             }
-        }*/
+        }
     }
 }

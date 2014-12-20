@@ -26,7 +26,7 @@ namespace TomP2P.Connection.Windows
             BufferSize = bufferSize;
         }
 
-        protected abstract Socket InstantiateSocket();
+        protected abstract Socket CreateServerSocket();
 
         protected abstract Task<int> Send(ClientToken token);
 
@@ -36,7 +36,7 @@ namespace TomP2P.Connection.Windows
 
         public void Start()
         {
-            _serverSocket = InstantiateSocket();
+            _serverSocket = CreateServerSocket();
 
             // bind
             if (LocalEndPoint.AddressFamily == AddressFamily.InterNetworkV6)

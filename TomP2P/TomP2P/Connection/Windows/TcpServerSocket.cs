@@ -12,7 +12,7 @@ namespace TomP2P.Connection.Windows
         {
         }
 
-        protected override Socket InstantiateSocket()
+        protected override Socket CreateServerSocket()
         {
             return new Socket(LocalEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
