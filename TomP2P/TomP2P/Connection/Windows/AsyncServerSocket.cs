@@ -11,6 +11,8 @@ namespace TomP2P.Connection.Windows
         
         protected readonly IPEndPoint LocalEndPoint;
 
+        protected volatile bool IsStopped;
+
         protected AsyncServerSocket(IPEndPoint localEndPoint, int maxNrOfClients, int bufferSize)
         {
             LocalEndPoint = localEndPoint;
@@ -48,11 +50,13 @@ namespace TomP2P.Connection.Windows
             {
                 ServiceLoop(new ClientToken(BufferSize));
             }
+            IsStopped = false;
         }
 
         protected void Stop(Socket serverSocket)
         {
             serverSocket.Close();
+            IsStopped = true;
         }
 
         protected abstract Task ServiceLoop(ClientToken token);

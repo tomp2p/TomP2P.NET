@@ -5,8 +5,16 @@ namespace TomP2P.Connection.Windows
 {
     public class ClientToken
     {
-        public Socket ClientHandler; // for TCP connections
-        public EndPoint RemotEndPoint; // for UDP connections
+        /// <summary>
+        /// Used for TCP connections. Represents the handler socket for the accepted client connection.
+        /// </summary>
+        public Socket ClientHandler;
+
+        /// <summary>
+        /// Used for UDP connections. Represents the remote end point from which to receive or sent to.
+        /// </summary>
+        public EndPoint RemotEndPoint;
+
         public byte[] SendBuffer { get; private set; }
         public byte[] RecvBuffer { get; private set; }
 

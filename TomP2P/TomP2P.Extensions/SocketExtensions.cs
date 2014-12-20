@@ -152,7 +152,7 @@ namespace TomP2P.Extensions
                 {
                     int recv = s.EndReceiveFrom(ar, ref ep);
 
-                    var output = new ReceiveFromOutput(recv, ep); // TODO ref param needed?
+                    var output = new ReceiveFromOutput(recv, ep);
                     t.TrySetResult(output);
                 }
                 catch (Exception ex)

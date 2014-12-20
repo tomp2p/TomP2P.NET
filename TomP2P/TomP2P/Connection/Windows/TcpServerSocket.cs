@@ -31,12 +31,15 @@ namespace TomP2P.Connection.Windows
 
         protected override async Task ServiceLoop(ClientToken token)
         {
-            // reset token for reuse
-            token.Reset();
+            while (!IsStopped)
+            {
+                // reset token for reuse
+                token.Reset();
 
-            // accept next client TCP connection
-            token.ClientHandler = await _serverSocket.AcceptAsync();
-            await ProcessAccept(token);
+                // accept next client TCP connection
+                token.ClientHandler = await _serverSocket.AcceptAsync();
+                await ProcessAccept(token);
+            }
         }
 
         private async Task ProcessAccept(ClientToken token)
@@ -55,9 +58,6 @@ namespace TomP2P.Connection.Windows
                 {
                     throw new Exception(String.Format("Error when processing data received from {0}:\r\n{1}", handler.RemoteEndPoint, ex));
                 }
-
-                // accept next client connection request, reuse token
-                await ServiceLoop(token);
             }
             else
             {
