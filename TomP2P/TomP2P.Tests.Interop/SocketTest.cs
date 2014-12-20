@@ -147,7 +147,7 @@ namespace TomP2P.Tests.Interop
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
 
             // start server socket on a separate thread
-            var server = new AsyncSocketServer2(serverEp, nrOfClients, bufferSize);
+            var server = new TcpServerSocket(serverEp, nrOfClients, bufferSize);
             new Thread(server.Start).Start();
 
             // run the async clients on separate threads
@@ -156,7 +156,7 @@ namespace TomP2P.Tests.Interop
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new AsyncSocketClient2(new IPEndPoint(IPAddress.Any, clientPort + i1));
+                    var client = new TcpClientSocket(new IPEndPoint(IPAddress.Any, clientPort + i1));
                     await client.ConnectAsync(serverName, serverPort);
                     for (int j = 0; j < iterations; j++)
                     {
@@ -164,8 +164,9 @@ namespace TomP2P.Tests.Interop
                         var sendBytes = new byte[bufferSize];
                         var recvBytes = new byte[bufferSize];
                         r.NextBytes(sendBytes);
-                        await client.SendTcpAsync(sendBytes);
-                        await client.ReceiveTcpAsync(recvBytes);
+
+                        await client.Send(sendBytes);
+                        await client.Receive(recvBytes);
 
                         var res = sendBytes.SequenceEqual(recvBytes);
                         results[i1][j] = res;
@@ -189,5 +190,70 @@ namespace TomP2P.Tests.Interop
                 }
             }
         }
+
+        /*[Test]
+        public void UdpAsyncSocketTest()
+        {
+            var r = new Random();
+            const int iterations = 100;
+            const int nrOfClients = 5;
+            const int bufferSize = 1000;
+
+            var tasks = new Task[nrOfClients];
+            var results = new bool[nrOfClients][];
+            for (int i = 0; i < nrOfClients; i++)
+            {
+                results[i] = new bool[iterations];
+            }
+
+            const string serverName = "localhost";
+            const int serverPort = 5150;
+            const int clientPort = 5151;
+            var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
+
+            // start server socket on a separate thread
+            var server = new AsyncServerSocket(serverEp, nrOfClients, bufferSize);
+            new Thread(server.Start).Start();
+
+            // run the async clients on separate threads
+            for (int i = 0; i < nrOfClients; i++)
+            {
+                int i1 = i;
+                var t = Task.Run(async () =>
+                {
+                    var client = new AsyncClientSocket(new IPEndPoint(IPAddress.Any, clientPort + i1));
+                    await client.ConnectAsync(serverName, serverPort);
+                    for (int j = 0; j < iterations; j++)
+                    {
+                        // send random bytes and expect same bytes as echo
+                        var sendBytes = new byte[bufferSize];
+                        var recvBytes = new byte[bufferSize];
+                        r.NextBytes(sendBytes);
+
+                        await client.SendUdpAsync(sendBytes);
+                        await client.ReceiveUdpAsync(recvBytes);
+
+                        var res = sendBytes.SequenceEqual(recvBytes);
+                        results[i1][j] = res;
+                    }
+                    await client.DisconnectAsync();
+                });
+                tasks[i] = t;
+            }
+
+            // await all tasks
+            Task.WaitAll(tasks);
+
+            server.Stop();
+
+            // check all results for true
+            for (int i = 0; i < results.Length; i++)
+            {
+                for (int j = 0; j < results[i].Length; j++)
+                {
+                    Assert.IsTrue(results[i][j]);
+                }
+            }
+        }*/
     }
 }

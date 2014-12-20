@@ -104,6 +104,7 @@ namespace TomP2P.Extensions.Sockets
 
                 // CONNECT
                 // try each address
+                // TODO not needed for UDP
                 foreach (var serverAddress in ipHostInfo.AddressList)
                 {
                     // create a UDP/IP socket

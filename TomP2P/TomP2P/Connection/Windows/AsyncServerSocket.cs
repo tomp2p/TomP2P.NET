@@ -8,40 +8,47 @@ using TomP2P.Extensions;
 
 namespace TomP2P.Connection.Windows
 {
-    public class AsyncSocketServer2
+    public abstract class AsyncServerSocket
     {
-        private readonly IPEndPoint _localEndPoint;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-        private Socket _serverSocket;
+        
         public int MaxNrOfClients { get; private set; }
         public int BufferSize { get; private set; }
-
+        
+        protected readonly IPEndPoint LocalEndPoint;
+        private Socket _serverSocket;
         private static readonly Mutex Mutex = new Mutex(); // to synchronize server execution
 
-        public AsyncSocketServer2(IPEndPoint localEndPoint, int maxNrOfClients, int bufferSize)
+        protected AsyncServerSocket(IPEndPoint localEndPoint, int maxNrOfClients, int bufferSize)
         {
-            _localEndPoint = localEndPoint;
+            LocalEndPoint = localEndPoint;
             MaxNrOfClients = maxNrOfClients;
             BufferSize = bufferSize;
         }
 
+        protected abstract Socket InstantiateSocket();
+
+        protected abstract Task Send(ClientToken token);
+
+        protected abstract Task Receive(ClientToken token);
+
+        protected abstract void CloseHandlerSocket(Socket handler);
+
         public void Start()
         {
-            // TODO this is TCP only atm, support UDP too
-            _serverSocket = new Socket(_localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocket = InstantiateSocket();
 
             // bind
-            if (_localEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
+            if (LocalEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 // set dual-mode (IPv4 & IPv6) for the socket listener
                 // see http://blogs.msdn.com/wndp/archive/2006/10/24/creating-ip-agnostic-applications-part-2-dual-mode-sockets.aspx
                 _serverSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                _serverSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, _localEndPoint.Port));
+                _serverSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, LocalEndPoint.Port));
             }
             else
             {
-                _serverSocket.Bind(_localEndPoint);
+                _serverSocket.Bind(LocalEndPoint);
             }
 
             // listen
@@ -77,8 +84,7 @@ namespace TomP2P.Connection.Windows
             {
                 try
                 {
-                    int recvBytes = await handler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
-                    await ProcessReceive(recvBytes, token);
+                    await Receive(token);
                 }
                 catch (Exception ex)
                 {
@@ -94,13 +100,7 @@ namespace TomP2P.Connection.Windows
             }
         }
 
-        private async Task Receive(ClientToken token)
-        {
-            var t = token.ClientHandler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
-            await ProcessReceive(t.Result, token);
-        }
-
-        private async Task ProcessReceive(int bytesRecv, ClientToken token)
+        protected async Task ProcessReceive(int bytesRecv, ClientToken token)
         {
             Socket handler = token.ClientHandler;
 
@@ -115,7 +115,7 @@ namespace TomP2P.Connection.Windows
                         // TODO process data, maybe use abstract method
                         Array.Copy(token.RecvBuffer, token.SendBuffer, BufferSize);
 
-                        await handler.SendAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None);
+                        await Send(token);
 
                         // read next block of data sent by the client
                         await Receive(token);
@@ -144,23 +144,6 @@ namespace TomP2P.Connection.Windows
             Logger.Error("Error with involved endpoint {0}.\r\n{1}", localEp, ex);
 
             CloseHandlerSocket(token.ClientHandler);
-        }
-
-        private void CloseHandlerSocket(Socket handler)
-        {
-            // TODO make UDP
-            try
-            {
-                handler.Shutdown(SocketShutdown.Send);
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                handler.Close();
-            }
         }
 
         public void Stop()
