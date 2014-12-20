@@ -17,16 +17,15 @@ namespace TomP2P.Connection.Windows
             return new Socket(LocalEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        protected override async Task Receive(ClientToken token)
+        protected override async Task<int> Send(ClientToken token)
         {
-            var t = token.ClientHandler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
-            await ProcessReceive(t.Result, token);
+            return await token.ClientHandler.SendAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None);
+            // TODO shutdown/close needed?
         }
 
-        protected override async Task Send(ClientToken token)
+        protected override async Task<int> Receive(ClientToken token)
         {
-            await token.ClientHandler.SendAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None);
-            // TODO shutdown/close needed?
+            return await token.ClientHandler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
         }
 
         protected override void CloseHandlerSocket(Socket handler)

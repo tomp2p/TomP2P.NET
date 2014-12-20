@@ -28,9 +28,9 @@ namespace TomP2P.Connection.Windows
 
         protected abstract Socket InstantiateSocket();
 
-        protected abstract Task Send(ClientToken token);
+        protected abstract Task<int> Send(ClientToken token);
 
-        protected abstract Task Receive(ClientToken token);
+        protected abstract Task<int> Receive(ClientToken token);
 
         protected abstract void CloseHandlerSocket(Socket handler);
 
@@ -84,7 +84,8 @@ namespace TomP2P.Connection.Windows
             {
                 try
                 {
-                    await Receive(token);
+                    var t = Receive(token);
+                    await ProcessReceive(t.Result, token);
                 }
                 catch (Exception ex)
                 {
@@ -118,12 +119,14 @@ namespace TomP2P.Connection.Windows
                         await Send(token);
 
                         // read next block of data sent by the client
-                        await Receive(token);
+                        var t = Receive(token);
+                        await ProcessReceive(t.Result, token);
                     }
                     else
                     {
                         // read next block of data sent by the client
-                        await Receive(token);
+                        var t = Receive(token);
+                        await ProcessReceive(t.Result, token);
                     }
                 }
                 catch (Exception ex)
