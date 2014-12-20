@@ -136,13 +136,12 @@ namespace TomP2P.Extensions
             return tcs.Task;
         }
 
-        private static EndPoint _remoteEp;
-
         public static Task<int> ReceiveFromAsync(this Socket socket, byte[] buffer, int offset, int size,
-            SocketFlags socketFlags, ref EndPoint remoteEp)
+            SocketFlags socketFlags, EndPoint remoteEp)
         {
-            var tcs = new TaskCompletionSource<int>(socket);
-            _remoteEp = remoteEp;
+            var refHolder = new RefHolder(socket, ref remoteEp);
+
+            var tcs = new TaskCompletionSource<int>(refHolder);
 
             socket.BeginReceiveFrom(buffer, offset, size, socketFlags, ref remoteEp, BeginReceiveFromCallback, tcs);
             return tcs.Task;
@@ -151,18 +150,37 @@ namespace TomP2P.Extensions
         private static void BeginReceiveFromCallback(IAsyncResult ar)
         {
             var t = (TaskCompletionSource<int>)ar.AsyncState;
-            var s = (Socket)t.Task.AsyncState;
+            var rh = (RefHolder)t.Task.AsyncState;
+            var remoteEp = rh.RemoteEp;
             try
             {
-                t.TrySetResult(s.EndReceiveFrom(ar, ref _remoteEp));
+                t.TrySetResult(rh.Socket.EndReceiveFrom(ar, ref remoteEp));
             }
             catch (Exception ex)
             {
                 t.TrySetException(ex);
             }
-            finally
+        }
+
+        private struct RefHolder
+        {
+            private readonly Socket _socket;
+            private readonly EndPoint _remoteEp;
+
+            public RefHolder(Socket socket, ref EndPoint remoteEp)
             {
-                _remoteEp = null;
+                _socket = socket;
+                _remoteEp = remoteEp;
+            }
+
+            public Socket Socket
+            {
+                get { return _socket; }
+            }
+
+            public EndPoint RemoteEp
+            {
+                get { return _remoteEp; }
             }
         }
     }

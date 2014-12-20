@@ -10,6 +10,7 @@ namespace TomP2P.Connection.Windows
 {
     public class AsyncSocketServer2
     {
+        private readonly IPEndPoint _localEndPoint;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private Socket _serverSocket;
@@ -18,28 +19,29 @@ namespace TomP2P.Connection.Windows
 
         private static readonly Mutex Mutex = new Mutex(); // to synchronize server execution
 
-        public AsyncSocketServer2(int maxNrOfClients, int bufferSize)
+        public AsyncSocketServer2(IPEndPoint localEndPoint, int maxNrOfClients, int bufferSize)
         {
+            _localEndPoint = localEndPoint;
             MaxNrOfClients = maxNrOfClients;
             BufferSize = bufferSize;
         }
 
-        public void Start(IPEndPoint localEndPoint)
+        public void Start()
         {
             // TODO this is TCP only atm, support UDP too
-            _serverSocket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocket = new Socket(_localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             // bind
-            if (localEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
+            if (_localEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
             {
                 // set dual-mode (IPv4 & IPv6) for the socket listener
                 // see http://blogs.msdn.com/wndp/archive/2006/10/24/creating-ip-agnostic-applications-part-2-dual-mode-sockets.aspx
                 _serverSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                _serverSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, localEndPoint.Port));
+                _serverSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, _localEndPoint.Port));
             }
             else
             {
-                _serverSocket.Bind(localEndPoint);
+                _serverSocket.Bind(_localEndPoint);
             }
 
             // listen

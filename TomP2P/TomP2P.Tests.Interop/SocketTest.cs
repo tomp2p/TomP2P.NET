@@ -131,8 +131,8 @@ namespace TomP2P.Tests.Interop
         {
             var r = new Random();
             const int iterations = 100;
-            const int nrOfClients = 4;
-            const int bufferSize = 10;
+            const int nrOfClients = 5;
+            const int bufferSize = 1000;
 
             var tasks = new Task[nrOfClients];
             var results = new bool[nrOfClients][];
@@ -142,12 +142,13 @@ namespace TomP2P.Tests.Interop
             }
 
             const string serverName = "localhost";
-            const int serverPort = 5151;
+            const int serverPort = 5150;
+            const int clientPort = 5151;
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
 
             // start server socket on a separate thread
-            var server = new AsyncSocketServer2(nrOfClients, bufferSize);
-            new Thread(() => server.Start(serverEp)).Start();
+            var server = new AsyncSocketServer2(serverEp, nrOfClients, bufferSize);
+            new Thread(server.Start).Start();
 
             // run the async clients on separate threads
             for (int i = 0; i < nrOfClients; i++)
@@ -155,7 +156,7 @@ namespace TomP2P.Tests.Interop
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new AsyncSocketClient2();
+                    var client = new AsyncSocketClient2(new IPEndPoint(IPAddress.Any, clientPort + i1));
                     await client.ConnectAsync(serverName, serverPort);
                     for (int j = 0; j < iterations; j++)
                     {
