@@ -3,6 +3,9 @@ using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows
 {
+    /// <summary>
+    /// Holds the necessary information for a server-side session.
+    /// </summary>
     public class ClientToken
     {
         /// <summary>

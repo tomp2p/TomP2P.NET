@@ -49,22 +49,27 @@ namespace TomP2P.Connection.Windows
 
         public async Task DisconnectAsync()
         {
-            await _tcpClient.DisconnectAsync(false);
+            // ensure all data is sent and received before socket is closed with
+            // Shutdown() before disconnect
+            _tcpClient.Shutdown(SocketShutdown.Both);
+
+            await _tcpClient.DisconnectAsync(false); // TODO make socket re-usable?
         }
 
         public async Task<int> SendAsync(byte[] buffer)
         {
             return await _tcpClient.SendAsync(buffer, 0, buffer.Length, SocketFlags.None);
-
-            // TODO TCP shutdown/close needed?
         }
 
         public async Task<int> ReceiveAsync(byte[] buffer)
         {
             return await _tcpClient.ReceiveAsync(buffer, 0, buffer.Length, SocketFlags.None);
+        }
 
-            // TODO loop as long as recvBytes == 0?
-            // TODO shutdown/close needed?
+        public override void Close()
+        {
+            _tcpClient.Shutdown(SocketShutdown.Both);
+            _tcpClient.Close();
         }
     }
 }

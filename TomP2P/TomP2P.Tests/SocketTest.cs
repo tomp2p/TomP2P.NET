@@ -56,6 +56,7 @@ namespace TomP2P.Tests
                         results[i1][j] = res;
                     }
                     await client.DisconnectAsync();
+                    client.Close();
                 });
                 tasks[i] = t;
             }
@@ -119,6 +120,7 @@ namespace TomP2P.Tests
                         var res = sendBytes.SequenceEqual(recvBytes);
                         results[i1][j] = res;
                     }
+                    client.Close();
                 });
                 tasks[i] = t;
             }

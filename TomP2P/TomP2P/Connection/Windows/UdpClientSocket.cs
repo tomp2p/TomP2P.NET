@@ -21,8 +21,15 @@ namespace TomP2P.Connection.Windows
 
         public async Task<int> ReceiveAsync(byte[] buffer, EndPoint remoteEndPoint)
         {
+            // TODO no binding needed? maybe when receiveFrom is called before sendTo
+            // TODO also see http://msdn.microsoft.com/en-us/library/system.net.sockets.socket.bind(v=vs.110).aspx
             var res = await _udpClient.ReceiveFromAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
             return res.BytesReceived;
+        }
+
+        public override void Close()
+        {
+            _udpClient.Close();
         }
     }
 }

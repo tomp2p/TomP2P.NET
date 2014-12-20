@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -8,7 +9,7 @@ namespace TomP2P.Connection.Windows
     {
         public int MaxNrOfClients { get; private set; }
         public int BufferSize { get; private set; }
-        
+
         protected readonly IPEndPoint LocalEndPoint;
 
         protected volatile bool IsStopped;
@@ -55,6 +56,17 @@ namespace TomP2P.Connection.Windows
 
         protected void Stop(Socket serverSocket)
         {
+            if (serverSocket.ProtocolType == ProtocolType.Tcp)
+            {
+                try
+                {
+                    serverSocket.Shutdown(SocketShutdown.Both);
+                }
+                catch (SocketException)
+                {
+                    // TODO exception is thrown, correct to ignore it here?
+                }
+            }
             serverSocket.Close();
             IsStopped = true;
         }

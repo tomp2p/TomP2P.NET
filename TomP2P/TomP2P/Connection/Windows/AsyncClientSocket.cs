@@ -9,5 +9,7 @@ namespace TomP2P.Connection.Windows
         {
             LocalEndPoint = localEndPoint;
         }*/
+
+        public abstract void Close();
     }
 }
