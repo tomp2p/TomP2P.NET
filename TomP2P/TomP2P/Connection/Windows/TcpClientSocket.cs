@@ -17,14 +17,14 @@ namespace TomP2P.Connection.Windows
             return new Socket(addressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        public override async Task<int> Send(byte[] buffer)
+        public async Task<int> SendAsync(byte[] buffer)
         {
             return await ClientSocket.SendAsync(buffer, 0, buffer.Length, SocketFlags.None);
 
             // TODO TCP shutdown/close needed?
         }
 
-        public override async Task<int> Receive(byte[] buffer)
+        public async Task<int> ReceiveAsync(byte[] buffer)
         {
             return await ClientSocket.ReceiveAsync(buffer, 0, buffer.Length, SocketFlags.None);
 

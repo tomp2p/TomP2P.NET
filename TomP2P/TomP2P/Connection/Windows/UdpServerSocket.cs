@@ -8,7 +8,7 @@ namespace TomP2P.Connection.Windows
 {
     public class UdpServerSocket : AsyncServerSocket
     {
-        private EndPoint _remoteEp = new IPEndPoint(IPAddress.Any, 0);
+        private readonly EndPoint _remoteEp = new IPEndPoint(IPAddress.Any, 0);
 
         public UdpServerSocket(IPEndPoint localEndPoint, int maxNrOfClients, int bufferSize)
             : base(localEndPoint, maxNrOfClients, bufferSize)
@@ -20,13 +20,13 @@ namespace TomP2P.Connection.Windows
             return new Socket(LocalEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
         }
 
-        protected override async Task<int> Send(ClientToken token)
+        protected override async Task<int> SendAsync(ClientToken token)
         {
             // TODO correct endpoint??
             return await token.ClientHandler.SendToAsync(token.SendBuffer, 0, BufferSize, SocketFlags.None, _remoteEp);
         }
 
-        protected override async Task<int> Receive(ClientToken token)
+        protected override async Task<int> ReceiveAsync(ClientToken token)
         {
             // TODO correct endpoint?
             // TODO how can remoteEp be set to correct address without ref?

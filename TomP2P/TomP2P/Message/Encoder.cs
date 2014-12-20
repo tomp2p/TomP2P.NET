@@ -35,7 +35,7 @@ namespace TomP2P.Message
             }
             else
             {
-                Logger.Debug("Send a follow-up message {0}.", message);
+                Logger.Debug("SendAsync a follow-up message {0}.", message);
                 _resume = true;
             }
 

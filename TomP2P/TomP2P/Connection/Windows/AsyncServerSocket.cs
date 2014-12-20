@@ -28,9 +28,9 @@ namespace TomP2P.Connection.Windows
 
         protected abstract Socket CreateServerSocket();
 
-        protected abstract Task<int> Send(ClientToken token);
+        protected abstract Task<int> SendAsync(ClientToken token);
 
-        protected abstract Task<int> Receive(ClientToken token);
+        protected abstract Task<int> ReceiveAsync(ClientToken token);
 
         protected abstract void CloseHandlerSocket(Socket handler);
 
@@ -69,6 +69,7 @@ namespace TomP2P.Connection.Windows
 
         private async Task AcceptClientConnection(ClientToken token)
         {
+            // TODO this is TCP only -> remove for udp
             // reset token for reuse
             token.Reset();
             token.ClientHandler = await _serverSocket.AcceptAsync();
@@ -84,7 +85,7 @@ namespace TomP2P.Connection.Windows
             {
                 try
                 {
-                    var t = Receive(token);
+                    var t = ReceiveAsync(token);
                     await ProcessReceive(t.Result, token);
                 }
                 catch (Exception ex)
@@ -116,16 +117,16 @@ namespace TomP2P.Connection.Windows
                         // TODO process data, maybe use abstract method
                         Array.Copy(token.RecvBuffer, token.SendBuffer, BufferSize);
 
-                        await Send(token);
+                        await SendAsync(token);
 
                         // read next block of data sent by the client
-                        var t = Receive(token);
+                        var t = ReceiveAsync(token);
                         await ProcessReceive(t.Result, token);
                     }
                     else
                     {
                         // read next block of data sent by the client
-                        var t = Receive(token);
+                        var t = ReceiveAsync(token);
                         await ProcessReceive(t.Result, token);
                     }
                 }

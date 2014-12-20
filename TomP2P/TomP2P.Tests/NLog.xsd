@@ -1497,7 +1497,7 @@
         </xs:attribute>
         <xs:attribute name="from" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>Sender's email address (e.g. joe@domain.com).</xs:documentation>
+            <xs:documentation>SendAsyncAsyncer's email address (e.g. joe@domain.com).</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="replaceNewlineWithBrTagInHtml" type="xs:boolean">

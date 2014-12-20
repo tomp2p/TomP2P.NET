@@ -165,8 +165,8 @@ namespace TomP2P.Tests.Interop
                         var recvBytes = new byte[bufferSize];
                         r.NextBytes(sendBytes);
 
-                        await client.Send(sendBytes);
-                        await client.Receive(recvBytes);
+                        await client.SendAsync(sendBytes);
+                        await client.ReceiveAsync(recvBytes);
 
                         var res = sendBytes.SequenceEqual(recvBytes);
                         results[i1][j] = res;
@@ -210,6 +210,7 @@ namespace TomP2P.Tests.Interop
             const int serverPort = 5150;
             const int clientPort = 5151;
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
+            var serverEp2 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), serverPort);
 
             // start server socket on a separate thread
             var server = new UdpServerSocket(serverEp, nrOfClients, bufferSize);
@@ -221,8 +222,8 @@ namespace TomP2P.Tests.Interop
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new udp(new IPEndPoint(IPAddress.Any, clientPort + i1));
-                    await client.ConnectAsync(serverName, serverPort);
+                    var client = new UdpClientSocket(new IPEndPoint(IPAddress.Any, clientPort + i1));
+                    //await client.ConnectAsync(serverName, serverPort);
                     for (int j = 0; j < iterations; j++)
                     {
                         // send random bytes and expect same bytes as echo
@@ -230,13 +231,13 @@ namespace TomP2P.Tests.Interop
                         var recvBytes = new byte[bufferSize];
                         r.NextBytes(sendBytes);
 
-                        await client.SendUdpAsync(sendBytes);
-                        await client.ReceiveUdpAsync(recvBytes);
+                        await client.SendAsync(sendBytes, serverEp2);
+                        await client.ReceiveAsync(recvBytes, serverEp2);
 
                         var res = sendBytes.SequenceEqual(recvBytes);
                         results[i1][j] = res;
                     }
-                    await client.DisconnectAsync();
+                    //await client.DisconnectAsync();
                 });
                 tasks[i] = t;
             }

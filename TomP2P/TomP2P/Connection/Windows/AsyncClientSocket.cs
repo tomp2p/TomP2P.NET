@@ -21,10 +21,6 @@ namespace TomP2P.Connection.Windows
 
         protected abstract Socket CreateClientSocket(AddressFamily addressFamily);
 
-        public abstract Task<int> Send(byte[] buffer);
-
-        public abstract Task<int> Receive(byte[] buffer);
-
         /// <summary>
         /// Used by TCP and UDP.
         /// - UDP: Remote EndPoint is resolved and stored.
@@ -52,6 +48,7 @@ namespace TomP2P.Connection.Windows
                     {
                         ClientSocket.Close();
                         ClientSocket = null;
+                        RemoteEndPoint = null;
                     }
                     continue;
                 }
