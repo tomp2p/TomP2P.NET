@@ -139,35 +139,36 @@ namespace TomP2P.Extensions
         public static Task<int> ReceiveFromAsync(this Socket socket, byte[] buffer, int offset, int size,
             SocketFlags socketFlags, EndPoint remoteEp)
         {
-            var refHolder = new RefHolder(socket, ref remoteEp);
+            var input = new ReceiveFromInput(socket, remoteEp);
+            var tcs = new TaskCompletionSource<int>(input);
 
-            var tcs = new TaskCompletionSource<int>(refHolder);
+            socket.BeginReceiveFrom(buffer, offset, size, socketFlags, ref remoteEp, ar =>
+            {
+                var t = (TaskCompletionSource<int>)ar.AsyncState;
+                var input2 = (ReceiveFromInput)t.Task.AsyncState;
+                Socket s = input2.Socket;
+                //EndPoint ep = input2.RemoteEp;
+                try
+                {
+                    int recv = s.EndReceiveFrom(ar, ref remoteEp);
 
-            socket.BeginReceiveFrom(buffer, offset, size, socketFlags, ref remoteEp, BeginReceiveFromCallback, tcs);
+                    //var output = new ReceiveFromOutput(recv, ep); // TODO ref param needed?
+                    t.TrySetResult(recv);
+                }
+                catch (Exception ex)
+                {
+                    t.TrySetException(ex);
+                }
+            }, tcs);
             return tcs.Task;
         }
 
-        private static void BeginReceiveFromCallback(IAsyncResult ar)
-        {
-            var t = (TaskCompletionSource<int>)ar.AsyncState;
-            var rh = (RefHolder)t.Task.AsyncState;
-            var remoteEp = rh.RemoteEp;
-            try
-            {
-                t.TrySetResult(rh.Socket.EndReceiveFrom(ar, ref remoteEp));
-            }
-            catch (Exception ex)
-            {
-                t.TrySetException(ex);
-            }
-        }
-
-        private struct RefHolder
+        private struct ReceiveFromInput
         {
             private readonly Socket _socket;
             private readonly EndPoint _remoteEp;
 
-            public RefHolder(Socket socket, ref EndPoint remoteEp)
+            public ReceiveFromInput(Socket socket, EndPoint remoteEp)
             {
                 _socket = socket;
                 _remoteEp = remoteEp;
@@ -176,6 +177,28 @@ namespace TomP2P.Extensions
             public Socket Socket
             {
                 get { return _socket; }
+            }
+
+            public EndPoint RemoteEp
+            {
+                get { return _remoteEp; }
+            }
+        }
+
+        public struct ReceiveFromOutput
+        {
+            private readonly int _bytesReceived;
+            private readonly EndPoint _remoteEp;
+
+            public ReceiveFromOutput(int bytesReceived, EndPoint remoteEp)
+            {
+                _bytesReceived = bytesReceived;
+                _remoteEp = remoteEp;
+            }
+
+            public int BytesReceived
+            {
+                get { return _bytesReceived; }
             }
 
             public EndPoint RemoteEp
