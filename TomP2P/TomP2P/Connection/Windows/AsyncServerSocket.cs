@@ -39,7 +39,7 @@ namespace TomP2P.Connection.Windows
                 serverSocket.Bind(LocalEndPoint);
             }
 
-            // listen
+            // listen, TCP-only
             if (serverSocket.ProtocolType == ProtocolType.Tcp)
             {
                 serverSocket.Listen(MaxNrOfClients);
@@ -64,6 +64,5 @@ namespace TomP2P.Connection.Windows
         protected abstract Task<int> SendAsync(ClientToken token);
 
         protected abstract Task<int> ReceiveAsync(ClientToken token);
-
     }
 }

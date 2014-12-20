@@ -124,15 +124,15 @@ namespace TomP2P.Connection.Windows
             return await token.ClientHandler.ReceiveAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None);
         }
 
-        private void CloseHandlerSocket(Socket handler)
+        private static void CloseHandlerSocket(Socket handler)
         {
             try
             {
                 handler.Shutdown(SocketShutdown.Send);
             }
-            catch
+            catch (Exception)
             {
-
+                // throws if already shutdown
             }
             finally
             {

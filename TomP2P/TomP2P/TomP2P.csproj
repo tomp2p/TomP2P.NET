@@ -53,10 +53,7 @@
     <Compile Include="Connection\Sender.cs" />
     <Compile Include="Connection\Windows\AsyncClientSocket.cs" />
     <Compile Include="Connection\Windows\AsyncServerSocket.cs" />
-    <Compile Include="Connection\Windows\AsyncUserToken.cs" />
-    <Compile Include="Connection\Windows\BufferManager.cs" />
     <Compile Include="Connection\Windows\ClientToken.cs" />
-    <Compile Include="Connection\Windows\SocketAsyncEventArgsPool.cs" />
     <Compile Include="Connection\Windows\TcpClientSocket.cs" />
     <Compile Include="Connection\Windows\TcpServerSocket.cs" />
     <Compile Include="Connection\Windows\UdpClientSocket.cs" />
