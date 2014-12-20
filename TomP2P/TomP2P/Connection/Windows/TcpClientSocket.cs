@@ -10,10 +10,9 @@ namespace TomP2P.Connection.Windows
     {
         private Socket _tcpClient;
 
-        public TcpClientSocket(IPEndPoint localEndPoint) 
+        /*public TcpClientSocket(IPEndPoint localEndPoint) 
             : base(localEndPoint)
-        {
-        }
+        { }*/
 
         public async Task ConnectAsync(string hostName, int hostPort)
         {

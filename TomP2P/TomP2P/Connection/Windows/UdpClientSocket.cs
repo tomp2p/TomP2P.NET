@@ -10,7 +10,6 @@ namespace TomP2P.Connection.Windows
         private readonly Socket _udpClient;
 
         public UdpClientSocket(IPEndPoint localEndPoint)
-            : base(localEndPoint)
         {
             _udpClient = new Socket(localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
         }

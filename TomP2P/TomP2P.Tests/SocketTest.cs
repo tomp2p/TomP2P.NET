@@ -28,7 +28,6 @@ namespace TomP2P.Tests
 
             const string serverName = "localhost";
             const int serverPort = 5150;
-            const int clientPort = 5151;
             var serverEp = new IPEndPoint(IPAddress.Any, serverPort);
 
             // start server socket on a separate thread
@@ -41,7 +40,7 @@ namespace TomP2P.Tests
                 int i1 = i;
                 var t = Task.Run(async () =>
                 {
-                    var client = new TcpClientSocket(new IPEndPoint(IPAddress.Any, clientPort + i1));
+                    var client = new TcpClientSocket();
                     await client.ConnectAsync(serverName, serverPort);
                     for (int j = 0; j < iterations; j++)
                     {

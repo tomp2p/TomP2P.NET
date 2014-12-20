@@ -48,7 +48,7 @@ namespace TomP2P.Connection.Windows
             // accept MaxNrOfClients simultaneous connections
             for (int i = 0; i < MaxNrOfClients; i++)
             {
-                ServiceLoop(new ClientToken(BufferSize));
+                ServiceLoopAsync(new ClientToken(BufferSize));
             }
             IsStopped = false;
         }
@@ -59,7 +59,7 @@ namespace TomP2P.Connection.Windows
             IsStopped = true;
         }
 
-        protected abstract Task ServiceLoop(ClientToken token);
+        protected abstract Task ServiceLoopAsync(ClientToken token);
 
         protected abstract Task<int> SendAsync(ClientToken token);
 

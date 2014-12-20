@@ -29,7 +29,7 @@ namespace TomP2P.Connection.Windows
             Stop(_serverSocket);
         }
 
-        protected override async Task ServiceLoop(ClientToken token)
+        protected override async Task ServiceLoopAsync(ClientToken token)
         {
             while (!IsStopped)
             {
