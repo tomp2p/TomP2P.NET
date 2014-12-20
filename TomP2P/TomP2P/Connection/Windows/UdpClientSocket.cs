@@ -17,14 +17,13 @@ namespace TomP2P.Connection.Windows
 
         public async Task<int> SendAsync(byte[] buffer, EndPoint remoteEndPoint)
         {
-            // TODO correct endpoint??
             return await _udpClient.SendToAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
         }
 
         public async Task<int> ReceiveAsync(byte[] buffer, EndPoint remoteEndPoint)
         {
-            // TODO correct endpoint? not wildcard?
-            return await _udpClient.ReceiveFromAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
+            var res = await _udpClient.ReceiveFromAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
+            return res.BytesReceived;
         }
     }
 }

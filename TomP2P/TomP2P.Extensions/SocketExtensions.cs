@@ -136,24 +136,24 @@ namespace TomP2P.Extensions
             return tcs.Task;
         }
 
-        public static Task<int> ReceiveFromAsync(this Socket socket, byte[] buffer, int offset, int size,
+        public static Task<ReceiveFromOutput> ReceiveFromAsync(this Socket socket, byte[] buffer, int offset, int size,
             SocketFlags socketFlags, EndPoint remoteEp)
         {
             var input = new ReceiveFromInput(socket, remoteEp);
-            var tcs = new TaskCompletionSource<int>(input);
+            var tcs = new TaskCompletionSource<ReceiveFromOutput>(input);
 
             socket.BeginReceiveFrom(buffer, offset, size, socketFlags, ref remoteEp, ar =>
             {
-                var t = (TaskCompletionSource<int>)ar.AsyncState;
+                var t = (TaskCompletionSource<ReceiveFromOutput>)ar.AsyncState;
                 var input2 = (ReceiveFromInput)t.Task.AsyncState;
                 Socket s = input2.Socket;
-                //EndPoint ep = input2.RemoteEp;
+                EndPoint ep = input2.RemoteEp;
                 try
                 {
-                    int recv = s.EndReceiveFrom(ar, ref remoteEp);
+                    int recv = s.EndReceiveFrom(ar, ref ep);
 
-                    //var output = new ReceiveFromOutput(recv, ep); // TODO ref param needed?
-                    t.TrySetResult(recv);
+                    var output = new ReceiveFromOutput(recv, ep); // TODO ref param needed?
+                    t.TrySetResult(output);
                 }
                 catch (Exception ex)
                 {

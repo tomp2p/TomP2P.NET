@@ -55,9 +55,12 @@ namespace TomP2P.Connection.Windows
         {
             // TODO correct endpoint?
             // TODO how can remoteEp be set to correct address without ref?
-            return await _serverSocket.ReceiveFromAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None, token.RemotEndPoint);
+            var res = await _serverSocket.ReceiveFromAsync(token.RecvBuffer, 0, BufferSize, SocketFlags.None, token.RemotEndPoint);
 
             // TODO set remoteEp reference to result of task-output?
+            token.RemotEndPoint = res.RemoteEp;
+
+            return res.BytesReceived;
         }
     }
 }
