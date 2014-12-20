@@ -1,10 +1,12 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows
 {
     public class ClientToken
     {
-        public Socket ClientHandler;
+        public Socket ClientHandler; // for TCP connections
+        public EndPoint RemotEndPoint; // for UDP connections
         public byte[] SendBuffer { get; private set; }
         public byte[] RecvBuffer { get; private set; }
 
@@ -17,6 +19,7 @@ namespace TomP2P.Connection.Windows
         public void Reset()
         {
             ClientHandler = null;
+            RemotEndPoint = null;
             SendBuffer = new byte[SendBuffer.Length];
             RecvBuffer = new byte[RecvBuffer.Length];
         }
