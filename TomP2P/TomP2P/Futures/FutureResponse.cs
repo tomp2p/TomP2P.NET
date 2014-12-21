@@ -12,6 +12,14 @@ namespace TomP2P.Futures
     /// </summary>
     public class FutureResponse
     {
+        /// <summary>
+        /// Creates a future and sets the request message.
+        /// </summary>
+        /// <param name="requestMessage">The request message that will be sent.</param>
+        public FutureResponse(Message.Message requestMessage)
+            : this(requestMessage, new FutureSuccessEvaluatorCommunication())
+        { }
+
         public bool IsCompleted()
         {
             // TODO in Java, this method is implemented in BaseFutureImpl
@@ -33,6 +41,15 @@ namespace TomP2P.Futures
         public void Failed(string failed)
         {
             // TODO in Java, this method is implemented in BaseFutureImpl
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// The FutureResponse always keeps a reference to the request.
+        /// </summary>
+        /// <returns></returns>
+        public Message.Message Request()
+        {
             throw new NotImplementedException();
         }
     }

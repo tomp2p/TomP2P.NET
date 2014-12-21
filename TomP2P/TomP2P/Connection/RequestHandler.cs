@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Futures;
+using TomP2P.Message;
 
 namespace TomP2P.Connection
 {
@@ -28,6 +29,13 @@ namespace TomP2P.Connection
         private readonly int _idleUdpSeconds;
         private readonly int _connectionTimeoutTcpMillis;
 
+        /// <summary>
+        /// Creates a request handler.
+        /// </summary>
+        /// <param name="futureResponse">The future that will be called when we get an answer.</param>
+        /// <param name="peerBean">The peer bean.</param>
+        /// <param name="connectionBean">The connection bean.</param>
+        /// <param name="configuration">The client-side connection configuration.</param>
         public RequestHandler(K futureResponse, PeerBean peerBean, ConnectionBean connectionBean, IConnectionConfiguration configuration)
         {
             _futureResponse = futureResponse;
@@ -44,10 +52,11 @@ namespace TomP2P.Connection
         /// Send a UDP message and expect a reply.
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
-        /// <returns></returns>
+        /// <returns>The future that was added in the constructor.</returns>
         public K SendUdp(ChannelCreator channelCreator)
         {
-            throw new NotImplementedException();
+            _connectionBean.Sender.SendUdp(this, _futureResponse, _message, channelCreator, _idleUdpSeconds, false);
+            return _futureResponse;
         }
     }
 }

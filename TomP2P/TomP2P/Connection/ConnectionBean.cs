@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace TomP2P.Connection
 {
     /// <summary>
@@ -12,9 +7,59 @@ namespace TomP2P.Connection
     /// </summary>
     public class ConnectionBean
     {
-        public int P2PId()
+        // TODO THREAD_NAME needed?
+        public static readonly int DefaultTcpIdleSeconds = 5;
+        public static readonly int DefaultUdpIdleSeconds = 5;
+        public static readonly int DefaultConnectionTimeoutTcp = 3000;
+        public static readonly int UdpLimit = 1400;
+
+        /// <summary>
+        /// The P2P ID.
+        /// </summary>
+        public int P2PId { get; private set; }
+        /// <summary>
+        /// The dispatcher object that receives all messages.
+        /// </summary>
+        public Dispatcher Dispatcher { get; private set; } // TODO needed?
+        /// <summary>
+        /// The sender object that sends out messages.
+        /// </summary>
+        public Sender Sender { get; private set; }
+        /// <summary>
+        /// The channel server that listens on incoming connections.
+        /// </summary>
+        public ChannelServer ChannelServer { get; private set; }
+        /// <summary>
+        /// The connection reservation that is responsible for resource management.
+        /// </summary>
+        public Reservation Reservation { get; private set; }
+        /// <summary>
+        /// The configuration that is responsible for the resource numbers.
+        /// </summary>
+        public ChannelClientConfiguration ResourceConfiguration { get; private set; }
+        
+        // TODO find ScheduledExecutorService equivalent for timer
+
+        /// <summary>
+        /// The connection bean with unmodifiable objects. Once it is set, it cannot be changed.
+        /// If it is required to change, then the peer must be shut down and a new one created.
+        /// </summary>
+        /// <param name="p2pId">The P2P ID.</param>
+        /// <param name="dispatcher">The dispatcher object that receives all messages.</param>
+        /// <param name="sender">The sender object that sends out messages.</param>
+        /// <param name="channelServer">The channel server that listens on incoming connections.</param>
+        /// <param name="reservation">The connection reservation that is responsible for resource management.</param>
+        /// <param name="resourceConfiguration">The configuration that is responsible for the resource numbers.</param>
+        public ConnectionBean(int p2pId, Dispatcher dispatcher, Sender sender, ChannelServer channelServer,
+            Reservation reservation, ChannelClientConfiguration resourceConfiguration)
         {
-            throw new NotImplementedException();
+            P2PId = p2pId;
+            Dispatcher = dispatcher;
+            Sender = sender;
+            ChannelServer = channelServer;
+            Reservation = reservation;
+            ResourceConfiguration = resourceConfiguration;
+            // TODO instantiate timer
         }
     }
 }

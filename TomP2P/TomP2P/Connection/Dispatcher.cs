@@ -15,5 +15,6 @@ namespace TomP2P.Connection
     /// </summary>
     public class Dispatcher // TODO extends SimpleChannelInboundHandler<Message>
     {
+        // TODO needed?
     }
 }

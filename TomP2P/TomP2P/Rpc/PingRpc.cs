@@ -73,8 +73,7 @@ namespace TomP2P.Rpc
             return Ping(remotePeer, configuration).SendUdp(channelCreator);
         }
 
-        // TODO return RequestHandler<FutureResponse>
-        private void CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
+        private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
             IConnectionConfiguration configuration)
         {
             var message = CreateMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
