@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Futures;
 using TomP2P.P2P;
 using TomP2P.Peers;
 
@@ -61,9 +62,15 @@ namespace TomP2P.Rpc
         /// </summary>
         /// <param name="remotePeer"></param>
         /// <param name="configuration"></param>
-        public void Ping(PeerAddress remotePeer, IConnectionConfiguration configuration)
+        public RequestHandler<FutureResponse> Ping(PeerAddress remotePeer, IConnectionConfiguration configuration)
         {
-            CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
+            return CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
+        }
+
+        public FutureResponse PingUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            return Ping(remotePeer, configuration).SendUdp(channelCreator);
         }
 
         // TODO return RequestHandler<FutureResponse>
@@ -71,8 +78,10 @@ namespace TomP2P.Rpc
             IConnectionConfiguration configuration)
         {
             var message = CreateMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
+            
+            var futureResponse = new FutureResponse(message);
 
-            // TODO implement FutureResponse and ReuqestHandler<FutureResponse>
+            return new RequestHandler<FutureResponse>(futureResponse, PeerBean, ConnectionBean, configuration);
         }
 
         /// <summary>

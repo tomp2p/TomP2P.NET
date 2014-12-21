@@ -53,6 +53,7 @@
     <Compile Include="Connection\ISignatureFactory.cs" />
     <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
+    <Compile Include="Connection\RequestHandler.cs" />
     <Compile Include="Connection\Sender.cs" />
     <Compile Include="Connection\Windows\AsyncClientSocket.cs" />
     <Compile Include="Connection\Windows\AsyncServerSocket.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Message\KeyMapByte.cs" />
     <Compile Include="Message\Message.cs" />
     <Compile Include="Message\MessageHeaderCodec.cs" />
+    <Compile Include="Message\MessageID.cs" />
     <Compile Include="Message\NeighborSet.cs" />
     <Compile Include="Message\MessageContentIndex.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
