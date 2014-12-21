@@ -83,21 +83,6 @@ namespace TomP2P.Rpc
             return new RequestHandler<FutureResponse>(futureResponse, PeerBean, ConnectionBean, configuration);
         }
 
-        /// <summary>
-        /// Creates a request message and fills it with peer bean and connection bean parameters.
-        /// </summary>
-        /// <param name="recipient">The recipient of this message.</param>
-        /// <param name="name">The command type.</param>
-        /// <param name="type">The request type.</param>
-        /// <returns>The created request message.</returns>
-        public Message.Message CreateMessage(PeerAddress recipient, sbyte name, Message.Message.MessageType type)
-        {
-            return new Message.Message()
-                .SetRecipient(recipient)
-                .SetSender(PeerBean.ServerPeerAddress())
-                .SetCommand(name)
-                .SetType(type)
-                .SetVersion(ConnectionBean.P2PId());
-        }
+        
     }
 }
