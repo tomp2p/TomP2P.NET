@@ -12,5 +12,9 @@ namespace TomP2P.Connection
     /// </summary>
     public class ConnectionBean
     {
+        public int P2PId()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

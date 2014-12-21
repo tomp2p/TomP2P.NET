@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Peers;
 
 namespace TomP2P.Connection
 {
@@ -12,5 +13,9 @@ namespace TomP2P.Connection
     /// </summary>
     public class PeerBean
     {
+        public PeerAddress ServerPeerAddress()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

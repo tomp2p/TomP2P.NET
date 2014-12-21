@@ -31,4 +31,13 @@
             GetLatestWithDigest
         }
     }
+
+    public static class RpcExtensions
+    {
+        public static sbyte GetNr(this Rpc.Commands command)
+        {
+            // TODO check if works
+            return (sbyte) ((int) command);
+        }
+    }
 }

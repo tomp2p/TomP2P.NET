@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.P2P;
+using TomP2P.Peers;
 
 namespace TomP2P.Rpc
 {
     /// <summary>
     /// The Ping message handler. Also used for NAT detection and other things.
     /// </summary>
-    public class PingRpc
+    public class PingRpc : DispatchHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -44,8 +45,51 @@ namespace TomP2P.Rpc
         /// <param name="register">Used for test cases, set to true in production.</param>
         /// <param name="wait">Used for test cases, set to false in production.</param>
         private PingRpc(PeerBean peerBean, ConnectionBean connectionBean, bool enable, bool register, bool wait)
+            : base(peerBean, connectionBean)
         {
-            
+            _enable = enable;
+            _wait = wait;
+            if (register)
+            {
+                // TODO implement
+            }
+        }
+
+        // TODO return RequestHandler<FutureResponse>
+        /// <summary>
+        /// Ping with UDP or TCP, but do not send yet.
+        /// </summary>
+        /// <param name="remotePeer"></param>
+        /// <param name="configuration"></param>
+        public void Ping(PeerAddress remotePeer, IConnectionConfiguration configuration)
+        {
+            CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
+        }
+
+        // TODO return RequestHandler<FutureResponse>
+        private void CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
+            IConnectionConfiguration configuration)
+        {
+            var message = CreateMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
+
+            // TODO implement FutureResponse and ReuqestHandler<FutureResponse>
+        }
+
+        /// <summary>
+        /// Creates a request message and fills it with peer bean and connection bean parameters.
+        /// </summary>
+        /// <param name="recipient">The recipient of this message.</param>
+        /// <param name="name">The command type.</param>
+        /// <param name="type">The request type.</param>
+        /// <returns>The created request message.</returns>
+        public Message.Message CreateMessage(PeerAddress recipient, sbyte name, Message.Message.MessageType type)
+        {
+            return new Message.Message()
+                .SetRecipient(recipient)
+                .SetSender(PeerBean.ServerPeerAddress())
+                .SetCommand(name)
+                .SetType(type)
+                .SetVersion(ConnectionBean.P2PId());
         }
     }
 }
