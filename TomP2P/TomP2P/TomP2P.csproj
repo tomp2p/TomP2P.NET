@@ -44,11 +44,13 @@
   <ItemGroup>
     <Compile Include="Connection\ChannelClientConfiguration.cs" />
     <Compile Include="Connection\ChannelCreator.cs" />
+    <Compile Include="Connection\ConnectionBean.cs" />
     <Compile Include="Connection\Dispatcher.cs" />
     <Compile Include="Connection\DsaSignatureFactory.cs" />
     <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
+    <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
     <Compile Include="Connection\Sender.cs" />
     <Compile Include="Connection\Windows\AsyncClientSocket.cs" />
@@ -77,6 +79,8 @@
     <Compile Include="Message\TomP2POutbound.cs" />
     <Compile Include="Message\TrackerData.cs" />
     <Compile Include="P2P\Builder\PingBuilder.cs" />
+    <Compile Include="P2P\IPeerReachable.cs" />
+    <Compile Include="P2P\IPeerReceivedBroadcastPing.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\Number160.cs" />
     <Compile Include="Peers\Number320.cs" />
@@ -86,6 +90,8 @@
     <Compile Include="Peers\PeerSocketAddress.cs" />
     <Compile Include="Peers\PeerStatistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rpc\DispatchHandler.cs" />
+    <Compile Include="Rpc\PingRpc.cs" />
     <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Rpc\SimpleBloomFilter.cs" />
     <Compile Include="Storage\Data.cs" />

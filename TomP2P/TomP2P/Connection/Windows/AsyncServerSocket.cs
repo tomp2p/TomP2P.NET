@@ -64,7 +64,7 @@ namespace TomP2P.Connection.Windows
                 }
                 catch (SocketException)
                 {
-                    // TODO exception is thrown, correct to ignore it here?
+                    // TODO exception is thrown, correct to ignore it here? maybe because client shut down already?
                 }
             }
             serverSocket.Close();
