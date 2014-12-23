@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Message;
 using TomP2P.Peers;
 
 namespace TomP2P.Rpc
@@ -86,6 +84,55 @@ namespace TomP2P.Rpc
                 .SetVersion(ConnectionBean.P2PId);
         }
 
-        // TODO finish port
+        /// <summary>
+        /// Creates a response message and fills it with peer bean and connection bean parameters.
+        /// </summary>
+        /// <param name="requestMessage">The request message.</param>
+        /// <param name="replyType">The type of the reply.</param>
+        /// <returns>The response message.</returns>
+        public Message.Message CreateResponseMessage(Message.Message requestMessage,
+            Message.Message.MessageType replyType)
+        {
+            return CreateResponseMessage(requestMessage, replyType, PeerBean.ServerPeerAddress());
+        }
+
+        public Message.Message CreateResponseMessage(Message.Message requestMessage,
+            Message.Message.MessageType replyType, PeerAddress peerAddress)
+        {
+            // this will have the ports >40'000 that we need to know for sending the reply
+            return new Message.Message()
+                .SetSenderSocket(requestMessage.SenderSocket)
+                .SetRecipientSocket(requestMessage.RecipientSocket)
+                .SetRecipient(requestMessage.Sender)
+                .SetSender(peerAddress)
+                .SetCommand(requestMessage.Command)
+                .SetType(replyType)
+                .SetVersion(requestMessage.Version)
+                .SetMessageId(requestMessage.MessageId)
+                .SetIsUdp(requestMessage.IsUdp);
+        }
+
+        /// <summary>
+        /// Forwards the request to a handler.
+        /// </summary>
+        /// <param name="requestMessage">The request message.</param>
+        /// <param name="peerConnection">The peer connection that can be used for communication.</param>
+        /// <param name="responder">The response message.</param>
+        public void ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// If the message is OK, that has been previously checked by the user using CheckMessage,
+        /// a response to the message is generated here.
+        /// </summary>
+        /// <param name="message">The request message.</param>
+        /// <param name="peerConnection"></param>
+        /// <param name="sign">Flag indicating whether the message is signed.</param>
+        /// <param name="responder"></param>
+        public abstract void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign,
+            IResponder responder);
     }
 }

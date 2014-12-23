@@ -70,6 +70,7 @@
     <Compile Include="Message\DataMap.cs" />
     <Compile Include="Message\Decoder.cs" />
     <Compile Include="Message\Encoder.cs" />
+    <Compile Include="Message\IResponder.cs" />
     <Compile Include="Message\KeyCollection.cs" />
     <Compile Include="Message\KeyMap640Keys.cs" />
     <Compile Include="Message\KeyMapByte.cs" />
