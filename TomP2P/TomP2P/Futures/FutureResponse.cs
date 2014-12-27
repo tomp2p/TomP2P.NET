@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TomP2P.Futures
 {
@@ -10,7 +11,7 @@ namespace TomP2P.Futures
     /// is set only if the request has been successful. This is indicated with
     /// IsFailed.
     /// </summary>
-    public class FutureResponse
+    public class FutureResponse // TODO inherit from Task
     {
         /// <summary>
         /// Creates a future and sets the request message.
