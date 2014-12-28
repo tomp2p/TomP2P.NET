@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using NLog;
@@ -52,7 +54,7 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="peerId">Specifies the receiver the dispatcher filters for. This allows to use one dispatcher for 
         /// several interfaces or even nodes.</param>
-        /// <param name="onBehalfOf">The ioHandler can be registered for the own use in behalf of another peer.
+        /// <param name="onBehalfOf">The IO Handler can be registered for the own use in behalf of another peer.
         /// (E.g., in case of a relay node.)</param>
         /// <param name="ioHandler">The handler which should process the given type of messages.</param>
         /// <param name="names">The command of the Message the given handler processes. All messages having that command will
@@ -62,7 +64,32 @@ namespace TomP2P.Connection
         public void RegisterIOHandler(Number160 peerId, Number160 onBehalfOf, DispatchHandler ioHandler,
             params int[] names)
         {
-            throw new NotImplementedException();
+            IDictionary<Number320, IDictionary<int, DispatchHandler>> copy = new Dictionary<Number320, IDictionary<int, DispatchHandler>>(_ioHandlers);
+            IDictionary<int, DispatchHandler> types;
+            bool contains = copy.TryGetValue(new Number320(peerId, onBehalfOf), out types); // TODO what if not present?
+            if (contains == false)
+            {
+                types = new Dictionary<int, DispatchHandler>();
+                copy.Add(new Number320(peerId, onBehalfOf), types);
+            }
+            foreach (int name in names)
+            {
+                types.Add(name, ioHandler);
+            }
+            _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
+        }
+
+        /// <summary>
+        /// If we shutdown, we remove the handlers. This means that a server may respond that the handler is unknown.
+        /// </summary>
+        /// <param name="peerId">The ID of the peer to remove the handlers.</param>
+        /// <param name="onBehalfOf">The IO Handler can be registered for the own use in behalf of another peer.
+        /// (E.g., in case of a relay node.)</param>
+        public void RemoveIOHandlers(Number160 peerId, Number160 onBehalfOf)
+        {
+            IDictionary<Number320, IDictionary<int, DispatchHandler>> copy = new Dictionary<Number320, IDictionary<int, DispatchHandler>>(_ioHandlers);
+            copy.Remove(new Number320(peerId, onBehalfOf));
+            _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
         public override void MessageReceived(Message.Message message)

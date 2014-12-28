@@ -14,6 +14,9 @@ namespace TomP2P.Connection.Windows
     {
         public abstract void MessageReceived(Message.Message message);
 
-        public abstract void ExceptionCaught(Exception cause);
+        public virtual void ExceptionCaught(Exception cause)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
