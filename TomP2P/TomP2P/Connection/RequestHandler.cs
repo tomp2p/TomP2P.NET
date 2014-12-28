@@ -79,7 +79,6 @@ namespace TomP2P.Connection
         /// <returns>The future that was added in the constructor.</returns>
         public TFuture SendUdp(ChannelCreator channelCreator)
         {
-            throw new NotImplementedException();
             ConnectionBean.Sender.SendUdp(this, _futureResponse, _message, channelCreator, _idleUdpSeconds, false);
             return FutureResponse;
         }

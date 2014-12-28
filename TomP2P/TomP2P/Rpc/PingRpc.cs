@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Futures;
+using TomP2P.Message;
 using TomP2P.P2P;
 using TomP2P.Peers;
 
@@ -83,6 +84,9 @@ namespace TomP2P.Rpc
             return new RequestHandler<FutureResponse>(futureResponse, PeerBean, ConnectionBean, configuration);
         }
 
-        
+        public override void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign, IResponder responder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

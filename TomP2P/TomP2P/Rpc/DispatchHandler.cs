@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Message;

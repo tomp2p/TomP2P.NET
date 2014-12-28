@@ -55,14 +55,6 @@
     <Compile Include="Netty\Buffer\IByteBufAllocator.cs" />
     <Compile Include="InteropRandom.cs" />
     <Compile Include="Netty\Buffer\UnpooledDirectByteBuf.cs" />
-    <Compile Include="Netty\Transport\ChannelFuture.cs" />
-    <Compile Include="Netty\Transport\ChannelHandlerAdapter.cs" />
-    <Compile Include="Netty\Transport\ChannelInboundHandlerAdapter.cs" />
-    <Compile Include="Netty\Transport\IChannel.cs" />
-    <Compile Include="Netty\Transport\IChannelHandler.cs" />
-    <Compile Include="Netty\Transport\IChannelInboundHandler.cs" />
-    <Compile Include="Netty\Transport\IChannelPipeline.cs" />
-    <Compile Include="Netty\Transport\SimpleChannelInboundHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Netty\Buffer\SlicedByteBuf.cs" />
     <Compile Include="Netty\Buffer\Unpooled.cs" />
