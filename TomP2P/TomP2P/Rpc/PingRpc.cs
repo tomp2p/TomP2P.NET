@@ -68,10 +68,10 @@ namespace TomP2P.Rpc
             return CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
         }
 
-        public FutureResponse PingUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
+        public async Task<Message.Message> PingUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            return Ping(remotePeer, configuration).SendUdp(channelCreator);
+            return await Ping(remotePeer, configuration).SendUdp(channelCreator);
         }
 
         private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
@@ -86,6 +86,8 @@ namespace TomP2P.Rpc
 
         public override void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign, IResponder responder)
         {
+            // comes from DispatchHandler
+            // Responder now responds the result...
             throw new NotImplementedException();
         }
     }

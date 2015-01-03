@@ -94,6 +94,8 @@ namespace TomP2P.Connection
 
         public override void MessageReceived(Message.Message message)
         {
+            // message comes (over network) from sender
+            // -> correct DispatchHandler handles response
             throw new NotImplementedException();
         }
 

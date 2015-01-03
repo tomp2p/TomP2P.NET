@@ -11,47 +11,13 @@ namespace TomP2P.Futures
     /// is set only if the request has been successful. This is indicated with
     /// IsFailed.
     /// </summary>
-    public class FutureResponse // TODO inherit from Task
+    public class FutureResponse : Task<Message.Message>
     {
-        /// <summary>
-        /// Creates a future and sets the request message.
-        /// </summary>
-        /// <param name="requestMessage">The request message that will be sent.</param>
-        public FutureResponse(Message.Message requestMessage)
-            : this(requestMessage, new FutureSuccessEvaluatorCommunication())
+        public FutureResponse(Func<Message.Message> function)
+            : base(function)
         { }
 
-        public bool IsCompleted()
-        {
-            // TODO in Java, this method is implemented in BaseFutureImpl
-            throw new NotImplementedException();
-        }
-
-        public bool IsFailed()
-        {
-            // TODO in Java, this method is implemented in BaseFutureImpl
-            throw new NotImplementedException();
-        }
-
-        public String FailedReason()
-        {
-            // TODO in Java, this method is implemented in BaseFutureImpl
-            throw new NotImplementedException();
-        }
-
-        public void Failed(string failed)
-        {
-            // TODO in Java, this method is implemented in BaseFutureImpl
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// The FutureResponse always keeps a reference to the request.
-        /// </summary>
-        /// <returns></returns>
-        public Message.Message Request()
-        {
-            throw new NotImplementedException();
-        }
+        // a FutureResponse is actually nothing more than a Task<Message>,
+        // but maybe, we need to add some functionalities for this .NET "future"
     }
 }

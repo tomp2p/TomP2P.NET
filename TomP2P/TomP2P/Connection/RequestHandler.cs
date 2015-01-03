@@ -137,6 +137,8 @@ namespace TomP2P.Connection
 
         public override void MessageReceived(Message.Message message)
         {
+            // here, the result for the awaitable task can be set
+            // -> actually, this method can be synchronically called after each "async SendX()"
             throw new NotImplementedException();
         }
 

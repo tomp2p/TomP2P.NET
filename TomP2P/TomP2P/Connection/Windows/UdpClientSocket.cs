@@ -14,6 +14,12 @@ namespace TomP2P.Connection.Windows
             _udpClient = new Socket(localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
         }
 
+        public void Bind(EndPoint localEndPoint)
+        {
+            // TODO needed?
+            _udpClient.Bind(localEndPoint);
+        }
+
         public async Task<int> SendAsync(byte[] buffer, EndPoint remoteEndPoint)
         {
             return await _udpClient.SendToAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
