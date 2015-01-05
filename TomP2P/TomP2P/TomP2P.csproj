@@ -46,6 +46,7 @@
     <Compile Include="Connection\ChannelClientConfiguration.cs" />
     <Compile Include="Connection\ChannelCreator.cs" />
     <Compile Include="Connection\ChannelServer.cs" />
+    <Compile Include="Connection\ChannelServerConfiguration.cs" />
     <Compile Include="Connection\ConnectionBean.cs" />
     <Compile Include="Connection\Dispatcher.cs" />
     <Compile Include="Connection\DsaSignatureFactory.cs" />
