@@ -10,7 +10,7 @@ namespace TomP2P.Connection.Windows
     /// Class that handles incoming messages.
     /// (Somewhat an equivalent to Java Netty's SimpleChannelInboundHandler class.)
     /// </summary>
-    public abstract class Inbox
+    public abstract class Inbox // TODO maybe rename, needed at all?
     {
         public abstract void MessageReceived(Message.Message message);
 

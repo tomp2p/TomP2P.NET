@@ -34,6 +34,7 @@ namespace TomP2P.Connection
         private readonly ReaderWriterLockSlim _readWriteLockTcp = new ReaderWriterLockSlim(); // TODO correct equivalent?
         private readonly ReaderWriterLockSlim _readWriteLockUdp = new ReaderWriterLockSlim(); // TODO correct equivalent?
 
+        private readonly ChannelClientConfiguration _channelClientConfiguration;
         private readonly Bindings _externalBindings;
 
         private bool _shutdownUdp = false;
@@ -45,21 +46,21 @@ namespace TomP2P.Connection
         internal ChannelCreator(ChannelClientConfiguration channelClientConfiguration)
         {
             // TODO implement
-
-            _externalBindings = channelClientConfiguration.BindingsOutgoing();
+            _channelClientConfiguration = channelClientConfiguration;
+            _externalBindings = channelClientConfiguration.BindingsOutgoing;
 
             throw new NotImplementedException();
         }
 
+        // TODO in Java/Netty, this is async
         /// <summary>
         /// Creates a "channel" to the given address.
         /// This won't send any message unlike TCP.
         /// </summary>
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
         /// <param name="futureResponse"></param>
-        public Task CreateUdp(bool broadcast, FutureResponse futureResponse)
+        public UdpClientSocket CreateUdp(bool broadcast, FutureResponse futureResponse)
         {
-            // TODO limit/lock resources as in Java
             _readWriteLockUdp.EnterReadLock();
             try
             {
@@ -74,13 +75,13 @@ namespace TomP2P.Connection
                 var udpSocket = new UdpClientSocket(localEndPoint);
 
                 // TODO set broadcast option
-                udpSocket.Bind(_ex);
+                udpSocket.Bind(_externalBindings.WildcardSocket());
 
-                _recipients.Add(null);
+                _recipients.Add(udpSocket);
 
                 _semaphoreUdp.Release();
 
-                return null; // TODO correct return type
+                return udpSocket;
             }
             finally
             {

@@ -2,6 +2,8 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
+using TomP2P.Message;
 
 namespace TomP2P.Connection.Windows
 {
@@ -16,8 +18,20 @@ namespace TomP2P.Connection.Windows
 
         public void Bind(EndPoint localEndPoint)
         {
-            // TODO needed?
+            // TODO needed? should be same as in c'tor
             _udpClient.Bind(localEndPoint);
+        }
+
+        public async Task<int> SendAsync(Message.Message message, EndPoint remoteEndPoint)
+        {
+            var encoder = new Encoder(null);
+            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+            encoder.Write(buf, message, null);
+            var buffer = buf.NioBuffer();
+            buffer.Position = 0;
+            var bytes = new byte[buffer.Remaining()];
+            buffer.Get(bytes, 0, bytes.Length);
+            return await SendAsync(bytes, remoteEndPoint);
         }
 
         public async Task<int> SendAsync(byte[] buffer, EndPoint remoteEndPoint)

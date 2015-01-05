@@ -79,7 +79,7 @@ namespace TomP2P.Connection
         /// <returns>The future that was added in the constructor.</returns>
         public TFuture SendUdp(ChannelCreator channelCreator)
         {
-            ConnectionBean.Sender.SendUdp(this, _futureResponse, _message, channelCreator, _idleUdpSeconds, false);
+            ConnectionBean.Sender.SendUdpAsync(this, _futureResponse, _message, channelCreator, _idleUdpSeconds, false);
             return FutureResponse;
         }
 
@@ -137,6 +137,7 @@ namespace TomP2P.Connection
 
         public override void MessageReceived(Message.Message message)
         {
+            // client-side:
             // here, the result for the awaitable task can be set
             // -> actually, this method can be synchronically called after each "async SendX()"
             throw new NotImplementedException();

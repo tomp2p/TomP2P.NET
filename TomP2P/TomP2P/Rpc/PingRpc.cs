@@ -68,10 +68,10 @@ namespace TomP2P.Rpc
             return CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
         }
 
-        public async Task<Message.Message> PingUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
+        public Task<Message.Message> PingUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            return await Ping(remotePeer, configuration).SendUdp(channelCreator);
+            return Ping(remotePeer, configuration).SendUdp(channelCreator);
         }
 
         private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
@@ -79,6 +79,9 @@ namespace TomP2P.Rpc
         {
             var message = CreateMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
             
+            // TODO use TaskCompletionSource?
+            var tcs = new TaskCompletionSource<Message.Message>(TaskCreationOptions.None);
+            tcs.tr
             var futureResponse = new FutureResponse(message);
 
             return new RequestHandler<FutureResponse>(futureResponse, PeerBean, ConnectionBean, configuration);
@@ -86,6 +89,7 @@ namespace TomP2P.Rpc
 
         public override void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign, IResponder responder)
         {
+            // server-side:
             // comes from DispatchHandler
             // Responder now responds the result...
             throw new NotImplementedException();
