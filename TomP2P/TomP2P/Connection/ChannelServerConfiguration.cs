@@ -38,7 +38,7 @@ namespace TomP2P.Connection
         private int _maxTcpIncomingConnections = 1000;
         private int _maxUdpIncomingConnections = 1000;
 
-        public int _heartBeatMillis = PeerConnection.HeartBeatMillis;
+        private int _heartBeatMillis = PeerConnection.HeartBeatMillis;
 
         /// <summary>
         /// Sets peer to be behind a firewall and not directly accessable.

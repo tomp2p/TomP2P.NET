@@ -56,6 +56,9 @@
     <Compile Include="Connection\ISignatureFactory.cs" />
     <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
+    <Compile Include="Connection\Pipeline\HandlerContext.cs" />
+    <Compile Include="Connection\Pipeline\InboundHandler.cs" />
+    <Compile Include="Connection\Pipeline\Pipeline.cs" />
     <Compile Include="Connection\Ports.cs" />
     <Compile Include="Connection\RequestHandler.cs" />
     <Compile Include="Connection\Sender.cs" />

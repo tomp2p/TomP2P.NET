@@ -51,16 +51,16 @@ namespace TomP2P.Connection
         /// <returns></returns>
         public bool Startup()
         {
-            if (!ChannelServerConfiguration.IsDisableBind())
+            if (!ChannelServerConfiguration.IsDisableBind)
             {
                 bool listenAll = _interfaceBindings.IsListenAll();
                 if (listenAll)
                 {
                     Logger.Info("Listening for broadcasts on UDP port {0} and TCP port {1}.",
-                        ChannelServerConfiguration.Ports().UdpPort(),
-                        ChannelServerConfiguration.Ports().TcpPort());
-                    if (!StartupTcp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports().TcpPort())) 
-                        || !StartupUdp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports().UdpPort())))
+                        ChannelServerConfiguration.Ports.UdpPort,
+                        ChannelServerConfiguration.Ports.TcpPort);
+                    if (!StartupTcp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports.TcpPort)) 
+                        || !StartupUdp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports.UdpPort)))
                     {
                         Logger.Warn("Cannot bind TCP or UDP.");
                         return false;
@@ -71,10 +71,10 @@ namespace TomP2P.Connection
                     foreach (IPAddress address in _interfaceBindings.FoundAddresses())
                     {
                         Logger.Info("Listening on address {0}, UDP port {1}, TCP port {2}.", address,
-                            ChannelServerConfiguration.Ports().UdpPort(),
-                            ChannelServerConfiguration.Ports().TcpPort());
-                        if (!StartupTcp(new IPEndPoint(address, ChannelServerConfiguration.Ports().TcpPort()))
-                            || !StartupUdp(new IPEndPoint(address, ChannelServerConfiguration.Ports().UdpPort())))
+                            ChannelServerConfiguration.Ports.UdpPort,
+                            ChannelServerConfiguration.Ports.TcpPort);
+                        if (!StartupTcp(new IPEndPoint(address, ChannelServerConfiguration.Ports.TcpPort))
+                            || !StartupUdp(new IPEndPoint(address, ChannelServerConfiguration.Ports.UdpPort)))
                         {
                             Logger.Warn("Cannot bind TCP or UDP.");
                             return false;
@@ -93,6 +93,7 @@ namespace TomP2P.Connection
         private bool StartupUdp(IPEndPoint listenAddress)
         {
             // TODO configure UDP server
+            // TODO configure a server-side pipeline
             try
             {
                 _udpServer = new UdpServerSocket(listenAddress, 10, 10*1024); // TODO move configs to separate config file
@@ -115,6 +116,7 @@ namespace TomP2P.Connection
         private bool StartupTcp(IPEndPoint listenAddress)
         {
             // TODO configure TCP server
+            // TODO configure a server-side pipeline
             try
             {
                 _tcpServer = new TcpServerSocket(listenAddress, 10, 10 * 1024); // TODO move configs to separate config file
