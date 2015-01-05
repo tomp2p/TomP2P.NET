@@ -8,31 +8,31 @@ namespace TomP2P.Connection
         /// active for short-lived connections.
         /// </summary>
         /// <returns></returns>
-        int IdleTcpSeconds();
+        int IdleTcpSeconds { get; }
 
         /// <summary>
         /// The time that a UDP connection can be idle before it is considered not 
         /// active for short-lived connections.
         /// </summary>
         /// <returns></returns>
-        int IdleUdpSeconds();
+        int IdleUdpSeconds { get; }
 
         /// <summary>
         /// The time a TCP connection is allowed to be established.
         /// </summary>
         /// <returns></returns>
-        int ConnectionTimeoutTcpMillis();
+        int ConnectionTimeoutTcpMillis { get; }
 
         /// <summary>
-        /// Set to true, if the communication should be TCP. Default is UDP for routing.
+        /// True, if the communication should be TCP. Default is UDP for routing.
         /// </summary>
         /// <returns></returns>
-        bool IsForceTcp();
+        bool IsForceTcp { get; }
 
         /// <summary>
-        /// Set to true, if the communication should be UDP. Default is TCP for request.
+        /// True, if the communication should be UDP. Default is TCP for request.
         /// </summary>
         /// <returns></returns>
-        bool IsForceUdp();
+        bool IsForceUdp { get; }
     }
 }
