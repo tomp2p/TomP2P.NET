@@ -10,7 +10,6 @@ using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Netty.Transport;
 using TomP2P.Futures;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -47,15 +46,31 @@ namespace TomP2P.Connection
         /// <summary>
         /// Sends a message via UDP.
         /// </summary>
-        /// <param name="handler">The handler to deal with a response message.</param>
-        /// <param name="futureResponse">The future to set the response.</param>
         /// <param name="message">The message to send.</param>
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
-        public async Task SendUdpAsync(Inbox handler, FutureResponse futureResponse, Message.Message message,
-            ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public async Task SendUdpAsync(bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
+            // TODO check for sync completion
+            //RemovePeerIfFailed(futureResponse, message);
+
+            // 1. relay options
+            if (message.Sender.IsRelayed)
+            {
+                message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
+            }
+
+            // 2. fire & forget options
+            
+            // 3. client-side pipeline
+
+            // 4. check for invalid UDP connection to unreachable peers)
+
+            // 5. create UDP channel (check resource constraints)
+
+            // 6. send/write message to the created channel
+
             // TODO check if everything ok
 
             // no need to continue if already finished
@@ -63,14 +78,7 @@ namespace TomP2P.Connection
             {
                 return;
             }
-            //RemovePeerIfFailed(futureResponse, message);
 
-            if (message.Sender.IsRelayed)
-            {
-                message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
-            }
-
-            bool isFireAndForget = handler == null;
             // TODO some handler configurations, probably not needed in .NET
 
             if (message.Recipient.IsRelayed && message.Command != Rpc.Rpc.Commands.Neighbor.GetNr()
