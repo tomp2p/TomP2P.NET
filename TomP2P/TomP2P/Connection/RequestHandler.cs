@@ -81,6 +81,7 @@ namespace TomP2P.Connection
         {
             ConnectionBean.Sender.SendUdpAsync(this, _futureResponse, _message, channelCreator, _idleUdpSeconds, false);
             return FutureResponse;
+            // TODO await response here, remove Inbox parameter
         }
 
         /// <summary>

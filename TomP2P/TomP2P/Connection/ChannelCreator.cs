@@ -77,6 +77,8 @@ namespace TomP2P.Connection
                 // TODO set broadcast option
                 udpSocket.Bind(_externalBindings.WildcardSocket());
 
+                // TODO configure client-side pipeline
+
                 _recipients.Add(udpSocket);
 
                 _semaphoreUdp.Release();

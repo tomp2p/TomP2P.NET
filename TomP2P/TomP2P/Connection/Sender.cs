@@ -131,7 +131,7 @@ namespace TomP2P.Connection
             
             // TODO how to send message? what EndPoint?
             // TODO remove
-            Task<int> writeFuture = udpSocket.SendAsync(message, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5150));
+            Task<int> writeFuture = udpSocket.Write();
             await AfterSendAsync(writeFuture, udpSocket, fireAndForget);
             // TODO report of possible channel creation exceptions
         }

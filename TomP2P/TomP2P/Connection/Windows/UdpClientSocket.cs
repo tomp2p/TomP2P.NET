@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using TomP2P.Connection.Pipeline;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Message;
@@ -22,16 +23,20 @@ namespace TomP2P.Connection.Windows
             _udpClient.Bind(localEndPoint);
         }
 
-        public async Task<int> SendAsync(Message.Message message, EndPoint remoteEndPoint)
+        // TODO make async
+        public Task Write(Message.Message message, ChannelClientConfiguration channelClientConfiguration)
         {
-            var encoder = new Encoder(null);
-            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
-            encoder.Write(buf, message, null);
-            var buffer = buf.NioBuffer();
+            // work through client-side pipeline
+            // 1. encoder (TomP2POutbound)
+            var outbound = new TomP2POutbound(false, channelClientConfiguration.SignatureFactory);
+            Context context = outbound.Write(message, true);
+
+            // 2. send over the wire
+            var buffer = context.MessageBuffer.NioBuffer();
             buffer.Position = 0;
             var bytes = new byte[buffer.Remaining()];
             buffer.Get(bytes, 0, bytes.Length);
-            return await SendAsync(bytes, remoteEndPoint);
+            return SendAsync(bytes, context.UdpRecipient);
         }
 
         public async Task<int> SendAsync(byte[] buffer, EndPoint remoteEndPoint)

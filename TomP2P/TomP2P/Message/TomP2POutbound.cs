@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Connection.Pipeline;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
@@ -28,47 +26,80 @@ namespace TomP2P.Message
             _alloc = alloc;
         }
 
-        //TODO overwrite?
-        public void Write(Object msg)
+        /// <summary>
+        /// .NET-specific encoding handler for outgoing UDP and TCP messages.
+        /// A Context object containing the necessary data is created and returned.
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="isUdp"></param>
+        /// <returns></returns>
+        public Context Write(Message msg, bool isUdp)
         {
-            AlternativeCompositeByteBuf buf = null;
+            var context = new Context();
             try
             {
-                bool done = false;
-                if (msg is Message)
-                {
-                    var message = (Message) msg;
+                AlternativeCompositeByteBuf buf = _preferDirect ? _alloc.CompDirectBuffer() : _alloc.CompBuffer();
+                // null means create signature
+                bool done = _encoder.Write(buf, msg, null);
 
-                    if (_preferDirect)
-                    {
-                        buf = _alloc.CompDirectBuffer();
-                    }
-                    else
-                    {
-                        buf = _alloc.CompBuffer();
-                    }
-                    // null means create signature
-                    done = _encoder.Write(buf, message, null);
-                }
-                else
-                {
-                    // TODO ctx.write(buf, message, null), return
-                }
-
-                Message message2 = _encoder.Message;
+                Message message = _encoder.Message;
 
                 if (buf.IsReadable)
                 {
-                    // distinct between UDP and TCP
-                    // TODO implement
-                    throw new NotImplementedException();
+                    if (isUdp)
+                    {
+                        IPEndPoint recipient;
+                        IPEndPoint sender;
+                        if (message.SenderSocket == null)
+                        {
+                            // in case of a request
+                            if (message.RecipientRelay != null)
+                            {
+                                // in case of sending to a relay (the relayed flag is already set)
+                                recipient = message.RecipientRelay.CreateSocketUdp();
+                            }
+                            else
+                            {
+                                recipient = message.Recipient.CreateSocketUdp();
+                            }
+                            sender = message.Sender.CreateSocketUdp();
+                        }
+                        else
+                        {
+                            // in case of a reply
+                            recipient = message.SenderSocket;
+                            sender = message.RecipientSocket;
+                        }
+                        // TODO Java uses a DatagramPacket wrapper -> interoperability issue?
+                        Logger.Debug("Send UDP message {0}, datagram: TODO.", message);
+
+                        context.UdpSender = sender;
+                        context.UdpRecipient = recipient;
+                        context.MessageBuffer = buf;
+                    }
+                    else
+                    {
+                        Logger.Debug("Send TCP message {0} to {1}.", message, message.SenderSocket);
+                        context.MessageBuffer = buf;
+                    }
+                    if (done)
+                    {
+                        message.SetDone(true);
+                        // we wrote the complete message, reset state
+                        _encoder.Reset();
+                    }
+                }
+                else
+                {
+                    context.MessageBuffer = Unpooled.EmptyBuffer;
                 }
             }
             catch (Exception)
             {
-                
+                // TODO fireExceptionCaught
                 throw;
             }
+            return context;
         }
     }
 }
