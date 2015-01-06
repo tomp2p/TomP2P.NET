@@ -55,6 +55,7 @@
     <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
+    <Compile Include="Connection\NET Helper\DatagramPacket.cs" />
     <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
     <Compile Include="Connection\Ports.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Message\MessageContentIndex.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
     <Compile Include="Message\TomP2POutbound.cs" />
+    <Compile Include="Message\TomP2PSinglePacketUDP.cs" />
     <Compile Include="Message\TrackerData.cs" />
     <Compile Include="P2P\Builder\PingBuilder.cs" />
     <Compile Include="P2P\IPeerReachable.cs" />

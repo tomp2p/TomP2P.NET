@@ -148,6 +148,8 @@ namespace TomP2P.Connection
                 {
                     // success
                     // decode message
+
+                    // return response message to the RequestHandler
                 }
             }
 

@@ -29,7 +29,6 @@ namespace TomP2P.Message
         // TODO what to return? Message vs. byte[] vs. ByteBuf
         /// <summary>
         /// .NET-specific encoding handler for outgoing UDP and TCP messages.
-        /// A Context object containing the necessary data is created and returned.
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
