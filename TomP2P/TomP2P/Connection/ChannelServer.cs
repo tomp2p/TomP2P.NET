@@ -39,7 +39,7 @@ namespace TomP2P.Connection
             IList<IPeerStatusListener> peerStatusListeners)
         {
             ChannelServerConfiguration = channelServerConfiguration;
-            _interfaceBindings = _channelServerConfiguration.BindingsIncoming();
+            _interfaceBindings = channelServerConfiguration.BindingsIncoming;
             _dispatcher = dispatcher;
             _peerStatusListeners = peerStatusListeners;
             // TODO finish implementation
@@ -53,8 +53,7 @@ namespace TomP2P.Connection
         {
             if (!ChannelServerConfiguration.IsDisableBind)
             {
-                bool listenAll = _interfaceBindings.IsListenAll();
-                if (listenAll)
+                if (_interfaceBindings.IsListenAll)
                 {
                     Logger.Info("Listening for broadcasts on UDP port {0} and TCP port {1}.",
                         ChannelServerConfiguration.Ports.UdpPort,
@@ -68,7 +67,7 @@ namespace TomP2P.Connection
                 }
                 else
                 {
-                    foreach (IPAddress address in _interfaceBindings.FoundAddresses())
+                    foreach (IPAddress address in _interfaceBindings.FoundAddresses)
                     {
                         Logger.Info("Listening on address {0}, UDP port {1}, TCP port {2}.", address,
                             ChannelServerConfiguration.Ports.UdpPort,

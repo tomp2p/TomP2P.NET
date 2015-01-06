@@ -9,7 +9,7 @@ namespace TomP2P.Connection.Pipeline
     /// <summary>
     /// Equivalent to Java Netty's ChannelHandlerContext
     /// </summary>
-    public interface HandlerContext
+    public interface IHandlerContext
     {
     }
 }
