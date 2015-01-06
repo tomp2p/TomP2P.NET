@@ -54,6 +54,7 @@ namespace TomP2P.Connection.Windows
         public override void Close()
         {
             _udpClient.Close();
+            OnClosed();
         }
     }
 }

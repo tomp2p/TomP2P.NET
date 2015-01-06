@@ -10,8 +10,18 @@ namespace TomP2P.Connection.Windows
             LocalEndPoint = localEndPoint;
         }*/
 
+        public delegate void SocketClosedEventHandler(AsyncClientSocket sender);
 
+        public event SocketClosedEventHandler Closed;
 
         public abstract void Close();
+
+        protected void OnClosed()
+        {
+            if (Closed != null)
+            {
+                Closed(this);
+            }
+        }
     }
 }

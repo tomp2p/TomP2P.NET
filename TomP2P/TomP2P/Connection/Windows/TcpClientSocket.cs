@@ -70,6 +70,7 @@ namespace TomP2P.Connection.Windows
         {
             _tcpClient.Shutdown(SocketShutdown.Both);
             _tcpClient.Close();
+            OnClosed();
         }
     }
 }

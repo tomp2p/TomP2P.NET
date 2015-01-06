@@ -100,10 +100,9 @@ namespace TomP2P.Connection
         /// can be created. Also, the lock for the channel creating is being released.
         /// This means that the ChannelCreator can be shut down.
         /// </summary>
-        private void SetupCloseListener(UdpClientSocket socket)
+        private void SetupCloseListener(AsyncClientSocket socket)
         {
-            // TODO subscribe to socket-close event
-            _semaphoreUdp.Release();
+            socket.Closed += sender => _semaphoreUdp.Release();
         }
     }
 }
