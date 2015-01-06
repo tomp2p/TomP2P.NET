@@ -58,8 +58,7 @@ namespace TomP2P.Connection
         /// This won't send any message unlike TCP.
         /// </summary>
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
-        /// <param name="futureResponse"></param>
-        public UdpClientSocket CreateUdp(bool broadcast, FutureResponse futureResponse)
+        public UdpClientSocket CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
         {
             _readWriteLockUdp.EnterReadLock();
             try
@@ -71,8 +70,7 @@ namespace TomP2P.Connection
                 _semaphoreUdp.WaitOne(); // TODO blocks infinitely
 
                 // TODO use correct local EP
-                var localEndPoint = new IPEndPoint(IPAddress.Any, 5051);
-                var udpSocket = new UdpClientSocket(localEndPoint);
+                var udpSocket = new UdpClientSocket(senderEndPoint);
 
                 // TODO set broadcast option
                 udpSocket.Bind(_externalBindings.WildcardSocket());

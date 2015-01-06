@@ -91,7 +91,7 @@ namespace TomP2P.Connection
                         PeerSocketAddress address = psa[_random.NextInt(psa.Count)];
                         message.SetRecipientRelay(
                             message.Recipient.ChangePeerSocketAddress(address).ChangeIsRelayed(true));
-                        udpSocket = channelCreator.CreateUdp(broadcast, handlers, futureResponse);
+                        udpSocket = channelCreator.CreateUdp(broadcast);
                     }
                     else
                     {
@@ -102,7 +102,7 @@ namespace TomP2P.Connection
                 else
                 {
                     // TODO in Java, this is async
-                    udpSocket = channelCreator.CreateUdp(broadcast, handlers, futureResponse);
+                    udpSocket = channelCreator.CreateUdp(broadcast);
                 }
                 await AfterConnect(message, udpSocket, handler == null); // TODO correct use of FF?
             }
@@ -131,7 +131,7 @@ namespace TomP2P.Connection
             
             // TODO how to send message? what EndPoint?
             // TODO remove
-            Task<int> writeFuture = udpSocket.Write();
+            Task writeFuture = udpSocket.Write(message, ChannelClientConfiguration);
             await AfterSendAsync(writeFuture, udpSocket, fireAndForget);
             // TODO report of possible channel creation exceptions
         }
@@ -141,7 +141,7 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="writeFuture">The task of the write operation. Can be UDP or TCP.</param>
         /// <param name="fireAndForget">True, if we don't expect a message.</param>
-        public async Task AfterSendAsync(Task<int> writeFuture, UdpClientSocket udpSocket, bool fireAndForget)
+        public async Task AfterSendAsync(Task writeFuture, UdpClientSocket udpSocket, bool fireAndForget)
         {
             // in Java, the async send operation is attached a listener
             // in .NET, we just await the async operation
