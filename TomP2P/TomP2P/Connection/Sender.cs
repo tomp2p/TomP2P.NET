@@ -116,10 +116,11 @@ namespace TomP2P.Connection
             // 3. client-side pipeline (sending)
             //  - encoder
             var outbound = new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory);
-            var messageBytes = outbound.Write(message); // encode
+            var buffer = outbound.Write(message); // encode
+            var messageBytes = ConnectionHelper.ExtractBytes(buffer);
             
             // 6. send/write message to the created channel
-
+            Task<int> task = udpClientSocket.SendAsync(messageBytes, receiverEp);
 
             // 7. await response message (if not fire&forget)
             //  - decoder
