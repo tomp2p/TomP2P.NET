@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
@@ -53,27 +54,66 @@ namespace TomP2P.Connection
         public async Task SendUdpAsync(bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
             // TODO check for sync completion
-            //RemovePeerIfFailed(futureResponse, message);
+            // TODO RemovePeerIfFailed(futureResponse, message);
 
+            // 2. fire & forget options
+            
             // 1. relay options
             if (message.Sender.IsRelayed)
             {
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
+
+                // TODO ok to do it here?
+                IList<PeerSocketAddress> relayAddresses = new List<PeerSocketAddress>(message.Recipient.PeerSocketAddresses);
+                Logger.Debug("Send neighbor request to random relay peer {0}.", relayAddresses);
+                if (relayAddresses.Count > 0)
+                {
+                    var relayAddress = relayAddresses[_random.NextInt(relayAddresses.Count)];
+                    message.SetRecipientRelay(message.Recipient
+                        .ChangePeerSocketAddress(relayAddress)
+                        .ChangeIsRelayed(true));
+                }
+                else
+                {
+                    Logger.Error("Peer is relayed, but no relay given.");
+                    // TODO set task to failed
+                    return;
+                }
             }
 
-            // 2. fire & forget options
-            
-            // 3. client-side pipeline
-
             // 4. check for invalid UDP connection to unreachable peers)
+            if (message.Recipient.IsRelayed && message.Command != Rpc.Rpc.Commands.Neighbor.GetNr()
+                && message.Command != Rpc.Rpc.Commands.Ping.GetNr())
+            {
+                Logger.Warn("Tried to send a UDP message to unreachable peers. Only TCP messages can be sent to unreachable peers: {0}.", message);
+                // TODO set task to failed
+                return;
+            }
 
             // 5. create UDP channel (check resource constraints)
+            //  - extract sender EP from message (in Java, this is done in TomP2POutbound)
+            var senderEp = ConnectionHelper.ExtractSenderEp(message);
+            var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
+            Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
+
+            UdpClientSocket udpClientSocket = channelCreator.CreateUdp(broadcast, senderEp);
+
+            // TODO Java uses a DatagramPacket wrapper -> interoperability issue?
+            // 3. client-side pipeline (sending)
+            //  - encoder
+
+
+
+
 
             // 6. send/write message to the created channel
 
             // 7. await response message (if not fire&forget)
+            //  - decoder
 
-            // 8. handle possible errors during send (normal vs. fire&forget)
+            // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
+
+            // 9. handle possible errors during send (normal vs. fire&forget)
 
             // TODO check if everything ok
 
@@ -85,12 +125,7 @@ namespace TomP2P.Connection
 
             // TODO some handler configurations, probably not needed in .NET
 
-            if (message.Recipient.IsRelayed && message.Command != Rpc.Rpc.Commands.Neighbor.GetNr()
-                && message.Command != Rpc.Rpc.Commands.Ping.GetNr())
-            {
-                Logger.Warn("Tried to send a UDP message to unreachable peers. Only TCP messages can be sent to unreachable peers: {0}.", message);
-                // TODO set task to failed...
-            }
+            
             else
             {
                 UdpClientSocket udpSocket;

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\NET Helper\ConnectionHelper.cs" />
     <Compile Include="Connection\Bindings.cs" />
     <Compile Include="Connection\ChannelClientConfiguration.cs" />
     <Compile Include="Connection\ChannelCreator.cs" />

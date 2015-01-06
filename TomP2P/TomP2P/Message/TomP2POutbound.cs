@@ -46,6 +46,7 @@ namespace TomP2P.Message
 
                 if (buf.IsReadable)
                 {
+                    // TODO remove, is done in Sender.SendUDP()
                     if (isUdp)
                     {
                         IPEndPoint recipient;

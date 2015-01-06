@@ -43,13 +43,14 @@ namespace TomP2P.Connection
         /// <summary>
         /// Internal constructor since this is created by <see cref="Reservation"/> and should never be called directly.
         /// </summary>
-        internal ChannelCreator(ChannelClientConfiguration channelClientConfiguration)
+        internal ChannelCreator(int maxPermitsUdp, int maxPermitsTcp, ChannelClientConfiguration channelClientConfiguration)
         {
-            // TODO implement
+            _maxPermitsUdp = maxPermitsUdp; // TODO why not use value from ChannelClientConfig?
+            _maxPermitsTcp = maxPermitsTcp;
+            _semaphoreUdp = new Semaphore(0, maxPermitsUdp); // TODO correct?
+            _semaphoreTcp = new Semaphore(0, maxPermitsTcp);
             _channelClientConfiguration = channelClientConfiguration;
             _externalBindings = channelClientConfiguration.BindingsOutgoing;
-
-            throw new NotImplementedException();
         }
 
         // TODO in Java/Netty, this is async
@@ -58,6 +59,8 @@ namespace TomP2P.Connection
         /// This won't send any message unlike TCP.
         /// </summary>
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
+        /// <param name="senderEndPoint"></param>
+        /// <returns>The created channel or null, if the channel could not be created.</returns>
         public UdpClientSocket CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
         {
             _readWriteLockUdp.EnterReadLock();
@@ -67,15 +70,18 @@ namespace TomP2P.Connection
                 {
                     return null;
                 }
-                _semaphoreUdp.WaitOne(); // TODO blocks infinitely
+                // try to aquire resources for the channel
+                if (!_semaphoreUdp.WaitOne(TimeSpan.FromMilliseconds(1))) // TODO blocks infinitely, use timeout
+                {
+                    const string errorMsg = "Tried to acquire more resources (UDP) than announced.";
+                    Logger.Error(errorMsg);
+                    throw new SystemException(errorMsg);
+                }
 
-                // TODO use correct local EP
+                // TODO set broadcast option, etc.
+                // create "channel", for which we use a socket in .NET
                 var udpSocket = new UdpClientSocket(senderEndPoint);
-
-                // TODO set broadcast option
                 udpSocket.Bind(_externalBindings.WildcardSocket());
-
-                // TODO configure client-side pipeline
 
                 _recipients.Add(udpSocket);
 
@@ -87,6 +93,17 @@ namespace TomP2P.Connection
             {
                 _readWriteLockUdp.ExitReadLock();
             }
+        }
+
+        /// <summary>
+        /// When a channel is closed, the semaphore is released and another channel
+        /// can be created. Also, the lock for the channel creating is being released.
+        /// This means that the ChannelCreator can be shut down.
+        /// </summary>
+        private void SetupCloseListener(UdpClientSocket socket)
+        {
+            // TODO subscribe to socket-close event
+            _semaphoreUdp.Release();
         }
     }
 }
