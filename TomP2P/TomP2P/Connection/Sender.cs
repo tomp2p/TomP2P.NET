@@ -52,7 +52,7 @@ namespace TomP2P.Connection
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
-        public async Task SendUdpAsync(bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public async Task<Message.Message> SendUdpAsync(bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
             // TODO check for sync completion
             // TODO RemovePeerIfFailed(futureResponse, message);
@@ -123,50 +123,36 @@ namespace TomP2P.Connection
             Task<int> task = udpClientSocket.SendAsync(messageBytes, receiverEp);
 
             // 7. await response message (if not fire&forget)
-            //  - decoder
-
-            // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
-
             // 9. handle possible errors during send (normal vs. fire&forget)
-
-            // TODO check if everything ok
-
-            // no need to continue if already finished
-            if (futureResponse.IsCompleted)
+            //  - decoder
+            if (isFireAndForget)
             {
-                return;
+                // close channel now
+                Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClientSocket);
+                udpClientSocket.Close(); // TODO ok? what happens when during sending operation? (linger option?)
+                
+                // TODO report message
+                return null; // TODO null for signaling fire&forget ok?
             }
-
-            // TODO some handler configurations, probably not needed in .NET
-
-            
             else
             {
-                UdpClientSocket udpSocket;
-                if (message.Recipient.IsRelayed)
+                // not fire&forget -> await response
+                await task;
+                if (task.Exception != null)
                 {
-                    IList<PeerSocketAddress> psa = new List<PeerSocketAddress>(message.Recipient.PeerSocketAddresses);
-                    Logger.Debug("Send neighbor request to random relay peer {0}.", psa);
-                    if (psa.Count > 0)
-                    {
-                        PeerSocketAddress address = psa[_random.NextInt(psa.Count)];
-                        message.SetRecipientRelay(
-                            message.Recipient.ChangePeerSocketAddress(address).ChangeIsRelayed(true));
-                        udpSocket = channelCreator.CreateUdp(broadcast);
-                    }
-                    else
-                    {
-                        // set task to failed...
-                        return;
-                    }
+                    // fail
+                    // TODO report failed
+                    Logger.Warn("One or more exceptions occurred when sending {0}: {1}.", message, task.Exception);
                 }
                 else
                 {
-                    // TODO in Java, this is async
-                    udpSocket = channelCreator.CreateUdp(broadcast);
+                    // success
+                    // decode message
                 }
-                await AfterConnect(message, udpSocket, handler == null); // TODO correct use of FF?
             }
+
+            // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
+            udpClientSocket.Close();
         }
 
         /// <summary>
