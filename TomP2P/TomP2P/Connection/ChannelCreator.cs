@@ -84,8 +84,7 @@ namespace TomP2P.Connection
                 udpSocket.Bind(_externalBindings.WildcardSocket());
 
                 _recipients.Add(udpSocket);
-
-                _semaphoreUdp.Release();
+                SetupCloseListener(udpSocket);
 
                 return udpSocket;
             }
@@ -102,6 +101,7 @@ namespace TomP2P.Connection
         /// </summary>
         private void SetupCloseListener(AsyncClientSocket socket)
         {
+            // TODO works?
             socket.Closed += sender => _semaphoreUdp.Release();
         }
     }

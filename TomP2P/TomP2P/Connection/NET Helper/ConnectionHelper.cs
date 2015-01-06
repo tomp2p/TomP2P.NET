@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.NET_Helper
 {
@@ -59,6 +61,21 @@ namespace TomP2P.Connection.NET_Helper
                 recipient = message.SenderSocket;
             }
             return recipient;
+        }
+
+        /// <summary>
+        /// Extracts the bytes from the ByteBuf that holds the message.
+        /// </summary>
+        /// <param name="messageBuffer">The buffer holding the message bytes.</param>
+        /// <returns></returns>
+        public static byte[] ExtractBytes(ByteBuf messageBuffer)
+        {
+            // TODO works?
+            var buffer = messageBuffer.NioBuffer();
+            buffer.Position = 0;
+            var bytes = new byte[buffer.Remaining()];
+            buffer.Get(bytes, 0, bytes.Length);
+            return bytes;
         }
     }
 }

@@ -26,16 +26,15 @@ namespace TomP2P.Message
             _alloc = alloc;
         }
 
+        // TODO what to return? Message vs. byte[] vs. ByteBuf
         /// <summary>
         /// .NET-specific encoding handler for outgoing UDP and TCP messages.
         /// A Context object containing the necessary data is created and returned.
         /// </summary>
         /// <param name="msg"></param>
-        /// <param name="isUdp"></param>
         /// <returns></returns>
-        public Context Write(Message msg, bool isUdp)
+        public ByteBuf Write(Message msg)
         {
-            var context = new Context();
             try
             {
                 AlternativeCompositeByteBuf buf = _preferDirect ? _alloc.CompDirectBuffer() : _alloc.CompBuffer();
@@ -47,7 +46,7 @@ namespace TomP2P.Message
                 if (buf.IsReadable)
                 {
                     // TODO remove, is done in Sender.SendUDP()
-                    if (isUdp)
+                    /*if (isUdp)
                     {
                         IPEndPoint recipient;
                         IPEndPoint sender;
@@ -82,7 +81,7 @@ namespace TomP2P.Message
                     {
                         Logger.Debug("Send TCP message {0} to {1}.", message, message.SenderSocket);
                         context.MessageBuffer = buf;
-                    }
+                    }*/
                     if (done)
                     {
                         message.SetDone(true);
@@ -92,15 +91,15 @@ namespace TomP2P.Message
                 }
                 else
                 {
-                    context.MessageBuffer = Unpooled.EmptyBuffer;
+                    return Unpooled.EmptyBuffer;
                 }
+                return buf;
             }
             catch (Exception)
             {
                 // TODO fireExceptionCaught
                 throw;
             }
-            return context;
         }
     }
 }

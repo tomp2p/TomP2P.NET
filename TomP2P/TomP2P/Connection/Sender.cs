@@ -12,6 +12,7 @@ using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Futures;
+using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using Encoder = TomP2P.Message.Encoder;
@@ -90,23 +91,35 @@ namespace TomP2P.Connection
                 return;
             }
 
-            // 5. create UDP channel (check resource constraints)
+            // 5. create UDP channel
             //  - extract sender EP from message (in Java, this is done in TomP2POutbound)
+            //  - check resource constraints
             var senderEp = ConnectionHelper.ExtractSenderEp(message);
             var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
             Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
             UdpClientSocket udpClientSocket = channelCreator.CreateUdp(broadcast, senderEp);
 
+            // check if channel could be created due to resource constraints
+            if (udpClientSocket == null)
+            {
+                Logger.Warn("Could not create a {0} socket. (Due to resource constraints.)", message.IsUdp ? "UDP" : "TCP");
+                // TODO set task to failed
+                Logger.Debug("Channel creation failed.");
+                // may have been closed by the other side
+                // or it may have been canceled from this side
+                // TODO add reason for fail (e.g., from SocketException)
+                return;
+            }
+
             // TODO Java uses a DatagramPacket wrapper -> interoperability issue?
             // 3. client-side pipeline (sending)
             //  - encoder
-
-
-
-
-
+            var outbound = new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory);
+            var messageBytes = outbound.Write(message); // encode
+            
             // 6. send/write message to the created channel
+
 
             // 7. await response message (if not fire&forget)
             //  - decoder

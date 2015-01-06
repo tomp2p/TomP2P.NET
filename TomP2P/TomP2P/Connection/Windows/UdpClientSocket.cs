@@ -22,22 +22,6 @@ namespace TomP2P.Connection.Windows
             _udpClient.Bind(localEndPoint);
         }
 
-        // TODO make async
-        public Task Write(Message.Message message, ChannelClientConfiguration channelClientConfiguration)
-        {
-            // work through client-side pipeline
-            // 1. encoder (TomP2POutbound)
-            var outbound = new TomP2POutbound(false, channelClientConfiguration.SignatureFactory);
-            Context context = outbound.Write(message, true);
-
-            // 2. send over the wire
-            var buffer = context.MessageBuffer.NioBuffer();
-            buffer.Position = 0;
-            var bytes = new byte[buffer.Remaining()];
-            buffer.Get(bytes, 0, bytes.Length);
-            return SendAsync(bytes, context.UdpRecipient);
-        }
-
         public async Task<int> SendAsync(byte[] buffer, EndPoint remoteEndPoint)
         {
             return await _udpClient.SendToAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
