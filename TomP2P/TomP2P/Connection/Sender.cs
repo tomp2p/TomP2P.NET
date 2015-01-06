@@ -71,6 +71,10 @@ namespace TomP2P.Connection
 
             // 6. send/write message to the created channel
 
+            // 7. await response message (if not fire&forget)
+
+            // 8. handle possible errors during send (normal vs. fire&forget)
+
             // TODO check if everything ok
 
             // no need to continue if already finished
