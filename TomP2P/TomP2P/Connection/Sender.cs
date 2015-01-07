@@ -180,56 +180,6 @@ namespace TomP2P.Connection
         }
 
         /// <summary>
-        /// After connecting, we check if the connect was successful.
-        /// </summary>
-        public async Task AfterConnect(Message.Message message, UdpClientSocket udpSocket, bool fireAndForget)
-        {
-            // this is actually the "callback"/successor of the SendX methods
-            // we send the message here...
-
-            // check if channel could be created due to resource constrains
-            if (udpSocket == null)
-            {
-                Logger.Warn("Could not create a {} socket. (Due to resource constraints.)", message.IsUdp ? "UDP" : "TCP");
-                // TODO set failed
-                return;
-            }
-            Logger.Debug("About to connect to {0} with channel {1}, ff={2}.", message.Recipient, udpSocket, fireAndForget);
-
-            // TODO cancellation token
-            // in Java, channel creation is awaited -> on completion listener starts sending
-            // in .NET, channel already exists -> we send right away
-            
-            // TODO how to send message? what EndPoint?
-            // TODO remove
-            Task writeFuture = udpSocket.Write(message, ChannelClientConfiguration);
-            await AfterSendAsync(writeFuture, udpSocket, fireAndForget);
-            // TODO report of possible channel creation exceptions
-        }
-
-        /// <summary>
-        /// After sending, we check if the write was successful or if it was a fire and forget.
-        /// </summary>
-        /// <param name="writeFuture">The task of the write operation. Can be UDP or TCP.</param>
-        /// <param name="fireAndForget">True, if we don't expect a message.</param>
-        public async Task AfterSendAsync(Task writeFuture, UdpClientSocket udpSocket, bool fireAndForget)
-        {
-            // in Java, the async send operation is attached a listener
-            // in .NET, we just await the async operation
-            await writeFuture;
-            if (writeFuture.Status != TaskStatus.RanToCompletion) // TODO correct status used?
-            {
-                ReportFailed(udpSocket);
-                // TODO logging
-            }
-            if (fireAndForget)
-            {
-                // TODO logging
-                ReportMessage(udpSocket);
-            }
-        }
-
-        /// <summary>
         /// Report a failure after the channel was closed.
         /// </summary>
         /// <param name="udpSocket"></param>

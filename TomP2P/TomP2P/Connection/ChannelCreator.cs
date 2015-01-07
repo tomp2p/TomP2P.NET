@@ -23,7 +23,7 @@ namespace TomP2P.Connection
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // the "ChannelGroup"
-        private readonly ISet<UdpClient> _recipients = new HashSet<UdpClient>();
+        private readonly ISet<MyUdpClient> _recipients = new HashSet<MyUdpClient>();
 
         private readonly int _maxPermitsUdp;
         private readonly int _maxPermitsTcp;
@@ -84,12 +84,12 @@ namespace TomP2P.Connection
                 //var udpSocket = new UdpClientSocket(senderEndPoint);
                 //udpSocket.Bind(_externalBindings.WildcardSocket());
 
-                var udpClient = new UdpClient(senderEndPoint);
+                var udpClient = new MyUdpClient(senderEndPoint); // binds to senderEp
 
                 _recipients.Add(udpClient);
-                SetupCloseListener(udpSocket);
+                SetupCloseListener(udpClient);
 
-                return udpSocket;
+                return udpClient;
             }
             finally
             {
@@ -102,7 +102,7 @@ namespace TomP2P.Connection
         /// can be created. Also, the lock for the channel creating is being released.
         /// This means that the ChannelCreator can be shut down.
         /// </summary>
-        private void SetupCloseListener(AsyncClientSocket socket)
+        private void SetupCloseListener(MyUdpClient socket)
         {
             // TODO works?
             socket.Closed += sender => _semaphoreUdp.Release();
