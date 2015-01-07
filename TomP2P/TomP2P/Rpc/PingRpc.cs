@@ -57,7 +57,6 @@ namespace TomP2P.Rpc
             }
         }
 
-        // TODO return RequestHandler<FutureResponse>
         /// <summary>
         /// Ping with UDP or TCP, but do not send yet.
         /// </summary>
@@ -72,19 +71,25 @@ namespace TomP2P.Rpc
             IConnectionConfiguration configuration)
         {
             return Ping(remotePeer, configuration).SendUdpAsync(channelCreator);
+
+            // TODO return the TCS task from the RequestHandler
         }
 
+        /// <summary>
+        /// Creates a RequestHandler.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="type">The type of the request.</param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
         private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
             IConnectionConfiguration configuration)
         {
             var message = CreateMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
             
-            // TODO use TaskCompletionSource?
             var tcs = new TaskCompletionSource<Message.Message>(TaskCreationOptions.None);
-            tcs.tr
-            var futureResponse = new FutureResponse(message);
 
-            return new RequestHandler<FutureResponse>(futureResponse, PeerBean, ConnectionBean, configuration);
+            return new RequestHandler<FutureResponse>(tcs, PeerBean, ConnectionBean, configuration);
         }
 
         public override void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign, IResponder responder)

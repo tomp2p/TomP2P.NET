@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows;
@@ -26,7 +27,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// The FutureResponse that will be called when we get an answer.
         /// </summary>
-        public TFuture FutureResponse { get; private set; }
+        public TaskCompletionSource<Message.Message> TaskCompletionSource { get; private set; }
 
         // the node with which this request handler is associated with
         /// <summary>
@@ -58,13 +59,13 @@ namespace TomP2P.Connection
         /// <summary>
         /// Creates a request handler that can send TCP and UDP messages.
         /// </summary>
-        /// <param name="futureResponse">The future that will be called when we get an answer.</param>
+        /// <param name="tcs">The future that will be called when we get an answer.</param>
         /// <param name="peerBean">The peer bean.</param>
         /// <param name="connectionBean">The connection bean.</param>
         /// <param name="configuration">The client-side connection configuration.</param>
-        public RequestHandler(TFuture futureResponse, PeerBean peerBean, ConnectionBean connectionBean, IConnectionConfiguration configuration)
+        public RequestHandler(TaskCompletionSource<Message.Message> tcs, PeerBean peerBean, ConnectionBean connectionBean, IConnectionConfiguration configuration)
         {
-            FutureResponse = futureResponse;
+            TaskCompletionSource = tcs;
             PeerBean = peerBean;
             ConnectionBean = connectionBean;
             _message = futureResponse.Request();
@@ -79,12 +80,18 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
         /// <returns>The future that was added in the constructor.</returns>
-        public async Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
+        public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
-            var t = ConnectionBean.Sender.SendUdpAsync(false, _message, channelCreator, IdleUdpSeconds, false);
+            // so far, everything is sync -> invoke async / new thread
+            ThreadPool.QueueUserWorkItem(delegate 
+            {
+                ConnectionBean.Sender.SendUdpAsync(false, _message, channelCreator, IdleUdpSeconds, false);
+                ResponseMessageReceived();
+            });
 
-            Message.Message response = ResponseMessageReceived(await t);
-            return response;
+
+
+            return TaskCompletionSource.Task;
         }
 
         /// <summary>
@@ -196,9 +203,9 @@ namespace TomP2P.Connection
             // we got a good answer, let's mark the sender as alive
             if (responseMessage.IsOk() || responseMessage.IsNotOk())
             {
-                lock (PeerBean.PeerStatusListeners())
+                lock (PeerBean.PeerStatusListeners)
                 {
-                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners())
+                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
                     {
                         if (responseMessage.Sender.IsRelayed && responseMessage.PeerSocketAddresses.Count != 0)
                         {
@@ -246,9 +253,9 @@ namespace TomP2P.Connection
                 if (pe.AbortCause != PeerException.AbortCauseEnum.UserAbort)
                 {
                     // do not force if we ran into a timeout, the peer may be busy
-                    lock (PeerBean.PeerStatusListeners())
+                    lock (PeerBean.PeerStatusListeners)
                     {
-                        foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners())
+                        foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
                         {
                             listener.PeerFailed(_message.Recipient, pe); // TODO futureResponse used
                         }
@@ -262,9 +269,9 @@ namespace TomP2P.Connection
             }
             else
             {
-                lock (PeerBean.PeerStatusListeners())
+                lock (PeerBean.PeerStatusListeners)
                 {
-                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners())
+                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
                     {
                         listener.PeerFailed(_message.Recipient, new PeerException(cause)); // TODO futureResponse used
                     }

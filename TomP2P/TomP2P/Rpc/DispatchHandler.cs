@@ -42,7 +42,7 @@ namespace TomP2P.Rpc
         /// <param name="names"></param>
         public void Register(params int[] names)
         {
-            Number160 onBehalfOf = PeerBean.ServerPeerAddress().PeerId;
+            Number160 onBehalfOf = PeerBean.ServerPeerAddress.PeerId;
             Register(onBehalfOf, names);
         }
 
@@ -54,7 +54,7 @@ namespace TomP2P.Rpc
         /// <param name="names"></param>
         public void Register(Number160 onBehalfOf, params int[] names)
         {
-            ConnectionBean.Dispatcher.RegisterIOHandler(PeerBean.ServerPeerAddress().PeerId, onBehalfOf, this, names);
+            ConnectionBean.Dispatcher.RegisterIOHandler(PeerBean.ServerPeerAddress.PeerId, onBehalfOf, this, names);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace TomP2P.Rpc
         {
             return new Message.Message()
                 .SetRecipient(recipient)
-                .SetSender(PeerBean.ServerPeerAddress())
+                .SetSender(PeerBean.ServerPeerAddress)
                 .SetCommand(name)
                 .SetType(type)
                 .SetVersion(ConnectionBean.P2PId);
@@ -92,7 +92,7 @@ namespace TomP2P.Rpc
         public Message.Message CreateResponseMessage(Message.Message requestMessage,
             Message.Message.MessageType replyType)
         {
-            return CreateResponseMessage(requestMessage, replyType, PeerBean.ServerPeerAddress());
+            return CreateResponseMessage(requestMessage, replyType, PeerBean.ServerPeerAddress);
         }
 
         public Message.Message CreateResponseMessage(Message.Message requestMessage,

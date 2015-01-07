@@ -53,10 +53,14 @@ namespace TomP2P.Connection
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
-        public async Task<Message.Message> SendUdpAsync(bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public void SendUd(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
-            // TODO check for sync completion
-            // TODO RemovePeerIfFailed(futureResponse, message);
+            if (tcs.Task.IsCompleted)
+            {
+                return;
+            }
+            RemovePeerIfFailed(tcs, message);
+
             // TODO how to use timeouts?? -> use param idleUdpSeconds
 
             // 2. fire & forget options
@@ -80,6 +84,7 @@ namespace TomP2P.Connection
                 {
                     Logger.Error("Peer is relayed, but no relay given.");
                     // TODO set task to failed
+                    //tcs.SetException();
                     return null;
                 }
             }
@@ -180,6 +185,28 @@ namespace TomP2P.Connection
 
             // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
             // TODO best to use try/finally to close()
+        }
+
+        private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
+        {
+            // execute the following delegate only if TCS task failed
+            tcs.Task.ContinueWith(delegate(Task task)
+            {
+                if (message.Recipient.IsRelayed)
+                {
+                    // TODO: make the relay go away if failed
+                }
+                else
+                {
+                    lock (_peerStatusListeners)
+                    {
+                        foreach (var listener in _peerStatusListeners)
+                        {
+                            listener.PeerFailed(message.Recipient, new PeerException(tcs));
+                        }
+                    }
+                }
+            }, TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }
