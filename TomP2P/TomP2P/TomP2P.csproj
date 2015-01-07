@@ -73,7 +73,7 @@
     <Compile Include="Futures\BaseFutureImpl.cs" />
     <Compile Include="Futures\FutureResponse.cs" />
     <Compile Include="Futures\ICancel.cs" />
-    <Compile Include="Futures\PeerException.cs" />
+    <Compile Include="Connection\PeerException.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\CompByteBufAllocator.cs" />
     <Compile Include="Message\DataMap.cs" />

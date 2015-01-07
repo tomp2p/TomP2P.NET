@@ -106,6 +106,8 @@ namespace TomP2P.Connection
         {
             // TODO works?
             socket.Closed += sender => _semaphoreUdp.Release();
+
+            // TODO in Java, the FutureResponse is responded now after channel closing
         }
     }
 }

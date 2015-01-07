@@ -7,6 +7,8 @@ using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Futures;
 using TomP2P.Message;
+using TomP2P.Peers;
+using TomP2P.Rpc;
 
 namespace TomP2P.Connection
 {
@@ -16,7 +18,7 @@ namespace TomP2P.Connection
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
     /// <typeparam name="TFuture">The type of future to handle.</typeparam>
-    public class RequestHandler<TFuture> : Inbox where TFuture : FutureResponse
+    public class RequestHandler<TFuture> : Inbox where TFuture : FutureResponse // TODO correct, remove
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -67,9 +69,9 @@ namespace TomP2P.Connection
             ConnectionBean = connectionBean;
             _message = futureResponse.Request();
             _sendMessageId = new MessageId(_message);
-            IdleTcpSeconds = configuration.IdleTcpSeconds();
-            IdleUdpSeconds = configuration.IdleUdpSeconds();
-            ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis();
+            IdleTcpSeconds = configuration.IdleTcpSeconds;
+            IdleUdpSeconds = configuration.IdleUdpSeconds;
+            ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis;
         }
 
         /// <summary>
@@ -77,11 +79,12 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
         /// <returns>The future that was added in the constructor.</returns>
-        public TFuture SendUdp(ChannelCreator channelCreator)
+        public async Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
-            ConnectionBean.Sender.SendUdpAsync(this, _futureResponse, _message, channelCreator, _idleUdpSeconds, false);
-            return FutureResponse;
-            // TODO await response here, remove Inbox parameter
+            var t = ConnectionBean.Sender.SendUdpAsync(false, _message, channelCreator, IdleUdpSeconds, false);
+
+            Message.Message response = ResponseMessageReceived(await t);
+            return response;
         }
 
         /// <summary>
@@ -136,16 +139,104 @@ namespace TomP2P.Connection
             return FutureResponse;
         }
 
-        public override void MessageReceived(Message.Message message)
+        public Message.Message ResponseMessageReceived(Message.Message responseMessage)
         {
+            // TODO give back this message in the SendUDP method
             // client-side:
             // here, the result for the awaitable task can be set
             // -> actually, this method can be synchronically called after each "async SendX()"
-            throw new NotImplementedException();
+
+            var recvMessageId = new MessageId(responseMessage);
+
+            // error handling
+            if (responseMessage.Type == Message.Message.MessageType.UnknownId)
+            {
+                string msg =
+                    "Message was not delivered successfully. Unknown ID (peer may be offline or unknown RPC handler): " +
+                    _message;
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                return;
+            }
+            else if (responseMessage.Type == Message.Message.MessageType.Exception)
+            {
+                string msg = "Message caused an exception on the other side. Handle as PeerAbort: " + _message;
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                return;
+            }
+            else if (responseMessage.IsRequest())
+            {
+                // fireChannelRead -> go to next inbound handler
+                return;
+            }
+            else if (!_sendMessageId.Equals(recvMessageId))
+            {
+                string msg =
+                    String.Format(
+                        "Response message [{0}] sent to the node is not the same as we expect. We sent request message [{1}].",
+                        responseMessage, _message);
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                return;
+            }
+            // We need to exclude RCON Messages from the sanity check because we
+            // use this RequestHandler for sending a Type.REQUEST_1,
+            // RPC.Commands.RCON message on top of it. Therefore the response
+            // type will never be the same Type as the one the user initially
+            // used (e.g. DIRECT_DATA).
+            else if (responseMessage.Command != Rpc.Rpc.Commands.Rcon.GetNr()
+                     && _message.Recipient.IsRelayed != responseMessage.Sender.IsRelayed)
+            {
+                string msg =
+                    String.Format(
+                        "Response message [{0}] sent has a different relay flag than we sent with request message [{1}]. Recipient ({2}) / Sender ({3}).",
+                        responseMessage, _message, _message.Recipient.IsRelayed, responseMessage.Sender.IsRelayed);
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                return;
+            }
+
+            // we got a good answer, let's mark the sender as alive
+            if (responseMessage.IsOk() || responseMessage.IsNotOk())
+            {
+                lock (PeerBean.PeerStatusListeners())
+                {
+                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners())
+                    {
+                        if (responseMessage.Sender.IsRelayed && responseMessage.PeerSocketAddresses.Count != 0)
+                        {
+                            // use the response message as we have up-to-date data for the relays
+                            PeerAddress remotePeer =
+                                responseMessage.Sender.ChangePeerSocketAddresses(responseMessage.PeerSocketAddresses);
+                            responseMessage.SetSender(remotePeer);
+                        }
+                        listener.PeerFound(responseMessage.Sender, null, null);
+                    }
+                }
+            }
+
+            // call this for streaming support
+            // TODO futureResponse.progress(responseMessage)
+            if (!responseMessage.IsDone)
+            {
+                Logger.Debug("Good message is streaming {0}.", responseMessage);
+                return;
+            }
+
+            if (!_message.IsKeepAlive())
+            {
+                Logger.Debug("Good message, close channel {0}, {1}.", responseMessage, "TODO"); // TODO use channel info here, and close channel
+                // TODO set the success now, but trigger the notify when we closed the channel
+                // TODO futureResponse.responseLater()
+                // TODO close channel
+            }
+            else
+            {
+                Logger.Debug("Good message, leave channel open {0}.", responseMessage);
+                // TODO futureResponse.response(responseMessage)
+            }
         }
 
-        public override void ExceptionCaught(Exception cause)
+        public void ExceptionCaught(Exception cause)
         {
+            // TODO
             throw new NotImplementedException();
         }
     }

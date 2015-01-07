@@ -159,7 +159,7 @@ namespace TomP2P.Message
         /// </summary>
         public IPEndPoint RecipientSocket { get; private set; }
         public bool IsUdp { get; private set; }
-        public bool Done { get; private set; }
+        public bool IsDone { get; private set; }
         private bool _sign = false;
         private bool _content = false;
         public bool Verified { get; private set; }
@@ -170,7 +170,7 @@ namespace TomP2P.Message
         public Message()
         {
             IsUdp = false;
-            Done = false;
+            IsDone = false;
             ReceivedSignature = null;
             MessageId = Random.Next();
             ContentTypes = new Content[ContentTypeLength];
@@ -403,7 +403,7 @@ namespace TomP2P.Message
         }
 
         /// <summary>
-        /// 
+        /// True if the message was OK, or at least sent partial data.
         /// </summary>
         /// <returns>True if the message was OK, or at least sent partial data.</returns>
         public bool IsOk()
@@ -412,7 +412,7 @@ namespace TomP2P.Message
         }
 
         /// <summary>
-        /// 
+        /// True if the message arrived, but data was not found or access was denied.
         /// </summary>
         /// <returns>True if the message arrived, but data was not found or access was denied.</returns>
         public bool IsNotOk()
@@ -472,7 +472,7 @@ namespace TomP2P.Message
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>True if this message was sent on a connection that should be kept alive.</returns>
+        /// <returns>True, if this message was sent on a connection that should be kept alive.</returns>
         public bool IsKeepAlive()
         {
             return (Options & 1) > 0;
@@ -982,7 +982,7 @@ namespace TomP2P.Message
         /// <returns>This class.</returns>
         public Message SetDone(bool isDone)
         {
-            Done = true;
+            IsDone = true;
             return this;
         }
 

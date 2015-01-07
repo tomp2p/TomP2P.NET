@@ -57,6 +57,7 @@ namespace TomP2P.Connection
         {
             // TODO check for sync completion
             // TODO RemovePeerIfFailed(futureResponse, message);
+            // TODO how to use timeouts?? -> use param idleUdpSeconds
 
             // 2. fire & forget options
             

@@ -12,11 +12,9 @@ namespace TomP2P.Connection.Windows
     /// </summary>
     public abstract class Inbox // TODO maybe rename, needed at all?
     {
-        public abstract void MessageReceived(Message.Message message);
+        //public abstract void ResponseMessageReceived(Message.Message message);
 
-        public virtual void ExceptionCaught(Exception cause)
-        {
-            throw new NotImplementedException();
-        }
+        //public virtual void ExceptionCaught(Exception cause)
+
     }
 }
