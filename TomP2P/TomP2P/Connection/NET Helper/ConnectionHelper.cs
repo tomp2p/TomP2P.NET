@@ -63,13 +63,9 @@ namespace TomP2P.Connection.NET_Helper
             return recipient;
         }
 
-        /// <summary>
-        /// Extracts the bytes from the ByteBuf that holds the message.
-        /// </summary>
-        /// <param name="messageBuffer">The buffer holding the message bytes.</param>
-        /// <returns></returns>
         public static byte[] ExtractBytes(ByteBuf messageBuffer)
         {
+            // TODO figure out how Netty serializes this wrapper and sends it over the wire
             // TODO works?
             var buffer = messageBuffer.NioBuffer();
             buffer.Position = 0;

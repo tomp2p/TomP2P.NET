@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using TomP2P.Connection.Pipeline;
 using TomP2P.Extensions;
 using TomP2P.Message;
 
@@ -32,7 +31,10 @@ namespace TomP2P.Connection.Windows
             // TODO no binding needed? maybe when receiveFrom is called before sendTo
             // TODO also see http://msdn.microsoft.com/en-us/library/system.net.sockets.socket.bind(v=vs.110).aspx
             var res = await _udpClient.ReceiveFromAsync(buffer, 0, buffer.Length, SocketFlags.None, remoteEndPoint);
-            return res.BytesReceived;
+            //return res.BytesReceived;
+
+            UdpClient client = new UdpClient();
+            var x = await client.
         }
 
         public override void Close()

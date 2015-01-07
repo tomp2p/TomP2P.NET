@@ -8,6 +8,8 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.NET_Helper
 {
+    // TODO figure out how Netty serializes this wrapper and sends it over the wire
+
     /// <summary>
     /// .NET equivalent for Java Netty's DatagramPacket, which is the message container that
     /// gets sent over the wire for UDP connections.
@@ -16,10 +18,10 @@ namespace TomP2P.Connection.NET_Helper
     public class DatagramPacket
     {
         private readonly ByteBuf _data;
-        private readonly IPAddress _recipient;
-        private readonly IPAddress _sender;
+        private readonly IPEndPoint _recipient;
+        private readonly IPEndPoint _sender;
 
-        public DatagramPacket(ByteBuf data, IPAddress recipient, IPAddress sender)
+        public DatagramPacket(ByteBuf data, IPEndPoint recipient, IPEndPoint sender)
         {
             if (data == null)
             {
@@ -40,12 +42,12 @@ namespace TomP2P.Connection.NET_Helper
             get { return _data; }
         }
 
-        public IPAddress Recipient
+        public IPEndPoint Recipient
         {
             get { return _recipient; }
         }
 
-        public IPAddress Sender
+        public IPEndPoint Sender
         {
             get { return _sender; }
         }

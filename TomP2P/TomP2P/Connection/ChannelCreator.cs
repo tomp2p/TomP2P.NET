@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace TomP2P.Connection
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // the "ChannelGroup"
-        private readonly ISet<UdpClientSocket> _recipients = new HashSet<UdpClientSocket>();
+        private readonly ISet<UdpClient> _recipients = new HashSet<UdpClient>();
 
         private readonly int _maxPermitsUdp;
         private readonly int _maxPermitsTcp;
@@ -61,7 +62,7 @@ namespace TomP2P.Connection
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
         /// <param name="senderEndPoint"></param>
         /// <returns>The created channel or null, if the channel could not be created.</returns>
-        public UdpClientSocket CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
+        public UdpClient CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
         {
             _readWriteLockUdp.EnterReadLock();
             try
@@ -80,10 +81,12 @@ namespace TomP2P.Connection
 
                 // TODO set broadcast option, etc.
                 // create "channel", for which we use a socket in .NET
-                var udpSocket = new UdpClientSocket(senderEndPoint);
-                udpSocket.Bind(_externalBindings.WildcardSocket());
+                //var udpSocket = new UdpClientSocket(senderEndPoint);
+                //udpSocket.Bind(_externalBindings.WildcardSocket());
 
-                _recipients.Add(udpSocket);
+                var udpClient = new UdpClient(senderEndPoint);
+
+                _recipients.Add(udpClient);
                 SetupCloseListener(udpSocket);
 
                 return udpSocket;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
@@ -24,7 +25,7 @@ namespace TomP2P.Message
         /// <summary>
         /// .NET-specific decoding handler for incoming UDP messages.
         /// </summary>
-        public void Read(byte[] msgBytes)
+        public Message Read(byte[] msgBytes, IPEndPoint recipient, IPEndPoint sender)
         {
             // setup buffer from bytes
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer(); // TODO use direct?
@@ -33,12 +34,23 @@ namespace TomP2P.Message
             try
             {
                 var decoder = new Decoder(_signatureFactory);
-                bool finished = decoder.Decode(buf,)
+                bool finished = decoder.Decode(buf, recipient, sender);
+                if (finished)
+                {
+                    // prepare finish
+                    var message = decoder.PrepareFinish();
+                    return message;
+                }
+                else
+                {
+                    Logger.Warn("Did not get the complete packet!");
+                    return null;
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                
-                throw;
+                Logger.Error("Error in UDP decoding.", ex);
+                throw ex;
             }
         }
     }
