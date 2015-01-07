@@ -99,7 +99,7 @@ namespace TomP2P.Connection
             var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
             Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
-            UdpClient udpClient = channelCreator.CreateUdp(broadcast, senderEp);
+            MyUdpClient udpClient = channelCreator.CreateUdp(broadcast, senderEp);
 
             // check if channel could be created due to resource constraints
             if (udpClient == null)
@@ -130,7 +130,7 @@ namespace TomP2P.Connection
             {
                 // close channel now
                 Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
-                udpClient.Close(); // TODO ok? what happens when during sending operation? (linger option?)
+                udpClient.NotifiedClose(); // TODO ok? what happens when during sending operation? (linger option?)
                 
                 // TODO report message
                 return null; // TODO null for signaling fire&forget ok?
@@ -143,6 +143,7 @@ namespace TomP2P.Connection
                 {
                     // fail sending
                     // TODO report failed
+                    udpClient.NotifiedClose();
                     Logger.Warn("One or more exceptions occurred when sending {0}: {1}.", message, sendTask.Exception);
                     return null;
                 }
@@ -156,6 +157,7 @@ namespace TomP2P.Connection
                     {
                         // fail receiving
                         // TODO report failed
+                        udpClient.NotifiedClose();
                         Logger.Warn("One or more exceptions occurred when receiving: {0}.", recvTask.Exception);
                         return null;
                     }
@@ -176,27 +178,7 @@ namespace TomP2P.Connection
             }
 
             // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
-            udpClient.Close();
-        }
-
-        /// <summary>
-        /// Report a failure after the channel was closed.
-        /// </summary>
-        /// <param name="udpSocket"></param>
-        private void ReportFailed(UdpClientSocket udpSocket)
-        {
-            udpSocket.Close();
-            // TODO responseNow();
-        }
-
-        /// <summary>
-        /// Report a successful response after the channel was closed.
-        /// </summary>
-        /// <param name="udpSocket"></param>
-        private void ReportMessage(UdpClientSocket udpSocket)
-        {
-            udpSocket.Close();
-            // TODO responseNow();
+            // TODO best to use try/finally to close()
         }
     }
 }

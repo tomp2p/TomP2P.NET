@@ -62,7 +62,7 @@ namespace TomP2P.Connection
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
         /// <param name="senderEndPoint"></param>
         /// <returns>The created channel or null, if the channel could not be created.</returns>
-        public UdpClient CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
+        public MyUdpClient CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
         {
             _readWriteLockUdp.EnterReadLock();
             try
