@@ -139,7 +139,7 @@ namespace TomP2P.Connection
             return FutureResponse;
         }
 
-        public Message.Message ResponseMessageReceived(Message.Message responseMessage)
+        private Message.Message ResponseMessageReceived(Message.Message responseMessage)
         {
             // TODO give back this message in the SendUDP method
             // client-side:
@@ -234,10 +234,46 @@ namespace TomP2P.Connection
             }
         }
 
-        public void ExceptionCaught(Exception cause)
+        private void ExceptionCaught(Exception cause)
         {
-            // TODO
-            throw new NotImplementedException();
+            Logger.Debug("Error originating from {0}. Cause: {1}", _message, cause); // TODO futureResponse used
+            // TODO check for completion and warn
+
+            Logger.Debug("Exception caught, but handled properly: {0}", cause);
+            if (cause is PeerException)
+            {
+                var pe = (PeerException) cause;
+                if (pe.AbortCause != PeerException.AbortCauseEnum.UserAbort)
+                {
+                    // do not force if we ran into a timeout, the peer may be busy
+                    lock (PeerBean.PeerStatusListeners())
+                    {
+                        foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners())
+                        {
+                            listener.PeerFailed(_message.Recipient, pe); // TODO futureResponse used
+                        }
+                    }
+                    Logger.Debug("Removed from map, cause: {0}, message: {1}.", pe, _message);
+                }
+                else
+                {
+                    Logger.Warn("Error in request.");
+                }
+            }
+            else
+            {
+                lock (PeerBean.PeerStatusListeners())
+                {
+                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners())
+                    {
+                        listener.PeerFailed(_message.Recipient, new PeerException(cause)); // TODO futureResponse used
+                    }
+                }
+            }
+
+            Logger.Debug("Report failure:", cause);
+            // TODO futureResponse.failedLater
+            // TODO close channel
         }
     }
 }
