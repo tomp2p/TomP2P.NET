@@ -1,12 +1,17 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace TomP2P.Connection.Windows
 {
     /// <summary>
     /// Holds the necessary information for a server-side session.
     /// </summary>
-    public class ClientToken
+    public class ClientToken2
     {
         /// <summary>
         /// Used for TCP connections. Represents the handler socket for the accepted client connection.
@@ -18,21 +23,11 @@ namespace TomP2P.Connection.Windows
         /// </summary>
         public IPEndPoint RemotEndPoint;
 
-        public byte[] SendBuffer { get; private set; }
-        public byte[] RecvBuffer { get; private set; }
-
-        public ClientToken(int bufferSize)
-        {
-            SendBuffer = new byte[bufferSize];
-            RecvBuffer = new byte[bufferSize];
-        }
 
         public void Reset()
         {
             ClientHandler = null;
             RemotEndPoint = null;
-            SendBuffer = new byte[SendBuffer.Length];
-            RecvBuffer = new byte[RecvBuffer.Length];
         }
     }
 }

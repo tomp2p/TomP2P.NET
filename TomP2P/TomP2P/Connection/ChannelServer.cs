@@ -93,6 +93,10 @@ namespace TomP2P.Connection
         {
             // TODO configure UDP server
             // TODO configure a server-side pipeline
+            // - decode incoming message
+            // - hand it to the Dispatcher
+            // - encode outgoing message
+
             try
             {
                 _udpServer = new UdpServerSocket(listenAddress, 10, 10*1024); // TODO move configs to separate config file

@@ -54,7 +54,6 @@ namespace TomP2P.Connection
             _externalBindings = channelClientConfiguration.BindingsOutgoing;
         }
 
-        // TODO in Java/Netty, this is async
         /// <summary>
         /// Creates a "channel" to the given address.
         /// This won't send any message unlike TCP.
@@ -79,6 +78,7 @@ namespace TomP2P.Connection
                     throw new SystemException(errorMsg);
                 }
 
+                // TODO surround with try/catch and return exception to TCS
                 // TODO set broadcast option, etc.
                 // create "channel", for which we use a socket in .NET
                 //var udpSocket = new UdpClientSocket(senderEndPoint);
