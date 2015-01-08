@@ -1,24 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Connection.NET_Helper;
+using TomP2P.Message;
 
 namespace TomP2P.Connection.Windows
 {
     public class MyUdpServer
     {
+        private readonly IPEndPoint _localEndPoint;
+        private readonly int _maxNrOfClients;
         private readonly UdpClient _udpServerSocket;
 
-        private readonly int _maxNrOfClients;
+        private readonly TomP2PSinglePacketUDP _decoder;
+        private readonly TomP2POutbound _encoder;
+        private readonly Dispatcher _dispatcher;
+
         private volatile bool _isStopped; // volatile!
 
-        public MyUdpServer(IPEndPoint localEndPoint, int maxNrOfClients)
+        public MyUdpServer(IPEndPoint localEndPoint, int maxNrOfClients, TomP2PSinglePacketUDP decoder, 
+            TomP2POutbound encoder, Dispatcher dispatcher)
         {
+            _localEndPoint = localEndPoint;
             _maxNrOfClients = maxNrOfClients;
             _udpServerSocket = new UdpClient(localEndPoint);
+
+            _decoder = decoder;
+            _encoder = encoder;
+            _dispatcher = dispatcher;
         }
 
         public void Start()
@@ -66,13 +75,27 @@ namespace TomP2P.Connection.Windows
                 UdpReceiveResult recvRes = await _udpServerSocket.ReceiveAsync();
                 IPEndPoint remoteEndPoint = recvRes.RemoteEndPoint;
 
-                // TODO process data, maybe use abstract method
-                var sampleBytes = new byte[10];
+                // process data
+                byte[] sendBytes = UdpPipeline(recvRes.Buffer, _localEndPoint, remoteEndPoint);
 
                 // return / send back
 
-                await _udpServerSocket.SendAsync(sampleBytes, sampleBytes.Length, remoteEndPoint);
+                await _udpServerSocket.SendAsync(sendBytes, sendBytes.Length, remoteEndPoint);
             }
+        }
+
+        private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
+        {
+            // - decode incoming message
+            // - hand it to the Dispatcher
+            // - encode outgoing message
+            var recvMessage = _decoder.Read(recvBytes, recipient, sender);
+
+            var sendMessage = _dispatcher.MessageReceived(recvMessage);
+
+            var buffer = _encoder.Write(sendMessage);
+            var sendBytes = ConnectionHelper.ExtractBytes(buffer);
+            return sendBytes;
         }
     }
 }

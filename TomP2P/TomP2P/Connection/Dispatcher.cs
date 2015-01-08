@@ -92,7 +92,7 @@ namespace TomP2P.Connection
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
-        public override void MessageReceived(Message.Message message)
+        public Message.Message MessageReceived(Message.Message message)
         {
             // server-side:
             // message comes (over network) from sender

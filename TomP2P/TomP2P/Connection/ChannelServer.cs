@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using NLog;
 using TomP2P.Connection.Windows;
+using TomP2P.Message;
 
 namespace TomP2P.Connection
 {
@@ -13,7 +14,7 @@ namespace TomP2P.Connection
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private UdpServerSocket _udpServer;
+        private MyUdpServer _udpServer;
         private TcpServerSocket _tcpServer;
 
         // setup
@@ -27,7 +28,10 @@ namespace TomP2P.Connection
         private readonly IList<IPeerStatusListener> _peerStatusListeners;
 
         // TODO DropConnectionInboundHandlers needed?
-        // TODO ChannelHandler needed?
+        private readonly TomP2PSinglePacketUDP _udpDecoderHandler;
+
+        // .NET
+        private readonly TomP2POutbound _udpEncoderHandler;
 
         /// <summary>
         /// Sets parameters and starts network device discovery.
@@ -43,6 +47,9 @@ namespace TomP2P.Connection
             _dispatcher = dispatcher;
             _peerStatusListeners = peerStatusListeners;
             // TODO finish implementation
+
+            _udpDecoderHandler = new TomP2PSinglePacketUDP(channelServerConfiguration.SignatureFactory);
+            _udpEncoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
         }
 
         /// <summary>
@@ -58,7 +65,7 @@ namespace TomP2P.Connection
                     Logger.Info("Listening for broadcasts on UDP port {0} and TCP port {1}.",
                         ChannelServerConfiguration.Ports.UdpPort,
                         ChannelServerConfiguration.Ports.TcpPort);
-                    if (!StartupTcp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports.TcpPort)) 
+                    if (!StartupTcp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports.TcpPort))
                         || !StartupUdp(new IPEndPoint(IPAddress.Any, ChannelServerConfiguration.Ports.UdpPort)))
                     {
                         Logger.Warn("Cannot bind TCP or UDP.");
@@ -92,15 +99,10 @@ namespace TomP2P.Connection
         private bool StartupUdp(IPEndPoint listenAddress)
         {
             // TODO configure UDP server
-            // TODO configure a server-side pipeline
-            // - decode incoming message
-            // - hand it to the Dispatcher
-            // - encode outgoing message
-
             try
             {
-                _udpServer = new UdpServerSocket(listenAddress, 10, 10*1024); // TODO move configs to separate config file
-                // binding is done in Start()
+                // TODO find appropriate maxNrOfClients
+                _udpServer = new MyUdpServer(listenAddress, 10, _udpDecoderHandler, _udpEncoderHandler, _dispatcher);
                 _udpServer.Start();
                 return true;
             }
