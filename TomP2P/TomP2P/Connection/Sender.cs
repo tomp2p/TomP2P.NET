@@ -49,12 +49,15 @@ namespace TomP2P.Connection
         /// <summary>
         /// Sends a message via UDP.
         /// </summary>
+        /// <param name="tcs"></param>
+        /// <param name="isFireAndForget"></param>
         /// <param name="message">The message to send.</param>
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
         public void SendUd(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
+            // no need to continue if already finished
             if (tcs.Task.IsCompleted)
             {
                 return;
@@ -82,10 +85,10 @@ namespace TomP2P.Connection
                 }
                 else
                 {
-                    Logger.Error("Peer is relayed, but no relay given.");
-                    // TODO set task to failed
-                    //tcs.SetException();
-                    return null;
+                    const string msg = "Peer is relayed, but no relay is given.";
+                    Logger.Error(msg);
+                    tcs.SetException(new TaskFailedException(msg));
+                    return;
                 }
             }
 
@@ -93,9 +96,13 @@ namespace TomP2P.Connection
             if (message.Recipient.IsRelayed && message.Command != Rpc.Rpc.Commands.Neighbor.GetNr()
                 && message.Command != Rpc.Rpc.Commands.Ping.GetNr())
             {
-                Logger.Warn("Tried to send a UDP message to unreachable peers. Only TCP messages can be sent to unreachable peers: {0}.", message);
-                // TODO set task to failed
-                return null;
+                string msg =
+                    String.Format(
+                        "Tried to send a UDP message to unreachable peers. Only TCP messages can be sent to unreachable peers: {0}.",
+                        message);
+                Logger.Warn(msg);
+                tcs.SetException(new TaskFailedException(msg));
+                return;
             }
 
             // 5. create UDP channel
@@ -107,17 +114,20 @@ namespace TomP2P.Connection
 
             MyUdpClient udpClient = channelCreator.CreateUdp(broadcast, senderEp);
 
-            // check if channel could be created due to resource constraints
+            // check if channel could be created (due to resource constraints)
             if (udpClient == null)
             {
-                Logger.Warn("Could not create a {0} socket. (Due to resource constraints.)", message.IsUdp ? "UDP" : "TCP");
-                // TODO set task to failed
+                const string msg = "Could not create a UDP socket. (Due to resource constraints.)";
+                Logger.Warn(msg);
+                tcs.TrySetException(new TaskFailedException(msg));
+                return;
+                
+                // TODO add reason for fail (e.g., from SocketException), e.g. move to ChannelCreator
                 Logger.Debug("Channel creation failed.");
                 // may have been closed by the other side
                 // or it may have been canceled from this side
-                // TODO add reason for fail (e.g., from SocketException)
-                return null;
             }
+            Logger.Debug("About to connect to {0} with channel {1}, ff = {2}.", message.Recipient, udpClient, isFireAndForget);
 
             // TODO Java uses a DatagramPacket wrapper -> interoperability issue?
             // 3. client-side pipeline (sending)
@@ -127,64 +137,69 @@ namespace TomP2P.Connection
             var bytes = ConnectionHelper.ExtractBytes(buffer);
             
             // 6. send/write message to the created channel
-            Task<int> sendTask = udpClient.SendAsync(bytes, bytes.Length, receiverEp);
+            //Task<int> sendTask = udpClient.SendAsync(bytes, bytes.Length, receiverEp);
+            //await sendTask;
 
-            // 7. await response message (if not fire&forget)
-            // 9. handle possible errors during send (normal vs. fire&forget)
-            //  - decoder
+            try
+            {
+                udpClient.Send(bytes, bytes.Length, receiverEp);
+            }
+            catch (Exception ex)
+            {
+                // fail sending
+                string msg = String.Format("One or more exceptions occurred when sending {0}: {1}.", message, ex);
+                Logger.Error(msg);
+                tcs.SetException(new TaskFailedException(msg));
+                udpClient.NotifiedClose();
+                return;
+            }
+
+            // success for sending
+            // await response, if not fire&forget
             if (isFireAndForget)
             {
                 // close channel now
                 Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
-                udpClient.NotifiedClose(); // TODO ok? what happens when during sending operation? (linger option?)
-                
-                // TODO report message
-                return null; // TODO null for signaling fire&forget ok?
+                    
+                // set FF response
+                tcs.SetResult(null);
+                udpClient.NotifiedClose();
+                return;
             }
             else
             {
-                // not fire&forget -> await response
-                await sendTask;
-                if (sendTask.Exception != null)
+                // receive response message
+                //Task<UdpReceiveResult> recvTask = udpClient.ReceiveAsync();
+                //await recvTask;
+                var remoteEp = new IPEndPoint(IPAddress.Any, 0); // TODO correct?
+
+                byte[] recvBytes;
+                try
                 {
-                    // fail sending
-                    // TODO report failed
+                    recvBytes = udpClient.Receive(ref remoteEp);
+                }
+                catch (Exception ex)
+                {
+                    // fail receiving
+                    string msg = String.Format("One or more exceptions occurred when receiving: {0}.", ex);
+                    Logger.Error(msg);
+                    tcs.SetException(new TaskFailedException(msg));
                     udpClient.NotifiedClose();
-                    Logger.Warn("One or more exceptions occurred when sending {0}: {1}.", message, sendTask.Exception);
-                    return null;
+                    return;
                 }
-                else
-                {
-                    // success for sending
-                    // await response
-                    Task<UdpReceiveResult> recvTask = udpClient.ReceiveAsync();
-                    await recvTask;
-                    if (recvTask.Exception != null)
-                    {
-                        // fail receiving
-                        // TODO report failed
-                        udpClient.NotifiedClose();
-                        Logger.Warn("One or more exceptions occurred when receiving: {0}.", recvTask.Exception);
-                        return null;
-                    }
-                    else
-                    {
-                        // success for receiving
-                        // decode message
-                        var singlePacketUdp = new TomP2PSinglePacketUDP(ChannelClientConfiguration.SignatureFactory);
 
-                        IPEndPoint remoteEndPoint = recvTask.Result.RemoteEndPoint;
-                        byte[] recvBytes = recvTask.Result.Buffer;
+                // success for receiving
+                // decode message
+                var singlePacketUdp = new TomP2PSinglePacketUDP(ChannelClientConfiguration.SignatureFactory);
+                var responseMessage = singlePacketUdp.Read(recvBytes, receiverEp, senderEp); // TODO correct? or use remoteEp from returned dgram?
 
-                        var responseMessage = singlePacketUdp.Read(recvBytes, receiverEp, senderEp); // TODO correct? or use remoteEp from returned dgram?
-                        // return response message to the RequestHandler
-                        return responseMessage;
-                    }
-                }
+                // return response message
+                tcs.SetResult(responseMessage);
             }
 
             // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
             // TODO best to use try/finally to close()
+            udpClient.NotifiedClose();
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
