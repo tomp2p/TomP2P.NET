@@ -73,7 +73,7 @@ namespace TomP2P.Rpc
         /// <param name="name">The command type.</param>
         /// <param name="type">The request type.</param>
         /// <returns>The created request message.</returns>
-        public Message.Message CreateMessage(PeerAddress recipient, sbyte name, Message.Message.MessageType type)
+        public Message.Message CreateRequestMessage(PeerAddress recipient, sbyte name, Message.Message.MessageType type)
         {
             return new Message.Message()
                 .SetRecipient(recipient)
@@ -95,7 +95,7 @@ namespace TomP2P.Rpc
             return CreateResponseMessage(requestMessage, replyType, PeerBean.ServerPeerAddress);
         }
 
-        public Message.Message CreateResponseMessage(Message.Message requestMessage,
+        public static Message.Message CreateResponseMessage(Message.Message requestMessage,
             Message.Message.MessageType replyType, PeerAddress peerAddress)
         {
             // this will have the ports >40'000 that we need to know for sending the reply

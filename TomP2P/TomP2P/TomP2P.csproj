@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\DirectResponder.cs" />
     <Compile Include="Connection\NET Helper\ConnectionHelper.cs" />
     <Compile Include="Connection\Bindings.cs" />
     <Compile Include="Connection\ChannelClientConfiguration.cs" />
@@ -62,11 +63,11 @@
     <Compile Include="Connection\Ports.cs" />
     <Compile Include="Connection\RequestHandler.cs" />
     <Compile Include="Connection\Sender.cs" />
+    <Compile Include="Connection\TimeoutFactory.cs" />
     <Compile Include="Connection\Windows\AsyncClientSocket.cs" />
     <Compile Include="Connection\Windows\AsyncServerSocket.cs" />
     <Compile Include="Connection\Windows\ClientToken.cs" />
     <Compile Include="Connection\Windows\ClientToken2.cs" />
-    <Compile Include="Connection\Windows\Inbox.cs" />
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpServer.cs" />
     <Compile Include="Connection\Windows\TcpClientSocket.cs" />

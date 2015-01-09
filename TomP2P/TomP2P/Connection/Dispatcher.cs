@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using NLog;
 using TomP2P.Connection.Windows;
+using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
@@ -19,7 +21,7 @@ namespace TomP2P.Connection
     /// This class is able to cover several channels but only one P2P network!)
     /// </para>
     /// </summary>
-    public class Dispatcher : Inbox
+    public class Dispatcher
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -92,17 +94,34 @@ namespace TomP2P.Connection
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
-        public Message.Message MessageReceived(Message.Message message)
+        public Message.Message MessageReceived(Message.Message requestMessage, Socket channel) // TODO use appropriate socket class
         {
             // server-side:
             // message comes (over network) from sender
             // -> correct DispatchHandler handles response
-            throw new NotImplementedException();
-        }
+            
+            Logger.Debug("Received request message {0} from channel {1}.", requestMessage, channel);
+            if (requestMessage.Version != _p2pId)
+            {
+                Logger.Error("Wrong version. We are looking for {0}, but we got {1}. Received: {2}.", _p2pId, requestMessage.Version, requestMessage);
+                // TODO close channel
+                lock (_peerBeanMaster.PeerStatusListeners)
+                {
+                    foreach (IPeerStatusListener listener in _peerBeanMaster.PeerStatusListeners)
+                    {
+                        listener.PeerFailed(requestMessage.Sender, new PeerException(PeerException.AbortCauseEnum.PeerError, "Wrong P2P version."))
+                    }
+                }
+                // TODO return
+            }
 
-        public override void ExceptionCaught(Exception cause)
-        {
-            throw new NotImplementedException();
+            if (!requestMessage.IsRequest())
+            {
+                // fireChannelRead -> go to next inbound handler
+            }
+
+            IResponder responder = new DirectResponder(this, _peerBeanMaster, requestMessage);
+            // TODO finish impl
         }
     }
 }

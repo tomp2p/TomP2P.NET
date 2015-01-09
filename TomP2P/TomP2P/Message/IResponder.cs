@@ -7,6 +7,6 @@ namespace TomP2P.Message
 
         void Failed(Message.MessageType type, string reason);
 
-        void ResponseFireAndForget();
+        void ResponseFireAndForget(bool isUdp);
     }
 }

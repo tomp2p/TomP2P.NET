@@ -85,7 +85,7 @@ namespace TomP2P.Rpc
         private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
             IConnectionConfiguration configuration)
         {
-            var message = CreateMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
             
             var tcs = new TaskCompletionSource<Message.Message>(TaskCreationOptions.None);
 

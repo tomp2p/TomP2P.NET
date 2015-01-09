@@ -86,12 +86,12 @@ namespace TomP2P.Connection.Windows
 
         private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
         {
-            // - decode incoming message
-            // - hand it to the Dispatcher
-            // - encode outgoing message
+            // 1. decode incoming message
+            // 2. hand it to the Dispatcher
+            // 3. encode outgoing message
             var recvMessage = _decoder.Read(recvBytes, recipient, sender);
 
-            var sendMessage = _dispatcher.MessageReceived(recvMessage);
+            var sendMessage = _dispatcher.MessageReceived(recvMessage, _udpServerSocket.Client);
 
             var buffer = _encoder.Write(sendMessage);
             var sendBytes = ConnectionHelper.ExtractBytes(buffer);
