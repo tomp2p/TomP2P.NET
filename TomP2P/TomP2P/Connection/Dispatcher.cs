@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using NLog;
 using TomP2P.Connection.Windows;
@@ -121,7 +122,124 @@ namespace TomP2P.Connection
             }
 
             IResponder responder = new DirectResponder(this, _peerBeanMaster, requestMessage);
-            // TODO finish impl
+            DispatchHandler myHandler = AssociatedHandler(requestMessage);
+        }
+
+        /// <summary>
+        /// Responds within a session. Keeps the connection open if told to do so.
+        /// Connection is only kept alive for TCP data.
+        /// </summary>
+        /// <param name="isUdp"></param>
+        /// <param name="responseMessage">The response message to send.</param>
+        internal Message.Message Respond(bool isUdp, Message.Message responseMessage, UdpClient udpClient) // TODO use appropriate socket
+        {
+            if (isUdp)
+            {
+                // Check, if channel is still open. If not, then do not send anything
+                // because this will cause an exception that will be logged.
+                // TODO check if UDP is open, how?
+                // TODO return null
+                Logger.Debug("Response UDP message {0}.", responseMessage);
+            }
+            else
+            {
+                // Check, if channel is still open. If not, then do not send anything
+                // because this will cause an exception that will be logged.
+                if (udpClient.Client.Connected)
+                {
+                    Logger.Debug("Channel TCP is not open, do not reply {0}.", responseMessage);
+                    return null;
+                }
+                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, udpClient.Client.RemoteEndPoint); // TODO correct?
+            }
+            return responseMessage;
+        }
+
+        /// <summary>
+        /// Returns the registered handler for the provided message, if any.
+        /// </summary>
+        /// <param name="message">The message a handler should be found for.</param>
+        /// <returns>The handler for the provided message or null, if none has been registered for that message.</returns>
+        public DispatchHandler AssociatedHandler(Message.Message message)
+        {
+            if (message == null || !message.IsRequest())
+            {
+                return null;
+            }
+
+            PeerAddress recipient = message.Recipient;
+
+            // search for handler, 0 is ping
+            // if we send with peerId = ZERO, then we take the first one we found
+            if (recipient.PeerId.IsZero && message.Command == Rpc.Rpc.Commands.Ping.GetNr())
+            {
+                Number160 peerId = _peerBeanMaster.ServerPeerAddress.PeerId;
+                return SearchHandler(peerId, peerId, Rpc.Rpc.Commands.Ping.GetNr());
+            }
+            else
+            {
+                // else we search for the handler that we are responsible for
+                DispatchHandler handler = SearchHandler(recipient.PeerId, recipient.PeerId, message.Command);
+                if (handler != null)
+                {
+                    return handler;
+                }
+                else
+                {
+                    // If we could not find a handler that we are responsible for, we
+                    // are most likely a relay. Since we have no ID of the relay, we
+                    // just take the first one.
+                    var handlers = SearchHandler(Convert.ToInt32(message.Command));
+                    foreach (var entry in handlers)
+                    {
+                        if (entry.Key.DomainKey.Equals(recipient.PeerId))
+                        {
+                            return entry.Value;
+                        }
+                    }
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Looks for a registered handler according to the given parameters.
+        /// </summary>
+        /// <param name="recipientId">The ID of the recipient of the message.</param>
+        /// <param name="onBehalfOf">The ID of the onBehalfOf peer.</param>
+        /// <param name="command">The command of the message to be filtered for.</param>
+        /// <returns>The handler for the provided parameters or null, if none has been found.</returns>
+        public DispatchHandler SearchHandler(Number160 recipientId, Number160 onBehalfOf, int command)
+        {
+            IDictionary<int, DispatchHandler> commands = _ioHandlers[new Number320(recipientId, onBehalfOf)];
+
+            if (commands != null && commands.ContainsKey(command))
+            {
+                return commands[command];
+            }
+            else
+            {
+                // not registered
+                Logger.Debug("Handler not found for command {0}. Looking for the server with ID {1}.", command, recipientId);
+                return null;
+            }
+        }
+
+        private IEnumerable<KeyValuePair<Number320, DispatchHandler>> SearchHandler(int command)
+        {
+            IDictionary<Number320, DispatchHandler> result = new Dictionary<Number320, DispatchHandler>();
+            foreach (var entry in _ioHandlers)
+            {
+                foreach (var entry2 in entry.Value)
+                {
+                    var handler = entry.Value[command];
+                    if (handler != null && entry2.Key == command)
+                    {
+                        result.Add(entry.Key, handler);
+                    }
+                }
+            }
+            return result;
         }
     }
 }
