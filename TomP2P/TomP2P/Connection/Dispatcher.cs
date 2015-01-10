@@ -95,7 +95,7 @@ namespace TomP2P.Connection
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
-        public Message.Message MessageReceived(Message.Message requestMessage, Socket channel) // TODO use appropriate socket class
+        public Message.Message MessageReceived(bool isUdp, Message.Message requestMessage, Socket channel) // TODO use appropriate socket class
         {
             // server-side:
             // message comes (over network) from sender
@@ -110,7 +110,8 @@ namespace TomP2P.Connection
                 {
                     foreach (IPeerStatusListener listener in _peerBeanMaster.PeerStatusListeners)
                     {
-                        listener.PeerFailed(requestMessage.Sender, new PeerException(PeerException.AbortCauseEnum.PeerError, "Wrong P2P version."))
+                        listener.PeerFailed(requestMessage.Sender,
+                            new PeerException(PeerException.AbortCauseEnum.PeerError, "Wrong P2P version."));
                     }
                 }
                 // TODO return
@@ -123,6 +124,63 @@ namespace TomP2P.Connection
 
             IResponder responder = new DirectResponder(this, _peerBeanMaster, requestMessage);
             DispatchHandler myHandler = AssociatedHandler(requestMessage);
+            if (myHandler != null)
+            {
+                bool isRelay = requestMessage.Sender.IsRelayed;
+                if (!isRelay && requestMessage.PeerSocketAddresses.Count != 0)
+                {
+                    PeerAddress sender =
+                        requestMessage.Sender.ChangePeerSocketAddresses(requestMessage.PeerSocketAddresses);
+                    requestMessage.SetSender(sender);
+                }
+                Logger.Debug("About to respond to request message {0}.", requestMessage);
+                // TODO create PeerConnection object
+                var peerConnection = new PeerConnection();
+
+                // handle the request message
+                return myHandler.ForwardMessage(requestMessage, isUdp ? null : peerConnection, responder);
+            }
+            else
+            {
+                // do better error handling
+                // if a handler is not present at all, print a warning
+                if (_ioHandlers.Count == 0)
+                {
+                    Logger.Debug("No handler found for request message {0}. This peer has probably been shut down.", requestMessage);
+                }
+                else
+                {
+                    var knownCommands = KnownCommands();
+                    if (knownCommands.Contains(Convert.ToInt32(requestMessage.Command)))
+                    {
+                        var sb = new StringBuilder();
+                        foreach (int cmd in knownCommands)
+                        {
+                            sb.Append((Rpc.Rpc.Commands) cmd + "; ");
+                        }
+                        Logger.Warn("No handler found for request message {0}. Is the RPC command {1} registered? Found registered: {2}.", requestMessage, (Rpc.Rpc.Commands) requestMessage.Command, sb);
+                    }
+                    else
+                    {
+                        Logger.Debug("No handler found for request message {0}. This peer has probably been partially shut down.", requestMessage);
+                    }
+                }
+
+                var responseMessage = DispatchHandler.CreateResponseMessage(requestMessage,
+                    Message.Message.MessageType.UnknownId, _peerBeanMaster.ServerPeerAddress);
+
+                return Respond(isUdp, responseMessage, channel); // TODO correct?
+            }
+        }
+
+        private IEnumerable<int> KnownCommands()
+        {
+            ISet<int> commandSet = new HashSet<int>();
+            foreach (var entry in _ioHandlers)
+            {
+                commandSet.UnionWith(entry.Value.Keys);
+            }
+            return commandSet;
         }
 
         /// <summary>
@@ -131,7 +189,7 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="isUdp"></param>
         /// <param name="responseMessage">The response message to send.</param>
-        internal Message.Message Respond(bool isUdp, Message.Message responseMessage, UdpClient udpClient) // TODO use appropriate socket
+        internal Message.Message Respond(bool isUdp, Message.Message responseMessage, Socket channel) // TODO use appropriate socket
         {
             if (isUdp)
             {
@@ -145,12 +203,12 @@ namespace TomP2P.Connection
             {
                 // Check, if channel is still open. If not, then do not send anything
                 // because this will cause an exception that will be logged.
-                if (udpClient.Client.Connected)
+                if (channel.Connected)
                 {
                     Logger.Debug("Channel TCP is not open, do not reply {0}.", responseMessage);
                     return null;
                 }
-                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, udpClient.Client.RemoteEndPoint); // TODO correct?
+                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, channel.RemoteEndPoint); // TODO correct?
             }
             return responseMessage;
         }

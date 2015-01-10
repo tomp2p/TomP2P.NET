@@ -47,7 +47,7 @@ namespace TomP2P.Rpc
         }
 
         /// <summary>
-        /// Registers all names on the dispatcher on behalf of the own peer.
+        /// Registers all names on the dispatcher on behalf of the provided peer.
         /// </summary>
         /// <param name="onBehalfOf">The IO handler can be registered for the own 
         /// use of in behalf of another peer. (e.g., iin case of a relay node)</param>
@@ -116,11 +116,38 @@ namespace TomP2P.Rpc
         /// </summary>
         /// <param name="requestMessage">The request message.</param>
         /// <param name="peerConnection">The peer connection that can be used for communication.</param>
-        /// <param name="responder">The response message.</param>
-        public void ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder)
+        /// <param name="responder">The responder used to respond the response message.</param>
+        public Message.Message ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            // request message from Dispatcher (server-side)
+            // -> forward to HandleResponse of this DispatchHandler
+
+            // here, we need a referral, since we got contacted and we don't know if
+            // we can contact the peer with its address. the peer may be behind a NAT
+            lock (PeerBean.PeerStatusListeners)
+            {
+                foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
+                {
+                    listener.PeerFound(requestMessage.Sender, requestMessage.Sender, peerConnection);
+                }
+            }
+
+            try
+            {
+                return HandleResponse(requestMessage, peerConnection, _sign, responder);
+            }
+            catch (Exception ex)
+            {
+                lock (PeerBean.PeerStatusListeners)
+                {
+                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
+                    {
+                        listener.PeerFailed(requestMessage.Sender, new PeerException(ex));
+                    }
+                }
+                Logger.Error("Exception in custom dipatch handler.", ex);
+                return responder.Failed(Message.Message.MessageType.Exception, ex.ToString());
+            }
         }
 
         /// <summary>

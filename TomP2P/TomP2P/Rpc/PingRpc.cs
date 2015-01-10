@@ -97,7 +97,8 @@ namespace TomP2P.Rpc
             // server-side:
             // comes from DispatchHandler
             // Responder now responds the result...
-            throw new NotImplementedException();
+
+            
         }
     }
 }
