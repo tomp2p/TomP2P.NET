@@ -9,6 +9,8 @@ using TomP2P.Rpc;
 
 namespace TomP2P.P2P
 {
+    // TODO finish implementation of Peer class
+
     // TODO document this class according to the newest version
     /// <summary>
     /// This is the main class to start DHT operations.
@@ -94,5 +96,19 @@ namespace TomP2P.P2P
         {
             get { return PeerCreator.ConnectionBean; }
         }
+
+        public PeerAddress PeerAddress
+        {
+            get { return PeerBean.ServerPeerAddress; }
+        }
+
+        public PeerAddress NotifyAutomaticFutures()
+        {
+            // TODO find .NET equivalent
+            throw new NotImplementedException();
+        }
+
+        // Basic P2P operations
+
     }
 }

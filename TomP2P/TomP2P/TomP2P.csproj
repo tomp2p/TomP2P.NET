@@ -60,6 +60,7 @@
     <Compile Include="Connection\NET Helper\TaskFailedException.cs" />
     <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
+    <Compile Include="Connection\PeerCreator.cs" />
     <Compile Include="Connection\Ports.cs" />
     <Compile Include="Connection\RequestHandler.cs" />
     <Compile Include="Connection\Sender.cs" />
