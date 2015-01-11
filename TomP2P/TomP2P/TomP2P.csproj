@@ -99,6 +99,7 @@
     <Compile Include="P2P\Builder\PingBuilder.cs" />
     <Compile Include="P2P\IPeerReachable.cs" />
     <Compile Include="P2P\IPeerReceivedBroadcastPing.cs" />
+    <Compile Include="P2P\Peer.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\IBloomfilterFactory.cs" />
     <Compile Include="Peers\Number160.cs" />
