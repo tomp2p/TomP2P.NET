@@ -1,13 +1,14 @@
 ﻿
+using System.Net.Sockets;
+
 namespace TomP2P.Message
 {
     public interface IResponder
     {
-        // TODO shouldn't these methods return Message in .NET pipeline?
-        void Response(Message responseMessage);
+        Message Response(Message responseMessage, bool isUdp, Socket channel); // last 2 params .NET-specific -> used in Dispatcher.Respond()
 
-        void Failed(Message.MessageType type, string reason);
+        Message Failed(Message.MessageType type, string reason, bool isUdp, Socket channel); // last 2 params .NET-specific -> used in Dispatcher.Respond()
 
-        void ResponseFireAndForget(bool isUdp);
+        Message ResponseFireAndForget(bool isUdp);
     }
 }

@@ -91,7 +91,7 @@ namespace TomP2P.Connection.Windows
             // 3. encode outgoing message
             var recvMessage = _decoder.Read(recvBytes, recipient, sender);
 
-            var sendMessage = _dispatcher.MessageReceived(recvMessage, _udpServerSocket.Client);
+            var sendMessage = _dispatcher.RequestMessageReceived(true, recvMessage, _udpServerSocket.Client);
 
             var buffer = _encoder.Write(sendMessage);
             var sendBytes = ConnectionHelper.ExtractBytes(buffer);

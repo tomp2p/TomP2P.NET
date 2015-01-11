@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Message;
@@ -58,7 +59,7 @@ namespace TomP2P.Rpc
         }
 
         /// <summary>
-        /// Set to true, if the message is signed.
+        /// Set to true, if the requestMessage is signed.
         /// </summary>
         /// <param name="sign"></param>
         public void SetSign(bool sign)
@@ -67,12 +68,12 @@ namespace TomP2P.Rpc
         }
 
         /// <summary>
-        /// Creates a request message and fills it with peer bean and connection bean parameters.
+        /// Creates a request requestMessage and fills it with peer bean and connection bean parameters.
         /// </summary>
-        /// <param name="recipient">The recipient of this message.</param>
+        /// <param name="recipient">The recipient of this requestMessage.</param>
         /// <param name="name">The command type.</param>
         /// <param name="type">The request type.</param>
-        /// <returns>The created request message.</returns>
+        /// <returns>The created request requestMessage.</returns>
         public Message.Message CreateRequestMessage(PeerAddress recipient, sbyte name, Message.Message.MessageType type)
         {
             return new Message.Message()
@@ -84,11 +85,11 @@ namespace TomP2P.Rpc
         }
 
         /// <summary>
-        /// Creates a response message and fills it with peer bean and connection bean parameters.
+        /// Creates a response requestMessage and fills it with peer bean and connection bean parameters.
         /// </summary>
-        /// <param name="requestMessage">The request message.</param>
+        /// <param name="requestMessage">The request requestMessage.</param>
         /// <param name="replyType">The type of the reply.</param>
-        /// <returns>The response message.</returns>
+        /// <returns>The response requestMessage.</returns>
         public Message.Message CreateResponseMessage(Message.Message requestMessage,
             Message.Message.MessageType replyType)
         {
@@ -114,12 +115,12 @@ namespace TomP2P.Rpc
         /// <summary>
         /// Forwards the request to a handler.
         /// </summary>
-        /// <param name="requestMessage">The request message.</param>
+        /// <param name="requestMessage">The request requestMessage.</param>
         /// <param name="peerConnection">The peer connection that can be used for communication.</param>
-        /// <param name="responder">The responder used to respond the response message.</param>
-        public Message.Message ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder)
+        /// <param name="responder">The responder used to respond the response requestMessage.</param>
+        public Message.Message ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder, bool isUdp, Socket channel)
         {
-            // request message from Dispatcher (server-side)
+            // request requestMessage from Dispatcher (server-side)
             // -> forward to HandleResponse of this DispatchHandler
 
             // here, we need a referral, since we got contacted and we don't know if
@@ -134,7 +135,7 @@ namespace TomP2P.Rpc
 
             try
             {
-                return HandleResponse(requestMessage, peerConnection, _sign, responder);
+                return HandleResponse(requestMessage, peerConnection, _sign, responder, isUdp, channel);
             }
             catch (Exception ex)
             {
@@ -146,19 +147,19 @@ namespace TomP2P.Rpc
                     }
                 }
                 Logger.Error("Exception in custom dipatch handler.", ex);
-                return responder.Failed(Message.Message.MessageType.Exception, ex.ToString());
+                return responder.Failed(Message.Message.MessageType.Exception, ex.ToString(), isUdp, channel);
             }
         }
 
         /// <summary>
-        /// If the message is OK, that has been previously checked by the user using CheckMessage,
-        /// a response to the message is generated here.
+        /// If the requestMessage is OK, that has been previously checked by the user using CheckMessage,
+        /// a response to the requestMessage is generated here.
         /// </summary>
-        /// <param name="message">The request message.</param>
+        /// <param name="requestMessage">The request requestMessage.</param>
         /// <param name="peerConnection"></param>
-        /// <param name="sign">Flag indicating whether the message is signed.</param>
+        /// <param name="sign">Flag indicating whether the requestMessage is signed.</param>
         /// <param name="responder"></param>
-        public abstract void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign,
-            IResponder responder);
+        public abstract Message.Message HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign,
+            IResponder responder, bool isUdp, Socket channel); // TODO last 2 params .NET-specific, maybe can be removed by not passing responder through hierarchy
     }
 }

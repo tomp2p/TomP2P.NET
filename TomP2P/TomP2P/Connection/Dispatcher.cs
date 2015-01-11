@@ -95,7 +95,14 @@ namespace TomP2P.Connection
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
-        public Message.Message MessageReceived(bool isUdp, Message.Message requestMessage, Socket channel) // TODO use appropriate socket class
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isUdp"></param>
+        /// <param name="requestMessage"></param>
+        /// <param name="channel"></param>
+        /// <returns>In .NET, returns the response message to the server pipeline.</returns>
+        public Message.Message RequestMessageReceived(Message.Message requestMessage, bool isUdp, Socket channel) // TODO use appropriate socket class
         {
             // server-side:
             // message comes (over network) from sender
@@ -138,7 +145,7 @@ namespace TomP2P.Connection
                 var peerConnection = new PeerConnection();
 
                 // handle the request message
-                return myHandler.ForwardMessage(requestMessage, isUdp ? null : peerConnection, responder);
+                return myHandler.ForwardMessage(requestMessage, isUdp ? null : peerConnection, responder, isUdp, channel);
             }
             else
             {

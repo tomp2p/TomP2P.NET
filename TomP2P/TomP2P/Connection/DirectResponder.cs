@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
@@ -25,7 +26,7 @@ namespace TomP2P.Connection
             _requestMessage = requestMessage;
         }
 
-        public void Response(Message.Message responseMessage)
+        public Message.Message Response(Message.Message responseMessage, bool isUdp, Socket channel)
         {
             if (responseMessage == null || responseMessage.Sender == null)
             {
@@ -36,17 +37,17 @@ namespace TomP2P.Connection
                 responseMessage.SetPeerSocketAddresses(responseMessage.Sender.PeerSocketAddresses);
             }
 
-            _dispatcher.Respond(responseMessage);
+            return _dispatcher.Respond(isUdp, responseMessage, channel);
         }
 
-        public void Failed(Message.Message.MessageType type, string reason)
+        public Message.Message Failed(Message.Message.MessageType type, string reason, bool isUdp, Socket channel)
         {
             var responseMessage = DispatchHandler.CreateResponseMessage(_requestMessage, type,
                 _peerBeanMaster.ServerPeerAddress);
-            _dispatcher.Respond(responseMessage);
+            return _dispatcher.Respond(isUdp, responseMessage, channel);
         }
 
-        public void ResponseFireAndForget(bool isUdp)
+        public Message.Message ResponseFireAndForget(bool isUdp)
         {
             Logger.Debug("The reply handler was a fire-and-forget handler. No message is sent back for {0}.", _requestMessage);
             if (!isUdp)
@@ -60,6 +61,8 @@ namespace TomP2P.Connection
                 // TODO remove timeout
                 TimeoutFactory.RemoveTimeout();
             }
+
+            return null; // TODO correct?
         }
     }
 }

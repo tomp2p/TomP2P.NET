@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
@@ -13,7 +16,7 @@ using TomP2P.Peers;
 namespace TomP2P.Rpc
 {
     /// <summary>
-    /// The Ping message handler. Also used for NAT detection and other things.
+    /// The Ping requestMessage handler. Also used for NAT detection and other things.
     /// </summary>
     public class PingRpc : DispatchHandler
     {
@@ -92,13 +95,133 @@ namespace TomP2P.Rpc
             return new RequestHandler<FutureResponse>(tcs, PeerBean, ConnectionBean, configuration);
         }
 
-        public override void HandleResponse(Message.Message message, PeerConnection peerConnection, bool sign, IResponder responder)
+        public override Message.Message HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder, bool isUdp, Socket channel)
         {
             // server-side:
             // comes from DispatchHandler
             // Responder now responds the result...
 
-            
+            if (!((requestMessage.Type == Message.Message.MessageType.RequestFf1 
+                || requestMessage.Type == Message.Message.MessageType.Request1
+                || requestMessage.Type == Message.Message.MessageType.Request2
+                || requestMessage.Type == Message.Message.MessageType.Request3
+                || requestMessage.Type == Message.Message.MessageType.Request3) 
+                && requestMessage.Command == Rpc.Commands.Ping.GetNr()))
+            {
+                throw new ArgumentException("Request requestMessage type or command is wrong for this handler.");
+            }
+
+            Message.Message responseMessage;
+
+            // probe
+            if (requestMessage.Type == Message.Message.MessageType.Request3)
+            {
+                Logger.Debug("Respond to probing. Firing requestMessage to {0}.", requestMessage.Sender);
+                responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
+
+                if (requestMessage.IsUdp)
+                {
+                    ConnectionBean.Reservation.Create(1, 0);
+                    // TODO add operationComplete listener
+                }
+                else
+                {
+                    ConnectionBean.Reservation.Create(0, 1);
+                    // TODO add operationComplete listener
+                }
+            }
+            // discover
+            else if (requestMessage.Type == Message.Message.MessageType.Request2)
+            {
+                Logger.Debug("Respond to discovering. Found {0}.", requestMessage.Sender);
+                responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
+                responseMessage.SetNeighborSet(CreateNeighborSet(requestMessage.Sender));
+            }
+            // regular ping
+            else if (requestMessage.Type == Message.Message.MessageType.Request1 ||
+                     requestMessage.Type == Message.Message.MessageType.Request4)
+            {
+                Logger.Debug("Respond to regular ping. {0}.", requestMessage.Sender);
+                // Test, of this is a broadcast requestMessage to ourselves.
+                // If it is, do not reply.
+                if (requestMessage.IsUdp 
+                    && requestMessage.Sender.PeerId.Equals(PeerBean.ServerPeerAddress.PeerId)
+                    && requestMessage.Recipient.PeerId.Equals(Number160.Zero))
+                {
+                    Logger.Warn("Don't respond. We are on the same peer, you should make this call.");
+                    responder.ResponseFireAndForget(true); // TODO correct?
+                }
+                if (_enable)
+                {
+                    responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
+                    if (_wait)
+                    {
+                        Thread.Sleep(WaitTime);
+                    }
+                }
+                else
+                {
+                    Logger.Debug("Don't respond.");
+                    // used for debugging
+                    if (_wait)
+                    {
+                        Thread.Sleep(WaitTime);
+                    }
+                    return null; // TODO correct?
+                }
+                if (requestMessage.Type == Message.Message.MessageType.Request4)
+                {
+                    lock (_receivedBroadcastPingListeners)
+                    {
+                        foreach (IPeerReceivedBroadcastPing listener in _receivedBroadcastPingListeners)
+                        {
+                            listener.BroadcastPingReceived(requestMessage.Sender);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // fire-and-forget if requestMessage.Type == MessageType.RequestFf1
+                // we received a fire-and forget ping
+                // this means we are reachable from the outside
+                PeerAddress serverAddress = PeerBean.ServerPeerAddress;
+                if (requestMessage.IsUdp)
+                {
+                    // UDP
+                    PeerAddress newServerAddress = serverAddress.ChangeIsFirewalledUdp(false);
+                    PeerBean.SetServerPeerAddress(newServerAddress);
+                    lock (_reachableListeners)
+                    {
+                        foreach (IPeerReachable listener in _reachableListeners)
+                        {
+                            listener.PeerWellConnected(newServerAddress, requestMessage.Sender, false);
+                        }
+                    }
+                    responseMessage = requestMessage;
+                }
+                else
+                {
+                    // TCP
+                    PeerAddress newServerAddress = serverAddress.ChangeIsFirewalledTcp(false);
+                    PeerBean.SetServerPeerAddress(newServerAddress);
+                    lock (_reachableListeners)
+                    {
+                        foreach (IPeerReachable listener in _reachableListeners)
+                        {
+                            listener.PeerWellConnected(newServerAddress, requestMessage.Sender, true);
+                        }
+                    }
+                    responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
+                }
+            }
+            return responder.Response(responseMessage, isUdp, channel);
+        }
+
+        private NeighborSet CreateNeighborSet(PeerAddress self)
+        {
+            IList<PeerAddress> tmp = new List<PeerAddress>();
+            tmp.Add(self);
         }
     }
 }
