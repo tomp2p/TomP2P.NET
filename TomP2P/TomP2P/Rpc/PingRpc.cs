@@ -108,7 +108,7 @@ namespace TomP2P.Rpc
                 || requestMessage.Type == Message.Message.MessageType.Request3) 
                 && requestMessage.Command == Rpc.Commands.Ping.GetNr()))
             {
-                throw new ArgumentException("Request requestMessage type or command is wrong for this handler.");
+                throw new ArgumentException("Request message type or command is wrong for this handler.");
             }
 
             Message.Message responseMessage;
@@ -116,9 +116,10 @@ namespace TomP2P.Rpc
             // probe
             if (requestMessage.Type == Message.Message.MessageType.Request3)
             {
-                Logger.Debug("Respond to probing. Firing requestMessage to {0}.", requestMessage.Sender);
+                Logger.Debug("Respond to probing. Firing message to {0}.", requestMessage.Sender);
                 responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
 
+                throw new NotImplementedException();
                 if (requestMessage.IsUdp)
                 {
                     ConnectionBean.Reservation.Create(1, 0);
@@ -142,14 +143,14 @@ namespace TomP2P.Rpc
                      requestMessage.Type == Message.Message.MessageType.Request4)
             {
                 Logger.Debug("Respond to regular ping. {0}.", requestMessage.Sender);
-                // Test, of this is a broadcast requestMessage to ourselves.
+                // Test, of this is a broadcast message to ourselves.
                 // If it is, do not reply.
                 if (requestMessage.IsUdp 
                     && requestMessage.Sender.PeerId.Equals(PeerBean.ServerPeerAddress.PeerId)
                     && requestMessage.Recipient.PeerId.Equals(Number160.Zero))
                 {
                     Logger.Warn("Don't respond. We are on the same peer, you should make this call.");
-                    responder.ResponseFireAndForget(true); // TODO correct?
+                    responder.ResponseFireAndForget(isUdp);
                 }
                 if (_enable)
                 {
@@ -218,10 +219,17 @@ namespace TomP2P.Rpc
             return responder.Response(responseMessage, isUdp, channel);
         }
 
-        private NeighborSet CreateNeighborSet(PeerAddress self)
+        /// <summary>
+        /// Create a neighbor set with one peer.
+        /// We only support sending a neighbor set, so we need this wrapper class.
+        /// </summary>
+        /// <param name="self">The peer that be stored in the neighbor set.</param>
+        /// <returns>The neighbor set with exactly one peer.</returns>
+        private static NeighborSet CreateNeighborSet(PeerAddress self)
         {
-            IList<PeerAddress> tmp = new List<PeerAddress>();
+            ICollection<PeerAddress> tmp = new List<PeerAddress>();
             tmp.Add(self);
+            return new NeighborSet(-1, tmp);
         }
     }
 }

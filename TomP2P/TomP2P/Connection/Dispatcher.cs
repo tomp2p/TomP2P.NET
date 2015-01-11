@@ -112,7 +112,7 @@ namespace TomP2P.Connection
             if (requestMessage.Version != _p2pId)
             {
                 Logger.Error("Wrong version. We are looking for {0}, but we got {1}. Received: {2}.", _p2pId, requestMessage.Version, requestMessage);
-                // TODO close channel
+                channel.Close(); // TODO correct?
                 lock (_peerBeanMaster.PeerStatusListeners)
                 {
                     foreach (IPeerStatusListener listener in _peerBeanMaster.PeerStatusListeners)
@@ -121,12 +121,13 @@ namespace TomP2P.Connection
                             new PeerException(PeerException.AbortCauseEnum.PeerError, "Wrong P2P version."));
                     }
                 }
-                // TODO return
+                return null; // TODO correct?
             }
 
             if (!requestMessage.IsRequest())
             {
                 // fireChannelRead -> go to next inbound handler
+                // in Java probably means that goes to encoding
             }
 
             IResponder responder = new DirectResponder(this, _peerBeanMaster, requestMessage);
@@ -173,10 +174,11 @@ namespace TomP2P.Connection
                     }
                 }
 
+                // return response that states that no handler was found
                 var responseMessage = DispatchHandler.CreateResponseMessage(requestMessage,
                     Message.Message.MessageType.UnknownId, _peerBeanMaster.ServerPeerAddress);
 
-                return Respond(isUdp, responseMessage, channel); // TODO correct?
+                return Respond(responseMessage, isUdp, channel); // TODO correct?
             }
         }
 
@@ -196,7 +198,7 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="isUdp"></param>
         /// <param name="responseMessage">The response message to send.</param>
-        internal Message.Message Respond(bool isUdp, Message.Message responseMessage, Socket channel) // TODO use appropriate socket
+        internal Message.Message Respond(Message.Message responseMessage, bool isUdp, Socket channel) // TODO use appropriate socket
         {
             if (isUdp)
             {

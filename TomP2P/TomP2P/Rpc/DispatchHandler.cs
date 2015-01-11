@@ -123,8 +123,8 @@ namespace TomP2P.Rpc
             // request requestMessage from Dispatcher (server-side)
             // -> forward to HandleResponse of this DispatchHandler
 
-            // here, we need a referral, since we got contacted and we don't know if
-            // we can contact the peer with its address. the peer may be behind a NAT
+            // Here, we need a referral since we got contacted and we don't know if
+            // we can contact the peer with its address. The peer may be behind a NAT.
             lock (PeerBean.PeerStatusListeners)
             {
                 foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)

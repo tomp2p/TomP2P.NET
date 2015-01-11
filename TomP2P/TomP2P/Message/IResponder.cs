@@ -9,6 +9,6 @@ namespace TomP2P.Message
 
         Message Failed(Message.MessageType type, string reason, bool isUdp, Socket channel); // last 2 params .NET-specific -> used in Dispatcher.Respond()
 
-        Message ResponseFireAndForget(bool isUdp);
+        void ResponseFireAndForget(bool isUdp);
     }
 }

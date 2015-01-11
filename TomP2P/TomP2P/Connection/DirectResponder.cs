@@ -37,32 +37,31 @@ namespace TomP2P.Connection
                 responseMessage.SetPeerSocketAddresses(responseMessage.Sender.PeerSocketAddresses);
             }
 
-            return _dispatcher.Respond(isUdp, responseMessage, channel);
+            return _dispatcher.Respond(responseMessage, isUdp, channel);
         }
 
         public Message.Message Failed(Message.Message.MessageType type, string reason, bool isUdp, Socket channel)
         {
             var responseMessage = DispatchHandler.CreateResponseMessage(_requestMessage, type,
                 _peerBeanMaster.ServerPeerAddress);
-            return _dispatcher.Respond(isUdp, responseMessage, channel);
+            return _dispatcher.Respond(responseMessage, isUdp, channel);
         }
 
-        public Message.Message ResponseFireAndForget(bool isUdp)
+        public void ResponseFireAndForget(bool isUdp)
         {
             Logger.Debug("The reply handler was a fire-and-forget handler. No message is sent back for {0}.", _requestMessage);
             if (!isUdp)
             {
-                string msg = "There is no TCP fire-and-forget. Use UDP in that case. ";
+                const string msg = "There is no TCP fire-and-forget. Use UDP in that case. ";
                 Logger.Warn(msg + _requestMessage);
                 throw new SystemException(msg);
             }
             else
             {
-                // TODO remove timeout
+                // TODO in Java, the class field ctx is modified here
+                // TODO remove timeout (channel handlers)
                 TimeoutFactory.RemoveTimeout();
             }
-
-            return null; // TODO correct?
         }
     }
 }
