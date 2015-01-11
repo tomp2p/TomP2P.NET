@@ -92,7 +92,7 @@ namespace TomP2P.Peers
         /// The relay peers.
         /// </summary>
         public ICollection<PeerSocketAddress> PeerSocketAddresses { get; private set; }
-        public static readonly ICollection<PeerSocketAddress> EmptyPeerSocketAddresses = new HashSet<PeerSocketAddress>();
+        public static readonly ICollection<PeerSocketAddress> EmptyPeerSocketAddresses = new HashSet<PeerSocketAddress>(); // TODO correct empty set?
 
         private const int TypeBitSize = 5;
         private const int HeaderSize = 2;
