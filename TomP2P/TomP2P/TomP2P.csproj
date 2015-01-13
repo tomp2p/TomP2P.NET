@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Connection\DirectResponder.cs" />
     <Compile Include="Connection\DiscoverNetworks.cs" />
+    <Compile Include="Connection\IPipelineFilter.cs" />
     <Compile Include="Connection\NET Helper\ConnectionHelper.cs" />
     <Compile Include="Connection\Bindings.cs" />
     <Compile Include="Connection\ChannelClientConfiguration.cs" />
@@ -100,6 +101,8 @@
     <Compile Include="Message\TomP2PSinglePacketUDP.cs" />
     <Compile Include="Message\TrackerData.cs" />
     <Compile Include="P2P\Builder\PingBuilder.cs" />
+    <Compile Include="P2P\IBroadcastHandler.cs" />
+    <Compile Include="P2P\IPeerInit.cs" />
     <Compile Include="P2P\IPeerReachable.cs" />
     <Compile Include="P2P\IPeerReceivedBroadcastPing.cs" />
     <Compile Include="P2P\IShutdown.cs" />

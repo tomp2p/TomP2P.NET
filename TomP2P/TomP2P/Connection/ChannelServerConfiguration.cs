@@ -19,7 +19,7 @@ namespace TomP2P.Connection
         private int _idleUdpSeconds = ConnectionBean.DefaultUdpIdleSeconds;
         private int _connectionTimeoutTcpMillis = ConnectionBean.DefaultConnectionTimeoutTcp;
 
-        // TODO PipelineFilter needed?
+        private IPipelineFilter _pipelineFilter = null;
 
         // interface bindings
         public Bindings BindingsIncoming { get; private set; }
@@ -117,6 +117,24 @@ namespace TomP2P.Connection
         public ChannelServerConfiguration SetIdleUdpSeconds(int idleUdpSeconds)
         {
             _idleUdpSeconds = idleUdpSeconds;
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the filter for the pipeline, where the user can add, remove or change filters.
+        /// </summary>
+        public IPipelineFilter PipelineFilter
+        {
+            get { return _pipelineFilter; }
+        }
+
+        /// <summary>
+        /// Sets the filter for the pipeline, where the user can add, remove or change filters.
+        /// </summary>
+        /// <returns></returns>
+        public ChannelServerConfiguration SetPipelineFilter(IPipelineFilter pipelineFilter)
+        {
+            _pipelineFilter = pipelineFilter;
             return this;
         }
 

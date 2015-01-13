@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
+using TomP2P.Rpc;
 
 namespace TomP2P.P2P
 {
@@ -41,20 +42,20 @@ namespace TomP2P.P2P
         public ChannelClientConfiguration ChannelClientConfiguration { get; private set; }
         private bool _behindFirewall = false; // TODO Java uses reference type and null
         public IBroadcastHandler BroadcastHandler { get; private set; }
-        private IBloomfilterFactory _bloomfilterFactory = null;
-        // TODO find ScheduledExecuterService equivalent
-        private MaintenanceTask _maintenanceTask = null;
-        private Random _random = null;
+        public IBloomfilterFactory BloomfilterFactory { get; private set; }
+        // TODO find ScheduledExecuterService equivalent, plus getter/setter
+        public MaintenanceTask MaintenanceTask { get; private set; }
+        public Random Random { get; private set; }
         private IList<IPeerInit> _toInitialize = new List<IPeerInit>(1);
 
         // enable/disable RPC/P2P/other
-        private bool _enableHandshakeRpc = true;
-        private bool _enableNeighborRpc = true;
-        private bool _enableDirectDataRpc = true;
-        private bool _enableBroadcast = true;
-        private bool _enableRouting = true;
-        private bool _enableMaintenance = true;
-        private bool _enableQuitRpc = true;
+        public bool IsEnabledHandshakeRpc { get; private set; }
+        public bool IsEnabledNeighborRpc { get; private set; }
+        public bool IsEnabledDirectDataRpc { get; private set; }
+        public bool IsEnabledBroadcastRpc { get; private set; }
+        public bool IsEnabledRoutingRpc { get; private set; }
+        public bool IsEnabledMaintenanceRpc { get; private set; }
+        public bool IsEnabledQuitRpc { get; private set; }
 
         /// <summary>
         /// .NET constructor used to set default property values.
@@ -76,6 +77,16 @@ namespace TomP2P.P2P
             ChannelServerConfiguration = null;
             ChannelClientConfiguration = null;
             BroadcastHandler = null;
+            BloomfilterFactory = null;
+            MaintenanceTask = null;
+
+            IsEnabledHandshakeRpc = true;
+            IsEnabledNeighborRpc = true;
+            IsEnabledDirectDataRpc = true;
+            IsEnabledBroadcastRpc = true;
+            IsEnabledRoutingRpc = true;
+            IsEnabledMaintenanceRpc = true;
+            IsEnabledQuitRpc = true;
         }
 
         /// <summary>
@@ -106,7 +117,137 @@ namespace TomP2P.P2P
                 _behindFirewall = false;
             }*/
 
-            if (_channel)
+            if (ChannelServerConfiguration == null)
+            {
+                ChannelServerConfiguration = CreateDefaultChannelServerConfiguration();
+                ChannelServerConfiguration.SetPortsForwarding(new Ports(TcpPortForwarding, UdpPortForwarding));
+                if (TcpPort == -1)
+                {
+                    TcpPort = Ports.DefaultPort;
+                }
+                if (UdpPort == -1)
+                {
+                    UdpPort = Ports.DefaultPort;
+                }
+                ChannelServerConfiguration.SetPorts(new Ports(TcpPort, UdpPort));
+                ChannelServerConfiguration.SetIsBehindFirewall(_behindFirewall);
+            }
+            if (ChannelClientConfiguration == null)
+            {
+                ChannelClientConfiguration = CreateDefaultChannelClientConfiguration();
+            }
+
+            if (KeyPair == null)
+            {
+                KeyPair = EmptyKeyPair;
+            }
+            if (P2PId == -1)
+            {
+                P2PId = 1;
+            }
+
+            if (InterfaceBindings == null)
+            {
+                InterfaceBindings = new Bindings();
+            }
+            ChannelServerConfiguration.SetBindingsIncoming(InterfaceBindings);
+            if (ExternalBindings == null)
+            {
+                ExternalBindings = new Bindings();
+            }
+            ChannelClientConfiguration.SetBindingsOutgoing(ExternalBindings);
+
+            if (PeerMap == null)
+            {
+                PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
+            }
+
+            if (MasterPeer == null && ScheduledExecutorService == null)
+            {
+                // TODO add executor
+            }
+
+            PeerCreator peerCreator;
+            if (MasterPeer != null)
+            {
+                peerCreator = new PeerCreator(MasterPeer.PeerCreator, PeerId, KeyPair);
+            }
+            else
+            {
+                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, ScheduledExecutorService); // TODO provide executor
+            }
+
+            var peer = new Peer(P2PId, PeerId, peerCreator);
+
+            PeerBean peerBean = peerCreator.PeerBean;
+            peerBean.AddPeerStatusListener(PeerMap);
+
+            ConnectionBean connectionBean = peerCreator.ConnectionBean;
+
+            peerBean.SetPeerMap(PeerMap);
+            peerBean.SetKeyPair(KeyPair);
+
+            if (BloomfilterFactory == null)
+            {
+                peerBean.SetBloomfilterFactory(new DefaultBloomfilterFactory());
+            }
+
+            if (BroadcastHandler == null)
+            {
+                BroadcastHandler = new DefaultBroadcastHandler(peer, new Random());
+            }
+
+            // set/enable RPC
+            if (IsEnabledHandshakeRpc)
+            {
+                var pingRpc = new PingRpc(peerBean, connectionBean);
+                peer.SetPingRpc(pingRpc);
+            }
+
+            // TODO initialize rest of RPC enablers
+
+            if (MaintenanceTask == null && IsEnabledMaintenanceRpc)
+            {
+                MaintenanceTask = new MaintenanceTask();
+            }
+            if (MaintenanceTask != null)
+            {
+                MaintenanceTask.Init(peer, connectionBean.Timer);
+                MaintenanceTask.AddMaintainable(PeerMap);
+            }
+            peerBean.SetMaintenanceTask(MaintenanceTask);
+
+            // set the ping builder for the heart beat
+            // TODO implement
+
+            foreach (var peerInit in _toInitialize)
+            {
+                peerInit.Init(peer);
+            }
+            return peer;
+        }
+
+        public static ChannelServerConfiguration CreateDefaultChannelServerConfiguration()
+        {
+            return new ChannelServerConfiguration().
+                SetBindingsIncoming(new Bindings()).
+                SetIsBehindFirewall(false).
+                //SetPipelineFilter(...).
+                SetSignatureFactory(new DsaSignatureFactory()).
+                // these two values may be overwritten in the peer builder
+                SetPorts(new Ports(Ports.DefaultPort, Ports.DefaultPort)).
+                SetPortsForwarding(new Ports(Ports.DefaultPort, Ports.DefaultPort));
+        }
+
+        public static ChannelClientConfiguration CreateDefaultChannelClientConfiguration()
+        {
+            return new ChannelClientConfiguration().
+                SetBindingsOutgoing(new Bindings()).
+                SetMaxPermitsPermanentTcp(MaxPermitsPermanentTcp).
+                SetMaxPermitsTcp(MaxPermitsTcp).
+                SetMaxPermitsUdp(MaxPermitsUdp).
+                //SetPipelineFilter(...).
+                SetSignatureFactory(new DsaSignatureFactory());
         }
 
         public PeerBuilder SetKeyPair(KeyPair keyPair)
@@ -220,6 +361,110 @@ namespace TomP2P.P2P
         public PeerBuilder SetBroadcastHandler(IBroadcastHandler broadcastHandler)
         {
             BroadcastHandler = broadcastHandler;
+            return this;
+        }
+
+        public PeerBuilder SetBloomfilterFactory(IBloomfilterFactory bloomfilterFactory)
+        {
+            BloomfilterFactory = bloomfilterFactory;
+            return this;
+        }
+
+        public PeerBuilder SetMaintenanceTask(MaintenanceTask maintenanceTask)
+        {
+            MaintenanceTask = maintenanceTask;
+            return this;
+        }
+
+        public PeerBuilder SetRandom(Random random)
+        {
+            Random = random;
+            return this;
+        }
+
+        public PeerBuilder Init(IPeerInit init)
+        {
+            _toInitialize.Add(init);
+            return this;
+        }
+
+        public PeerBuilder Init(params IPeerInit[] inits)
+        {
+            foreach (var init in inits)
+            {
+                _toInitialize.Add(init);
+            }
+            return this;
+        }
+
+        public PeerBuilder SetEnableHandshakeRpc(bool enableHandshakeRpc)
+        {
+            IsEnabledHandshakeRpc = enableHandshakeRpc;
+            return this;
+        }
+
+        public PeerBuilder SetEnableNeighborRpc(bool enableNeighborRpc)
+        {
+            IsEnabledNeighborRpc = enableNeighborRpc;
+            return this;
+        }
+
+        public PeerBuilder SetEnableDirectDataRpc(bool enabeDirectDataRpc)
+        {
+            IsEnabledDirectDataRpc = enabeDirectDataRpc;
+            return this;
+        }
+
+        public PeerBuilder SetEnableBroadcastRpc(bool enableBroadcastRpc)
+        {
+            IsEnabledBroadcastRpc = enableBroadcastRpc;
+            return this;
+        }
+
+        public PeerBuilder SetEnableRoutingRpc(bool enableRoutingRpc)
+        {
+            IsEnabledRoutingRpc = enableRoutingRpc;
+            return this;
+        }
+
+        public PeerBuilder SetEnableMaintenanceRpc(bool enableMaintenanceRpc)
+        {
+            IsEnabledMaintenanceRpc = enableMaintenanceRpc;
+            return this;
+        }
+
+        public PeerBuilder SetEnableQuitRpc(bool enableQuitRpc)
+        {
+            IsEnabledQuitRpc = enableQuitRpc;
+            return this;
+        }
+
+        /// <summary>
+        /// True, if this peer is behind a firewall and cannot be accessed directly.
+        /// </summary>
+        public bool IsBehindFirewall
+        {
+            get { return _behindFirewall; }
+        }
+
+        /// <summary>
+        /// Sets peer to be behind a firewall and not directly accessable.
+        /// </summary>
+        /// <returns></returns>
+        public PeerBuilder SetBehindFirewall()
+        {
+            return SetBehindFirewall(true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="behindFirewall">Set to true, if this peer is behind a firewall and
+        /// cannot be accessed directly.</param>
+        /// <returns></returns>
+        public PeerBuilder SetBehindFirewall(bool behindFirewall)
+        {
+            _behindFirewall = behindFirewall;
             return this;
         }
     }
