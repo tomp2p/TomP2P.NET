@@ -127,5 +127,10 @@ namespace TomP2P.Utils
             return new Number160(digest.ToSByteArray()); // TODO make unit test
             */
         }
+
+        public static Number160 MakeShaHash(byte[] buffer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

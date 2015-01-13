@@ -4,7 +4,7 @@
     /// As there is no .NET equivalent to the java.security.PrivateKey interface,
     /// this interface serves as a workaround.
     /// </summary>
-    public interface IPrivateKey
+    public interface IPrivateKey : IKey
     {
     }
 }
