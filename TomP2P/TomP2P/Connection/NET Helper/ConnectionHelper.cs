@@ -65,6 +65,7 @@ namespace TomP2P.Connection.NET_Helper
 
         public static byte[] ExtractBytes(ByteBuf messageBuffer)
         {
+            // TODO use a zero-copy mechanism
             // TODO figure out how Netty serializes this wrapper and sends it over the wire
             // TODO works?
             var buffer = messageBuffer.NioBuffer();

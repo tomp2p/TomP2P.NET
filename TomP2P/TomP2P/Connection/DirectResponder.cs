@@ -28,10 +28,6 @@ namespace TomP2P.Connection
 
         public Message.Message Response(Message.Message responseMessage, bool isUdp, Socket channel)
         {
-            if (responseMessage == null || responseMessage.Sender == null)
-            {
-                Console.WriteLine("why");
-            }
             if (responseMessage.Sender.IsRelayed)
             {
                 responseMessage.SetPeerSocketAddresses(responseMessage.Sender.PeerSocketAddresses);
@@ -40,7 +36,7 @@ namespace TomP2P.Connection
             return _dispatcher.Respond(responseMessage, isUdp, channel);
         }
 
-        public Message.Message Failed(Message.Message.MessageType type, string reason, bool isUdp, Socket channel)
+        public Message.Message Failed(Message.Message.MessageType type, bool isUdp, Socket channel)
         {
             var responseMessage = DispatchHandler.CreateResponseMessage(_requestMessage, type,
                 _peerBeanMaster.ServerPeerAddress);

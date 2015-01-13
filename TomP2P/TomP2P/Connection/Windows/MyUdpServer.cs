@@ -79,7 +79,6 @@ namespace TomP2P.Connection.Windows
                 byte[] sendBytes = UdpPipeline(recvRes.Buffer, _localEndPoint, remoteEndPoint);
 
                 // return / send back
-
                 await _udpServerSocket.SendAsync(sendBytes, sendBytes.Length, remoteEndPoint);
             }
         }

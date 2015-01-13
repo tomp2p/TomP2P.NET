@@ -212,7 +212,7 @@ namespace TomP2P.Connection
             {
                 // Check, if channel is still open. If not, then do not send anything
                 // because this will cause an exception that will be logged.
-                if (channel.Connected)
+                if (!channel.Connected)
                 {
                     Logger.Debug("Channel TCP is not open, do not reply {0}.", responseMessage);
                     return null;

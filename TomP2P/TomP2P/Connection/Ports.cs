@@ -9,7 +9,7 @@ namespace TomP2P.Connection
     {
         // the maximal port number, 2^16
         public const int MaxPort = 65535;
-        // IANA recommends to use ports higher than 49152
+        // IANA recommends to use ports higher or equal than 49152
         public const int MinDynPort = 49152;
         // the default port of TomP2P
         public const int DefaultPort = 7700;

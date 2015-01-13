@@ -83,13 +83,10 @@ namespace TomP2P.Connection
         public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
             // so far, everything is sync -> invoke async / new thread
-            ThreadPool.QueueUserWorkItem(delegate 
+            ThreadPool.QueueUserWorkItem(delegate
             {
-                ConnectionBean.Sender.SendUdpAsync(false, _message, channelCreator, IdleUdpSeconds, false);
-                ResponseMessageReceived();
+                ConnectionBean.Sender.SendUd(TaskCompletionSource, false, _message, channelCreator, IdleUdpSeconds, false);
             });
-
-
 
             return TaskCompletionSource.Task;
         }
@@ -205,15 +202,15 @@ namespace TomP2P.Connection
             {
                 lock (PeerBean.PeerStatusListeners)
                 {
+                    if (responseMessage.Sender.IsRelayed && responseMessage.PeerSocketAddresses.Count != 0)
+                    {
+                        // use the response message as we have up-to-date data for the relays
+                        PeerAddress remotePeer =
+                            responseMessage.Sender.ChangePeerSocketAddresses(responseMessage.PeerSocketAddresses);
+                        responseMessage.SetSender(remotePeer);
+                    }
                     foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
                     {
-                        if (responseMessage.Sender.IsRelayed && responseMessage.PeerSocketAddresses.Count != 0)
-                        {
-                            // use the response message as we have up-to-date data for the relays
-                            PeerAddress remotePeer =
-                                responseMessage.Sender.ChangePeerSocketAddresses(responseMessage.PeerSocketAddresses);
-                            responseMessage.SetSender(remotePeer);
-                        }
                         listener.PeerFound(responseMessage.Sender, null, null);
                     }
                 }
@@ -249,7 +246,7 @@ namespace TomP2P.Connection
             Logger.Debug("Exception caught, but handled properly: {0}", cause);
             if (cause is PeerException)
             {
-                var pe = (PeerException) cause;
+                var pe = (PeerException)cause;
                 if (pe.AbortCause != PeerException.AbortCauseEnum.UserAbort)
                 {
                     // do not force if we ran into a timeout, the peer may be busy

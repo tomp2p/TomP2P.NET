@@ -82,9 +82,10 @@ namespace TomP2P.P2P
             }
         }
 
-        public void SetDistributedRouting(DistributedRouting distributedRouting)
+        public Peer SetDistributedRouting(DistributedRouting distributedRouting)
         {
             _distributedRouting = distributedRouting;
+            return this;
         }
 
         public PeerBean PeerBean
