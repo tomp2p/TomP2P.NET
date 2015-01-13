@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.ServiceModel.
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Connection;
+using TomP2P.Connection.NET_Helper;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
@@ -38,6 +41,7 @@ namespace TomP2P.P2P
         private volatile bool _shutdown = false;
 
         // TODO add the two lists
+        private SynchronizedCollection<IShutdown> _shutdownListeners = new SynchronizedCollection<IShutdown>();
 
         /// <summary>
         /// Creates a peer. Please use <see cref="PeerBuilder"/> to create a <see cref="Peer"/> instance.
@@ -110,6 +114,52 @@ namespace TomP2P.P2P
         }
 
         // Basic P2P operations
+        // TODO implement
 
+        /// <summary>
+        /// Shuts down everything.
+        /// </summary>
+        /// <returns>The task for when the shutdown is completed.</returns>
+        public Task ShutdownAsync()
+        {
+            // prevent shutdown from being called twice
+            if (!_shutdown)
+            {
+                _shutdown = true;
+
+                // TODO lock not needed with .NET BlockingCollection class?
+                IList<IShutdown> copy = _shutdownListeners.ToList();
+                IList<Task> tasks = new List<Task>(_shutdownListeners.Count + 1);
+                foreach (var shutdown in copy)
+                {
+                    tasks.Add(shutdown.ShutdownAsync());
+                    RemoveShutdownListener(shutdown);
+                }
+                tasks.Add(PeerCreator.ShutdownAsync());
+                return Task.WhenAll(tasks);
+            }
+            else
+            {
+                // TODO correct?
+                var tcs = new TaskCompletionSource<object>();
+                tcs.SetException(new TaskFailedException("Already shutting / shut down."));
+
+                return tcs.Task;
+            }
+        }
+
+        /// <summary>
+        /// True, if the peer is about to be shut down or has done so already.
+        /// </summary>
+        public bool IsShutdown
+        {
+            get { return _shutdown; }
+        }
+
+        public Peer RemoveShutdownListener(IShutdown shutdown)
+        {
+            _shutdownListeners.Remove(shutdown);
+            return this;
+        }
     }
 }

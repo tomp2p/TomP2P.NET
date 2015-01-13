@@ -35,6 +35,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -101,6 +102,7 @@
     <Compile Include="P2P\Builder\PingBuilder.cs" />
     <Compile Include="P2P\IPeerReachable.cs" />
     <Compile Include="P2P\IPeerReceivedBroadcastPing.cs" />
+    <Compile Include="P2P\IShutdown.cs" />
     <Compile Include="P2P\Peer.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\IBloomfilterFactory.cs" />
