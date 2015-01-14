@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -15,7 +16,7 @@ namespace TomP2P.Tests.Rpc
     public class PingTest
     {
         [Test]
-        public void TestPingUdp()
+        public async void TestPingUdp()
         {
             Peer sender = null;
             Peer recv1 = null;
@@ -47,7 +48,11 @@ namespace TomP2P.Tests.Rpc
                     Start();
                 var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
 
-                await recv1.ConnectionBean.Reservation.Create(1, 0);
+                cc = await recv1.ConnectionBean.Reservation.CreateAsync(1, 0);
+
+                var t = handshake.PingUdpAsync(recv1.PeerAddress, cc, new DefaultConnectionConfiguration());
+                await t;
+                Assert.IsTrue(!t.IsFaulted);
             }
             finally
             {

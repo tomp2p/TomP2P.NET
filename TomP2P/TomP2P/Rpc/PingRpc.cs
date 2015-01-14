@@ -70,7 +70,7 @@ namespace TomP2P.Rpc
             return CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
         }
 
-        public Task<Message.Message> PingUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
+        public Task<Message.Message> PingUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
             return Ping(remotePeer, configuration).SendUdpAsync(channelCreator);
