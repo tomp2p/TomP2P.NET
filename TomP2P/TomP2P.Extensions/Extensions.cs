@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Extensions
@@ -44,6 +45,24 @@ namespace TomP2P.Extensions
         {
             HashAlgorithm algorithm = SHA1.Create();
             return (sbyte[])(Array)algorithm.ComputeHash(Encoding.UTF8.GetBytes(x)); // TODO test double cast
+        }
+
+        /// <summary>
+        /// Equivalent to Java's Semaphore.acquire(int).
+        /// Acquires the given number of permits from this semaphore, blocking until all are available, or the thread is interrupted. 
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="permits">The number of permits to acquire.</param>
+        public static void Acquire(this Semaphore s, int permits)
+        {
+            // see http://stackoverflow.com/questions/20401046/why-there-is-no-javalike-semaphore-acquiring-multiple-permits-in-c
+            lock (s)
+            {
+                for (int i = 0; i < permits; i++)
+                {
+                    s.WaitOne();
+                }
+            }
         }
 
         /// <summary>

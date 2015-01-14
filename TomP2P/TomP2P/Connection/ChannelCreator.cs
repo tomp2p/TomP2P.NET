@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
-using TomP2P.Futures;
+using TomP2P.Extensions;
 
 namespace TomP2P.Connection
 {
@@ -162,20 +162,8 @@ namespace TomP2P.Connection
                 }
                 // we can block here
                 // TODO correct? workaround for multiple acquires/waitOnes in .NET
-                lock (_semaphoreUdp)
-                {
-                    for (int i = 0; i < _maxPermitsUdp; i++)
-                    {
-                        _semaphoreUdp.WaitOne();
-                    }
-                }
-                lock (_semaphoreTcp)
-                {
-                    for (int i = 0; i < _maxPermitsTcp; i++)
-                    {
-                        _semaphoreTcp.WaitOne();
-                    }
-                }
+                _semaphoreUdp.Acquire(_maxPermitsUdp);
+                _semaphoreTcp.Acquire(_maxPermitsTcp);
                 _tcsChannelShutdownDone.SetResult(null); // completes the Task
             });
 

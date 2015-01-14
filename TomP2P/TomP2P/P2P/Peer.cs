@@ -143,7 +143,6 @@ namespace TomP2P.P2P
                 // TODO correct?
                 var tcs = new TaskCompletionSource<object>();
                 tcs.SetException(new TaskFailedException("Already shutting / shut down."));
-
                 return tcs.Task;
             }
         }

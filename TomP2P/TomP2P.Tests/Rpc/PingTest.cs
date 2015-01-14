@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using TomP2P.Connection;
 using TomP2P.P2P;
+using TomP2P.Peers;
+using TomP2P.Rpc;
 
 namespace TomP2P.Tests.Rpc
 {
@@ -34,6 +36,18 @@ namespace TomP2P.Tests.Rpc
             fr.awaitUninterruptibly();
             Assert.assertEquals(true, fr.isSuccess());
                  * */
+
+                sender = new PeerBuilder(new Number160("0x9876")).
+                    SetP2PId(55).
+                    SetPorts(2424).
+                    Start();
+                recv1 = new PeerBuilder(new Number160("0x1234")).
+                    SetP2PId(55).
+                    SetPorts(8088).
+                    Start();
+                var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
+
+                await recv1.ConnectionBean.Reservation.Create(1, 0);
             }
             finally
             {

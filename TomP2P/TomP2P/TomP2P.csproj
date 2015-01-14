@@ -66,6 +66,7 @@
     <Compile Include="Connection\PeerCreator.cs" />
     <Compile Include="Connection\Ports.cs" />
     <Compile Include="Connection\RequestHandler.cs" />
+    <Compile Include="Connection\Reservation.cs" />
     <Compile Include="Connection\Sender.cs" />
     <Compile Include="Connection\TimeoutFactory.cs" />
     <Compile Include="Connection\Windows\AsyncClientSocket.cs" />
