@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace TomP2P.Connection
 {
     /// <summary>
@@ -11,15 +6,19 @@ namespace TomP2P.Connection
     /// </summary>
     public class DefaultConnectionConfiguration : IConnectionConfiguration
     {
-        private bool _forceUdp = false;
-        private bool _forceTcp = false;
-        private int _idleTcpSeconds = ConnectionBean.DefaultTcpIdleSeconds;
-        private int _idleUdpSeconds = ConnectionBean.DefaultUdpIdleSeconds;
-        private int _connectionTimeoutTcpMillis = ConnectionBean.DefaultConnectionTimeoutTcp;
+        public int IdleTcpSeconds { get; private set; }
+        public int IdleUdpSeconds { get; private set; }
+        public int ConnectionTimeoutTcpMillis { get; private set; }
+        public bool IsForceTcp { get; private set; }
+        public bool IsForceUdp { get; private set; }
 
-        public int IdleTcpSeconds
+        public DefaultConnectionConfiguration()
         {
-            get { return _idleTcpSeconds; }
+            IdleTcpSeconds = ConnectionBean.DefaultTcpIdleSeconds;
+            IdleUdpSeconds = ConnectionBean.DefaultUdpIdleSeconds;
+            ConnectionTimeoutTcpMillis = ConnectionBean.DefaultConnectionTimeoutTcp;
+            IsForceTcp = false;
+            IsForceUdp = false;
         }
 
         /// <summary>
@@ -30,13 +29,8 @@ namespace TomP2P.Connection
         /// <returns>This instance.</returns>
         public DefaultConnectionConfiguration SetIdleTcpSeconds(int idleTcpSeconds)
         {
-            _idleTcpSeconds = idleTcpSeconds;
+            IdleTcpSeconds = idleTcpSeconds;
             return this;
-        }
-
-        public int IdleUdpSeconds
-        {
-            get { return _idleUdpSeconds; }
         }
 
         /// <summary>
@@ -47,13 +41,8 @@ namespace TomP2P.Connection
         /// <returns>This instance.</returns>
         public DefaultConnectionConfiguration SetIdleUdpSeconds(int idleUdpSeconds)
         {
-            _idleUdpSeconds = idleUdpSeconds;
+            IdleUdpSeconds = idleUdpSeconds;
             return this;
-        }
-
-        public int ConnectionTimeoutTcpMillis
-        {
-            get { return _connectionTimeoutTcpMillis; }
         }
 
         /// <summary>
@@ -63,13 +52,8 @@ namespace TomP2P.Connection
         /// <returns>This instance.</returns>
         public DefaultConnectionConfiguration SetConnectionTimeoutTcpMillis(int connectionTimeoutTcpMillis)
         {
-            _connectionTimeoutTcpMillis = connectionTimeoutTcpMillis;
+            ConnectionTimeoutTcpMillis = connectionTimeoutTcpMillis;
             return this;
-        }
-
-        public bool IsForceTcp
-        {
-            get { return _forceTcp; }
         }
 
         /// <summary>
@@ -79,7 +63,7 @@ namespace TomP2P.Connection
         /// <returns>This instance.</returns>
         public DefaultConnectionConfiguration SetIsForceTcp(bool isForceTcp)
         {
-            _forceTcp = isForceTcp;
+            IsForceTcp = isForceTcp;
             return this;
         }
 
@@ -92,11 +76,6 @@ namespace TomP2P.Connection
             return SetIsForceTcp(true);
         }
 
-        public bool IsForceUdp
-        {
-            get { return _forceUdp; }
-        }
-
         /// <summary>
         /// Sets whether the communication should be UDP. Default is TCP for requests.
         /// </summary>
@@ -104,7 +83,7 @@ namespace TomP2P.Connection
         /// <returns>This instance.</returns>
         public DefaultConnectionConfiguration SetIsForceUdp(bool isForceUdp)
         {
-            _forceUdp = isForceUdp;
+            IsForceUdp = isForceUdp;
             return this;
         }
 
