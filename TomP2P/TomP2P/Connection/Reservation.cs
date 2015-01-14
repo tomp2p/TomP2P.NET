@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TomP2P.Connection.NET_Helper;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection
 {
@@ -29,6 +30,7 @@ namespace TomP2P.Connection
         private readonly ConcurrentQueue<Task> _queue = new ConcurrentQueue<Task>();
 
         // single thread
+        // TODO this class uses a threadpool that is not limited to 1 single thread!
         // TODO find ExecutorService equivalent
 
         // we should be fair, otherwise, we see connection timeouts
@@ -38,7 +40,7 @@ namespace TomP2P.Connection
 
         private readonly SynchronizedCollection<ChannelCreator> _channelCreators = new SynchronizedCollection<ChannelCreator>();
 
-        private readonly TaskCompletionSource<object> _futureReservationDone = new TaskCompletionSource<object>();
+        private readonly TaskCompletionSource<object> _tcsReservationDone = new TaskCompletionSource<object>();
 
         /// <summary>
         /// Creates a new reservation class with the 3 permits contained in the provided configuration.
@@ -72,7 +74,7 @@ namespace TomP2P.Connection
         /// <param name="permitsUdp">The number of short-lived UDP connections.</param>
         /// <param name="permitsTcp">The number of short-lived TCP connections.</param>
         /// <returns>The future channel creator.</returns>
-        public Task<ChannelCreator> Create(int permitsUdp, int permitsTcp)
+        public Task<ChannelCreator> CreateAsync(int permitsUdp, int permitsTcp)
         {
             // TODO this async pars are very tricky -> check!
             if (permitsUdp > _maxPermitsUdp)
@@ -164,7 +166,7 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="permitsPermanentTcp">The number of long-lived TCP connections.</param>
         /// <returns>The future channel creator.</returns>
-        public Task<ChannelCreator> CreatePermanent(int permitsPermanentTcp)
+        public Task<ChannelCreator> CreatePermanentAsync(int permitsPermanentTcp)
         {
             if (permitsPermanentTcp > _maxPermitsPermanentTcp)
             {
@@ -230,6 +232,61 @@ namespace TomP2P.Connection
             {
                 _readWriteLock.ExitReadLock();
             }
+        }
+
+        /// <summary>
+        /// Shuts down all the channel creators.
+        /// </summary>
+        /// <returns></returns>
+        public Task ShutdownAsync()
+        {
+            _readWriteLock.EnterWriteLock();
+            try
+            {
+                if (_shutdown)
+                {
+                    _tcsReservationDone.SetException(new TaskFailedException("Already shutting down."));
+                    return _tcsReservationDone.Task;
+                }
+                _shutdown = true;
+            }
+            finally
+            {
+                _readWriteLock.ExitWriteLock();
+            }
+
+            // Fast shutdown for those that are in the queue is not required.
+            // Let the executor finish since the shutdown-flag is set and the
+            // future will be set as well to "shutting down".
+            
+            // TODO find a way to abort the un-started tasks in the thread pool/executor
+
+            // the channel creator doesn't change anymore from here on // TODO correct?
+            int size = _channelCreators.Count;
+            if (size == 0)
+            {
+                _tcsReservationDone.SetResult(null);
+            }
+            else
+            {
+                var completeCounter = new AtomicInteger(0);
+                foreach (var channelCreator in _channelCreators)
+                {
+                    // It's important to set the listener before calling shutdown.
+                    channelCreator.ShutdownTask.ContinueWith(delegate
+                    {
+                        if (completeCounter.IncrementAndGet() == size)
+                        {
+                            // we can block here
+                            _semaphoreUdp.Acquire(_maxPermitsUdp);
+                            _semaphoreTcp.Acquire(_maxPermitsTcp);
+                            _semaphorePermanentTcp.Acquire(_maxPermitsPermanentTcp);
+                            _tcsReservationDone.SetResult(null);
+                        }
+                    });
+                }
+            }
+            return _tcsReservationDone.Task;
         }
 
         /// <summary>
