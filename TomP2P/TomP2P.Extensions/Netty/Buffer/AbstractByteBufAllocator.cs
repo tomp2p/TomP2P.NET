@@ -4,8 +4,8 @@ namespace TomP2P.Extensions.Netty
 {
     public abstract class AbstractByteBufAllocator : IByteBufAllocator
     {
-        private static readonly int DEFAULT_INITIAL_CAPACITY = 256;
-        private static readonly int DEFAULT_MAX_COMPONENTS = 16;
+        //private static readonly int DEFAULT_INITIAL_CAPACITY = 256;
+        //private static readonly int DEFAULT_MAX_COMPONENTS = 16;
 
         private readonly bool _directByDefault;
         private readonly ByteBuf _emptyBuf;

@@ -7,7 +7,7 @@ namespace TomP2P.Extensions.Netty
     {
         private readonly IByteBufAllocator _alloc;
         private sbyte[] _array;
-        private MemoryStream _tmpNioBuf;
+        //private MemoryStream _tmpNioBuf;
 
         public UnpooledHeapByteBuf(IByteBufAllocator alloc, int initialCapacity, int maxCapacity)
             : this(alloc, new sbyte[initialCapacity], 0, 0, maxCapacity)
@@ -43,7 +43,7 @@ namespace TomP2P.Extensions.Netty
         private void SetArray(sbyte[] initialArray)
         {
             _array = initialArray;
-            _tmpNioBuf = null;
+            //_tmpNioBuf = null;
         }
 
         public override IByteBufAllocator Alloc

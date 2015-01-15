@@ -12,7 +12,7 @@ namespace TomP2P.Extensions.Netty
         private readonly IByteBufAllocator _alloc;
 
         private MemoryStream _buffer;
-        private MemoryStream _tmpNioBuf;
+        //private MemoryStream _tmpNioBuf;
         private int _capacity;
         private bool _doNotFree;
 
@@ -57,7 +57,7 @@ namespace TomP2P.Extensions.Netty
             }
 
             _buffer = buffer;
-            _tmpNioBuf = null;
+            //_tmpNioBuf = null;
             _capacity = (int)buffer.Remaining(); // TODO unsafe cast
         }
 
