@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Extensions;
 
 namespace TomP2P.Connection
 {
@@ -19,7 +21,7 @@ namespace TomP2P.Connection
         { }
 
         /// <summary>
-        /// Searches for local interfaces. Hints how to search for those interfacesare
+        /// Searches for local interfaces. Hints how to search for those interfaces are
         /// provided by the user through the <see cref="Bindings"/> instance.
         /// The results of that search are stored in this <see cref="Bindings"/> instance as well.
         /// </summary>
@@ -63,8 +65,44 @@ namespace TomP2P.Connection
         /// <returns>The status of the discovery.</returns>
         public static string DiscoverNetwork(NetworkInterface networkInterface, Bindings bindings)
         {
-            var sb = new StringBuilder("( ");
-            throw new NotImplementedException();
+            var sb = new StringBuilder("(");
+
+            // this part is very .NET-specific
+            foreach (var addressInfo in networkInterface.GetIPProperties().UnicastAddresses)
+            {
+                if (addressInfo == null)
+                {
+                    continue;
+                }
+                IPAddress inet = addressInfo.Address;
+                // TODO how to get the broadcast address?
+                if (bindings.ContainsAddress(inet))
+                {
+                    continue;
+                }
+                // ignore, if a user specifies an address and inet is not part of it
+                if (!bindings.AnyAddresses)
+                {
+                    if (!bindings.Addresses.Contains(inet))
+                    {
+                        continue;
+                    }
+                }
+
+                if (inet.IsIPv4() && bindings.IsIPv4)
+                {
+                    sb.Append(inet).Append(", ");
+                    bindings.AddFoundAddress(inet);
+                }
+                else if (inet.IsIPv6() && bindings.IsIPv6)
+                {
+                    sb.Append(inet).Append(", ");
+                    bindings.AddFoundAddress(inet);
+                }
+            }
+
+            sb.Remove(sb.Length - 1, 1);
+            return sb.Append(")").ToString();
         }
     }
 }

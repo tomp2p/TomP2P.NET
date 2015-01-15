@@ -162,7 +162,6 @@ namespace TomP2P.P2P
             {
                 // TODO uncomment
                 //PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
-                throw new NotImplementedException();
             }
 
             if (MasterPeer == null && Timer == null)
@@ -194,14 +193,12 @@ namespace TomP2P.P2P
             {
                 // TODO uncomment
                 //peerBean.SetBloomfilterFactory(new DefaultBloomfilterFactory());
-                throw new NotImplementedException();
             }
 
             if (BroadcastHandler == null)
             {
                 // TODO uncomment
                 //BroadcastHandler = new DefaultBroadcastHandler(peer, new Random());
-                throw new NotImplementedException();
             }
 
             // set/enable RPC

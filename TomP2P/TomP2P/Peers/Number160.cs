@@ -87,8 +87,8 @@ namespace TomP2P.Peers
             {
                 _val[i >> 3] <<= 4;
 
-                int digit = Convert.ToInt32(tmp[j].ToString(), 16); // TODO check conversion
-                if (digit < 0) // TODO what's returned in the conversion?
+                int digit = Convert.ToInt32(tmp[j].ToString(), 16);
+                if (digit < 0)
                 {
                     throw new SystemException(String.Format("Not a hexadecimal number \"{0}\". The range is [0-9a-f].", tmp[j]));
                 }
