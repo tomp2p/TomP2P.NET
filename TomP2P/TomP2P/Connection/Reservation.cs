@@ -60,11 +60,7 @@ namespace TomP2P.Connection
             _channelClientConfiguration = channelClientConfiguration;
         }
 
-        public void Create(RoutingConfiguration routingConfiguration, RequestConfiguration requestConfiguration,
-            DefaultConnectionConfiguration builder)
-        {
-            throw new NotImplementedException();
-        }
+        // TODO implement the second Create() method
 
         /// <summary>
         /// Creates a channel creator for short-lived connections.

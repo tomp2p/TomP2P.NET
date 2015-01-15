@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Timers;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions.Workaround;
@@ -35,7 +36,7 @@ namespace TomP2P.Connection
 
         private readonly bool _master;
 
-        // TODO find ScheduledExecutorService timer equivalent
+        private readonly TaskCompletionSource<object> _tcsServerDone = new TaskCompletionSource<object>(); 
 
         /// <summary>
         /// Creates a master peer and starts UDP and TCP channels.
@@ -46,9 +47,11 @@ namespace TomP2P.Connection
         /// <param name="channelServerConfiguration">The server configuration to create the 
         /// channel server that is used for listening for incoming connections.</param>
         /// <param name="channelClientConfiguration">The client-side configuration.</param>
+        /// <param name="timer"></param>
         public PeerCreator(int p2pId, Number160 peerId, KeyPair keyPair,
             ChannelServerConfiguration channelServerConfiguration,
-            ChannelClientConfiguration channelClientConfiguration)
+            ChannelClientConfiguration channelClientConfiguration,
+            Timer timer)
         {
             // peer bean
             PeerBean = new PeerBean(keyPair);
@@ -60,7 +63,7 @@ namespace TomP2P.Connection
             // TODO find EventLoogGroup equivalents
 
             var dispatcher = new Dispatcher(p2pId, PeerBean, channelServerConfiguration.HearBeatMillis);
-            var channelServer = new ChannelServer(channelServerConfiguration, dispatcher, _peerBean.PeerStatusListeners);
+            var channelServer = new ChannelServer(channelServerConfiguration, dispatcher, PeerBean.PeerStatusListeners);
             if (!channelServer.Startup())
             {
                 // TODO shutdown "Netty"
@@ -69,8 +72,8 @@ namespace TomP2P.Connection
 
             // connection bean
             var sender = new Sender(peerId, PeerBean.PeerStatusListeners, channelClientConfiguration, dispatcher);
-            Reservation reservation = new Reservation(channelClientConfiguration);
-            ConnectionBean = new ConnectionBean(p2pId, dispatcher, sender, channelServer, reservation, channelClientConfiguration); // TODO provide .NET timer
+            var reservation = new Reservation(channelClientConfiguration);
+            ConnectionBean = new ConnectionBean(p2pId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer);
             _master = true;
         }
 
@@ -107,18 +110,29 @@ namespace TomP2P.Connection
                 PeerBean.MaintenanceTask.Shutdown();
             }
 
+            // shutdown all children
+            if (!_master)
+            {
+                foreach (var peerCreator in _childConnections)
+                {
+                    peerCreator.ShutdownAsync();
+                }
+                _tcsServerDone.SetResult(null);
+                return _tcsServerDone.Task;
+            }
+
             // shutdown the timer
-            ConnectionBean.Timer.Shutdown();
+            ConnectionBean.Timer.Stop(); // TODO sufficient?
 
             Logger.Debug("Starting shutdown in client done...");
-
-            // TODO reservation shutdown
-            // TODO operationComplete handling for reservation shutdown
+            ConnectionBean.Reservation.ShutdownAsync().ContinueWith(delegate
+            {
+                ConnectionBean.ChannelServer.Shutdown();
+                // TODO shut down "Netty"
+            });
 
             // this is blocking
-            // TODO awaits shutdown of "ShutdownNetty()" -> needed?
-
-            throw new NotImplementedException();
+            return _tcsServerDone.Task;
         }
 
         /// <summary>

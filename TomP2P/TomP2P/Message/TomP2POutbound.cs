@@ -2,7 +2,6 @@
 using System.Net;
 using NLog;
 using TomP2P.Connection;
-using TomP2P.Connection.Pipeline;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message

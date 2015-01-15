@@ -103,6 +103,7 @@
     <Compile Include="Message\TomP2PSinglePacketUDP.cs" />
     <Compile Include="Message\TrackerData.cs" />
     <Compile Include="P2P\Builder\PingBuilder.cs" />
+    <Compile Include="P2P\DistributedRouting.cs" />
     <Compile Include="P2P\IBroadcastHandler.cs" />
     <Compile Include="P2P\IPeerInit.cs" />
     <Compile Include="P2P\IPeerReachable.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="P2P\Peer.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\IBloomfilterFactory.cs" />
+    <Compile Include="Peers\IMaintainable.cs" />
     <Compile Include="Peers\Number160.cs" />
     <Compile Include="Peers\Number320.cs" />
     <Compile Include="Peers\Number480.cs" />

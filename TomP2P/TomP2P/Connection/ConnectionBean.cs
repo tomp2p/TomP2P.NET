@@ -1,4 +1,5 @@
-﻿
+﻿using System.Timers;
+
 namespace TomP2P.Connection
 {
     /// <summary>
@@ -37,8 +38,10 @@ namespace TomP2P.Connection
         /// The configuration that is responsible for the resource numbers.
         /// </summary>
         public ChannelClientConfiguration ResourceConfiguration { get; private set; }
-        
-        // TODO find ScheduledExecutorService equivalent for timer
+        /// <summary>
+        /// The timer used for the discovery.
+        /// </summary>
+        public Timer Timer { get; private set; } // TODO correct equivalent?
 
         /// <summary>
         /// The connection bean with unmodifiable objects. Once it is set, it cannot be changed.
@@ -50,8 +53,9 @@ namespace TomP2P.Connection
         /// <param name="channelServer">The channel server that listens on incoming connections.</param>
         /// <param name="reservation">The connection reservation that is responsible for resource management.</param>
         /// <param name="resourceConfiguration">The configuration that is responsible for the resource numbers.</param>
+        /// <param name="timer">The timer for the discovery process.</param>
         public ConnectionBean(int p2pId, Dispatcher dispatcher, Sender sender, ChannelServer channelServer,
-            Reservation reservation, ChannelClientConfiguration resourceConfiguration)
+            Reservation reservation, ChannelClientConfiguration resourceConfiguration, Timer timer)
         {
             P2PId = p2pId;
             Dispatcher = dispatcher;
@@ -59,7 +63,7 @@ namespace TomP2P.Connection
             ChannelServer = channelServer;
             Reservation = reservation;
             ResourceConfiguration = resourceConfiguration;
-            // TODO instantiate timer
+            Timer = timer;
         }
     }
 }
