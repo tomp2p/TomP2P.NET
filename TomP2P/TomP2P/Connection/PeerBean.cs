@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using NLog;
 using TomP2P.Extensions.Workaround;
+using TomP2P.P2P;
 using TomP2P.Peers;
+using TomP2P.Storage;
 
 namespace TomP2P.Connection
 {
@@ -129,13 +131,13 @@ namespace TomP2P.Connection
             return this;
         }
 
-        public PeerBean SetDigestStorage(DigestStorage digestStorage)
+        public PeerBean SetDigestStorage(IDigestStorage digestStorage)
         {
             DigestStorage = digestStorage;
             return this;
         }
 
-        public PeerBean SetDigestTracker(DigestTracker digestTracker)
+        public PeerBean SetDigestTracker(IDigestTracker digestTracker)
         {
             DigestTracker = digestTracker;
             return this;

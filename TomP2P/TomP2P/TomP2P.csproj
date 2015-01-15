@@ -108,6 +108,7 @@
     <Compile Include="P2P\IPeerReachable.cs" />
     <Compile Include="P2P\IPeerReceivedBroadcastPing.cs" />
     <Compile Include="P2P\IShutdown.cs" />
+    <Compile Include="P2P\MaintenanceTask.cs" />
     <Compile Include="P2P\Peer.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
     <Compile Include="Peers\IBloomfilterFactory.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Peers\Number480.cs" />
     <Compile Include="Peers\Number640.cs" />
     <Compile Include="Peers\PeerAddress.cs" />
+    <Compile Include="Peers\PeerMap.cs" />
     <Compile Include="Peers\PeerSocketAddress.cs" />
     <Compile Include="Peers\PeerStatistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -125,6 +127,8 @@
     <Compile Include="Rpc\SimpleBloomFilter.cs" />
     <Compile Include="Storage\Data.cs" />
     <Compile Include="Storage\DataBuffer.cs" />
+    <Compile Include="Storage\IDigestStorage.cs" />
+    <Compile Include="Storage\IDigestTracker.cs" />
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
