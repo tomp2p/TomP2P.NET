@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TomP2P.Connection.NET_Helper
 {
     /// <summary>
-    /// Used for TaskCompletionSource.(Try)SetException().
+    /// Used for TaskResponse.(Try)SetException().
     /// Thus used to notify about a failure in the execution of the underlying Task.
     /// </summary>
     public class TaskFailedException : Exception

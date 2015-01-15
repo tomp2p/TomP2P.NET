@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using TomP2P.Connection.Windows;
-using TomP2P.Futures;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -19,7 +14,7 @@ namespace TomP2P.Connection
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
     /// <typeparam name="TFuture">The type of future to handle.</typeparam>
-    public class RequestHandler<TFuture> : Inbox where TFuture : FutureResponse // TODO correct, remove
+    public class RequestHandler<TFuture>
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -27,7 +22,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// The FutureResponse that will be called when we get an answer.
         /// </summary>
-        public TaskCompletionSource<Message.Message> TaskCompletionSource { get; private set; }
+        private readonly TaskCompletionSource<Message.Message> _taskResponse;
 
         // the node with which this request handler is associated with
         /// <summary>
@@ -65,10 +60,10 @@ namespace TomP2P.Connection
         /// <param name="configuration">The client-side connection configuration.</param>
         public RequestHandler(TaskCompletionSource<Message.Message> tcs, PeerBean peerBean, ConnectionBean connectionBean, IConnectionConfiguration configuration)
         {
-            TaskCompletionSource = tcs;
+            _taskResponse = tcs;
             PeerBean = peerBean;
             ConnectionBean = connectionBean;
-            _message = futureResponse.Request();
+            _message = tcs.Task.Result; // TODO correct??
             _sendMessageId = new MessageId(_message);
             IdleTcpSeconds = configuration.IdleTcpSeconds;
             IdleUdpSeconds = configuration.IdleUdpSeconds;
@@ -85,10 +80,11 @@ namespace TomP2P.Connection
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(delegate
             {
-                ConnectionBean.Sender.SendUd(TaskCompletionSource, false, _message, channelCreator, IdleUdpSeconds, false);
+                var responseMessage = ConnectionBean.Sender.SendUd(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, false);
+                ResponseMessageReceived(responseMessage);
             });
 
-            return TaskCompletionSource.Task;
+            return _taskResponse.Task;
         }
 
         /// <summary>
@@ -99,7 +95,6 @@ namespace TomP2P.Connection
         public TFuture FireAndForgetUdp(ChannelCreator channelCreator)
         {
             throw new NotImplementedException();
-            return FutureResponse;
         }
 
         /// <summary>
@@ -110,7 +105,6 @@ namespace TomP2P.Connection
         public TFuture SendBroadcastUdp(ChannelCreator channelCreator)
         {
             throw new NotImplementedException();
-            return FutureResponse;
         }
 
         /// <summary>
@@ -121,14 +115,12 @@ namespace TomP2P.Connection
         public TFuture SendTcp(ChannelCreator channelCreator)
         {
             throw new NotImplementedException();
-            return FutureResponse;
         }
 
         // TODO add documentation
         public TFuture SendTcp(PeerConnection peerConnection)
         {
             throw new NotImplementedException();
-            return FutureResponse;
         }
 
         /// <summary>
@@ -140,15 +132,24 @@ namespace TomP2P.Connection
         public TFuture SendTcp(ChannelCreator channelCreator, PeerConnection peerConnection)
         {
             throw new NotImplementedException();
-            return FutureResponse;
         }
 
-        private Message.Message ResponseMessageReceived(Message.Message responseMessage)
+        private void ResponseMessageReceived(Message.Message responseMessage)
         {
             // TODO give back this message in the SendUDP method
             // client-side:
             // here, the result for the awaitable task can be set
             // -> actually, this method can be synchronically called after each "async SendX()"
+
+            // the "result" of the TCS must be set here, not in sender
+            // - fire-and-forget -> result = null
+            // - else -> result = response message
+            if (responseMessage == null)
+            {
+                // handle response only, if not fire-and-forget
+                _taskResponse.SetResult(null);
+                return;
+            }
 
             var recvMessageId = new MessageId(responseMessage);
 
@@ -227,57 +228,61 @@ namespace TomP2P.Connection
             if (!_message.IsKeepAlive())
             {
                 Logger.Debug("Good message, close channel {0}, {1}.", responseMessage, "TODO"); // TODO use channel info here, and close channel
-                // TODO set the success now, but trigger the notify when we closed the channel
-                // TODO futureResponse.responseLater()
-                // TODO close channel
+                // channel has already been closed in Sender, set result now
+                _taskResponse.SetResult(responseMessage);
             }
             else
             {
                 Logger.Debug("Good message, leave channel open {0}.", responseMessage);
-                // TODO futureResponse.response(responseMessage)
+                _taskResponse.SetResult(responseMessage);
             }
         }
 
         private void ExceptionCaught(Exception cause)
         {
-            Logger.Debug("Error originating from {0}. Cause: {1}", _message, cause); // TODO futureResponse used
-            // TODO check for completion and warn
-
-            Logger.Debug("Exception caught, but handled properly: {0}", cause);
-            if (cause is PeerException)
+            Logger.Debug("Error originating from {0}. Cause: {1}", _message, cause);
+            if (_taskResponse.Task.IsCompleted)
             {
-                var pe = (PeerException)cause;
-                if (pe.AbortCause != PeerException.AbortCauseEnum.UserAbort)
+                Logger.Warn("Got exception, but ignored it. (Task completed.): {0}.", _taskResponse.Task.Exception);
+            }
+            else
+            {
+                Logger.Debug("Exception caught, but handled properly: {0}", cause);
+                var pe = cause as PeerException;
+                if (pe != null)
                 {
-                    // do not force if we ran into a timeout, the peer may be busy
+                    if (pe.AbortCause != PeerException.AbortCauseEnum.UserAbort)
+                    {
+                        // do not force if we ran into a timeout, the peer may be busy
+                        lock (PeerBean.PeerStatusListeners)
+                        {
+                            foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
+                            {
+                                listener.PeerFailed(_message.Recipient, pe);
+                            }
+                        }
+                        Logger.Debug("Removed from map. Cause: {0}. Message: {1}.", pe, _message);
+                    }
+                    else
+                    {
+                        Logger.Warn("Error in request.", cause);
+                    }
+                }
+                else
+                {
                     lock (PeerBean.PeerStatusListeners)
                     {
                         foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
                         {
-                            listener.PeerFailed(_message.Recipient, pe); // TODO futureResponse used
+                            listener.PeerFailed(_message.Recipient, new PeerException(cause));
                         }
-                    }
-                    Logger.Debug("Removed from map, cause: {0}, message: {1}.", pe, _message);
-                }
-                else
-                {
-                    Logger.Warn("Error in request.");
-                }
-            }
-            else
-            {
-                lock (PeerBean.PeerStatusListeners)
-                {
-                    foreach (IPeerStatusListener listener in PeerBean.PeerStatusListeners)
-                    {
-                        listener.PeerFailed(_message.Recipient, new PeerException(cause)); // TODO futureResponse used
                     }
                 }
             }
 
-            Logger.Debug("Report failure:", cause);
-            // TODO futureResponse.failedLater
-            // TODO close channel
+            Logger.Debug("Report failure: ", cause);
+            // channel already closed in Sender
+            _taskResponse.SetException(cause);
         }
     }
 }

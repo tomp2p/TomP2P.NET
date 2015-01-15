@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.ServiceModel.
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Connection.NET_Helper;

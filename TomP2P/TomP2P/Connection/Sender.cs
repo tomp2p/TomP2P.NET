@@ -55,12 +55,13 @@ namespace TomP2P.Connection
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
-        public void SendUd(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        /// <returns>The response message or null, if it is fire-and-forget or a failure occurred.</returns>
+        public Message.Message SendUd(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
             // no need to continue if already finished
             if (tcs.Task.IsCompleted)
             {
-                return;
+                return tcs.Task.Result; // TODO correct?
             }
             RemovePeerIfFailed(tcs, message);
 
@@ -88,7 +89,7 @@ namespace TomP2P.Connection
                     const string msg = "Peer is relayed, but no relay is given.";
                     Logger.Error(msg);
                     tcs.SetException(new TaskFailedException(msg));
-                    return;
+                    return null;
                 }
             }
 
@@ -102,7 +103,7 @@ namespace TomP2P.Connection
                         message);
                 Logger.Warn(msg);
                 tcs.SetException(new TaskFailedException(msg));
-                return;
+                return null;
             }
 
             // 5. create UDP channel
@@ -120,7 +121,7 @@ namespace TomP2P.Connection
                 const string msg = "Could not create a UDP socket. (Due to resource constraints.)";
                 Logger.Warn(msg);
                 tcs.TrySetException(new TaskFailedException(msg));
-                return;
+                return null;
                 
                 // TODO add reason for fail (e.g., from SocketException), e.g. move to ChannelCreator
                 Logger.Debug("Channel creation failed.");
@@ -151,7 +152,7 @@ namespace TomP2P.Connection
                 Logger.Error(msg);
                 tcs.SetException(new TaskFailedException(msg));
                 udpClient.NotifiedClose();
-                return;
+                return null;
             }
 
             // success for sending
@@ -162,9 +163,9 @@ namespace TomP2P.Connection
                 Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
                     
                 // set FF response
-                tcs.SetResult(null);
+                //tcs.SetResult(null);
                 udpClient.NotifiedClose();
-                return;
+                return null;
             }
             else
             {
@@ -185,7 +186,7 @@ namespace TomP2P.Connection
                     Logger.Error(msg);
                     tcs.SetException(new TaskFailedException(msg));
                     udpClient.NotifiedClose();
-                    return;
+                    return null;
                 }
 
                 // success for receiving
@@ -194,12 +195,10 @@ namespace TomP2P.Connection
                 var responseMessage = singlePacketUdp.Read(recvBytes, receiverEp, senderEp); // TODO correct? or use remoteEp from returned dgram?
 
                 // return response message
-                tcs.SetResult(responseMessage);
+                //tcs.SetResult(responseMessage);
+                udpClient.NotifiedClose();
+                return responseMessage;
             }
-
-            // 8. close channel/socket -> ChannelCreator -> SetupCloseListener
-            // TODO best to use try/finally to close()
-            udpClient.NotifiedClose();
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)

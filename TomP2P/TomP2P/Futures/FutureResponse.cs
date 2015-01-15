@@ -17,7 +17,7 @@ namespace TomP2P.Futures
             : base(function)
         { }
 
-        // a FutureResponse is actually nothing more than a Task<Message> (or TaskCompletionSource<Message>)
+        // a FutureResponse is actually nothing more than a Task<Message> (or TaskResponse<Message>)
         // but maybe, we need to add some functionalities for this .NET "future"
     }
 }
