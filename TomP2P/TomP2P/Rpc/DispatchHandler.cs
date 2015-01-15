@@ -147,7 +147,7 @@ namespace TomP2P.Rpc
                     }
                 }
                 Logger.Error("Exception in custom dipatch handler.", ex);
-                return responder.Failed(Message.Message.MessageType.Exception, ex.ToString(), isUdp, channel);
+                return responder.Failed(Message.Message.MessageType.Exception, isUdp, channel);
             }
         }
 

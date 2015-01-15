@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Timers;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
@@ -43,7 +44,7 @@ namespace TomP2P.P2P
         private bool _behindFirewall = false; // TODO Java uses reference type and null
         public IBroadcastHandler BroadcastHandler { get; private set; }
         public IBloomfilterFactory BloomfilterFactory { get; private set; }
-        // TODO find ScheduledExecuterService equivalent, plus getter/setter
+        public Timer Timer { get; private set; }
         public MaintenanceTask MaintenanceTask { get; private set; }
         public Random Random { get; private set; }
         private IList<IPeerInit> _toInitialize = new List<IPeerInit>(1);
@@ -159,12 +160,14 @@ namespace TomP2P.P2P
 
             if (PeerMap == null)
             {
-                PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
+                // TODO uncomment
+                //PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
+                throw new NotImplementedException();
             }
 
-            if (MasterPeer == null && ScheduledExecutorService == null)
+            if (MasterPeer == null && Timer == null)
             {
-                // TODO add executor
+                Timer = new Timer(); // ok?
             }
 
             PeerCreator peerCreator;
@@ -174,7 +177,7 @@ namespace TomP2P.P2P
             }
             else
             {
-                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, ScheduledExecutorService); // TODO provide executor
+                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, Timer);
             }
 
             var peer = new Peer(P2PId, PeerId, peerCreator);
@@ -189,12 +192,16 @@ namespace TomP2P.P2P
 
             if (BloomfilterFactory == null)
             {
-                peerBean.SetBloomfilterFactory(new DefaultBloomfilterFactory());
+                // TODO uncomment
+                //peerBean.SetBloomfilterFactory(new DefaultBloomfilterFactory());
+                throw new NotImplementedException();
             }
 
             if (BroadcastHandler == null)
             {
-                BroadcastHandler = new DefaultBroadcastHandler(peer, new Random());
+                // TODO uncomment
+                //BroadcastHandler = new DefaultBroadcastHandler(peer, new Random());
+                throw new NotImplementedException();
             }
 
             // set/enable RPC
@@ -394,6 +401,12 @@ namespace TomP2P.P2P
             {
                 _toInitialize.Add(init);
             }
+            return this;
+        }
+
+        public PeerBuilder SetTimer(Timer timer)
+        {
+            Timer = timer;
             return this;
         }
 

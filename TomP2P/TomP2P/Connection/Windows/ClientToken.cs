@@ -16,7 +16,7 @@ namespace TomP2P.Connection.Windows
         /// <summary>
         /// Used for UDP connections. Represents the remote end point from which to receive or sent to.
         /// </summary>
-        public IPEndPoint RemotEndPoint;
+        public EndPoint RemotEndPoint;
 
         public byte[] SendBuffer { get; private set; }
         public byte[] RecvBuffer { get; private set; }
