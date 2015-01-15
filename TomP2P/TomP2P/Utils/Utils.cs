@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
+using TomP2P.Connection;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
@@ -131,6 +133,33 @@ namespace TomP2P.Utils
         public static Number160 MakeShaHash(byte[] buffer)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Adds a listener to the response tasks and releases all acquired channels in the channel creator.
+        /// </summary>
+        /// <param name="channelCreator">The channel creator that will be shutdown and all connections will be closed.</param>
+        /// <param name="tasks">The tasks to listen to. If all the tasks finished, then the channel creator is shut down.
+        /// If null is provided, then the channel crator is shut down immediately.</param>
+        public static void AddReleaseListener(ChannelCreator channelCreator, params Task[] tasks)
+        {
+            if (tasks == null)
+            {
+                channelCreator.ShutdownAsync();
+                return;
+            }
+            int count = tasks.Count();
+            var finished = new AtomicInteger(0);
+            foreach (var task in tasks)
+            {
+                task.ContinueWith(delegate
+                {
+                    if (finished.IncrementAndGet() == count)
+                    {
+                        channelCreator.ShutdownAsync();
+                    }
+                });
+            }
         }
     }
 }

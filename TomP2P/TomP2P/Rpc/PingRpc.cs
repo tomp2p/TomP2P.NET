@@ -79,6 +79,32 @@ namespace TomP2P.Rpc
         }
 
         /// <summary>
+        /// Ping a UDP peer, but don't expect an answer.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a UDP channel.</param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public Task<Message.Message> FireUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Ping a TCP peer, but don't expect an answer.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a TCP channel.</param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public Task<Message.Message> FireTcp(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Creates a RequestHandler.
         /// </summary>
         /// <param name="remotePeer">The destination peer.</param>
@@ -88,6 +114,7 @@ namespace TomP2P.Rpc
         private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
             IConnectionConfiguration configuration)
         {
+            // TODO use this message, stuff it into the TCS (AsyncState)
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
             
             var tcs = new TaskCompletionSource<Message.Message>(TaskCreationOptions.None);
@@ -119,16 +146,41 @@ namespace TomP2P.Rpc
                 Logger.Debug("Respond to probing. Firing message to {0}.", requestMessage.Sender);
                 responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
 
-                throw new NotImplementedException();
                 if (requestMessage.IsUdp)
                 {
-                    ConnectionBean.Reservation.Create(1, 0);
-                    // TODO add operationComplete listener
+                    ConnectionBean.Reservation.CreateAsync(1, 0).ContinueWith(t =>
+                    {
+                        if (!t.IsFaulted)
+                        {
+                            Logger.Debug("Fire UDP to {0}.", requestMessage.Sender);
+                            var taskResponse = FireUdp(requestMessage.Sender, t.Result,
+                                ConnectionBean.ChannelServer.ChannelServerConfiguration);
+                            Utils.Utils.AddReleaseListener(t.Result, taskResponse);
+                        }
+                        else
+                        {
+                            Utils.Utils.AddReleaseListener(t.Result);
+                            Logger.Warn("Handling response for Request3 failed. (UDP) {0}", t.Exception);
+                        }
+                    });
                 }
                 else
                 {
-                    ConnectionBean.Reservation.Create(0, 1);
-                    // TODO add operationComplete listener
+                    ConnectionBean.Reservation.CreateAsync(0, 1).ContinueWith(t =>
+                    {
+                        if (!t.IsFaulted)
+                        {
+                            Logger.Debug("Fire TCP to {0}.", requestMessage.Sender);
+                            var taskResponse = FireTcp(requestMessage.Sender, t.Result,
+                                ConnectionBean.ChannelServer.ChannelServerConfiguration);
+                            Utils.Utils.AddReleaseListener(t.Result, taskResponse);
+                        }
+                        else
+                        {
+                            Utils.Utils.AddReleaseListener(t.Result);
+                            Logger.Warn("Handling response for Request3 failed. (TCP) {0}", t.Exception);
+                        }
+                    });
                 }
             }
             // discover
