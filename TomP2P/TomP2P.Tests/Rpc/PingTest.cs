@@ -40,6 +40,10 @@ namespace TomP2P.Tests.Rpc
                 await t;
                 Assert.IsTrue(!t.IsFaulted);
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             finally
             {
                 if (cc != null)

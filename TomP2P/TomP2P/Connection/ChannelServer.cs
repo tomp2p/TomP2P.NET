@@ -46,8 +46,10 @@ namespace TomP2P.Connection
             _interfaceBindings = channelServerConfiguration.BindingsIncoming;
             _dispatcher = dispatcher;
             _peerStatusListeners = peerStatusListeners;
-            // TODO finish implementation
+            string status = DiscoverNetworks.DiscoverInterfaces(_interfaceBindings);
+            Logger.Info("Status of interface search: {0}.", status);
 
+            // TODO DropConnectionInboundHandlers needed?
             _udpDecoderHandler = new TomP2PSinglePacketUDP(channelServerConfiguration.SignatureFactory);
             _udpEncoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
         }
@@ -120,6 +122,8 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupTcp(IPEndPoint listenAddress)
         {
+            return true;
+            // TODO implement
             // TODO configure TCP server
             // TODO configure a server-side pipeline
             try

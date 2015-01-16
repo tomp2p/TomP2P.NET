@@ -13,17 +13,20 @@ namespace TomP2P.P2P
 
         public void Init(Peer peer, object timer)
         {
-            throw new NotImplementedException();
+            // TODO implement
+            //throw new NotImplementedException();
         }
 
         public void AddMaintainable(IMaintainable peerMap)
         {
-            throw new NotImplementedException();
+            // TODO implement
+            //throw new NotImplementedException();
         }
 
         public void Shutdown()
         {
-            throw new NotImplementedException();
+            // TODO implement
+            //throw new NotImplementedException();
         }
     }
 }

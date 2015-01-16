@@ -68,6 +68,7 @@ namespace TomP2P.Connection
             var sb = new StringBuilder("(");
 
             // this part is very .NET-specific
+            // TODO only UnicastAddresses sufficient?
             foreach (var addressInfo in networkInterface.GetIPProperties().UnicastAddresses)
             {
                 if (addressInfo == null)

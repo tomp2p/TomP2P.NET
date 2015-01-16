@@ -66,6 +66,25 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's Map.put(key, value).
+        /// In contrast to .NET's IDictionary.Add(), this method replaces the value for the key, 
+        /// if another value for the same key is already stored.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="d"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public static void Put<TKey, TValue>(this IDictionary<TKey, TValue> d, TKey key, TValue value)
+        {
+            if (d.ContainsKey(key))
+            {
+                d.Remove(key);
+            }
+            d.Add(key, value);
+        }
+
+        /// <summary>
         /// Equivalent to Java's Queue.peek() that returns null if empty.
         /// </summary>
         /// <typeparam name="T"></typeparam>

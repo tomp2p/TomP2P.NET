@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using NLog;
 using TomP2P.Connection.Windows;
+using TomP2P.Extensions;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -69,15 +70,17 @@ namespace TomP2P.Connection
         {
             IDictionary<Number320, IDictionary<int, DispatchHandler>> copy = new Dictionary<Number320, IDictionary<int, DispatchHandler>>(_ioHandlers);
             IDictionary<int, DispatchHandler> types;
-            bool contains = copy.TryGetValue(new Number320(peerId, onBehalfOf), out types); // TODO what if not present?
-            if (contains == false)
+            
+            // .NET specific
+            copy.TryGetValue(new Number320(peerId, onBehalfOf), out types);
+            if (types == null)
             {
                 types = new Dictionary<int, DispatchHandler>();
                 copy.Add(new Number320(peerId, onBehalfOf), types);
             }
             foreach (int name in names)
             {
-                types.Add(name, ioHandler);
+                types.Put(name, ioHandler);
             }
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }

@@ -56,7 +56,7 @@ namespace TomP2P.Rpc
             _wait = wait;
             if (register)
             {
-                // TODO implement
+                ConnectionBean.Dispatcher.RegisterIOHandler(peerBean.ServerPeerAddress.PeerId, peerBean.ServerPeerAddress.PeerId, this, Rpc.Commands.Ping.GetNr());
             }
         }
 

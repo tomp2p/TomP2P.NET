@@ -274,7 +274,7 @@ namespace TomP2P.Peers
             int index = 0;
             foreach (var psa in peerSocketAddresses)
             {
-                bool isIPv6 = false; // TODO implement correctly
+                bool isIPv6 = psa.InetAddress.IsIPv6();
                 _relayType.Set(index, isIPv6);
                 size += psa.Size();
                 index++;
