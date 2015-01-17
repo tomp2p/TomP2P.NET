@@ -63,7 +63,7 @@ namespace TomP2P.Connection
             _taskResponse = tcs;
             PeerBean = peerBean;
             ConnectionBean = connectionBean;
-            _message = tcs.Task.Result; // TODO correct??
+            _message = tcs.Task.AsyncState as Message.Message;
             _sendMessageId = new MessageId(_message);
             IdleTcpSeconds = configuration.IdleTcpSeconds;
             IdleUdpSeconds = configuration.IdleUdpSeconds;

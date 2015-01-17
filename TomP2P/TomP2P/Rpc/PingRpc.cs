@@ -74,8 +74,6 @@ namespace TomP2P.Rpc
             IConnectionConfiguration configuration)
         {
             return Ping(remotePeer, configuration).SendUdpAsync(channelCreator);
-
-            // TODO return the TCS task from the RequestHandler
         }
 
         /// <summary>
@@ -114,10 +112,10 @@ namespace TomP2P.Rpc
         private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
             IConnectionConfiguration configuration)
         {
-            // TODO use this message, stuff it into the TCS (AsyncState)
+            // .NET-specific: create message and store it as AsyncState in the TaskCompletionSource
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
-            
-            var tcs = new TaskCompletionSource<Message.Message>(TaskCreationOptions.None);
+
+            var tcs = new TaskCompletionSource<Message.Message>(message);
 
             return new RequestHandler<FutureResponse>(tcs, PeerBean, ConnectionBean, configuration);
         }

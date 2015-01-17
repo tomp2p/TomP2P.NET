@@ -54,8 +54,8 @@ namespace TomP2P.Connection
             _maxPermitsUdp = channelClientConfiguration.MaxPermitsUdp;
             _maxPermitsTcp = channelClientConfiguration.MaxPermitsTcp;
             _maxPermitsPermanentTcp = channelClientConfiguration.MaxPermitsPermanentTcp;
-            _semaphoreUdp = new Semaphore(0, _maxPermitsUdp); // TODO correct usage?
-            _semaphoreTcp = new Semaphore(0, _maxPermitsTcp);
+            _semaphoreUdp = new Semaphore(_maxPermitsUdp, _maxPermitsUdp); // TODO correct usage?
+            _semaphoreTcp = new Semaphore(_maxPermitsTcp, _maxPermitsTcp);
             _semaphorePermanentTcp = new Semaphore(0, _maxPermitsPermanentTcp);
             _channelClientConfiguration = channelClientConfiguration;
         }
