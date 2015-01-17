@@ -33,7 +33,7 @@ namespace TomP2P.Message
 
             try
             {
-                var decoder = new Decoder(_signatureFactory);
+                var decoder = new Decoder(_signatureFactory); // TODO provide isUdp info
                 bool finished = decoder.Decode(buf, recipient, sender);
                 if (finished)
                 {

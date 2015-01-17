@@ -140,12 +140,13 @@ namespace TomP2P.Connection
             }
         }
 
-        // TODO in Java, this method is async
         /// <summary>
         /// Shuts down the server.
         /// </summary>
         public void Shutdown()
         {
+            // in Java, this method is async
+
             // shutdown both UDP and TCP server sockets
             if (_udpServer != null)
             {

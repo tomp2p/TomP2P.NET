@@ -14,7 +14,7 @@ namespace TomP2P.Connection
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
     /// <typeparam name="TFuture">The type of future to handle.</typeparam>
-    public class RequestHandler<TFuture>
+    public class RequestHandler<TFuture> // TODO generic needed?
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -80,7 +80,7 @@ namespace TomP2P.Connection
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(delegate
             {
-                var responseMessage = ConnectionBean.Sender.SendUd(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, false);
+                var responseMessage = ConnectionBean.Sender.SendUdp(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, false);
                 ResponseMessageReceived(responseMessage);
             });
 
@@ -182,7 +182,7 @@ namespace TomP2P.Connection
                 ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
                 return;
             }
-            // We need to exclude RCON Messages from the sanity check because we
+            // We need to exclude RCON messages from the sanity check because we
             // use this RequestHandler for sending a Type.REQUEST_1,
             // RPC.Commands.RCON message on top of it. Therefore the response
             // type will never be the same Type as the one the user initially

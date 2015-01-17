@@ -56,7 +56,7 @@ namespace TomP2P.Connection
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
         /// <returns>The response message or null, if it is fire-and-forget or a failure occurred.</returns>
-        public Message.Message SendUd(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public Message.Message SendUdp(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
             // no need to continue if already finished
             if (tcs.Task.IsCompleted)
@@ -120,7 +120,7 @@ namespace TomP2P.Connection
             {
                 const string msg = "Could not create a UDP socket. (Due to resource constraints.)";
                 Logger.Warn(msg);
-                tcs.TrySetException(new TaskFailedException(msg));
+                tcs.SetException(new TaskFailedException(msg));
                 return null;
                 
                 // TODO add reason for fail (e.g., from SocketException), e.g. move to ChannelCreator

@@ -193,9 +193,9 @@ namespace TomP2P.Rpc
                      requestMessage.Type == Message.Message.MessageType.Request4)
             {
                 Logger.Debug("Respond to regular ping. {0}.", requestMessage.Sender);
-                // Test, of this is a broadcast message to ourselves.
+                // Test, if this is a broadcast message to ourselves.
                 // If it is, do not reply.
-                if (requestMessage.IsUdp 
+                if (requestMessage.IsUdp // TODO this actually would be true for UDP --> see flag set in Decoder
                     && requestMessage.Sender.PeerId.Equals(PeerBean.ServerPeerAddress.PeerId)
                     && requestMessage.Recipient.PeerId.Equals(Number160.Zero))
                 {

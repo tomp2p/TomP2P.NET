@@ -18,12 +18,16 @@ namespace TomP2P.Peers
 
         public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
         {
-            throw new NotImplementedException();
+            // TODO implement
+            return true;
+            //throw new NotImplementedException();
         }
 
         public bool PeerFound(PeerAddress remotePeer, PeerAddress referrer, PeerConnection peerConnection)
         {
-            throw new NotImplementedException();
+            // TODO implement
+            return true;
+            //throw new NotImplementedException();
         }
     }
 }

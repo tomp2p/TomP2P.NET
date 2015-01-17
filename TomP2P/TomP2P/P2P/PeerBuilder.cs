@@ -162,6 +162,8 @@ namespace TomP2P.P2P
             {
                 // TODO uncomment
                 //PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
+                // TODO remove
+                PeerMap = new PeerMap();
             }
 
             if (MasterPeer == null && Timer == null)

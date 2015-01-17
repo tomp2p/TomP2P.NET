@@ -61,12 +61,11 @@ namespace TomP2P.Connection
 
             // start server
             // TODO find EventLoogGroup equivalents
-
             var dispatcher = new Dispatcher(p2pId, PeerBean, channelServerConfiguration.HearBeatMillis);
             var channelServer = new ChannelServer(channelServerConfiguration, dispatcher, PeerBean.PeerStatusListeners);
             if (!channelServer.Startup())
             {
-                // TODO shutdown "Netty"
+                ShutdownNetty();
                 throw new IOException("Cannot bind to TCP or UDP port.");
             }
 
@@ -96,6 +95,8 @@ namespace TomP2P.Connection
 
         public Task ShutdownAsync()
         {
+            // TODO this method does not complete the _tcsServerDone
+
             if (_master)
             {
                 Logger.Debug("Shutdown is in progress...");
@@ -117,7 +118,7 @@ namespace TomP2P.Connection
                 {
                     peerCreator.ShutdownAsync();
                 }
-                _tcsServerDone.SetResult(null);
+                _tcsServerDone.SetResult(null); // complete task
                 return _tcsServerDone.Task;
             }
 
@@ -128,7 +129,7 @@ namespace TomP2P.Connection
             ConnectionBean.Reservation.ShutdownAsync().ContinueWith(delegate
             {
                 ConnectionBean.ChannelServer.Shutdown();
-                // TODO shut down "Netty"
+                ShutdownNetty();
             });
 
             // this is blocking
@@ -164,6 +165,15 @@ namespace TomP2P.Connection
                 false, PeerAddress.EmptyPeerSocketAddresses);
 
             return self;
+        }
+
+        private void ShutdownNetty()
+        {
+            // in .NET, there is nothing like Netty, so this method is only for
+            // portability reasons (code-flow)
+
+            Logger.Debug("Shutdown done in client...");
+            _tcsServerDone.SetResult(null); // complete task
         }
     }
 }

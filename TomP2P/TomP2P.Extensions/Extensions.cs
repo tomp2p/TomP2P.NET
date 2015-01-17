@@ -66,6 +66,19 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's Semaphore.release(int).
+        /// In contrast to .NET's Semaphore.Release(int), this method allows 0 as input parameter without
+        /// throwing an ArgumentOutOfRangeException.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="count">The number of times to exit the semaphore.</param>
+        /// <returns>The count on the semaphore before this method was called.</returns>
+        public static int Release2(this Semaphore s, int count)
+        {
+            return count != 0 ? s.Release(count) : 0;
+        }
+
+        /// <summary>
         /// Equivalent to Java's Map.put(key, value).
         /// In contrast to .NET's IDictionary.Add(), this method replaces the value for the key, 
         /// if another value for the same key is already stored.

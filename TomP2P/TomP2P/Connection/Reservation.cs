@@ -97,8 +97,8 @@ namespace TomP2P.Connection
                 {
                     // release the permits in all cases
                     // otherwise, we may see inconsistencies
-                    _semaphoreUdp.Release(permitsUdp);
-                    _semaphoreTcp.Release(permitsTcp);
+                    _semaphoreUdp.Release2(permitsUdp);
+                    _semaphoreTcp.Release2(permitsTcp);
                 });
 
                 // instead of Executor.execute(new WaitReservation())

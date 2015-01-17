@@ -63,6 +63,7 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
+            // TODO notify async wait in service loop (CancellationToken)
             _udpServerSocket.Close();
             _isStopped = true;
         }

@@ -78,7 +78,7 @@ namespace TomP2P.Message
                     {
                         // TODO store the sender as an attribute??
 
-                        Message.SetIsUdp(false); // TODO how to get whether it's UDP?
+                        Message.SetIsUdp(false); // TODO how to get whether it's UDP? -> provide as isUdp flag
                         if (Message.IsFireAndForget() && Message.IsUdp)
                         {
                             // TODO remove timeout

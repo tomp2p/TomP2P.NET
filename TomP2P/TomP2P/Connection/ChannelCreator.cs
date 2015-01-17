@@ -60,8 +60,8 @@ namespace TomP2P.Connection
             _maxPermitsTcp = maxPermitsTcp;
             _channelClientConfiguration = channelClientConfiguration;
             _externalBindings = channelClientConfiguration.BindingsOutgoing;
-            _semaphoreUdp = new Semaphore(0, maxPermitsUdp); // TODO correct?
-            _semaphoreTcp = new Semaphore(0, maxPermitsTcp);
+            _semaphoreUdp = new Semaphore(maxPermitsUdp, maxPermitsUdp); // TODO correct?
+            _semaphoreTcp = new Semaphore(maxPermitsUdp, maxPermitsTcp);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace TomP2P.Connection
                     return null;
                 }
                 // try to aquire resources for the channel
-                if (!_semaphoreUdp.WaitOne(TimeSpan.Zero)) // TODO blocks infinitely, use timeout
+                if (!_semaphoreUdp.WaitOne(TimeSpan.Zero))
                 {
                     const string errorMsg = "Tried to acquire more resources (UDP) than announced.";
                     Logger.Error(errorMsg);
@@ -122,7 +122,10 @@ namespace TomP2P.Connection
         private void SetupCloseListener(MyUdpClient socket, Semaphore semaphore)
         {
             // TODO works?
-            socket.Closed += sender => semaphore.Release();
+            socket.Closed += sender =>
+                {
+                    semaphore.Release();
+                };
 
             // TODO in Java, the FutureResponse is responded now after channel closing
         }
@@ -156,6 +159,7 @@ namespace TomP2P.Connection
             // make async
             ThreadPool.QueueUserWorkItem(delegate
             {
+                // .NET-specific to close all channels (Java has ChannelGroup.close())
                 foreach (var client in _recipients) // TODO make also TCP
                 {
                     client.Close();
