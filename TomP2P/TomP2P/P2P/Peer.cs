@@ -111,7 +111,7 @@ namespace TomP2P.P2P
         }
 
         // Basic P2P operations
-        // TODO implement
+        // TODO implement basic P2P operations in Peer
 
         /// <summary>
         /// Shuts down everything.

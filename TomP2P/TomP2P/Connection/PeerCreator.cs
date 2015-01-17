@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Timers;
 using System.Threading.Tasks;
 using NLog;
@@ -95,8 +92,6 @@ namespace TomP2P.Connection
 
         public Task ShutdownAsync()
         {
-            // TODO this method does not complete the _tcsServerDone
-
             if (_master)
             {
                 Logger.Debug("Shutdown is in progress...");
