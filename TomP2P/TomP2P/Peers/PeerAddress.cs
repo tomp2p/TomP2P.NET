@@ -143,7 +143,7 @@ namespace TomP2P.Peers
             var tmp = new sbyte[Number160.ByteArraySize];
             Array.Copy(me, offset, tmp, 0, Number160.ByteArraySize);
             PeerId = new Number160(tmp);
-            Offset += Number160.ByteArraySize;
+            offset += Number160.ByteArraySize;
 
             PeerSocketAddress = PeerSocketAddress.Create(me, IsIPv4, offset);
             offset = PeerSocketAddress.Offset;

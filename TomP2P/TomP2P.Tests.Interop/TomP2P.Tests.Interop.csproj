@@ -60,6 +60,7 @@
     <Compile Include="JarRunner.cs" />
     <Compile Include="JavaEncodeDecodeTest.cs" />
     <Compile Include="MessageEncodeDecodeTest.cs" />
+    <Compile Include="InteropPingTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -38,7 +38,7 @@ namespace TomP2P.Tests.Rpc
 
                 var t = handshake.PingUdpAsync(recv1.PeerAddress, cc, new DefaultConnectionConfiguration());
                 await t;
-                Assert.IsTrue(!t.IsFaulted);
+                Assert.IsTrue(t.IsCompleted && !t.IsFaulted);
             }
             catch (Exception ex)
             {

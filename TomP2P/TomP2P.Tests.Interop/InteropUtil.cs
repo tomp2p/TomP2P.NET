@@ -14,5 +14,12 @@ namespace TomP2P.Tests.Interop
             buffer.Get(bytes, 0, bytes.Length);
             return bytes;
         }
+
+        public static sbyte[] ReadJavaBytes(byte[] bytes)
+        {
+            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytes.ToSByteArray());
+            return ExtractBytes(buf).ToSByteArray();
+        }
     }
 }

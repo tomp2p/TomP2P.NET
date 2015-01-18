@@ -30,9 +30,9 @@ namespace TomP2P.Connection
         public static string DiscoverInterfaces(Bindings bindings)
         {
             var sb = new StringBuilder("Discover status: ");
-            var e = NetworkInterface.GetAllNetworkInterfaces();
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
 
-            foreach (var netInterface in e)
+            foreach (var netInterface in interfaces)
             {
                 if (bindings.AnyInterfaces)
                 {
