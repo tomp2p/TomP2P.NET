@@ -110,7 +110,7 @@ namespace TomP2P.Connection
             }
             catch (Exception ex)
             {
-                Logger.Warn("An exception occured when starting up UDP server. {0}", ex);
+                Logger.Warn("An exception occured when starting up UDP server.", ex);
                 return false;
             }
         }

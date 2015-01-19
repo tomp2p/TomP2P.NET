@@ -34,9 +34,13 @@ namespace TomP2P.Connection
 
             foreach (var netInterface in interfaces)
             {
+                if (netInterface.OperationalStatus != OperationalStatus.Up)
+                {
+                    continue;
+                }
                 if (bindings.AnyInterfaces)
                 {
-                    sb.Append(" ++").Append(netInterface.Name); // TODO correct name property?
+                    sb.Append(" ++").Append(netInterface.Name);
                     sb.Append(DiscoverNetwork(netInterface, bindings)).Append(", ");
                 }
                 else
@@ -68,8 +72,8 @@ namespace TomP2P.Connection
             var sb = new StringBuilder("(");
 
             // this part is very .NET-specific
-            // TODO only UnicastAddresses sufficient?
-            foreach (var addressInfo in networkInterface.GetIPProperties().UnicastAddresses)
+            var unicastIpc = networkInterface.GetIPProperties().UnicastAddresses;
+            foreach (var addressInfo in unicastIpc)
             {
                 if (addressInfo == null)
                 {

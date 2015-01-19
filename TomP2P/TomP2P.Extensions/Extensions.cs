@@ -51,7 +51,7 @@ namespace TomP2P.Extensions
         /// Equivalent to Java's Semaphore.acquire(int).
         /// Acquires the given number of permits from this semaphore, blocking until all are available, or the thread is interrupted. 
         /// </summary>
-        /// <param name="s"></param>
+        /// <param name="s">The Semaphore instance to be extended.</param>
         /// <param name="permits">The number of permits to acquire.</param>
         public static void Acquire(this Semaphore s, int permits)
         {
@@ -301,8 +301,8 @@ namespace TomP2P.Extensions
         /// Equivalent of Java's ByteBuffer.remaining().
         /// Returns the number of elements between the current position and the limit.
         /// </summary>
-        /// <param name="ms"></param>
-        /// <returns></returns>
+        /// <param name="ms">The MemoryStream instance to be extended.</param>
+        /// <returns>The number of bytes remaining in this buffer.</returns>
         public static long Remaining(this MemoryStream ms)
         {
             return ms.Length - ms.Position;
