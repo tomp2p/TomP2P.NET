@@ -17,8 +17,8 @@ namespace TomP2P.Connection.Windows
 
         public event SocketClosedEventHandler Closed;
 
-        public MyUdpClient(IPEndPoint localEp)
-            : base(localEp)
+        public MyUdpClient()
+            : base()
         { }
 
         /// <summary>

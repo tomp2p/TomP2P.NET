@@ -39,13 +39,17 @@ namespace TomP2P.Tests.Interop
         public static byte[] RequestJavaBytes([CallerMemberName] string testArgument = "", DataReceivedEventHandler dataReceived = null)
         {
             Run(testArgument, dataReceived);
+            return ReadJavaResult();
+        }
 
+        public static byte[] ReadJavaResult([CallerMemberName] string testArgument = "")
+        {
             var inputPath = String.Format("{0}{1}-out.txt", TmpDir, testArgument);
             byte[] bytes = File.ReadAllBytes(inputPath);
             return bytes;
         }
 
-        private static void Run(string testArgument, DataReceivedEventHandler dataReceived = null)
+        public static void Run(string testArgument, DataReceivedEventHandler dataReceived = null)
         {
             string jarArgs = String.Format("{0} {1}", JavaArgs, testArgument);
 
@@ -79,19 +83,21 @@ namespace TomP2P.Tests.Interop
 
         private static void ProcessOnErrorDataReceived(object sender, DataReceivedEventArgs args)
         {
-            Trace.TraceError(args.Data);
+            Trace.TraceError("JAVA: " + args.Data);
         }
 
         private static void ProcessOnOutputDataReceived(object sender, DataReceivedEventArgs args)
         {
-            Trace.WriteLine(args.Data);
+            Trace.WriteLine("JAVA: " + args.Data);
         }
 
         public static void WriteToProcess(string arguments)
         {
             if (_process != null)
             {
-                _process.StandardInput.Write(arguments);
+                StreamWriter sw = _process.StandardInput;
+                sw.WriteLine(arguments);
+                sw.Close();
             }
         }
     }

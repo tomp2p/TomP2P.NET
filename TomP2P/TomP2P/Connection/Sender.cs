@@ -148,7 +148,7 @@ namespace TomP2P.Connection
             catch (Exception ex)
             {
                 // fail sending
-                string msg = String.Format("One or more exceptions occurred when sending {0}: {1}.", message, ex);
+                string msg = String.Format("Exception(s) when sending {0}: {1}.", message, ex);
                 Logger.Error(msg);
                 tcs.SetException(new TaskFailedException(msg));
                 udpClient.NotifiedClose();

@@ -94,7 +94,7 @@ namespace TomP2P.Connection
                 //var udpSocket = new UdpClientSocket(senderEndPoint);
                 //udpSocket.Bind(_externalBindings.WildcardSocket());
 
-                var udpClient = new MyUdpClient(senderEndPoint); // binds to senderEp
+                var udpClient = new MyUdpClient(); // TODO bind to senderEp?
 
                 _recipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);

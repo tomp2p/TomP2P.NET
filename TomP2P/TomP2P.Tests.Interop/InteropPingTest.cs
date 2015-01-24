@@ -27,7 +27,7 @@ namespace TomP2P.Tests.Interop
             tcs = new TaskCompletionSource<PeerAddress>();
             ThreadPool.QueueUserWorkItem(delegate
             {
-                JarRunner.RequestJavaBytes("TestPingJavaUdp-start", DataReceived);
+                JarRunner.Run("TestPingJavaUdp-start", DataReceived);
             });
             PeerAddress server = await tcs.Task;
 
@@ -59,18 +59,23 @@ namespace TomP2P.Tests.Interop
                 {
                     sender.ShutdownAsync().Wait();
                 }
-                // TODO shutdown Java receiver
                 JarRunner.WriteToProcess("TestPingJavaUdp-stop");
             }
         }
 
-        private void DataReceived(object sender, DataReceivedEventArgs dataReceivedEventArgs)
+        private void DataReceived(object sender, DataReceivedEventArgs args)
         {
             // parse for the server PeerAddress, for this, it's required to 
             // know how it will be printed to the Java log
 
             // use a TCS to set the found address -> the calling method should await this result before proceeding
 
+            if (args.Data != null && args.Data.Contains("[---RESULT-READY---]"))
+            {
+                var bytes = JarRunner.ReadJavaResult("TestPingJavaUdp-start");
+                var sbytes = bytes.ToSByteArray();
+                tcs.SetResult(new PeerAddress(sbytes));
+            }
         }
     }
 }
