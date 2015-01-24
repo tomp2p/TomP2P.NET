@@ -87,7 +87,7 @@ namespace TomP2P.Connection
         }
 
         /// <summary>
-        /// Adds an address thatwe want to listen to. If the address is not found, it will be ignored.
+        /// Adds an address that we want to listen to. If the address is not found, it will be ignored.
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>

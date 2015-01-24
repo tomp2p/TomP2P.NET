@@ -8,7 +8,6 @@ namespace TomP2P.Extensions
     /// </summary>
     public class InteropRandom
     {
-
         private UInt64 _seed;
 
         public InteropRandom(ulong seed)

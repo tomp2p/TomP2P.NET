@@ -26,7 +26,7 @@
     </xs:attribute>
     <xs:attribute name="internalLogFile" type="xs:string">
       <xs:annotation>
-        <xs:documentation>Write internal NLog messages to the specified file.</xs:documentation>
+        <xs:documentation>WriteToProcess internal NLog messages to the specified file.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="internalLogLevel" type="NLogLevel">
@@ -991,7 +991,7 @@
           <xs:element name="archiveAboveSize" minOccurs="0" maxOccurs="1" type="xs:long" />
           <xs:element name="maxArchiveFiles" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="forceManaged" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="replaceFileContentsOnEachWrite" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="replaceFileContentsOnEachWriteToProcess" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="enableFileDelete" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="deleteOldFileOnStartTCPTCPup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="createDirs" minOccurs="0" maxOccurs="1" type="xs:boolean" />
@@ -999,11 +999,11 @@
           <xs:element name="fileName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="fileAttributes" minOccurs="0" maxOccurs="1" type="NLog.Targets.Win32FileAttributes" />
           <xs:element name="bufferSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteAttemptDelay" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteAttempts" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="concurrentWriteToProcessAttemptDelay" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="concurrentWriteToProcessAttempts" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="concurrentWriteToProcesss" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="keepFileOpen" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="networkWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="networkWriteToProcesss" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="openFileCacheSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="openFileCacheTimeout" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="autoFlush" minOccurs="0" maxOccurs="1" type="xs:boolean" />
@@ -1068,7 +1068,7 @@
             <xs:documentation>Gets ors set a value indicating whether a managed file stream is forced, instead of used the native implementation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="replaceFileContentsOnEachWrite" type="xs:boolean">
+        <xs:attribute name="replaceFileContentsOnEachWriteToProcess" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to replace file contents on each write instead of appending log message at the end.</xs:documentation>
           </xs:annotation>
@@ -1108,17 +1108,17 @@
             <xs:documentation>Log file buffer size in bytes.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteAttemptDelay" type="xs:integer">
+        <xs:attribute name="concurrentWriteToProcessAttemptDelay" type="xs:integer">
           <xs:annotation>
             <xs:documentation>Delay in milliseconds to wait before attempting to write to the file again.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteAttempts" type="xs:integer">
+        <xs:attribute name="concurrentWriteToProcessAttempts" type="xs:integer">
           <xs:annotation>
             <xs:documentation>Number of times the write is appended on the file before NLog discards the log message.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWrites" type="xs:boolean">
+        <xs:attribute name="concurrentWriteToProcesss" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on the same host.</xs:documentation>
           </xs:annotation>
@@ -1128,7 +1128,7 @@
             <xs:documentation>Indicates whether to keep log file open instead of opening and closing it on each logging event.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="networkWrites" type="xs:boolean">
+        <xs:attribute name="networkWriteToProcesss" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on different network hosts.</xs:documentation>
           </xs:annotation>
@@ -1191,7 +1191,7 @@
       <xs:enumeration value="Compressed" />
       <xs:enumeration value="NotContentIndexed" />
       <xs:enumeration value="Encrypted" />
-      <xs:enumeration value="WriteThrough" />
+      <xs:enumeration value="WriteToProcessThrough" />
       <xs:enumeration value="NoBuffering" />
       <xs:enumeration value="DeleteOnClose" />
       <xs:enumeration value="PosixSemantics" />

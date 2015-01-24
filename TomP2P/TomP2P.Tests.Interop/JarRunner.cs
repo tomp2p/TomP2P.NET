@@ -8,6 +8,8 @@ namespace TomP2P.Tests.Interop
 {
     public class JarRunner
     {
+        private static Process _process;
+
         public const string TmpDir = "C:/Users/Christian/Desktop/interop/";
         //public const string TmpDir = "D:/Desktop/interop/";
 
@@ -27,44 +29,70 @@ namespace TomP2P.Tests.Interop
             byte[] result = File.ReadAllBytes(inputPath);
 
             var javaReader = new JavaBinaryReader(new MemoryStream(result));
-            
+
             // 1: test succeeded
             // 0: test failed
             int res = javaReader.ReadByte();
             return res == 1;
         }
 
-        public static byte[] RequestJavaBytes([CallerMemberName] string testArgument = "")
+        public static byte[] RequestJavaBytes([CallerMemberName] string testArgument = "", DataReceivedEventHandler dataReceived = null)
         {
-            Run(testArgument);
+            Run(testArgument, dataReceived);
 
             var inputPath = String.Format("{0}{1}-out.txt", TmpDir, testArgument);
             byte[] bytes = File.ReadAllBytes(inputPath);
             return bytes;
         }
 
-        private static void Run(string testArgument)
+        private static void Run(string testArgument, DataReceivedEventHandler dataReceived = null)
         {
             string jarArgs = String.Format("{0} {1}", JavaArgs, testArgument);
 
             var processInfo = new ProcessStartInfo(JavaExecutable, jarArgs)
             {
-                CreateNoWindow = true,
-                UseShellExecute = false,
+                CreateNoWindow = false,
+                UseShellExecute = false, // redirected
 
                 // redirect output stream
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                RedirectStandardInput = true // TODO ok?
             };
 
-            var process = new Process {StartInfo = processInfo};
-            process.Start();
+            _process = new Process { StartInfo = processInfo, EnableRaisingEvents = true };
+            _process.OutputDataReceived += ProcessOnOutputDataReceived;
+            _process.ErrorDataReceived += ProcessOnErrorDataReceived;
+            if (dataReceived != null)
+            {
+                _process.OutputDataReceived += dataReceived;
+                _process.ErrorDataReceived += dataReceived;
+            }
+            _process.Start();
 
-            string t = process.StandardOutput.ReadToEnd();
-            Trace.WriteLine(t);
+            _process.BeginOutputReadLine();
+            _process.BeginErrorReadLine();
 
-            process.WaitForExit();
-            process.Close();
+            _process.WaitForExit();
+            _process.Close();
+        }
+
+        private static void ProcessOnErrorDataReceived(object sender, DataReceivedEventArgs args)
+        {
+            Trace.TraceError(args.Data);
+        }
+
+        private static void ProcessOnOutputDataReceived(object sender, DataReceivedEventArgs args)
+        {
+            Trace.WriteLine(args.Data);
+        }
+
+        public static void WriteToProcess(string arguments)
+        {
+            if (_process != null)
+            {
+                _process.StandardInput.Write(arguments);
+            }
         }
     }
 }

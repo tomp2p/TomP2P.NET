@@ -147,7 +147,7 @@ namespace TomP2P.Connection
             if (responseMessage == null)
             {
                 // handle response only, if not fire-and-forget
-                _taskResponse.SetResult(null);
+                _taskResponse.TrySetResult(null);
                 return;
             }
 

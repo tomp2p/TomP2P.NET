@@ -54,7 +54,7 @@ namespace TomP2P.Connection
             _maxPermitsUdp = channelClientConfiguration.MaxPermitsUdp;
             _maxPermitsTcp = channelClientConfiguration.MaxPermitsTcp;
             _maxPermitsPermanentTcp = channelClientConfiguration.MaxPermitsPermanentTcp;
-            _semaphoreUdp = new Semaphore(_maxPermitsUdp, _maxPermitsUdp); // TODO correct usage?
+            _semaphoreUdp = new Semaphore(_maxPermitsUdp, _maxPermitsUdp);
             _semaphoreTcp = new Semaphore(_maxPermitsTcp, _maxPermitsTcp);
             _semaphorePermanentTcp = new Semaphore(0, _maxPermitsPermanentTcp);
             _channelClientConfiguration = channelClientConfiguration;
@@ -72,7 +72,6 @@ namespace TomP2P.Connection
         /// <returns>The future channel creator.</returns>
         public Task<ChannelCreator> CreateAsync(int permitsUdp, int permitsTcp)
         {
-            // TODO this async pars are very tricky -> check!
             if (permitsUdp > _maxPermitsUdp)
             {
                 throw new ArgumentException(String.Format("Cannot acquire more UDP connections ({0}) than maximally allowed ({1}).", permitsUdp, _maxPermitsUdp));
@@ -87,7 +86,6 @@ namespace TomP2P.Connection
             {
                 if (_shutdown)
                 {
-                    // TODO correct?
                     tcsChannelCreator.SetException(new TaskFailedException("Shutting down."));
                     return tcsChannelCreator.Task;
                 }
