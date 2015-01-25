@@ -100,6 +100,7 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupUdp(IPEndPoint listenAddress)
         {
+            // pipeline is implemented in MyUdpServer.UdpPipeline
             // TODO configure UDP server
             try
             {

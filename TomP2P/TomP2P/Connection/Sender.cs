@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Futures;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
-using Encoder = TomP2P.Message.Encoder;
 
 namespace TomP2P.Connection
 {
@@ -61,7 +55,7 @@ namespace TomP2P.Connection
             // no need to continue if already finished
             if (tcs.Task.IsCompleted)
             {
-                return tcs.Task.Result; // TODO correct?
+                return tcs.Task.Result;
             }
             RemovePeerIfFailed(tcs, message);
 
@@ -130,7 +124,6 @@ namespace TomP2P.Connection
             }
             Logger.Debug("About to connect to {0} with channel {1}, ff = {2}.", message.Recipient, udpClient, isFireAndForget);
 
-            // TODO Java uses a DatagramPacket wrapper -> interoperability issue?
             // 3. client-side pipeline (sending)
             //  - encoder
             var outbound = new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory);
@@ -172,7 +165,7 @@ namespace TomP2P.Connection
                 // receive response message
                 //Task<UdpReceiveResult> recvTask = udpClient.ReceiveAsync();
                 //await recvTask;
-                var remoteEp = new IPEndPoint(IPAddress.Any, 0); // TODO correct?
+                var remoteEp = new IPEndPoint(IPAddress.Any, 0); // TODO correct? or should MyUdpServer receive answer?
 
                 byte[] recvBytes;
                 try
@@ -192,7 +185,7 @@ namespace TomP2P.Connection
                 // success for receiving
                 // decode message
                 var singlePacketUdp = new TomP2PSinglePacketUDP(ChannelClientConfiguration.SignatureFactory);
-                var responseMessage = singlePacketUdp.Read(recvBytes, receiverEp, senderEp); // TODO correct? or use remoteEp from returned dgram?
+                var responseMessage = singlePacketUdp.Read(recvBytes, (IPEndPoint)udpClient.Client.LocalEndPoint, remoteEp); 
 
                 // return response message
                 //tcs.SetResult(responseMessage);

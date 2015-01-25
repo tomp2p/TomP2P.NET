@@ -55,13 +55,13 @@ namespace TomP2P.Tests.Interop
 
             var processInfo = new ProcessStartInfo(JavaExecutable, jarArgs)
             {
-                CreateNoWindow = false,
-                UseShellExecute = false, // redirected
+                CreateNoWindow = true,
+                UseShellExecute = false, // redirected streams
 
                 // redirect output stream
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                RedirectStandardInput = true // TODO ok?
+                RedirectStandardInput = true
             };
 
             _process = new Process { StartInfo = processInfo, EnableRaisingEvents = true };
@@ -73,22 +73,31 @@ namespace TomP2P.Tests.Interop
                 _process.ErrorDataReceived += dataReceived;
             }
             _process.Start();
+            Trace.WriteLine("Java process started.");
 
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
 
+            Trace.WriteLine("Waiting for Java process to exit.");
             _process.WaitForExit();
+            Trace.WriteLine("Java process exited.");
             _process.Close();
         }
 
         private static void ProcessOnErrorDataReceived(object sender, DataReceivedEventArgs args)
         {
-            Trace.TraceError("JAVA: " + args.Data);
+            if (args.Data != null)
+            {
+                Trace.TraceError("JAVA [ERROR]: " + args.Data);
+            }
         }
 
         private static void ProcessOnOutputDataReceived(object sender, DataReceivedEventArgs args)
         {
-            Trace.WriteLine("JAVA: " + args.Data);
+            if (args.Data != null)
+            {
+                Trace.WriteLine("JAVA: " + args.Data);
+            }
         }
 
         public static void WriteToProcess(string arguments)

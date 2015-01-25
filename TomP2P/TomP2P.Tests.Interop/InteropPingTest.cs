@@ -18,18 +18,18 @@ namespace TomP2P.Tests.Interop
     [TestFixture]
     public class InteropPingTest
     {
-        private TaskCompletionSource<PeerAddress> tcs;
+        private TaskCompletionSource<PeerAddress> _tcs;
 
         [Test]
         public async void TestPingJavaUdp()
         {
             // setup Java server and get it's PeerAddress
-            tcs = new TaskCompletionSource<PeerAddress>();
+            _tcs = new TaskCompletionSource<PeerAddress>();
             ThreadPool.QueueUserWorkItem(delegate
             {
                 JarRunner.Run("TestPingJavaUdp-start", DataReceived);
             });
-            PeerAddress server = await tcs.Task;
+            PeerAddress server = await _tcs.Task;
 
             // ping & test
             Peer sender = null;
@@ -45,9 +45,10 @@ namespace TomP2P.Tests.Interop
                 cc = await sender.ConnectionBean.Reservation.CreateAsync(1, 0);
                 var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
                 var task = handshake.PingUdpAsync(server, cc, new DefaultConnectionConfiguration());
-                await task;
+                var responseMessage = await task;
 
                 Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
+                Assert.AreEqual(responseMessage.Sender, server);
             }
             finally
             {
@@ -74,7 +75,7 @@ namespace TomP2P.Tests.Interop
             {
                 var bytes = JarRunner.ReadJavaResult("TestPingJavaUdp-start");
                 var sbytes = bytes.ToSByteArray();
-                tcs.SetResult(new PeerAddress(sbytes));
+                _tcs.SetResult(new PeerAddress(sbytes));
             }
         }
     }
