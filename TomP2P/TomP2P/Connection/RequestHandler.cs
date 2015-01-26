@@ -13,8 +13,7 @@ namespace TomP2P.Connection
     /// (It is important that this class handles close() because if we shutdown the connections, 
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
-    /// <typeparam name="TFuture">The type of future to handle.</typeparam>
-    public class RequestHandler<TFuture> // TODO generic needed?
+    public class RequestHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -74,16 +73,29 @@ namespace TomP2P.Connection
         /// Sends a UDP message and expects a response.
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
-        /// <returns>The future that was added in the constructor.</returns>
+        /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(delegate
             {
-                var responseMessage = ConnectionBean.Sender.SendUdp(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, false);
-                ResponseMessageReceived(responseMessage);
+                var response = ConnectionBean.Sender.SendUdp(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, false);
+                ResponseMessageReceived(response);
             });
+            return _taskResponse.Task;
+        }
 
+        /// <summary>
+        /// Broadscasts a UDP message (layer 2) and expects a response.
+        /// </summary>
+        /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
+        /// <returns>The future task that was added in the constructor.</returns>
+        public Task<Message.Message> SendBroadcastUdp(ChannelCreator channelCreator)
+        {
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                ConnectionBean.Sender.SendUdp(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, true);
+            });
             return _taskResponse.Task;
         }
 
@@ -91,18 +103,8 @@ namespace TomP2P.Connection
         /// Sends a UDP message and doesn't expect a response.
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
-        /// <returns>The future that was added in the constructor.</returns>
-        public TFuture FireAndForgetUdp(ChannelCreator channelCreator)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Broadscasts a UDP message (layer 2) and expects a response.
-        /// </summary>
-        /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
-        /// <returns>The future that was added in the constructor.</returns>
-        public TFuture SendBroadcastUdp(ChannelCreator channelCreator)
+        /// <returns>The future task that was added in the constructor.</returns>
+        public Task<Message.Message> FireAndForgetUdp(ChannelCreator channelCreator)
         {
             throw new NotImplementedException();
         }
@@ -111,14 +113,14 @@ namespace TomP2P.Connection
         /// Sends a TCP message and expects a response.
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a TCP connection.</param>
-        /// <returns>The future that was added in the constructor.</returns>
-        public TFuture SendTcp(ChannelCreator channelCreator)
+        /// <returns>The future task that was added in the constructor.</returns>
+        public Task<Message.Message> SendTcp(ChannelCreator channelCreator)
         {
             throw new NotImplementedException();
         }
 
         // TODO add documentation
-        public TFuture SendTcp(PeerConnection peerConnection)
+        public Task<Message.Message> SendTcp(PeerConnection peerConnection)
         {
             throw new NotImplementedException();
         }
@@ -129,7 +131,7 @@ namespace TomP2P.Connection
         /// <param name="channelCreator">The channel creator will create a TCP connection.</param>
         /// <param name="peerConnection"></param>
         /// <returns>The future that was added in the constructor.<</returns>
-        public TFuture SendTcp(ChannelCreator channelCreator, PeerConnection peerConnection)
+        public Task<Message.Message> SendTcp(ChannelCreator channelCreator, PeerConnection peerConnection)
         {
             throw new NotImplementedException();
         }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using System.Security.AccessControl;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,13 +86,12 @@ namespace TomP2P.Connection
                 }
 
                 // TODO surround with try/catch and return exception to TCS
-                // TODO set broadcast option, etc.
-                // create "channel", for which we use a socket in .NET
-                //var udpSocket = new UdpClientSocket(senderEndPoint);
-                //udpSocket.Bind(_externalBindings.WildcardSocket());
-
-                var udpClient = new MyUdpClient(); // TODO bind to senderEp?
-
+                // create and bind
+                var udpClient = new MyUdpClient(_externalBindings.WildcardSocket());
+                if (broadcast)
+                {
+                    udpClient.Client.EnableBroadcast = true;
+                }
                 _recipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);
 

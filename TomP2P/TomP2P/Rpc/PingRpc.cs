@@ -16,7 +16,7 @@ using TomP2P.Peers;
 namespace TomP2P.Rpc
 {
     /// <summary>
-    /// The Ping requestMessage handler. Also used for NAT detection and other things.
+    /// The Ping message handler. Also used for NAT detection and other things.
     /// </summary>
     public class PingRpc : DispatchHandler
     {
@@ -27,7 +27,6 @@ namespace TomP2P.Rpc
         private readonly IList<IPeerReachable> _reachableListeners = new List<IPeerReachable>(1);
         private readonly IList<IPeerReceivedBroadcastPing> _receivedBroadcastPingListeners = new List<IPeerReceivedBroadcastPing>(1);
 
-        // TODO needed?
         // used for testing and debugging 
         private readonly bool _enable;
         private readonly bool _wait;
@@ -65,15 +64,35 @@ namespace TomP2P.Rpc
         /// </summary>
         /// <param name="remotePeer"></param>
         /// <param name="configuration"></param>
-        public RequestHandler<FutureResponse> Ping(PeerAddress remotePeer, IConnectionConfiguration configuration)
+        public RequestHandler Ping(PeerAddress remotePeer, IConnectionConfiguration configuration)
         {
             return CreateHandler(remotePeer, Message.Message.MessageType.Request1, configuration);
         }
 
+        /// <summary>
+        /// Ping a UDP peer.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a UDP channel.</param>
+        /// <param name="configuration"></param>
+        /// <returns>The future response message.</returns>
         public Task<Message.Message> PingUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
             return Ping(remotePeer, configuration).SendUdpAsync(channelCreator);
+        }
+
+        /// <summary>
+        /// Ping a UDP peer using layer 2 broadcast.
+        /// </summary>
+        /// <param name="remotePeer"></param>
+        /// <param name="channelCreator"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public Task<Message.Message> PingBroadcastUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            return CreateHandler(remotePeer, Message.Message.MessageType.Request4, configuration).SendBroadcastUdp(channelCreator);
         }
 
         /// <summary>
@@ -109,15 +128,17 @@ namespace TomP2P.Rpc
         /// <param name="type">The type of the request.</param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        private RequestHandler<FutureResponse> CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
+        private RequestHandler CreateHandler(PeerAddress remotePeer, Message.Message.MessageType type,
             IConnectionConfiguration configuration)
         {
-            // .NET-specific: create message and store it as AsyncState in the TaskCompletionSource
+            // .NET-specific:
+            // 1. use TCS<Message> instead of FutureResponse
+            // 2. store message as the TCS's AsyncState
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
 
             var tcs = new TaskCompletionSource<Message.Message>(message);
 
-            return new RequestHandler<FutureResponse>(tcs, PeerBean, ConnectionBean, configuration);
+            return new RequestHandler(tcs, PeerBean, ConnectionBean, configuration);
         }
 
         public override Message.Message HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder, bool isUdp, Socket channel)
