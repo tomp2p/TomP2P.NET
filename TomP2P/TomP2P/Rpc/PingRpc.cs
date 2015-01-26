@@ -92,7 +92,7 @@ namespace TomP2P.Rpc
         public Task<Message.Message> PingBroadcastUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            return CreateHandler(remotePeer, Message.Message.MessageType.Request4, configuration).SendBroadcastUdp(channelCreator);
+            return CreateHandler(remotePeer, Message.Message.MessageType.Request4, configuration).SendBroadcastUdpAsync(channelCreator);
         }
 
         /// <summary>
@@ -102,10 +102,12 @@ namespace TomP2P.Rpc
         /// <param name="channelCreator">The channel creator where we create a UDP channel.</param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        public Task<Message.Message> FireUdp(PeerAddress remotePeer, ChannelCreator channelCreator,
+        public Task<Message.Message> FireUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            throw new NotImplementedException();
+            return
+                CreateHandler(remotePeer, Message.Message.MessageType.RequestFf1, configuration)
+                    .FireAndForgetUdpAsync(channelCreator);
         }
 
         /// <summary>
@@ -172,7 +174,7 @@ namespace TomP2P.Rpc
                         if (!t.IsFaulted)
                         {
                             Logger.Debug("Fire UDP to {0}.", requestMessage.Sender);
-                            var taskResponse = FireUdp(requestMessage.Sender, t.Result,
+                            var taskResponse = FireUdpAsync(requestMessage.Sender, t.Result,
                                 ConnectionBean.ChannelServer.ChannelServerConfiguration);
                             Utils.Utils.AddReleaseListener(t.Result, taskResponse);
                         }

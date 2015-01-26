@@ -43,14 +43,14 @@ namespace TomP2P.Connection
         /// <summary>
         /// Sends a message via UDP.
         /// </summary>
-        /// <param name="tcs"></param>
-        /// <param name="isFireAndForget"></param>
+        /// <param name="isFireAndForget">True, if handler = null.</param>
+        /// <param name="tcs">The TCS for the response message. (FutureResponse equivalent.)</param>
         /// <param name="message">The message to send.</param>
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
         /// <returns>The response message or null, if it is fire-and-forget or a failure occurred.</returns>
-        public Message.Message SendUdp(TaskCompletionSource<Message.Message> tcs, bool isFireAndForget, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public Message.Message SendUdp(bool isFireAndForget, TaskCompletionSource<Message.Message> tcs, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
             // no need to continue if already finished
             if (tcs.Task.IsCompleted)
@@ -154,11 +154,8 @@ namespace TomP2P.Connection
             {
                 // close channel now
                 Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
-                    
-                // set FF response
-                //tcs.SetResult(null);
                 udpClient.NotifiedClose();
-                return null;
+                return null; // return FF response
             }
             else
             {

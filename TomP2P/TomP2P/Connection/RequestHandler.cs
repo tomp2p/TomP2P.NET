@@ -76,10 +76,11 @@ namespace TomP2P.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
+            // TODO find more efficient way instead of 1 thread per message
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(delegate
             {
-                var response = ConnectionBean.Sender.SendUdp(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, false);
+                var response = ConnectionBean.Sender.SendUdp(false, _taskResponse, _message, channelCreator, IdleUdpSeconds, false);
                 ResponseMessageReceived(response);
             });
             return _taskResponse.Task;
@@ -90,11 +91,12 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
         /// <returns>The future task that was added in the constructor.</returns>
-        public Task<Message.Message> SendBroadcastUdp(ChannelCreator channelCreator)
+        public Task<Message.Message> SendBroadcastUdpAsync(ChannelCreator channelCreator)
         {
             ThreadPool.QueueUserWorkItem(delegate
             {
-                ConnectionBean.Sender.SendUdp(_taskResponse, false, _message, channelCreator, IdleUdpSeconds, true);
+                var response = ConnectionBean.Sender.SendUdp(false, _taskResponse, _message, channelCreator, IdleUdpSeconds, true);
+                ResponseMessageReceived(response);
             });
             return _taskResponse.Task;
         }
@@ -104,9 +106,14 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a UDP connection.</param>
         /// <returns>The future task that was added in the constructor.</returns>
-        public Task<Message.Message> FireAndForgetUdp(ChannelCreator channelCreator)
+        public Task<Message.Message> FireAndForgetUdpAsync(ChannelCreator channelCreator)
         {
-            throw new NotImplementedException();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                var response = ConnectionBean.Sender.SendUdp(true, _taskResponse, _message, channelCreator, 0, false);
+                ResponseMessageReceived(response);
+            });
+            return _taskResponse.Task;
         }
 
         /// <summary>
@@ -138,12 +145,18 @@ namespace TomP2P.Connection
 
         private void ResponseMessageReceived(Message.Message responseMessage)
         {
-            // TODO give back this message in the SendUDP method
             // client-side:
             // here, the result for the awaitable task can be set
-            // -> actually, this method can be synchronically called after each "async SendX()"
+            // -> actually, this method can be synchronically called after each Sender.Send*Async()
 
-            // the "result" of the TCS must be set here, not in sender
+            // the "result" of the TCS must be set here, not in Sender
+            // if responseMessage == null
+            // - either an exception occurred, but then Sender should have called TCS.SetException()
+            // - or the request message was Fire-and-Forget
+            // => TCS.TrySetResult(null)
+            // else, the response message is the result
+            // => TCS.SetResult(responseMessage)
+
             // - fire-and-forget -> result = null
             // - else -> result = response message
             if (responseMessage == null)

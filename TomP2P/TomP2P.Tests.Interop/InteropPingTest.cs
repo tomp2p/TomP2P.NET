@@ -64,6 +64,94 @@ namespace TomP2P.Tests.Interop
             }
         }
 
+        [Test]
+        public async void TestPingJavaBroadcastUdp()
+        {
+            // setup Java server and get it's PeerAddress
+            _tcs = new TaskCompletionSource<PeerAddress>();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                JarRunner.Run("TestPingJavaUdp-start", DataReceived);
+            });
+            PeerAddress server = await _tcs.Task;
+
+            // ping & test
+            Peer sender = null;
+            ChannelCreator cc = null;
+            try
+            {
+                // setup .NET sender
+                sender = new PeerBuilder(new Number160("0x9876")).
+                    SetP2PId(55).
+                    SetPorts(2424).
+                    Start();
+
+                cc = await sender.ConnectionBean.Reservation.CreateAsync(1, 0);
+                var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
+                var task = handshake.PingBroadcastUdpAsync(server, cc, new DefaultConnectionConfiguration());
+                var responseMessage = await task;
+
+                Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
+                Assert.AreEqual(responseMessage.Sender, server);
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                JarRunner.WriteToProcess("TestPingJavaUdp-stop");
+            }
+        }
+
+        [Test]
+        public async void TestPingJavaFireUdp()
+        {
+            // setup Java server and get it's PeerAddress
+            _tcs = new TaskCompletionSource<PeerAddress>();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                JarRunner.Run("TestPingJavaUdp-start", DataReceived);
+            });
+            PeerAddress server = await _tcs.Task;
+
+            // ping & test
+            Peer sender = null;
+            ChannelCreator cc = null;
+            try
+            {
+                // setup .NET sender
+                sender = new PeerBuilder(new Number160("0x9876")).
+                    SetP2PId(55).
+                    SetPorts(2424).
+                    Start();
+
+                cc = await sender.ConnectionBean.Reservation.CreateAsync(1, 0);
+                var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
+                var task = handshake.FireUdpAsync(server, cc, new DefaultConnectionConfiguration());
+                var responseMessage = await task;
+
+                Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
+                Assert.IsTrue(responseMessage == null);
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                JarRunner.WriteToProcess("TestPingJavaUdp-stop");
+            }
+        }
+
         private void DataReceived(object sender, DataReceivedEventArgs args)
         {
             // parse for the server PeerAddress, for this, it's required to 
