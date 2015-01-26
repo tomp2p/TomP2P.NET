@@ -78,7 +78,7 @@ namespace TomP2P.Connection
                     return null;
                 }
                 // try to aquire resources for the channel
-                if (!_semaphoreUdp.WaitOne(TimeSpan.Zero))
+                if (!_semaphoreUdp.TryAcquire())
                 {
                     const string errorMsg = "Tried to acquire more resources (UDP) than announced.";
                     Logger.Error(errorMsg);

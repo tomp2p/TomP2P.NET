@@ -66,6 +66,16 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's Semaphore.tryAcquire().
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static bool TryAcquire(this Semaphore s)
+        {
+            return s.WaitOne(TimeSpan.Zero);
+        }
+
+        /// <summary>
         /// Equivalent to Java's Semaphore.release(int).
         /// In contrast to .NET's Semaphore.Release(int), this method allows 0 as input parameter without
         /// throwing an ArgumentOutOfRangeException.

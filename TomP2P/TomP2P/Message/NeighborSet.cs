@@ -13,25 +13,23 @@ namespace TomP2P.Message
         public NeighborSet(int neighborLimit, ICollection<PeerAddress> neighbors)
         {
             NeighborsLimit = neighborLimit;
-            IList<PeerAddress> peerAddresses = neighbors as IList<PeerAddress> ?? neighbors.ToList();
-            Neighbors = peerAddresses;
+            Neighbors = neighbors;
 
             // remove neighbors that are over the limit
             long serializedSize = 1;
             
             // no need to cut if we don't provide a limit
-            if (NeighborsLimit < 0) // TODO shouldn't this be <= 0?
+            if (NeighborsLimit < 0)
             {
                 return;
             }
 
-            for (int i = 0; i < peerAddresses.Count; i++)
+            foreach (var neighbor in neighbors.ToList()) // iterate over list-copy
             {
-                var neighbor = peerAddresses[i];
                 serializedSize += neighbor.Size;
                 if (serializedSize > neighborLimit)
                 {
-                    peerAddresses.Remove(neighbor);
+                    neighbors.Remove(neighbor); // remove from original list
                 }
             }
         }
