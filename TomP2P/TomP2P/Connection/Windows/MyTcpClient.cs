@@ -23,9 +23,9 @@ namespace TomP2P.Connection.Windows
         /// <summary>
         /// A Close() method that notfies the subscribed events.
         /// </summary>
-        public void NotifiedClose()
+        public new void Close()
         {
-            Close();
+            base.Close();
             OnClosed();
         }
 

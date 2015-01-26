@@ -144,7 +144,7 @@ namespace TomP2P.Connection
                 string msg = String.Format("Exception(s) when sending {0}: {1}.", message, ex);
                 Logger.Error(msg);
                 tcs.SetException(new TaskFailedException(msg));
-                udpClient.NotifiedClose();
+                udpClient.Close();
                 return null;
             }
 
@@ -154,7 +154,7 @@ namespace TomP2P.Connection
             {
                 // close channel now
                 Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
-                udpClient.NotifiedClose();
+                udpClient.Close();
                 return null; // return FF response
             }
             else
@@ -175,7 +175,7 @@ namespace TomP2P.Connection
                     string msg = String.Format("One or more exceptions occurred when receiving: {0}.", ex);
                     Logger.Error(msg);
                     tcs.SetException(new TaskFailedException(msg));
-                    udpClient.NotifiedClose();
+                    udpClient.Close();
                     return null;
                 }
 
@@ -186,7 +186,7 @@ namespace TomP2P.Connection
 
                 // return response message
                 //tcs.SetResult(responseMessage);
-                udpClient.NotifiedClose();
+                udpClient.Close();
                 return responseMessage;
             }
         }
