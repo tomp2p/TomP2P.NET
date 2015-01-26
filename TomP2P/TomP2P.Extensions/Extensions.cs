@@ -450,6 +450,18 @@ namespace TomP2P.Extensions
 
         #endregion*/
 
+        /// <summary>
+        /// Equivalent to Java Netty's Channel.isOpen().
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static bool IsOpen(this Socket s)
+        {
+            // see http://stackoverflow.com/questions/2661764/how-to-check-if-a-socket-is-connected-disconnected-in-c
+            // TODO does this work? correctly?
+            return !((s.Poll(1000, SelectMode.SelectRead) && (s.Available == 0)) || !s.Connected);
+        }
+
         #region Conversion
 
         /// <summary>

@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
-using TomP2P.P2P;
 using TomP2P.Peers;
 
 namespace TomP2P.Connection
 {
-    public class PeerConnection
+    public class PeerConnection : IEquatable<PeerConnection>
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public const int HeartBeatMillisConst = 2000;
 
         private readonly Semaphore _oneConnection;
-        private readonly PeerAddress _remotePeer;
-        private readonly ChannelCreator _cc;
+        public PeerAddress RemotePeer { get; private set; }
+        public ChannelCreator ChannelCreator { get; private set; }
         private readonly bool _initiator;
 
         private readonly IDictionary<TaskCompletionSource<ChannelCreator>, TaskCompletionSource<Message.Message>> _map;
@@ -35,8 +32,8 @@ namespace TomP2P.Connection
             TaskCompletionSource<object> tcsClose, int heartBeatMillis, MyTcpClient channel)
         {
             _oneConnection = oneConnection;
-            _remotePeer = remotePeer;
-            _cc = cc;
+            RemotePeer = remotePeer;
+            ChannelCreator = cc;
             _initiator = initiator;
             _map = map;
             _tcsClose = tcsClose;
@@ -52,8 +49,8 @@ namespace TomP2P.Connection
         /// <param name="heartBeatMillis"></param>
         public PeerConnection(PeerAddress remotePeer, ChannelCreator cc, int heartBeatMillis)
         {
-            _remotePeer = remotePeer;
-            _cc = cc;
+            RemotePeer = remotePeer;
+            ChannelCreator = cc;
             HeartBeatMillis = heartBeatMillis;
             _initiator = true;
             _oneConnection = new Semaphore(1, 1);
@@ -69,10 +66,10 @@ namespace TomP2P.Connection
         /// <param name="heartBeatMillis"></param>
         public PeerConnection(PeerAddress remotePeer, MyTcpClient channel, int heartBeatMillis)
         {
-            _remotePeer = remotePeer;
+            RemotePeer = remotePeer;
             _channel = channel;
             AddCloseListener(channel);
-            _cc = null;
+            ChannelCreator = null;
             HeartBeatMillis = heartBeatMillis;
             _initiator = false;
             _oneConnection = new Semaphore(1, 1);
@@ -99,15 +96,33 @@ namespace TomP2P.Connection
 
         private void AddCloseListener(MyTcpClient channel)
         {
-            // TODO implement
-            // TODO use Close() event from MyUdpClient
-            throw new NotImplementedException();
+            channel.Closed += sender =>
+            {
+                Logger.Debug("About to close the connection {0}, {1}.", channel, _initiator ? "initiator" : "from-dispatcher");
+                _tcsClose.SetResult(null); // complete
+            };
         }
 
         public Task Close()
         {
-            // TODO implement
-            throw new NotImplementedException();
+            // cc is not null if we opened the connection
+            if (ChannelCreator != null)
+            {
+                Logger.Debug("Close connection {0}. We were the initiator.", _channel);
+                // maybe done on arrival? set close future in any case
+                ChannelCreator.ShutdownAsync().ContinueWith(delegate
+                {
+                    _tcsClose.SetResult(null); // complete
+                });
+            }
+            else
+            {
+                // cc is null if it is an incoming connection
+                // we can close it here or it will be closed when the dispatcher is shut down
+                Logger.Debug("Close connection {0}. We are not the initiator.", _channel);
+                _channel.Close();
+            }
+            return _tcsClose.Task;
         }
 
         public Task<ChannelCreator> AcquireAsync(TaskCompletionSource<Message.Message> tcsResponse)
@@ -118,14 +133,14 @@ namespace TomP2P.Connection
 
         private Task<ChannelCreator> AcquireAsync(TaskCompletionSource<ChannelCreator> tcsChannelCreator, TaskCompletionSource<Message.Message> tcsResponse)
         {
-            Logger.Debug("About to acquire a peer connection for {0}.", _remotePeer);
+            Logger.Debug("About to acquire a peer connection for {0}.", RemotePeer);
             if (_oneConnection.TryAcquire())
             {
-                Logger.Debug("Acquired a peer connection for {0}.", _remotePeer);
+                Logger.Debug("Acquired a peer connection for {0}.", RemotePeer);
                 tcsResponse.Task.ContinueWith(delegate
                 {
                     _oneConnection.Release();
-                    Logger.Debug("Released peer connection for {0}.", _remotePeer);
+                    Logger.Debug("Released peer connection for {0}.", RemotePeer);
                     lock (_map)
                     {
                         // TODO works?
@@ -136,8 +151,7 @@ namespace TomP2P.Connection
                         }
                     }
                 });
-                tcsChannelCreator.SetResult(_cc);
-                return tcsChannelCreator.Task;
+                tcsChannelCreator.SetResult(ChannelCreator);
             }
             else
             {
@@ -147,6 +161,54 @@ namespace TomP2P.Connection
                 }
             }
             return tcsChannelCreator.Task;
+        }
+
+        public bool IsOpen
+        {
+            get
+            {
+                if (_channel != null)
+                {
+                    return _channel.Client.IsOpen();
+                }
+                return false;
+            }
+        }
+
+        public PeerConnection ChangeRemotePeer(PeerAddress remotePeer)
+        {
+            return new PeerConnection(_oneConnection, remotePeer, ChannelCreator, _initiator, _map, _tcsClose, HeartBeatMillis, _channel);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals(obj as PeerConnection);
+        }
+
+        public bool Equals(PeerConnection other)
+        {
+            if (_channel != null)
+            {
+                return _channel.Equals(other._channel);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
         }
     }
 }
