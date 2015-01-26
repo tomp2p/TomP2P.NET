@@ -121,26 +121,13 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="channelCreator">The channel creator will create a TCP connection.</param>
         /// <returns>The future task that was added in the constructor.</returns>
-        public Task<Message.Message> SendTcp(ChannelCreator channelCreator)
+        public Task<Message.Message> SendTcpAsync(ChannelCreator channelCreator)
         {
-            throw new NotImplementedException();
-        }
-
-        // TODO add documentation
-        public Task<Message.Message> SendTcp(PeerConnection peerConnection)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sends a TCP message and expects a response.
-        /// </summary>
-        /// <param name="channelCreator">The channel creator will create a TCP connection.</param>
-        /// <param name="peerConnection"></param>
-        /// <returns>The future that was added in the constructor.<</returns>
-        public Task<Message.Message> SendTcp(ChannelCreator channelCreator, PeerConnection peerConnection)
-        {
-            throw new NotImplementedException();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                //var response = ConnectionBean.Sender.SendTcp
+            });
+            return _taskResponse.Task;
         }
 
         private void ResponseMessageReceived(Message.Message responseMessage)

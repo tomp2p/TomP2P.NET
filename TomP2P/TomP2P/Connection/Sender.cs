@@ -43,7 +43,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// Sends a message via UDP.
         /// </summary>
-        /// <param name="isFireAndForget">True, if handler = null.</param>
+        /// <param name="isFireAndForget">True, if handler == null.</param>
         /// <param name="tcs">The TCS for the response message. (FutureResponse equivalent.)</param>
         /// <param name="message">The message to send.</param>
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
@@ -191,6 +191,37 @@ namespace TomP2P.Connection
             }
         }
 
+        /// <summary>
+        /// Sends a message via TCP.
+        /// </summary>
+        /// <param name="isFireAndFroget">True, if handler == null.</param>
+        /// <param name="tcs">The TCS for the response message. (FutureResponse equivalent.)</param>
+        /// <param name="message">The message to send.</param>
+        /// <param name="channelCreator">The channel creator for the TCP channel.</param>
+        /// <param name="idleTcpSeconds">The idle time until message fail.</param>
+        /// <param name="connectTimeoutMillis">The idle time for the connection setup.</param>
+        /// <param name="peerConnection"></param>
+        /// <returns></returns>
+        public Message.Message SendTcp(bool isFireAndFroget, TaskCompletionSource<Message.Message> tcs,
+            Message.Message message, ChannelCreator channelCreator, int idleTcpSeconds, int connectTimeoutMillis,
+            PeerConnection peerConnection)
+        {
+            // no need to continue if already finished
+            if (tcs.Task.IsCompleted)
+            {
+                return tcs.Task.Result;
+            }
+            RemovePeerIfFailed(tcs, message);
+
+            // we need to set the neighbors if we use relays
+            if (message.Sender.IsRelayed && message.Sender.PeerSocketAddresses.Count != 0)
+            {
+                message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
+            }
+
+            if (peerConnection != null && p)
+        }
+
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
         {
             // execute the following delegate only if TCS task failed
@@ -198,7 +229,7 @@ namespace TomP2P.Connection
             {
                 if (message.Recipient.IsRelayed)
                 {
-                    // TODO: make the relay go away if failed
+                    // TODO: Java, make the relay go away if failed
                 }
                 else
                 {

@@ -88,7 +88,7 @@ namespace TomP2P.Rpc
         /// <param name="remotePeer"></param>
         /// <param name="channelCreator"></param>
         /// <param name="configuration"></param>
-        /// <returns></returns>
+        /// <returns>The future response message.</returns>
         public Task<Message.Message> PingBroadcastUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
@@ -101,13 +101,27 @@ namespace TomP2P.Rpc
         /// <param name="remotePeer">The destination peer.</param>
         /// <param name="channelCreator">The channel creator where we create a UDP channel.</param>
         /// <param name="configuration"></param>
-        /// <returns></returns>
+        /// <returns>The future response message, which is null for fire-and-forget.</returns>
         public Task<Message.Message> FireUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
             return
                 CreateHandler(remotePeer, Message.Message.MessageType.RequestFf1, configuration)
                     .FireAndForgetUdpAsync(channelCreator);
+        }
+
+        /// <summary>
+        /// Ping a TCP peer.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a TCP channel.</param>
+        /// <param name="configuration"></param>
+        /// <returns>The future response message.</returns>
+        public Task<Message.Message> PingTcpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            Logger.Debug("Pinging TCP the remote peer {0}.", remotePeer);
+            return Ping(remotePeer, configuration).SendTcpAsync(channelCreator);
         }
 
         /// <summary>

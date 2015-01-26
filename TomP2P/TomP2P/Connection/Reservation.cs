@@ -118,7 +118,7 @@ namespace TomP2P.Connection
                         }
                         try
                         {
-                            _semaphoreUdp.Acquire(_maxPermitsUdp);
+                            _semaphoreUdp.Acquire(permitsUdp);
                         }
                         catch (Exception ex)
                         {
@@ -127,7 +127,7 @@ namespace TomP2P.Connection
                         }
                         try
                         {
-                            _semaphoreTcp.Acquire(_maxPermitsTcp);
+                            _semaphoreTcp.Acquire(permitsTcp);
                         }
                         catch (Exception ex)
                         {
@@ -136,7 +136,7 @@ namespace TomP2P.Connection
                             return;
                         }
 
-                        channelCreator = new ChannelCreator(tcsChannelCreationDone, _maxPermitsUdp, _maxPermitsTcp,
+                        channelCreator = new ChannelCreator(tcsChannelCreationDone, permitsUdp, permitsTcp,
                             _channelClientConfiguration);
                         AddToSet(channelCreator);
                     }
