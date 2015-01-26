@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
 using TomP2P.P2P;
 using TomP2P.Peers;
@@ -27,11 +28,11 @@ namespace TomP2P.Connection
         public int HeartBeatMillis { get; private set; }
 
         // these may be called from different threads, but they will never be called concurrently within this library
-        private volatile TcpClient _channel;
+        private volatile MyTcpClient _channel;
 
         private PeerConnection(Semaphore oneConnection, PeerAddress remotePeer, ChannelCreator cc, bool initiator,
             IDictionary<TaskCompletionSource<ChannelCreator>, TaskCompletionSource<Message.Message>> map,
-            TaskCompletionSource<object> tcsClose, int heartBeatMillis, TcpClient channel)
+            TaskCompletionSource<object> tcsClose, int heartBeatMillis, MyTcpClient channel)
         {
             _oneConnection = oneConnection;
             _remotePeer = remotePeer;
@@ -66,7 +67,7 @@ namespace TomP2P.Connection
         /// <param name="remotePeer">The remote peer to connect to.</param>
         /// <param name="channel">The already open TCP channel.</param>
         /// <param name="heartBeatMillis"></param>
-        public PeerConnection(PeerAddress remotePeer, TcpClient channel, int heartBeatMillis)
+        public PeerConnection(PeerAddress remotePeer, MyTcpClient channel, int heartBeatMillis)
         {
             _remotePeer = remotePeer;
             _channel = channel;
@@ -79,14 +80,14 @@ namespace TomP2P.Connection
             _tcsClose = new TaskCompletionSource<object>();
         }
 
-        public PeerConnection SetChannel(TcpClient channel)
+        public PeerConnection SetChannel(MyTcpClient channel)
         {
             _channel = channel;
             AddCloseListener(channel);
             return this;
         }
 
-        public TcpClient Channel
+        public MyTcpClient Channel
         {
             get { return _channel; }
         }
@@ -96,7 +97,7 @@ namespace TomP2P.Connection
             get { return _tcsClose.Task; }
         }
 
-        private void AddCloseListener(TcpClient channel)
+        private void AddCloseListener(MyTcpClient channel)
         {
             // TODO implement
             // TODO use Close() event from MyUdpClient

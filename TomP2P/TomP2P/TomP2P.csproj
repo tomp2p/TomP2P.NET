@@ -74,6 +74,7 @@
     <Compile Include="Connection\Windows\AsyncServerSocket.cs" />
     <Compile Include="Connection\Windows\ClientToken.cs" />
     <Compile Include="Connection\Windows\ClientToken2.cs" />
+    <Compile Include="Connection\Windows\MyTcpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpServer.cs" />
     <Compile Include="Connection\Windows\TcpClientSocket.cs" />

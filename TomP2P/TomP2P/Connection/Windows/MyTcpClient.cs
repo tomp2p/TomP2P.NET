@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace TomP2P.Connection.Windows
 {
     /// <summary>
-    /// Slightly extended <see cref="UdpClient"/>.
+    /// Slightly extended <see cref="TcpClient"/>.
     /// </summary>
-    public class MyUdpClient : UdpClient
+    public class MyTcpClient : TcpClient
     {
-        public delegate void SocketClosedEventHandler(MyUdpClient sender);
+        public delegate void SocketClosedEventHandler(MyTcpClient sender);
         public event SocketClosedEventHandler Closed;
 
-        public MyUdpClient(IPEndPoint localEndPoint)
-            : base(localEndPoint)
+        public MyTcpClient()
+            : base()
         { }
 
         /// <summary>
