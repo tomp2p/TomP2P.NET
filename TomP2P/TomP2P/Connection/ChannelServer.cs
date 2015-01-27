@@ -32,7 +32,7 @@ namespace TomP2P.Connection
         private readonly TomP2PSinglePacketUdp _udpDecoderHandler;
 
         // .NET
-        private readonly TomP2POutbound _udpEncoderHandler;
+        private readonly TomP2POutbound _encoderHandler;
         private readonly TomP2PCumulationTcp _tcpDecoderHandler;
         private readonly int _maxNrOfClients;
 
@@ -54,7 +54,7 @@ namespace TomP2P.Connection
 
             // TODO DropConnectionInboundHandlers needed?
             _udpDecoderHandler = new TomP2PSinglePacketUdp(channelServerConfiguration.SignatureFactory);
-            _udpEncoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
+            _encoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
             _maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
         }
 
@@ -108,7 +108,7 @@ namespace TomP2P.Connection
             try
             {
                 // binds in constructor
-                _udpServer = new MyUdpServer(listenAddress, _maxNrOfClients, _udpDecoderHandler, _udpEncoderHandler, _dispatcher);
+                _udpServer = new MyUdpServer(listenAddress, _maxNrOfClients, _udpDecoderHandler, _encoderHandler, _dispatcher);
                 _udpServer.Socket.EnableBroadcast = true;
                 _udpServer.Start();
                 return true;
@@ -131,7 +131,7 @@ namespace TomP2P.Connection
             // pipeline is implemented in MyTcpServer.TcpPipeline
             try
             {
-                _tcpServer = new MyTcpServer(listenAddress, _maxNrOfClients);
+                _tcpServer = new MyTcpServer(listenAddress, _maxNrOfClients, _tcpDecoderHandler, _encoderHandler, _dispatcher);
                 _tcpServer.Socket.LingerState = new LingerOption(false, 0); // TODO correct?
                 _tcpServer.Socket.NoDelay = true; // TODO correct?
                 _tcpServer.Start();

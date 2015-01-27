@@ -28,7 +28,7 @@ namespace TomP2P.Message
         public Message Read(byte[] msgBytes, IPEndPoint recipient, IPEndPoint sender)
         {
             // setup buffer from bytes
-            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer(); // TODO use direct?
+            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(msgBytes.ToSByteArray());
 
             try

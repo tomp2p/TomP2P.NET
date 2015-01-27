@@ -5,19 +5,19 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
     /// <summary>
     /// Slightly extended <see cref="TcpClient"/>.
     /// </summary>
-    public class MyTcpClient : TcpClient
+    public class MyTcpClient : TcpClient, ITcpChannel
     {
-        public delegate void SocketClosedEventHandler(MyTcpClient sender);
-        public event SocketClosedEventHandler Closed;
+        public event ClosedEventHandler Closed;
 
-        public MyTcpClient()
-            : base()
+        public MyTcpClient(IPEndPoint localEndPoint)
+            : base(localEndPoint) // bind
         { }
 
         /// <summary>
@@ -36,5 +36,16 @@ namespace TomP2P.Connection.Windows
                 Closed(this);
             }
         }
+
+        public bool IsActive
+        {
+            get { return this.Active; }
+        }
+
+        public Socket Socket
+        {
+            get { return this.Client; }
+        }
+
     }
 }

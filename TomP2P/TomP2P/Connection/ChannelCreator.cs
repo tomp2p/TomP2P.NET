@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,8 @@ namespace TomP2P.Connection
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // the "ChannelGroup"
-        private readonly ISet<MyUdpClient> _recipients = new HashSet<MyUdpClient>();
+        private readonly ISet<MyUdpClient> _udpRecipients = new HashSet<MyUdpClient>(); // TODO merge
+        private readonly ISet<MyTcpClient> _tcpRecipients = new HashSet<MyTcpClient>();
 
         private readonly int _maxPermitsUdp;
         private readonly int _maxPermitsTcp;
@@ -66,9 +68,8 @@ namespace TomP2P.Connection
         /// This won't send any message unlike TCP.
         /// </summary>
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
-        /// <param name="senderEndPoint"></param>
         /// <returns>The created channel or null, if the channel could not be created.</returns>
-        public MyUdpClient CreateUdp(bool broadcast, IPEndPoint senderEndPoint)
+        public MyUdpClient CreateUdp(bool broadcast)
         {
             _readWriteLockUdp.EnterReadLock();
             try
@@ -92,7 +93,7 @@ namespace TomP2P.Connection
                 {
                     udpClient.Client.EnableBroadcast = true;
                 }
-                _recipients.Add(udpClient);
+                _udpRecipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);
 
                 return udpClient;
@@ -103,9 +104,41 @@ namespace TomP2P.Connection
             }
         }
 
-        public void CreateTcp()
+        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, handlers ,
+            TaskCompletionSource<Message.Message> tcsResponse)
         {
-            throw new NotImplementedException();
+            _readWriteLockTcp.EnterReadLock();
+            try
+            {
+                if (_shutdownTcp)
+                {
+                    return null;
+                }
+                // try to acquire resources for the channel
+                if (!_semaphoreTcp.TryAcquire())
+                {
+                    const string errorMsg = "Tried to acquire more resources (TCP) than announced.";
+                    Logger.Error(errorMsg);
+                    throw new SystemException(errorMsg);
+                }
+                var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket());
+                // TODO how to set CONNECT_TIMEOUT_MILLIS option?
+                tcpClient.Client.NoDelay = true;
+                tcpClient.Client.LingerState = new LingerOption(false, 0);
+                tcpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                // TODO add handlers to the pipeline
+
+                // connect
+                tcpClient.Connect(remoteAddress);
+
+                _tcpRecipients.Add(tcpClient);
+                SetupCloseListener(tcpClient, _semaphoreTcp, tcsResponse);
+                return tcpClient;
+            }
+            finally
+            {
+                _readWriteLockTcp.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -123,6 +156,11 @@ namespace TomP2P.Connection
                     semaphore.Release();
                 };
 
+            // TODO in Java, the FutureResponse is responded now after channel closing
+        }
+
+        public void SetupCloseListener(MyTcpClient channel, TaskCompletionSource<Message.Message> tcsResponse)
+        {
             // TODO in Java, the FutureResponse is responded now after channel closing
         }
 

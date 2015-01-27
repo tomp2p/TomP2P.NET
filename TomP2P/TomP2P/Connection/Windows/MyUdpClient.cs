@@ -3,36 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
     /// <summary>
     /// Slightly extended <see cref="UdpClient"/>.
     /// </summary>
-    public class MyUdpClient : UdpClient
+    public class MyUdpClient : BaseChannel, IUdpChannel
     {
-        public delegate void SocketClosedEventHandler(MyUdpClient sender);
-        public event SocketClosedEventHandler Closed;
+        // wrapped member
+        private readonly UdpClient _udpClient;
 
         public MyUdpClient(IPEndPoint localEndPoint)
-            : base(localEndPoint)
-        { }
-
-        /// <summary>
-        /// A Close() method that notfies the subscribed events.
-        /// </summary>
-        public new void Close()
         {
-            base.Close();
-            OnClosed();
+            // bind
+            _udpClient = new UdpClient(localEndPoint);    
         }
 
-        protected void OnClosed()
+        protected override void DoClose()
         {
-            if (Closed != null)
-            {
-                Closed(this);
-            }
+            throw new NotImplementedException();
+        }
+
+        public bool IsOpen()
+        {
+            throw new NotImplementedException();
         }
     }
 }

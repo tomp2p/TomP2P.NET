@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Connection.NET_Helper;
+using TomP2P.Message;
 
 namespace TomP2P.Connection.Windows
 {
@@ -14,13 +16,22 @@ namespace TomP2P.Connection.Windows
         private readonly int _maxNrOfClients;
         private readonly TcpListener _tcpServerSocket;
 
+        private readonly TomP2PCumulationTcp _decoder;
+        private readonly TomP2POutbound _encoder;
+        private readonly Dispatcher _dispatcher;
+
         private volatile bool _isStopped; // volatile!
 
-        public MyTcpServer(IPEndPoint localEndPoint, int maxNrOfClients)
+        public MyTcpServer(IPEndPoint localEndPoint, int maxNrOfClients, TomP2PCumulationTcp decoder,
+            TomP2POutbound encoder, Dispatcher dispatcher)
         {
             _localEndPoint = localEndPoint;
             _maxNrOfClients = maxNrOfClients;
             _tcpServerSocket = new TcpListener(localEndPoint);
+
+            _decoder = decoder;
+            _encoder = encoder;
+            _dispatcher = dispatcher;
         }
 
         public void Start()
@@ -60,7 +71,8 @@ namespace TomP2P.Connection.Windows
                 while (await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length) != 0)
                 {
                     // process data
-                    // TODO
+                    // TODO implement
+                    throw new NotImplementedException();
 
                     // send back
                     await stream.WriteAsync(sendBuffer, 0, sendBuffer.Length);
@@ -68,9 +80,11 @@ namespace TomP2P.Connection.Windows
             }
         }
 
-        private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
+        private byte[] TcpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
         {
-            // 1. decode incoming message
+            // TODO implement a pipeline config somewhat similar to Java's ChannelServer.handlers()
+            throw new NotImplementedException();
+            /*// 1. decode incoming message
             // 2. hand it to the Dispatcher
             // 3. encode outgoing message
             var recvMessage = _decoder.Read(recvBytes, recipient, sender);
@@ -83,7 +97,7 @@ namespace TomP2P.Connection.Windows
 
             var buffer = _encoder.Write(responseMessage);
             var sendBytes = ConnectionHelper.ExtractBytes(buffer);
-            return sendBytes;
+            return sendBytes;*/
         }
 
         public Socket Socket
