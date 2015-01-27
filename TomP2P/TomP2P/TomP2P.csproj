@@ -76,6 +76,7 @@
     <Compile Include="Connection\Windows\ClientToken.cs" />
     <Compile Include="Connection\Windows\ClientToken2.cs" />
     <Compile Include="Connection\Windows\MyTcpClient.cs" />
+    <Compile Include="Connection\Windows\MyTcpServer.cs" />
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpServer.cs" />
     <Compile Include="Connection\Windows\TcpClientSocket.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Message\NeighborSet.cs" />
     <Compile Include="Message\MessageContentIndex.cs" />
     <Compile Include="Message\ISignatureCodec.cs" />
+    <Compile Include="Message\TomP2PCumulationTcp.cs" />
     <Compile Include="Message\TomP2POutbound.cs" />
     <Compile Include="Message\TomP2PSinglePacketUDP.cs" />
     <Compile Include="Message\TrackerData.cs" />

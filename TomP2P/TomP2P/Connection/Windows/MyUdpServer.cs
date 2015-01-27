@@ -12,13 +12,13 @@ namespace TomP2P.Connection.Windows
         private readonly int _maxNrOfClients;
         private readonly UdpClient _udpServerSocket;
 
-        private readonly TomP2PSinglePacketUDP _decoder;
+        private readonly TomP2PSinglePacketUdp _decoder;
         private readonly TomP2POutbound _encoder;
         private readonly Dispatcher _dispatcher;
 
         private volatile bool _isStopped; // volatile!
 
-        public MyUdpServer(IPEndPoint localEndPoint, int maxNrOfClients, TomP2PSinglePacketUDP decoder, 
+        public MyUdpServer(IPEndPoint localEndPoint, int maxNrOfClients, TomP2PSinglePacketUdp decoder, 
             TomP2POutbound encoder, Dispatcher dispatcher)
         {
             _localEndPoint = localEndPoint;
@@ -86,6 +86,8 @@ namespace TomP2P.Connection.Windows
 
         private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
         {
+            // TODO implement a pipeline config somewhat similar to Java's ChannelServer.handlers()
+
             // 1. decode incoming message
             // 2. hand it to the Dispatcher
             // 3. encode outgoing message
@@ -102,9 +104,9 @@ namespace TomP2P.Connection.Windows
             return sendBytes;
         }
 
-        public void SetBroadcast(bool isBroadcast)
+        public Socket Socket
         {
-            _udpServerSocket.Client.EnableBroadcast = isBroadcast;
+            get { return _udpServerSocket.Client; }
         }
     }
 }

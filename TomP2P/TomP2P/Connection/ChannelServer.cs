@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Message;
@@ -15,7 +16,7 @@ namespace TomP2P.Connection
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private MyUdpServer _udpServer;
-        private TcpServerSocket _tcpServer;
+        private MyTcpServer _tcpServer;
 
         // setup
         private readonly Bindings _interfaceBindings;
@@ -28,10 +29,11 @@ namespace TomP2P.Connection
         private readonly IList<IPeerStatusListener> _peerStatusListeners;
 
         // TODO DropConnectionInboundHandlers needed?
-        private readonly TomP2PSinglePacketUDP _udpDecoderHandler;
+        private readonly TomP2PSinglePacketUdp _udpDecoderHandler;
 
         // .NET
         private readonly TomP2POutbound _udpEncoderHandler;
+        private readonly TomP2PCumulationTcp _tcpDecoderHandler;
         private readonly int _maxNrOfClients;
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace TomP2P.Connection
             Logger.Info("Status of interface search: {0}.", status);
 
             // TODO DropConnectionInboundHandlers needed?
-            _udpDecoderHandler = new TomP2PSinglePacketUDP(channelServerConfiguration.SignatureFactory);
+            _udpDecoderHandler = new TomP2PSinglePacketUdp(channelServerConfiguration.SignatureFactory);
             _udpEncoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
             _maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
         }
@@ -107,7 +109,7 @@ namespace TomP2P.Connection
             {
                 // binds in constructor
                 _udpServer = new MyUdpServer(listenAddress, _maxNrOfClients, _udpDecoderHandler, _udpEncoderHandler, _dispatcher);
-                _udpServer.SetBroadcast(true);
+                _udpServer.Socket.EnableBroadcast = true;
                 _udpServer.Start();
                 return true;
             }
@@ -119,26 +121,25 @@ namespace TomP2P.Connection
         }
 
         /// <summary>
-        /// Starts tp listen on a TCP port.
+        /// Starts to listen on a TCP port.
         /// </summary>
         /// <param name="listenAddress">The address to listen to.</param>
         /// <returns>True, if startup was successful.</returns>
         private bool StartupTcp(IPEndPoint listenAddress)
         {
-            return true;
-            // TODO implement
-            // TODO configure TCP server
-            // TODO configure a server-side pipeline
+            // TODO implement and use TimeoutFactory stuff!
+            // pipeline is implemented in MyTcpServer.TcpPipeline
             try
             {
-                _tcpServer = new TcpServerSocket(listenAddress, 10, 10 * 1024); // TODO move configs to separate config file
-                // binding is done in Start()
+                _tcpServer = new MyTcpServer(listenAddress, _maxNrOfClients);
+                _tcpServer.Socket.LingerState = new LingerOption(false, 0); // TODO correct?
+                _tcpServer.Socket.NoDelay = true; // TODO correct?
                 _tcpServer.Start();
                 return true;
             }
             catch (Exception ex)
             {
-                Logger.Warn("An exception occured when starting up TCP server. {0}", ex);
+                Logger.Warn("An exception occured when starting up TCP server.", ex);
                 return false;
             }
         }

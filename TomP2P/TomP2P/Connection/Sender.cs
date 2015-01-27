@@ -181,7 +181,7 @@ namespace TomP2P.Connection
 
                 // success for receiving
                 // decode message
-                var singlePacketUdp = new TomP2PSinglePacketUDP(ChannelClientConfiguration.SignatureFactory);
+                var singlePacketUdp = new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory);
                 var responseMessage = singlePacketUdp.Read(recvBytes, (IPEndPoint)udpClient.Client.LocalEndPoint, remoteEp); 
 
                 // return response message

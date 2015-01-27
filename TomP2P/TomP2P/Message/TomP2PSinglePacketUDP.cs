@@ -11,13 +11,13 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PSinglePacketUDP
+    public class TomP2PSinglePacketUdp
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly ISignatureFactory _signatureFactory;
 
-        public TomP2PSinglePacketUDP(ISignatureFactory signatureFactory)
+        public TomP2PSinglePacketUdp(ISignatureFactory signatureFactory)
         {
             _signatureFactory = signatureFactory;
         }
