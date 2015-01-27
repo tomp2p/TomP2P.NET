@@ -32,6 +32,7 @@ namespace TomP2P.Connection
 
         // .NET
         private readonly TomP2POutbound _udpEncoderHandler;
+        private readonly int _maxNrOfClients;
 
         /// <summary>
         /// Sets parameters and starts network device discovery.
@@ -52,6 +53,7 @@ namespace TomP2P.Connection
             // TODO DropConnectionInboundHandlers needed?
             _udpDecoderHandler = new TomP2PSinglePacketUDP(channelServerConfiguration.SignatureFactory);
             _udpEncoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
+            _maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
         }
 
         /// <summary>
@@ -101,11 +103,11 @@ namespace TomP2P.Connection
         private bool StartupUdp(IPEndPoint listenAddress)
         {
             // pipeline is implemented in MyUdpServer.UdpPipeline
-            // TODO configure UDP server
             try
             {
-                // TODO find appropriate maxNrOfClients
-                _udpServer = new MyUdpServer(listenAddress, 10, _udpDecoderHandler, _udpEncoderHandler, _dispatcher);
+                // binds in constructor
+                _udpServer = new MyUdpServer(listenAddress, _maxNrOfClients, _udpDecoderHandler, _udpEncoderHandler, _dispatcher);
+                _udpServer.SetBroadcast(true);
                 _udpServer.Start();
                 return true;
             }

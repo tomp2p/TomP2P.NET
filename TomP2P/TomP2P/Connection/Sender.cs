@@ -219,7 +219,8 @@ namespace TomP2P.Connection
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
             }
 
-            if (peerConnection != null && p)
+            // TODO implement
+            throw new NotImplementedException();
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)

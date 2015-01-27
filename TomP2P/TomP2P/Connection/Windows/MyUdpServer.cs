@@ -101,5 +101,10 @@ namespace TomP2P.Connection.Windows
             var sendBytes = ConnectionHelper.ExtractBytes(buffer);
             return sendBytes;
         }
+
+        public void SetBroadcast(bool isBroadcast)
+        {
+            _udpServerSocket.Client.EnableBroadcast = isBroadcast;
+        }
     }
 }

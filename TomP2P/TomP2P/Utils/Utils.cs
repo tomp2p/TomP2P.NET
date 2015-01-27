@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -161,5 +162,23 @@ namespace TomP2P.Utils
                 });
             }
         }
+
+        #region .NET only
+
+        /// <summary>
+        /// Evaluates a reasonable number of clients that can be served on a server on this machine.
+        /// NrOfClients = #cores + 1
+        /// </summary>
+        public static int GetMaxNrOfClients()
+        {
+            int coreCount = 0;
+            foreach (var item in new ManagementObjectSearcher("Select * from Win32_Processor").Get())
+            {
+                coreCount += int.Parse(item["NumberOfCores"].ToString());
+            }
+            return coreCount + 1;
+        }
+
+        #endregion
     }
 }

@@ -145,8 +145,7 @@ namespace TomP2P.Connection
                     requestMessage.SetSender(sender);
                 }
                 Logger.Debug("About to respond to request message {0}.", requestMessage);
-                // TODO create PeerConnection object
-                var peerConnection = new PeerConnection();
+                var peerConnection = new PeerConnection(requestMessage.Sender, channel, _heartBeatMillis);
 
                 // handle the request message
                 return myHandler.ForwardMessage(requestMessage, isUdp ? null : peerConnection, responder, isUdp, channel);
