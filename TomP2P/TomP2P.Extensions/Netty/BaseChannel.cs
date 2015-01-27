@@ -12,6 +12,13 @@ namespace TomP2P.Extensions.Netty
     {
         public event ClosedEventHandler Closed;
 
+        protected Pipeline _pipeline;
+
+        public void SetPipeline(Pipeline pipeline)
+        {
+            _pipeline = pipeline;
+        }
+
         /// <summary>
         /// A Close() method that notfies the subscribed events.
         /// </summary>
@@ -32,5 +39,10 @@ namespace TomP2P.Extensions.Netty
         }
 
         public abstract Socket Socket { get; }
+
+        public Pipeline Pipeline
+        {
+            get { return _pipeline; }
+        }
     }
 }

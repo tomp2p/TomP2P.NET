@@ -57,8 +57,10 @@
     <Compile Include="InteropRandom.cs" />
     <Compile Include="Netty\Buffer\UnpooledDirectByteBuf.cs" />
     <Compile Include="Netty\IChannel.cs" />
+    <Compile Include="Netty\IChannelHandler.cs" />
     <Compile Include="Netty\ITcpChannel.cs" />
     <Compile Include="Netty\IUdpChannel.cs" />
+    <Compile Include="Netty\Pipeline.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Netty\Buffer\SlicedByteBuf.cs" />
     <Compile Include="Netty\Buffer\Unpooled.cs" />

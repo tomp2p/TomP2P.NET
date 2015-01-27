@@ -69,6 +69,7 @@ namespace TomP2P.Connection.Windows
         private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
         {
             // TODO implement a pipeline config somewhat similar to Java's ChannelServer.handlers()
+            // TODO this method then just executes the pipeline and guarantees the flow
 
             // 1. decode incoming message
             // 2. hand it to the Dispatcher

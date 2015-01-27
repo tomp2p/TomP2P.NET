@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
@@ -17,6 +18,12 @@ namespace TomP2P.Connection.Windows
         {
             // bind
             _tcpClient = new TcpClient(localEndPoint);    
+        }
+
+        public Task ConnectAsync(IPEndPoint remoteEndPoint)
+        {
+            // just forward
+            return _tcpClient.ConnectAsync(remoteEndPoint.Address, remoteEndPoint.Port);
         }
 
         protected override void DoClose()

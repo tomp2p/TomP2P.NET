@@ -93,9 +93,10 @@ namespace TomP2P.Connection
                 {
                     udpClient.Socket.EnableBroadcast = true;
                 }
+                // TODO add (filtered) handlers to the pipeline
+
                 _recipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);
-
                 return udpClient;
             }
             finally
@@ -104,8 +105,14 @@ namespace TomP2P.Connection
             }
         }
 
-        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, handlers ,
-            TaskCompletionSource<Message.Message> tcsResponse)
+        /// <summary>
+        /// Creates a channel to the given address. This will setup the TCP connection.
+        /// </summary>
+        /// <param name="remoteAddress">The remote address.</param>
+        /// <param name="connectionTimeoutMillis">The timeout for establishing a TCP connection.</param>
+        /// <param name="handlers">The handlers to set.</param>
+        /// <returns></returns>
+        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, handlers)
         {
             _readWriteLockTcp.EnterReadLock();
             try
@@ -126,13 +133,13 @@ namespace TomP2P.Connection
                 tcpClient.Socket.NoDelay = true;
                 tcpClient.Socket.LingerState = new LingerOption(false, 0);
                 tcpClient.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                // TODO add handlers to the pipeline
+                // TODO add (filtered) handlers to the pipeline
 
                 // connect
-                tcpClient.Connect(remoteAddress);
+                tcpClient.ConnectAsync(remoteAddress);
 
                 _recipients.Add(tcpClient);
-                SetupCloseListener(tcpClient, _semaphoreTcp, tcsResponse);
+                SetupCloseListener(tcpClient, _semaphoreTcp);
                 return tcpClient;
             }
             finally
@@ -146,22 +153,30 @@ namespace TomP2P.Connection
         /// can be created. Also, the lock for the channel creating is being released.
         /// This means that the ChannelCreator can be shut down.
         /// </summary>
-        /// <param name="socket">The channel.</param>
+        /// <param name="channel">The channel.</param>
         /// <param name="semaphore">The semaphore to release.</param>
-        private void SetupCloseListener(MyUdpClient socket, Semaphore semaphore)
+        private static void SetupCloseListener(IChannel channel, Semaphore semaphore)
         {
-            // TODO works?
-            socket.Closed += sender =>
-                {
-                    semaphore.Release();
-                };
-
+            // tcsResponse seems not to be needed here
+            channel.Closed += sender => semaphore.Release();
             // TODO in Java, the FutureResponse is responded now after channel closing
         }
 
-        public void SetupCloseListener(MyTcpClient channel, TaskCompletionSource<Message.Message> tcsResponse)
+        private void AddHandlers(IDictionary<string, IChannelHandler> channelHandlers)
+        {
+            // TODO implement
+        }
+
+        /// <summary>
+        /// Setup the close listener for a channel that was already created.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="tcsResponse"></param>
+        /// <returns>The channel that was passed as an argument.</returns>
+        public IChannel SetupCloseListener(IChannel channel, TaskCompletionSource<Message.Message> tcsResponse)
         {
             // TODO in Java, the FutureResponse is responded now after channel closing
+            return channel;
         }
 
         /// <summary>

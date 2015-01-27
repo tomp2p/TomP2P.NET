@@ -14,10 +14,11 @@ namespace TomP2P.Extensions.Netty
     /// </summary>
     public interface IChannel
     {
-        // TODO add pipeline
         // TODO add context
 
         event ClosedEventHandler Closed;
+
+        void SetPipeline(Pipeline pipeline);
 
         void Close();
 
@@ -25,5 +26,7 @@ namespace TomP2P.Extensions.Netty
         /// The underlying socket that is used.
         /// </summary>
         Socket Socket { get; }
+
+        Pipeline Pipeline { get; }
     }
 }
