@@ -8,6 +8,7 @@ using NLog;
 using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Futures;
 using TomP2P.Message;
 using TomP2P.P2P;

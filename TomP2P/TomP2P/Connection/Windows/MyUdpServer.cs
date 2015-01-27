@@ -2,15 +2,15 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TomP2P.Connection.NET_Helper;
+using TomP2P.Extensions.Netty;
 using TomP2P.Message;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyUdpServer
+    public class MyUdpServer : BaseChannel, IUdpChannel
     {
-        private readonly IPEndPoint _localEndPoint;
-        private readonly int _maxNrOfClients;
-        private readonly UdpClient _udpServerSocket;
+        // wrapped member
+        private readonly UdpClient _udpServer;
 
         private readonly TomP2PSinglePacketUdp _decoder;
         private readonly TomP2POutbound _encoder;
@@ -18,12 +18,10 @@ namespace TomP2P.Connection.Windows
 
         private volatile bool _isStopped; // volatile!
 
-        public MyUdpServer(IPEndPoint localEndPoint, int maxNrOfClients, TomP2PSinglePacketUdp decoder, 
+        public MyUdpServer(IPEndPoint localEndPoint, TomP2PSinglePacketUdp decoder, 
             TomP2POutbound encoder, Dispatcher dispatcher)
         {
-            _localEndPoint = localEndPoint;
-            _maxNrOfClients = maxNrOfClients;
-            _udpServerSocket = new UdpClient(localEndPoint);
+            _udpServer = new UdpClient(localEndPoint);
 
             _decoder = decoder;
             _encoder = encoder;
@@ -32,29 +30,8 @@ namespace TomP2P.Connection.Windows
 
         public void Start()
         {
-            /* already done in c'tor
-            // bind
-            if (LocalEndPoint.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                // set dual-mode (IPv4 & IPv6) for the socket listener
-                // see http://blogs.msdn.com/wndp/archive/2006/10/24/creating-ip-agnostic-applications-part-2-dual-mode-sockets.aspx
-                serverSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                serverSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, LocalEndPoint.Port));
-            }
-            else
-            {
-                serverSocket.Bind(LocalEndPoint);
-            }*/
-
-            /*
-            // listen, TCP-only
-            if (serverSocket.ProtocolType == ProtocolType.Tcp)
-            {
-                serverSocket.Listen(MaxNrOfClients);
-            }*/
-
-            // accept MaxNrOfClients simultaneous connections
-            for (int i = 0; i < _maxNrOfClients; i++)
+           // accept MaxNrOfClients simultaneous connections
+            for (int i = 0; i < Utils.Utils.GetMaxNrOfClients(); i++)
             {
                 ServiceLoopAsync();
             }
@@ -63,8 +40,13 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
+            this.Close();
+        }
+
+        protected override void DoClose()
+        {
             // TODO notify async wait in service loop (CancellationToken)
-            _udpServerSocket.Close();
+            _udpServer.Close();
             _isStopped = true;
         }
 
@@ -73,14 +55,14 @@ namespace TomP2P.Connection.Windows
             while (!_isStopped)
             {
                 // receive request from client
-                UdpReceiveResult recvRes = await _udpServerSocket.ReceiveAsync();
+                UdpReceiveResult recvRes = await _udpServer.ReceiveAsync();
                 IPEndPoint remoteEndPoint = recvRes.RemoteEndPoint;
 
                 // process data
-                byte[] sendBytes = UdpPipeline(recvRes.Buffer, _localEndPoint, remoteEndPoint);
+                byte[] sendBytes = UdpPipeline(recvRes.Buffer, _udpServer.Client.LocalEndPoint as IPEndPoint, remoteEndPoint);
 
                 // return / send back
-                await _udpServerSocket.SendAsync(sendBytes, sendBytes.Length, remoteEndPoint);
+                await _udpServer.SendAsync(sendBytes, sendBytes.Length, remoteEndPoint);
             }
         }
 
@@ -95,7 +77,7 @@ namespace TomP2P.Connection.Windows
 
             // null means that no response is sent back
             // TODO does this mean that we can close channel?
-            var responseMessage = _dispatcher.RequestMessageReceived(recvMessage, true, _udpServerSocket.Client);
+            var responseMessage = _dispatcher.RequestMessageReceived(recvMessage, true, Socket);
 
             // TODO channel might have been closed, check
 
@@ -104,9 +86,14 @@ namespace TomP2P.Connection.Windows
             return sendBytes;
         }
 
-        public Socket Socket
+        public bool IsOpen
         {
-            get { return _udpServerSocket.Client; }
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public override Socket Socket
+        {
+            get { return _udpServer.Client; }
         }
     }
 }

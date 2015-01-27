@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
@@ -12,40 +8,30 @@ namespace TomP2P.Connection.Windows
     /// <summary>
     /// Slightly extended <see cref="TcpClient"/>.
     /// </summary>
-    public class MyTcpClient : TcpClient, ITcpChannel
+    public class MyTcpClient : BaseChannel, ITcpChannel
     {
-        public event ClosedEventHandler Closed;
+        // wrapped member
+        private readonly TcpClient _tcpClient;
 
         public MyTcpClient(IPEndPoint localEndPoint)
-            : base(localEndPoint) // bind
-        { }
-
-        /// <summary>
-        /// A Close() method that notfies the subscribed events.
-        /// </summary>
-        public new void Close()
         {
-            base.Close();
-            OnClosed();
+            // bind
+            _tcpClient = new TcpClient(localEndPoint);    
         }
 
-        protected void OnClosed()
+        protected override void DoClose()
         {
-            if (Closed != null)
-            {
-                Closed(this);
-            }
+            _tcpClient.Close();
+        }
+
+        public override Socket Socket
+        {
+            get { return _tcpClient.Client; }
         }
 
         public bool IsActive
         {
-            get { return this.Active; }
+            get { throw new NotImplementedException(); }
         }
-
-        public Socket Socket
-        {
-            get { return this.Client; }
-        }
-
     }
 }

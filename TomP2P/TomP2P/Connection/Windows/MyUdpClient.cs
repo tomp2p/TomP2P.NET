@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using TomP2P.Extensions.Netty;
@@ -23,12 +21,17 @@ namespace TomP2P.Connection.Windows
 
         protected override void DoClose()
         {
-            throw new NotImplementedException();
+            _udpClient.Close();
         }
 
-        public bool IsOpen()
+        public override Socket Socket
         {
-            throw new NotImplementedException();
+            get { return _udpClient.Client; }
+        }
+
+        public bool IsOpen
+        {
+            get { throw new NotImplementedException(); }
         }
     }
 }

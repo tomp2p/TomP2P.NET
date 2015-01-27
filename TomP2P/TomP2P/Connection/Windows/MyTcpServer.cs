@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
-using TomP2P.Connection.NET_Helper;
+using TomP2P.Extensions.Netty;
 using TomP2P.Message;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyTcpServer
+    public class MyTcpServer : BaseChannel, ITcpChannel
     {
-        private readonly IPEndPoint _localEndPoint;
-        private readonly int _maxNrOfClients;
-        private readonly TcpListener _tcpServerSocket;
+        // wrapped member
+        private readonly TcpListener _tcpServer;
 
         private readonly TomP2PCumulationTcp _decoder;
         private readonly TomP2POutbound _encoder;
@@ -22,12 +18,11 @@ namespace TomP2P.Connection.Windows
 
         private volatile bool _isStopped; // volatile!
 
-        public MyTcpServer(IPEndPoint localEndPoint, int maxNrOfClients, TomP2PCumulationTcp decoder,
+        public MyTcpServer(IPEndPoint localEndPoint, TomP2PCumulationTcp decoder,
             TomP2POutbound encoder, Dispatcher dispatcher)
         {
-            _localEndPoint = localEndPoint;
-            _maxNrOfClients = maxNrOfClients;
-            _tcpServerSocket = new TcpListener(localEndPoint);
+            // local endpoint
+            _tcpServer = new TcpListener(localEndPoint);
 
             _decoder = decoder;
             _encoder = encoder;
@@ -36,10 +31,10 @@ namespace TomP2P.Connection.Windows
 
         public void Start()
         {
-            _tcpServerSocket.Start();
+            _tcpServer.Start();
 
             // accept MaxNrOfClients simultaneous connections
-            for (int i = 0; i < _maxNrOfClients; i++)
+            for (int i = 0; i < Utils.Utils.GetMaxNrOfClients(); i++)
             {
                 ServiceLoopAsync();
             }
@@ -48,7 +43,12 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
-            _tcpServerSocket.Stop();
+            this.Close();
+        }
+
+        protected override void DoClose()
+        {
+            _tcpServer.Stop();
             // TODO notify async wait in service loop (CancellationToken)
             _isStopped = true;
         }
@@ -62,7 +62,7 @@ namespace TomP2P.Connection.Windows
             while (!_isStopped)
             {
                 // accept a client connection
-                var client = await _tcpServerSocket.AcceptTcpClientAsync();
+                var client = await _tcpServer.AcceptTcpClientAsync();
                 
                 // get stream for reading and writing
                 var stream = client.GetStream();
@@ -100,9 +100,14 @@ namespace TomP2P.Connection.Windows
             return sendBytes;*/
         }
 
-        public Socket Socket
+        public override Socket Socket
         {
-            get { return _tcpServerSocket.Server; }
+            get { return _tcpServer.Server; }
+        }
+
+        public bool IsActive
+        {
+            get { throw new NotImplementedException(); }
         }
     }
 }

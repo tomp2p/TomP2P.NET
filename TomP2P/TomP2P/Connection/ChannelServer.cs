@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using NLog;
 using TomP2P.Connection.Windows;
+using TomP2P.Extensions.Netty;
 using TomP2P.Message;
 
 namespace TomP2P.Connection
@@ -108,7 +109,7 @@ namespace TomP2P.Connection
             try
             {
                 // binds in constructor
-                _udpServer = new MyUdpServer(listenAddress, _maxNrOfClients, _udpDecoderHandler, _encoderHandler, _dispatcher);
+                _udpServer = new MyUdpServer(listenAddress, _udpDecoderHandler, _encoderHandler, _dispatcher);
                 _udpServer.Socket.EnableBroadcast = true;
                 _udpServer.Start();
                 return true;
@@ -131,7 +132,7 @@ namespace TomP2P.Connection
             // pipeline is implemented in MyTcpServer.TcpPipeline
             try
             {
-                _tcpServer = new MyTcpServer(listenAddress, _maxNrOfClients, _tcpDecoderHandler, _encoderHandler, _dispatcher);
+                _tcpServer = new MyTcpServer(listenAddress, _tcpDecoderHandler, _encoderHandler, _dispatcher);
                 _tcpServer.Socket.LingerState = new LingerOption(false, 0); // TODO correct?
                 _tcpServer.Socket.NoDelay = true; // TODO correct?
                 _tcpServer.Start();

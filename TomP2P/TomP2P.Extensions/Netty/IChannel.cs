@@ -19,6 +19,8 @@ namespace TomP2P.Extensions.Netty
 
         event ClosedEventHandler Closed;
 
+        void Close();
+
         /// <summary>
         /// The underlying socket that is used.
         /// </summary>

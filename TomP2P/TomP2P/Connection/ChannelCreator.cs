@@ -9,6 +9,7 @@ using NLog;
 using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection
 {
@@ -22,8 +23,7 @@ namespace TomP2P.Connection
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // the "ChannelGroup"
-        private readonly ISet<MyUdpClient> _udpRecipients = new HashSet<MyUdpClient>(); // TODO merge
-        private readonly ISet<MyTcpClient> _tcpRecipients = new HashSet<MyTcpClient>();
+        private readonly ISet<IChannel> _recipients = new HashSet<IChannel>();
 
         private readonly int _maxPermitsUdp;
         private readonly int _maxPermitsTcp;
@@ -32,8 +32,8 @@ namespace TomP2P.Connection
         private readonly Semaphore _semaphoreTcp;
 
         // we should be fair, otherwise we see connection timeouts due to unfairness if busy
-        private readonly ReaderWriterLockSlim _readWriteLockTcp = new ReaderWriterLockSlim(); // TODO correct equivalent?
-        private readonly ReaderWriterLockSlim _readWriteLockUdp = new ReaderWriterLockSlim(); // TODO correct equivalent?
+        private readonly ReaderWriterLockSlim _readWriteLockTcp = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim _readWriteLockUdp = new ReaderWriterLockSlim();
 
         private readonly TaskCompletionSource<object> _tcsChannelShutdownDone;
 
@@ -59,7 +59,7 @@ namespace TomP2P.Connection
             _maxPermitsTcp = maxPermitsTcp;
             _channelClientConfiguration = channelClientConfiguration;
             _externalBindings = channelClientConfiguration.BindingsOutgoing;
-            _semaphoreUdp = new Semaphore(maxPermitsUdp, maxPermitsUdp); // TODO correct?
+            _semaphoreUdp = new Semaphore(maxPermitsUdp, maxPermitsUdp);
             _semaphoreTcp = new Semaphore(maxPermitsUdp, maxPermitsTcp);
         }
 
@@ -91,9 +91,9 @@ namespace TomP2P.Connection
                 var udpClient = new MyUdpClient(_externalBindings.WildcardSocket());
                 if (broadcast)
                 {
-                    udpClient.Client.EnableBroadcast = true;
+                    udpClient.Socket.EnableBroadcast = true;
                 }
-                _udpRecipients.Add(udpClient);
+                _recipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);
 
                 return udpClient;
@@ -123,15 +123,15 @@ namespace TomP2P.Connection
                 }
                 var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket());
                 // TODO how to set CONNECT_TIMEOUT_MILLIS option?
-                tcpClient.Client.NoDelay = true;
-                tcpClient.Client.LingerState = new LingerOption(false, 0);
-                tcpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                tcpClient.Socket.NoDelay = true;
+                tcpClient.Socket.LingerState = new LingerOption(false, 0);
+                tcpClient.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 // TODO add handlers to the pipeline
 
                 // connect
                 tcpClient.Connect(remoteAddress);
 
-                _tcpRecipients.Add(tcpClient);
+                _recipients.Add(tcpClient);
                 SetupCloseListener(tcpClient, _semaphoreTcp, tcsResponse);
                 return tcpClient;
             }
@@ -194,12 +194,11 @@ namespace TomP2P.Connection
             ThreadPool.QueueUserWorkItem(delegate
             {
                 // .NET-specific to close all channels (Java has ChannelGroup.close())
-                foreach (var client in _recipients) // TODO make also TCP
+                foreach (var client in _recipients)
                 {
                     client.Close();
                 }
                 // we can block here
-                // TODO correct? workaround for multiple acquires/waitOnes in .NET
                 _semaphoreUdp.Acquire(_maxPermitsUdp);
                 _semaphoreTcp.Acquire(_maxPermitsTcp);
                 _tcsChannelShutdownDone.SetResult(null); // completes the Task
