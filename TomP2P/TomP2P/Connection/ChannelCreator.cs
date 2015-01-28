@@ -68,8 +68,9 @@ namespace TomP2P.Connection
         /// This won't send any message unlike TCP.
         /// </summary>
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
+        /// <param name="pipeline">The pipeline to filter and set.</param>
         /// <returns>The created channel or null, if the channel could not be created.</returns>
-        public MyUdpClient CreateUdp(bool broadcast)
+        public MyUdpClient CreateUdp(bool broadcast, Pipeline pipeline)
         {
             _readWriteLockUdp.EnterReadLock();
             try
@@ -93,7 +94,8 @@ namespace TomP2P.Connection
                 {
                     udpClient.Socket.EnableBroadcast = true;
                 }
-                // TODO add (filtered) handlers to the pipeline
+                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, false, true);
+                udpClient.SetPipeline(filteredPipeline);
 
                 _recipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);
@@ -110,9 +112,9 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="remoteAddress">The remote address.</param>
         /// <param name="connectionTimeoutMillis">The timeout for establishing a TCP connection.</param>
-        /// <param name="handlers">The handlers to set.</param>
+        /// <param name="pipeline">The pipeline to filter and set.</param>
         /// <returns></returns>
-        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, handlers)
+        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, Pipeline pipeline)
         {
             _readWriteLockTcp.EnterReadLock();
             try
@@ -133,7 +135,9 @@ namespace TomP2P.Connection
                 tcpClient.Socket.NoDelay = true;
                 tcpClient.Socket.LingerState = new LingerOption(false, 0);
                 tcpClient.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                // TODO add (filtered) handlers to the pipeline
+
+                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, true, true);
+                tcpClient.SetPipeline(filteredPipeline);
 
                 // connect
                 tcpClient.ConnectAsync(remoteAddress);
@@ -160,11 +164,6 @@ namespace TomP2P.Connection
             // tcsResponse seems not to be needed here
             channel.Closed += sender => semaphore.Release();
             // TODO in Java, the FutureResponse is responded now after channel closing
-        }
-
-        private void AddHandlers(IDictionary<string, IChannelHandler> channelHandlers)
-        {
-            // TODO implement
         }
 
         /// <summary>

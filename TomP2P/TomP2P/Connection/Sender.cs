@@ -62,10 +62,18 @@ namespace TomP2P.Connection
             }
             RemovePeerIfFailed(tcsResponse, message);
 
-            // TODO how to use timeouts?? -> use param idleUdpSeconds
+            // pipeline setup
+            TimeoutFactory timeoutFactory = CreateTimeoutHandler(tcsResponse, idleUdpSeconds, isFireAndForget);
+            var pipeline = new Pipeline();
+            if (!isFireAndForget)
+            {
+                pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
+            }
+            pipeline.AddLast("decoder", new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory));
+            pipeline.AddLast("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
+            // TODO "handler" needed as well?
 
-            // 2. fire & forget options
-            
             // 1. relay options
             if (message.Sender.IsRelayed)
             {

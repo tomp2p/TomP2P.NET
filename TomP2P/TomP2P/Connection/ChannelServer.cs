@@ -146,6 +146,11 @@ namespace TomP2P.Connection
             }
         }
 
+        /// <summary>
+        /// Creates the handlers. After this, it passes the user-set pipeline 
+        /// filter where the handlers can be modified.
+        /// </summary>
+        /// <param name="channel"></param>
         private void AddHandlers(IChannel channel)
         {
             var timeoutFactory = new TimeoutFactory(null, ChannelServerConfiguration.IdleTcpSeconds,

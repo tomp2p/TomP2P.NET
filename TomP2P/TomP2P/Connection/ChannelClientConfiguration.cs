@@ -18,9 +18,10 @@ namespace TomP2P.Connection
         /// The maximum number of short-lived TCP connections.
         /// </summary>
         public int MaxPermitsTcp { get; private set; }
-
-        // TODO pipelinefilter needed? (netty)
-
+        /// <summary>
+        /// Gets the filter for the pipeline, where the user can add/remove or change handlers.
+        /// </summary>
+        public IPipelineFilter PipelineFilter { get; private set; }
         /// <summary>
         /// The factory for the signature.
         /// </summary>
@@ -58,6 +59,15 @@ namespace TomP2P.Connection
         public ChannelClientConfiguration SetMaxPermitsTcp(int maxPermitsTcp)
         {
             MaxPermitsTcp = maxPermitsTcp;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the filter for the pipeline, where the user can add/remove or change handlers.
+        /// </summary>
+        public ChannelClientConfiguration SetPipelineFilter(IPipelineFilter pipelineFilter)
+        {
+            PipelineFilter = pipelineFilter;
             return this;
         }
 

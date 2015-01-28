@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TomP2P.Extensions.Netty
 {
     /// <summary>
-    /// Equivalent to Java Netty's ChannelPipeline.
+    /// Equivalent to Java Netty's ChannelPipeline. Represents a chain of inbound and outbound handlers.
     /// Only the required parts are implemented.
     /// </summary>
     public class Pipeline
