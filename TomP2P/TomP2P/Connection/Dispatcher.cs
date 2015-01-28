@@ -9,6 +9,7 @@ using System.Text;
 using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -23,7 +24,7 @@ namespace TomP2P.Connection
     /// This class is able to cover several channels but only one P2P network!)
     /// </para>
     /// </summary>
-    public class Dispatcher
+    public class Dispatcher : IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

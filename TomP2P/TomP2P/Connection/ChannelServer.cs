@@ -35,7 +35,6 @@ namespace TomP2P.Connection
         // .NET
         private readonly TomP2POutbound _encoderHandler;
         private readonly TomP2PCumulationTcp _tcpDecoderHandler;
-        private readonly int _maxNrOfClients;
 
         /// <summary>
         /// Sets parameters and starts network device discovery.
@@ -55,8 +54,8 @@ namespace TomP2P.Connection
 
             // TODO DropConnectionInboundHandlers needed?
             _udpDecoderHandler = new TomP2PSinglePacketUdp(channelServerConfiguration.SignatureFactory);
+            _tcpDecoderHandler = new TomP2PCumulationTcp(channelServerConfiguration.SignatureFactory);
             _encoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
-            _maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
         }
 
         /// <summary>
@@ -110,6 +109,7 @@ namespace TomP2P.Connection
             {
                 // binds in constructor
                 _udpServer = new MyUdpServer(listenAddress, _udpDecoderHandler, _encoderHandler, _dispatcher);
+                AddHandlers(_udpServer);
                 _udpServer.Socket.EnableBroadcast = true;
                 _udpServer.Start();
                 return true;
@@ -133,6 +133,7 @@ namespace TomP2P.Connection
             try
             {
                 _tcpServer = new MyTcpServer(listenAddress, _tcpDecoderHandler, _encoderHandler, _dispatcher);
+                AddHandlers(_tcpServer);
                 _tcpServer.Socket.LingerState = new LingerOption(false, 0); // TODO correct?
                 _tcpServer.Socket.NoDelay = true; // TODO correct?
                 _tcpServer.Start();
@@ -143,6 +144,35 @@ namespace TomP2P.Connection
                 Logger.Warn("An exception occured when starting up TCP server.", ex);
                 return false;
             }
+        }
+
+        private void AddHandlers(IChannel channel)
+        {
+            var timeoutFactory = new TimeoutFactory(null, ChannelServerConfiguration.IdleTcpSeconds,
+                _peerStatusListeners, "Server");
+            var pipeline = new Pipeline();
+
+            if (channel.IsTcp)
+            {
+                // TODO add dropconnection
+                pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
+                pipeline.AddLast("decoder", _tcpDecoderHandler);
+            }
+            else if (channel.IsUdp)
+            {
+                // no need for a timeout handler, since whole packet arrives or nothing
+                // different from TCP where the stream can be closed by the remote peer
+                // in the middle of the transmission
+                // TODO add dropconnection
+                pipeline.AddLast("decoder", _udpDecoderHandler);
+            }
+            pipeline.AddLast("encoder", _encoderHandler);
+            pipeline.AddLast("dispatcher", _dispatcher);
+
+            var filteredPipeline = ChannelServerConfiguration.PipelineFilter.Filter(pipeline, channel.IsTcp, false);
+
+            channel.SetPipeline(filteredPipeline);
         }
 
         /// <summary>

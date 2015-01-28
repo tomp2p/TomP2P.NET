@@ -28,5 +28,9 @@ namespace TomP2P.Extensions.Netty
         Socket Socket { get; }
 
         Pipeline Pipeline { get; }
+
+        bool IsUdp { get; }
+
+        bool IsTcp { get; }
     }
 }

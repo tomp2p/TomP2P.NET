@@ -7,7 +7,7 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PCumulationTcp
+    public class TomP2PCumulationTcp : IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

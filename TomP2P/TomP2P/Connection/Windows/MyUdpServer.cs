@@ -96,5 +96,15 @@ namespace TomP2P.Connection.Windows
         {
             get { return _udpServer.Client; }
         }
+
+        public override bool IsUdp
+        {
+            get { return true; }
+        }
+
+        public override bool IsTcp
+        {
+            get { return false; }
+        }
     }
 }

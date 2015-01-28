@@ -11,7 +11,7 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PSinglePacketUdp
+    public class TomP2PSinglePacketUdp : IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

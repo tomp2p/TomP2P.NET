@@ -6,7 +6,7 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2POutbound // TODO ChannelOutboundHandlerAdapter needed?
+    public class TomP2POutbound : IOutboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

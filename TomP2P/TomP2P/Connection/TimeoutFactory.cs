@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection
 {
@@ -33,6 +34,16 @@ namespace TomP2P.Connection
             _timeoutSeconds = timeoutSeconds;
             _peerStatusListeners = peerStatusListeners;
             _name = name;
+        }
+
+        public IChannelHandler CreateIdleStateHandlerTomP2P()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IChannelHandler CreateTimeHandler()
+        {
+            throw new NotImplementedException();
         }
 
         public static void RemoveTimeout()

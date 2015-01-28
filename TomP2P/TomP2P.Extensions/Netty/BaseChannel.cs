@@ -44,5 +44,9 @@ namespace TomP2P.Extensions.Netty
         {
             get { return _pipeline; }
         }
+
+        public abstract bool IsUdp { get; }
+
+        public abstract bool IsTcp { get; }
     }
 }

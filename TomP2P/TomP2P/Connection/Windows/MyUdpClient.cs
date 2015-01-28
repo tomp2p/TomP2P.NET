@@ -33,5 +33,15 @@ namespace TomP2P.Connection.Windows
         {
             get { throw new NotImplementedException(); }
         }
+
+        public override bool IsUdp
+        {
+            get { return true; }
+        }
+
+        public override bool IsTcp
+        {
+            get { return false; }
+        }
     }
 }
