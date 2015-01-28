@@ -61,7 +61,6 @@
     <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
-    <Compile Include="Connection\NET Helper\DatagramPacket.cs" />
     <Compile Include="Connection\NET Helper\TaskFailedException.cs" />
     <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
@@ -80,6 +79,7 @@
     <Compile Include="Connection\Windows\MyTcpServer.cs" />
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpServer.cs" />
+    <Compile Include="Connection\Windows\Netty\ChannelHandlerContext.cs" />
     <Compile Include="Connection\Windows\Netty\IChannel.cs" />
     <Compile Include="Connection\Windows\Netty\IChannelHandler.cs" />
     <Compile Include="Connection\Windows\Netty\ITcpChannel.cs" />

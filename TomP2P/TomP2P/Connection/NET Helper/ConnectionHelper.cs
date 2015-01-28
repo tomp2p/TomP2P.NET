@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
-namespace TomP2P.Connection.NET_Helper
+namespace TomP2P.Connection
 {
     public static class ConnectionHelper
     {
@@ -63,8 +58,11 @@ namespace TomP2P.Connection.NET_Helper
             return recipient;
         }
 
-        public static byte[] ExtractBytes(ByteBuf messageBuffer)
+        public static byte[] ExtractBytes(object msg)
         {
+            // TODO extract bytes from whatever input
+            // - ByteBuf
+
             // TODO use a zero-copy mechanism
             // TODO figure out how Netty serializes this wrapper and sends it over the wire
             // TODO works?

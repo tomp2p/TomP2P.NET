@@ -9,17 +9,7 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public interface IChannel
     {
-        // TODO add context
-
         event ClosedEventHandler Closed;
-
-        void SetPipeline(Pipeline pipeline);
-
-        /// <summary>
-        /// Sends a message through the pipeline.
-        /// </summary>
-        /// <param name="message"></param>
-        void Send(Message.Message message);
 
         void Close();
 

@@ -25,61 +25,39 @@ namespace TomP2P.Message
             _alloc = alloc;
         }
 
-        // TODO what to return? Message vs. byte[] vs. ByteBuf
         /// <summary>
         /// .NET-specific encoding handler for outgoing UDP and TCP messages.
         /// </summary>
+        /// <param name="ctx"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public ByteBuf Write(Message msg)
+        public void Write(ChannelHandlerContext ctx, object msg)
         {
             try
             {
-                AlternativeCompositeByteBuf buf = _preferDirect ? _alloc.CompDirectBuffer() : _alloc.CompBuffer();
-                // null means create signature
-                bool done = _encoder.Write(buf, msg, null);
+                AlternativeCompositeByteBuf buf;
+                Message message;
+                bool done;
+                if (msg is Message)
+                {
+                    message = (Message)msg;
+                    buf = _preferDirect ? _alloc.CompDirectBuffer() : _alloc.CompBuffer();
+                    // null means create signature
+                    done = _encoder.Write(buf, message, null);
+                }
+                else
+                {
+                    ctx.Write(msg);
+                    return;
+                }
 
-                Message message = _encoder.Message;
+                message = _encoder.Message;
 
+                // send buffer
                 if (buf.IsReadable)
                 {
-                    // TODO remove, is done in Sender.SendUDP()
-                    /*if (isUdp)
-                    {
-                        IPEndPoint recipient;
-                        IPEndPoint sender;
-                        if (message.SenderSocket == null)
-                        {
-                            // in case of a request
-                            if (message.RecipientRelay != null)
-                            {
-                                // in case of sending to a relay (the relayed flag is already set)
-                                recipient = message.RecipientRelay.CreateSocketUdp();
-                            }
-                            else
-                            {
-                                recipient = message.Recipient.CreateSocketUdp();
-                            }
-                            sender = message.Sender.CreateSocketUdp();
-                        }
-                        else
-                        {
-                            // in case of a reply
-                            recipient = message.SenderSocket;
-                            sender = message.RecipientSocket;
-                        }
-                        // TODO Java uses a DatagramPacket wrapper -> interoperability issue?
-                        Logger.Debug("Send UDP message {0}, datagram: TODO.", message);
+                    ctx.Write(buf);
 
-                        context.UdpSender = sender;
-                        context.UdpRecipient = recipient;
-                        context.MessageBuffer = buf;
-                    }
-                    else
-                    {
-                        Logger.Debug("Send TCP message {0} to {1}.", message, message.SenderSocket);
-                        context.MessageBuffer = buf;
-                    }*/
                     if (done)
                     {
                         message.SetDone(true);
@@ -89,14 +67,12 @@ namespace TomP2P.Message
                 }
                 else
                 {
-                    return Unpooled.EmptyBuffer;
+                    ctx.Write(Unpooled.EmptyBuffer);
                 }
-                return buf;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO fireExceptionCaught
-                throw;
+                ctx.FireExceptionCaught(ex);
             }
         }
     }

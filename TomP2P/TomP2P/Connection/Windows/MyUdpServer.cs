@@ -19,7 +19,8 @@ namespace TomP2P.Connection.Windows
         private volatile bool _isStopped; // volatile!
 
         public MyUdpServer(IPEndPoint localEndPoint, TomP2PSinglePacketUdp decoder, 
-            TomP2POutbound encoder, Dispatcher dispatcher)
+            TomP2POutbound encoder, Dispatcher dispatcher, Pipeline pipeline)
+            : base(pipeline)
         {
             _udpServer = new UdpClient(localEndPoint);
 

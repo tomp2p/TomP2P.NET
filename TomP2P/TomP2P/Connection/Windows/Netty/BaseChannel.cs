@@ -7,24 +7,20 @@ namespace TomP2P.Connection.Windows.Netty
     {
         public event ClosedEventHandler Closed;
 
-        private Pipeline _pipeline;
+        private readonly Pipeline _pipeline;
 
-        public void SetPipeline(Pipeline pipeline)
+        protected BaseChannel(Pipeline pipeline)
         {
             _pipeline = pipeline;
         }
 
-        public void Send(Message.Message message)
+        protected void ProcessOutboundPipeline(Message.Message message)
         {
             if (_pipeline == null)
             {
                 throw new NullReferenceException("No pipeline is set for this channel.");
             }
             // query current outbound handlers and execute
-
-
-            // finally, send bytes over the wire
-
         }
 
         /// <summary>

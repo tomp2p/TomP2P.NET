@@ -14,7 +14,8 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly TcpClient _tcpClient;
 
-        public MyTcpClient(IPEndPoint localEndPoint)
+        public MyTcpClient(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base(pipeline)
         {
             // bind
             _tcpClient = new TcpClient(localEndPoint);    

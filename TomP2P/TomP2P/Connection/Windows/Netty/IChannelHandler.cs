@@ -1,4 +1,7 @@
-﻿namespace TomP2P.Connection.Windows.Netty
+﻿using System.Security.Cryptography.X509Certificates;
+using TomP2P.Extensions.Netty;
+
+namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
     /// Equivalent to Java Netty's ChannelHandler.
@@ -21,6 +24,6 @@
     /// </summary>
     public interface IOutboundHandler : IChannelHandler
     {
-
+        void Write(ChannelHandlerContext ctx, object msg);
     }
 }

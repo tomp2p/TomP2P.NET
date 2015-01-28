@@ -19,7 +19,8 @@ namespace TomP2P.Connection.Windows
         private volatile bool _isStopped; // volatile!
 
         public MyTcpServer(IPEndPoint localEndPoint, TomP2PCumulationTcp decoder,
-            TomP2POutbound encoder, Dispatcher dispatcher)
+            TomP2POutbound encoder, Dispatcher dispatcher, Pipeline pipeline)
+            : base(pipeline)
         {
             // local endpoint
             _tcpServer = new TcpListener(localEndPoint);

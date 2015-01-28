@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NLog;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -10,13 +11,72 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public class Pipeline
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        public delegate void PipelineEventHandler(Pipeline pipeline, byte[] bytes);
+        public event PipelineEventHandler OutboundFinished;
+
         private readonly IDictionary<string, HandlerItem> _name2Item;
         private readonly LinkedList<HandlerItem> _handlers;
 
-        public Pipeline()
+        private readonly IChannel _channel;
+        private readonly ChannelHandlerContext _ctx;
+        private IOutboundHandler _currentOutbound = null;
+
+        public Pipeline(IChannel channel)
         {
             _name2Item = new Dictionary<string, HandlerItem>();
             _handlers = new LinkedList<HandlerItem>();
+
+            _channel = channel;
+            _ctx = new ChannelHandlerContext(channel, this);
+        }
+
+        public void Write(object msg) // TODO called from API and ctx, problematic?
+        {
+            if (msg == null)
+            {
+                throw new NullReferenceException("msg");
+            }
+            // find next outbound handler
+            while (GetNextOutbound() != null)
+            {
+                Logger.Debug("Processing outbound handler '{0}'.", _currentOutbound);
+                _currentOutbound.Write(_ctx, msg);
+            }
+            var bytes = ConnectionHelper.ExtractBytes(msg); // TODO check if correct
+            OnOutboundFinished(bytes);
+        }
+
+        private IOutboundHandler GetNextOutbound()
+        {
+            var outbounds = CurrentOutboundHandlers;
+            if (outbounds.Count != 0)
+            {
+                if (_currentOutbound == null)
+                {
+                    _currentOutbound = outbounds.First.Value;
+                }
+                else
+                {
+                    var node = outbounds.Find(_currentOutbound);
+                    if (node != null && node.Next != null)
+                    {
+                        _currentOutbound = node.Next.Value;
+                    }
+                    return null;
+                }
+                return _currentOutbound;
+            }
+            return null;
+        }
+
+        protected void OnOutboundFinished(byte[] bytes)
+        {
+            if (OutboundFinished != null)
+            {
+                OutboundFinished(this, bytes);
+            }
         }
 
         /// <summary>
@@ -106,7 +166,7 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        public LinkedList<IOutboundHandler> CurrentOutboundHandlers
+        private LinkedList<IOutboundHandler> CurrentOutboundHandlers
         {
             // TODO check if works
             get

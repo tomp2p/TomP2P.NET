@@ -87,14 +87,13 @@ namespace TomP2P.Connection
                     throw new SystemException(errorMsg);
                 }
 
+                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, false, true);
                 // create and bind
-                var udpClient = new MyUdpClient(_externalBindings.WildcardSocket());
+                var udpClient = new MyUdpClient(_externalBindings.WildcardSocket(), filteredPipeline);
                 if (broadcast)
                 {
                     udpClient.Socket.EnableBroadcast = true;
                 }
-                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, false, true);
-                udpClient.SetPipeline(filteredPipeline);
 
                 _recipients.Add(udpClient);
                 SetupCloseListener(udpClient, _semaphoreUdp);
@@ -129,14 +128,13 @@ namespace TomP2P.Connection
                     Logger.Error(errorMsg);
                     throw new SystemException(errorMsg);
                 }
-                var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket());
+                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, true, true);
+                
+                var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket(), filteredPipeline);
                 // TODO how to set CONNECT_TIMEOUT_MILLIS option?
                 tcpClient.Socket.NoDelay = true;
                 tcpClient.Socket.LingerState = new LingerOption(false, 0);
                 tcpClient.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-
-                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, true, true);
-                tcpClient.SetPipeline(filteredPipeline);
 
                 // connect
                 tcpClient.ConnectAsync(remoteAddress);
