@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Sockets;
 
-namespace TomP2P.Extensions.Netty
+namespace TomP2P.Connection.Windows.Netty
 {
     public delegate void ClosedEventHandler(IChannel channel);
     
@@ -19,6 +14,12 @@ namespace TomP2P.Extensions.Netty
         event ClosedEventHandler Closed;
 
         void SetPipeline(Pipeline pipeline);
+
+        /// <summary>
+        /// Sends a message through the pipeline.
+        /// </summary>
+        /// <param name="message"></param>
+        void Send(Message.Message message);
 
         void Close();
 

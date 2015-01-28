@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Net;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message

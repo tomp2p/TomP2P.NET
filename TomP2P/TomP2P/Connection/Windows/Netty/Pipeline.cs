@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TomP2P.Extensions.Netty
+namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
     /// Equivalent to Java Netty's ChannelPipeline. Represents a chain of inbound and outbound handlers.
@@ -105,6 +103,19 @@ namespace TomP2P.Extensions.Netty
             if (_name2Item.ContainsKey(name))
             {
                 throw new ArgumentException("Duplicate handler name: " + name);
+            }
+        }
+
+        public LinkedList<IOutboundHandler> CurrentOutboundHandlers
+        {
+            // TODO check if works
+            get
+            {
+                var outbounds = _handlers.
+                    Select(item => item.Handler).
+                    Where(handler => handler is IOutboundHandler).
+                    Cast<IOutboundHandler>();
+                return new LinkedList<IOutboundHandler>(outbounds);
             }
         }
 

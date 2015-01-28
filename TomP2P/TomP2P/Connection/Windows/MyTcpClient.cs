@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using TomP2P.Extensions.Netty;
+using TomP2P.Connection.Windows.Netty;
 
 namespace TomP2P.Connection.Windows
 {

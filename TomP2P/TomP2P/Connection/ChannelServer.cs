@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using NLog;
 using TomP2P.Connection.Windows;
-using TomP2P.Extensions.Netty;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Message;
 
 namespace TomP2P.Connection

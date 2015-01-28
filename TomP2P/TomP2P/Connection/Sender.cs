@@ -14,6 +14,7 @@ using TomP2P.Message;
 using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
+using Pipeline = TomP2P.Connection.Windows.Netty.Pipeline;
 
 namespace TomP2P.Connection
 {
@@ -79,7 +80,6 @@ namespace TomP2P.Connection
             {
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
 
-                // TODO ok to do it here?
                 IList<PeerSocketAddress> relayAddresses = new List<PeerSocketAddress>(message.Recipient.PeerSocketAddresses);
                 Logger.Debug("Send neighbor request to random relay peer {0}.", relayAddresses);
                 if (relayAddresses.Count > 0)
@@ -118,47 +118,34 @@ namespace TomP2P.Connection
             var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
             Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
-            MyUdpClient udpClient = channelCreator.CreateUdp(broadcast, senderEp);
-
+            MyUdpClient udpClient = null;
+            try
+            {
+                udpClient = channelCreator.CreateUdp(broadcast, pipeline);
+            }
+            catch (Exception ex)
+            {
+                string msg = "Channel creation failed. " + ex;
+                Logger.Debug(msg);
+                tcsResponse.SetException(ex);
+                // may have been closed by the other side
+                // or it may have been canceled from this side
+            }
             // check if channel could be created (due to resource constraints)
             if (udpClient == null)
             {
-                const string msg = "Could not create a UDP socket. (Due to resource constraints.)";
+                const string msg = "Could not create a UDP socket. (Due to shutdown.)";
                 Logger.Warn(msg);
                 tcsResponse.SetException(new TaskFailedException(msg));
                 return null;
-                
-                // TODO add reason for fail (e.g., from SocketException), e.g. move to ChannelCreator
-                Logger.Debug("Channel creation failed.");
-                // may have been closed by the other side
-                // or it may have been canceled from this side
             }
             Logger.Debug("About to connect to {0} with channel {1}, ff = {2}.", message.Recipient, udpClient, isFireAndForget);
 
             // 3. client-side pipeline (sending)
-            //  - encoder
-            var outbound = new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory);
-            var buffer = outbound.Write(message); // encode
-            var bytes = ConnectionHelper.ExtractBytes(buffer);
-            
             // 6. send/write message to the created channel
-            //Task<int> sendTask = udpClient.SendAsync(bytes, bytes.Length, receiverEp);
-            //await sendTask;
+            udpClient.Send(message);
 
-            try
-            {
-                udpClient.Send(bytes, bytes.Length, receiverEp);
-            }
-            catch (Exception ex)
-            {
-                // fail sending
-                string msg = String.Format("Exception(s) when sending {0}: {1}.", message, ex);
-                Logger.Error(msg);
-                tcsResponse.SetException(new TaskFailedException(msg));
-                udpClient.Close();
-                return null;
-            }
-
+            // TODO receive pipeline
             // success for sending
             // await response, if not fire&forget
             if (isFireAndForget)

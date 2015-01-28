@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
 using NLog;
-using TomP2P.Connection.Windows;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;

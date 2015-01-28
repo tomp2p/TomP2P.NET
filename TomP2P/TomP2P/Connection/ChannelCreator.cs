@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection
 {
@@ -87,7 +87,6 @@ namespace TomP2P.Connection
                     throw new SystemException(errorMsg);
                 }
 
-                // TODO surround with try/catch and return exception to TCS
                 // create and bind
                 var udpClient = new MyUdpClient(_externalBindings.WildcardSocket());
                 if (broadcast)

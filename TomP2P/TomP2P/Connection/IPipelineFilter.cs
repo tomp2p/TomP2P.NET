@@ -1,4 +1,4 @@
-﻿using TomP2P.Extensions.Netty;
+﻿using Pipeline = TomP2P.Connection.Windows.Netty.Pipeline;
 
 namespace TomP2P.Connection
 {

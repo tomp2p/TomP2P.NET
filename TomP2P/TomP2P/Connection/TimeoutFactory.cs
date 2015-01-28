@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using TomP2P.Extensions.Netty;
+using IChannelHandler = TomP2P.Connection.Windows.Netty.IChannelHandler;
 
 namespace TomP2P.Connection
 {

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 

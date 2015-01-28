@@ -1,22 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TomP2P.Extensions.Netty
+namespace TomP2P.Connection.Windows.Netty
 {
     public abstract class BaseChannel : IChannel
     {
         public event ClosedEventHandler Closed;
 
-        protected Pipeline _pipeline;
+        private Pipeline _pipeline;
 
         public void SetPipeline(Pipeline pipeline)
         {
             _pipeline = pipeline;
+        }
+
+        public void Send(Message.Message message)
+        {
+            if (_pipeline == null)
+            {
+                throw new NullReferenceException("No pipeline is set for this channel.");
+            }
+            // query current outbound handlers and execute
+
+
+            // finally, send bytes over the wire
+
         }
 
         /// <summary>
