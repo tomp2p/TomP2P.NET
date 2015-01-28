@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using TomP2P.Extensions.Netty;
-
+﻿
 namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
@@ -16,7 +14,7 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public interface IInboundHandler : IChannelHandler
     {
-        
+        void Read(ChannelHandlerContext ctx, object msg);
     }
 
     /// <summary>

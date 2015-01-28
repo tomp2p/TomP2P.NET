@@ -37,6 +37,14 @@ namespace TomP2P.Connection.Windows
             return tcs.Task;
         }
 
+        public Task ReceiveAsync()
+        {
+            var t = _udpClient.ReceiveAsync();
+
+            // execute inbound pipeline
+            Pipeline.Read(bytes);
+        }
+
         protected override void DoClose()
         {
             _udpClient.Close();

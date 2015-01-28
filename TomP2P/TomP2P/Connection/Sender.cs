@@ -54,8 +54,9 @@ namespace TomP2P.Connection
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
         /// <returns>The response message or null, if it is fire-and-forget or a failure occurred.</returns>
-        public Message.Message SendUdp(bool isFireAndForget, TaskCompletionSource<Message.Message> tcsResponse, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public async Task SendUdpAsync(bool isFireAndForget, TaskCompletionSource<Message.Message> tcsResponse, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
+            // TODO add RequestHandler as inbound handler to pipeline (passed via argument)
             // no need to continue if already finished
             if (tcsResponse.Task.IsCompleted)
             {
@@ -141,11 +142,10 @@ namespace TomP2P.Connection
             }
             Logger.Debug("About to connect to {0} with channel {1}, ff = {2}.", message.Recipient, udpClient, isFireAndForget);
 
-            // 3. client-side pipeline (sending)
+            // 3. client-side pipeline (outbound)
             // 6. send/write message to the created channel
-            udpClient.Send(message);
+            udpClient.SendAsync(message, receiverEp);
 
-            // TODO receive pipeline
             // success for sending
             // await response, if not fire&forget
             if (isFireAndForget)
@@ -157,35 +157,11 @@ namespace TomP2P.Connection
             }
             else
             {
+                // TODO correct? or should MyUdpServer receive answer?
                 // receive response message
-                //Task<UdpReceiveResult> recvTask = udpClient.ReceiveAsync();
-                //await recvTask;
-                var remoteEp = new IPEndPoint(IPAddress.Any, 0); // TODO correct? or should MyUdpServer receive answer?
-
-                byte[] recvBytes;
-                try
-                {
-                    recvBytes = udpClient.Receive(ref remoteEp);
-                }
-                catch (Exception ex)
-                {
-                    // fail receiving
-                    string msg = String.Format("One or more exceptions occurred when receiving: {0}.", ex);
-                    Logger.Error(msg);
-                    tcsResponse.SetException(new TaskFailedException(msg));
-                    udpClient.Close();
-                    return null;
-                }
-
-                // success for receiving
-                // decode message
-                var singlePacketUdp = new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory);
-                var responseMessage = singlePacketUdp.Read(recvBytes, (IPEndPoint)udpClient.Client.LocalEndPoint, remoteEp); 
-
-                // return response message
-                //tcsResponse.SetResult(responseMessage);
+                // client-side pipeline (inbound)
+                await udpClient.ReceiveAsync();
                 udpClient.Close();
-                return responseMessage;
             }
         }
 

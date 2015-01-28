@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
@@ -63,14 +64,23 @@ namespace TomP2P.Connection
             // TODO extract bytes from whatever input
             // - ByteBuf
 
+            if (msg is Message.Message)
+            {
+                throw new NotImplementedException();
+            }
+            else if (msg is ByteBuf)
+            {
             // TODO use a zero-copy mechanism
-            // TODO figure out how Netty serializes this wrapper and sends it over the wire
-            // TODO works?
-            var buffer = messageBuffer.NioBuffer();
-            buffer.Position = 0;
-            var bytes = new byte[buffer.Remaining()];
-            buffer.Get(bytes, 0, bytes.Length);
-            return bytes;
+                var buf = (ByteBuf) msg;
+                var ms = buf.NioBuffer();
+                var bytes = new byte[ms.Remaining()];
+                ms.Get(bytes, 0, bytes.Length);
+                return bytes;
+            }
+            else
+            {
+                throw new ArgumentException("Cannot extract bytes from the provided bytes. Implementation required.");
+            }
         }
     }
 }
