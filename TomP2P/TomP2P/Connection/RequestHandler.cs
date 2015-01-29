@@ -130,6 +130,7 @@ namespace TomP2P.Connection
 
         public void Read(ChannelHandlerContext ctx, object msg)
         {
+            // TODO implement Java-like
             // client-side:
             // Here, the result for the awaitable task can be set.
             // If it is not a fire-and-forget message, the "result" of the TCS
@@ -161,7 +162,7 @@ namespace TomP2P.Connection
             }
             else if (responseMessage.IsRequest())
             {
-                // fireChannelRead -> go to next inbound handler
+                // TODO fireChannelRead -> go to next inbound handler
                 return;
             }
             else if (!_sendMessageId.Equals(recvMessageId))
@@ -229,7 +230,7 @@ namespace TomP2P.Connection
             }
         }
 
-        private void ExceptionCaught(Exception cause)
+        public void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
         {
             Logger.Debug("Error originating from {0}. Cause: {1}", _message, cause);
             if (_tcsResponse.Task.IsCompleted)
