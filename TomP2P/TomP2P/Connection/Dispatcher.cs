@@ -194,7 +194,7 @@ namespace TomP2P.Connection
 
         /// <summary>
         /// Responds within a session. Keeps the connection open if told to do so.
-        /// Connection is only kept alive for TCP data.
+        /// Connection is only kept alive for TCP content.
         /// </summary>
         /// <param name="isUdp"></param>
         /// <param name="responseMessage">The response message to send.</param>

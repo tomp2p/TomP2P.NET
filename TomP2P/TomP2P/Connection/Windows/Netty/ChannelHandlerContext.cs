@@ -19,10 +19,24 @@
             _pipeline = pipeline;
         }
 
-        public void Write(object msg)
+        /// <summary>
+        /// Results in having the next outbound handler write the provided message.
+        /// </summary>
+        /// <param name="msg"></param>
+        public void FireWrite(object msg)
         {
             // forward to pipeline
             _pipeline.Write(msg);
+        }
+
+        /// <summary>
+        /// Results in having the next inbound handler read the provided message.
+        /// </summary>
+        /// <param name="msg"></param>
+        public void FireRead(object msg)
+        {
+            // forward to pipeline
+            _pipeline.Read(msg);
         }
 
         public void FireExceptionCaught(System.Exception ex)

@@ -67,9 +67,9 @@ namespace TomP2P.Connection
         /// This won't send any message unlike TCP.
         /// </summary>
         /// <param name="broadcast">Sets this channel to be able to broadcast.</param>
-        /// <param name="pipeline">The pipeline to filter and set.</param>
+        /// <param name="handlers">The handlers to be added to the channel's pipeline.</param>
         /// <returns>The created channel or null, if the channel could not be created.</returns>
-        public MyUdpClient CreateUdp(bool broadcast, Pipeline pipeline)
+        public MyUdpClient CreateUdp(bool broadcast, IDictionary<string, IChannelHandler> handlers)
         {
             _readWriteLockUdp.EnterReadLock();
             try
@@ -86,9 +86,14 @@ namespace TomP2P.Connection
                     throw new SystemException(errorMsg);
                 }
 
-                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, false, true);
                 // create and bind
-                var udpClient = new MyUdpClient(_externalBindings.WildcardSocket(), filteredPipeline);
+                var udpClient = new MyUdpClient(_externalBindings.WildcardSocket());
+                
+                // attach filtered pipeline
+                var pipeline = new Pipeline(udpClient, handlers);
+                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, false, true);
+                udpClient.SetPipeline(filteredPipeline);
+
                 if (broadcast)
                 {
                     udpClient.Socket.EnableBroadcast = true;

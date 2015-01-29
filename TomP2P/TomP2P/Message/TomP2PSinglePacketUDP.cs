@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Net;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
-using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
@@ -24,30 +22,35 @@ namespace TomP2P.Message
         /// </summary>
         public void Read(ChannelHandlerContext ctx, object msg)
         {
-            // setup buffer from bytes
-            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
-            buf.WriteBytes(msgBytes.ToSByteArray());
+            if (!(msg is DatagramPacket))
+            {
+                ctx.FireRead(msg);
+                return;
+            }
+
+            var dgram = (DatagramPacket) msg;
+            var buf = AlternativeCompositeByteBuf.CompBuffer(dgram.Content);
+            var sender = dgram.Sender;
+            var recipient = dgram.Recipient;
 
             try
             {
-                var decoder = new Decoder(_signatureFactory); // TODO provide isUdp info
+                var decoder = new Decoder(_signatureFactory);
                 bool finished = decoder.Decode(buf, recipient, sender);
                 if (finished)
                 {
                     // prepare finish
-                    var message = decoder.PrepareFinish();
-                    return message;
+                    ctx.FireRead(decoder.PrepareFinish());
                 }
                 else
                 {
                     Logger.Warn("Did not get the complete packet!");
-                    return null;
                 }
             }
             catch (Exception ex)
             {
                 Logger.Error("Error in UDP decoding.", ex);
-                throw ex;
+                throw;
             }
         }
     }

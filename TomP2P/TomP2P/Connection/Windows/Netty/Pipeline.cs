@@ -21,13 +21,14 @@ namespace TomP2P.Connection.Windows.Netty
         private IOutboundHandler _currentOutbound = null;
         private IInboundHandler _currentInbound = null;
 
-        public Pipeline(IChannel channel)
+        public Pipeline(IChannel channel, IDictionary<string, IChannelHandler> handlers)
         {
             _name2Item = new Dictionary<string, HandlerItem>();
             _handlers = new LinkedList<HandlerItem>();
 
             _channel = channel;
             _ctx = new ChannelHandlerContext(channel, this);
+            Add(handlers);
         }
 
         public byte[] Write(object msg) // TODO called from API and ctx, problematic? (should not due to while-checks)
@@ -57,7 +58,7 @@ namespace TomP2P.Connection.Windows.Netty
                 Logger.Debug("Processing inbound handler '{0}'.", _currentInbound);
                 _currentInbound.Read(_ctx, msg);
             }
-            
+            // TODO return message object?
         }
 
         private IOutboundHandler GetNextOutbound()
@@ -104,6 +105,15 @@ namespace TomP2P.Connection.Windows.Netty
                 return _currentInbound;
             }
             return null;
+        }
+
+        private Pipeline Add(IDictionary<string, IChannelHandler> handlers)
+        {
+            foreach (var handler in handlers)
+            {
+                AddLast(handler.Key, handler.Value);
+            }
+            return this;
         }
 
         /// <summary>

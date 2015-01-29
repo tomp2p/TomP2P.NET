@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Futures;
@@ -46,36 +47,26 @@ namespace TomP2P.Connection
         /// <summary>
         /// Sends a message via UDP.
         /// </summary>
-        /// <param name="isFireAndForget">True, if handler == null.</param>
+        /// <param name="handler">The handler to deal with the response message.</param>
         /// <param name="tcsResponse">The TCS for the response message. (FutureResponse equivalent.)</param>
         /// <param name="message">The message to send.</param>
         /// <param name="channelCreator">The channel creator for the UDP channel.</param>
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
         /// <returns>The response message or null, if it is fire-and-forget or a failure occurred.</returns>
-        public async Task SendUdpAsync(bool isFireAndForget, TaskCompletionSource<Message.Message> tcsResponse, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public void SendUdp(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
             // TODO add RequestHandler as inbound handler to pipeline (passed via argument)
             // no need to continue if already finished
             if (tcsResponse.Task.IsCompleted)
             {
-                return tcsResponse.Task.Result;
+                return;
             }
             RemovePeerIfFailed(tcsResponse, message);
 
-            // pipeline setup
-            TimeoutFactory timeoutFactory = CreateTimeoutHandler(tcsResponse, idleUdpSeconds, isFireAndForget);
-            var pipeline = new Pipeline();
-            if (!isFireAndForget)
-            {
-                pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
-                pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
-            }
-            pipeline.AddLast("decoder", new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory));
-            pipeline.AddLast("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
-            // TODO "handler" needed as well?
+            bool isFireAndForget = handler == null;
 
-            // 1. relay options
+            // relay options
             if (message.Sender.IsRelayed)
             {
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
@@ -94,11 +85,11 @@ namespace TomP2P.Connection
                     const string msg = "Peer is relayed, but no relay is given.";
                     Logger.Error(msg);
                     tcsResponse.SetException(new TaskFailedException(msg));
-                    return null;
+                    return;
                 }
             }
 
-            // 4. check for invalid UDP connection to unreachable peers)
+            // check for invalid UDP connection to unreachable peers
             if (message.Recipient.IsRelayed && message.Command != Rpc.Rpc.Commands.Neighbor.GetNr()
                 && message.Command != Rpc.Rpc.Commands.Ping.GetNr())
             {
@@ -108,20 +99,29 @@ namespace TomP2P.Connection
                         message);
                 Logger.Warn(msg);
                 tcsResponse.SetException(new TaskFailedException(msg));
-                return null;
+                return;
             }
 
-            // 5. create UDP channel
-            //  - extract sender EP from message (in Java, this is done in TomP2POutbound)
-            //  - check resource constraints
-            var senderEp = ConnectionHelper.ExtractSenderEp(message);
-            var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
-            Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
-
+            // pipeline handler setup
+            TimeoutFactory timeoutFactory = CreateTimeoutHandler(tcsResponse, idleUdpSeconds, isFireAndForget);
+            var handlers = new Dictionary<string, IChannelHandler>();
+            if (!isFireAndForget)
+            {
+                handlers.Add("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                handlers.Add("timeout1", timeoutFactory.CreateTimeHandler());
+            }
+            handlers.Add("decoder", new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory));
+            handlers.Add("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
+            if (!isFireAndForget)
+            {
+                handlers.Add("handler", handler);
+            }
+            
+            // create UDP channel
             MyUdpClient udpClient = null;
             try
             {
-                udpClient = channelCreator.CreateUdp(broadcast, pipeline);
+                udpClient = channelCreator.CreateUdp(broadcast, handlers);
             }
             catch (Exception ex)
             {
@@ -131,37 +131,34 @@ namespace TomP2P.Connection
                 // may have been closed by the other side
                 // or it may have been canceled from this side
             }
-            // check if channel could be created (due to resource constraints)
+            // check if channel could be created (due to shutdown)
             if (udpClient == null)
             {
                 const string msg = "Could not create a UDP socket. (Due to shutdown.)";
                 Logger.Warn(msg);
                 tcsResponse.SetException(new TaskFailedException(msg));
-                return null;
+                return;
             }
             Logger.Debug("About to connect to {0} with channel {1}, ff = {2}.", message.Recipient, udpClient, isFireAndForget);
 
-            // 3. client-side pipeline (outbound)
-            // 6. send/write message to the created channel
-            udpClient.SendAsync(message, receiverEp);
+            // send request message
+            // processes client-side outbound pipeline
+            udpClient.SendAsync(message); // TODO await?
 
-            // success for sending
-            // await response, if not fire&forget
+            // if not fire-and-forget, receive response
             if (isFireAndForget)
             {
-                // close channel now
                 Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
-                udpClient.Close();
-                return null; // return FF response
+                tcsResponse.SetResult(null); // set FF result
             }
             else
             {
                 // TODO correct? or should MyUdpServer receive answer?
                 // receive response message
-                // client-side pipeline (inbound)
-                await udpClient.ReceiveAsync();
-                udpClient.Close();
+                // processes client-side inbound pipeline
+                udpClient.ReceiveAsync();
             }
+            udpClient.Close();
         }
 
         /// <summary>

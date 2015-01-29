@@ -48,7 +48,7 @@ namespace TomP2P.Connection.Windows
                 await ReceiveAsync(token);
 
                 // return / send back
-                // TODO process data, maybe use abstract method
+                // TODO process content, maybe use abstract method
                 Array.Copy(token.RecvBuffer, token.SendBuffer, BufferSize);
 
                 await SendAsync(token);

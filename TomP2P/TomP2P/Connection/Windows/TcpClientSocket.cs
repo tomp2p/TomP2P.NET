@@ -49,7 +49,7 @@ namespace TomP2P.Connection.Windows
 
         public async Task DisconnectAsync()
         {
-            // ensure all data is sent and received before socket is closed with
+            // ensure all content is sent and received before socket is closed with
             // Shutdown() before disconnect
             _tcpClient.Shutdown(SocketShutdown.Both);
 

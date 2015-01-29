@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -13,7 +14,7 @@ namespace TomP2P.Connection
     /// (It is important that this class handles close() because if we shutdown the connections, 
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
-    public class RequestHandler
+    public class RequestHandler : IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -80,8 +81,7 @@ namespace TomP2P.Connection
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(delegate
             {
-                var response = ConnectionBean.Sender.SendUdp(false, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
-                ResponseMessageReceived(response);
+                ConnectionBean.Sender.SendUdp(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
             });
             return _tcsResponse.Task;
         }
@@ -95,8 +95,7 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(delegate
             {
-                var response = ConnectionBean.Sender.SendUdp(false, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
-                ResponseMessageReceived(response);
+                ConnectionBean.Sender.SendUdp(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
             });
             return _tcsResponse.Task;
         }
@@ -110,8 +109,7 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(delegate
             {
-                var response = ConnectionBean.Sender.SendUdp(true, _tcsResponse, _message, channelCreator, 0, false);
-                ResponseMessageReceived(response);
+                ConnectionBean.Sender.SendUdp(null, _tcsResponse, _message, channelCreator, 0, false);
             });
             return _tcsResponse.Task;
         }
@@ -130,26 +128,17 @@ namespace TomP2P.Connection
             return _tcsResponse.Task;
         }
 
-        private void ResponseMessageReceived(Message.Message responseMessage)
+        public void Read(ChannelHandlerContext ctx, object msg)
         {
             // client-side:
-            // here, the result for the awaitable task can be set
-            // -> actually, this method can be synchronically called after each Sender.Send*Async()
+            // Here, the result for the awaitable task can be set.
+            // If it is not a fire-and-forget message, the "result" of the TCS
+            // must be set here. (If FF, then it is set in Sender.)
 
-            // the "result" of the TCS must be set here, not in Sender
-            // if responseMessage == null
-            // - either an exception occurred, but then Sender should have called TCS.SetException()
-            // - or the request message was Fire-and-Forget
-            // => TCS.TrySetResult(null)
-            // else, the response message is the result
-            // => TCS.SetResult(responseMessage)
-
-            // - fire-and-forget -> result = null
-            // - else -> result = response message
+            // Java uses a SimpleChannelInboundHandler that only expects Message objects
+            var responseMessage = msg as Message.Message;
             if (responseMessage == null)
             {
-                // handle response only, if not fire-and-forget
-                _tcsResponse.TrySetResult(null);
                 return;
             }
 
@@ -158,16 +147,16 @@ namespace TomP2P.Connection
             // error handling
             if (responseMessage.Type == Message.Message.MessageType.UnknownId)
             {
-                string msg =
+                string msg2 =
                     "Message was not delivered successfully. Unknown ID (peer may be offline or unknown RPC handler): " +
                     _message;
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
             else if (responseMessage.Type == Message.Message.MessageType.Exception)
             {
-                string msg = "Message caused an exception on the other side. Handle as PeerAbort: " + _message;
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                string msg2 = "Message caused an exception on the other side. Handle as PeerAbort: " + _message;
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
             else if (responseMessage.IsRequest())
@@ -177,11 +166,11 @@ namespace TomP2P.Connection
             }
             else if (!_sendMessageId.Equals(recvMessageId))
             {
-                string msg =
+                string msg2 =
                     String.Format(
                         "Response message [{0}] sent to the node is not the same as we expect. We sent request message [{1}].",
                         responseMessage, _message);
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
             // We need to exclude RCON messages from the sanity check because we
@@ -192,11 +181,11 @@ namespace TomP2P.Connection
             else if (responseMessage.Command != Rpc.Rpc.Commands.Rcon.GetNr()
                      && _message.Recipient.IsRelayed != responseMessage.Sender.IsRelayed)
             {
-                string msg =
+                string msg2 =
                     String.Format(
                         "Response message [{0}] sent has a different relay flag than we sent with request message [{1}]. Recipient ({2}) / Sender ({3}).",
                         responseMessage, _message, _message.Recipient.IsRelayed, responseMessage.Sender.IsRelayed);
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg));
+                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
 
@@ -207,7 +196,7 @@ namespace TomP2P.Connection
                 {
                     if (responseMessage.Sender.IsRelayed && responseMessage.PeerSocketAddresses.Count != 0)
                     {
-                        // use the response message as we have up-to-date data for the relays
+                        // use the response message as we have up-to-date content for the relays
                         PeerAddress remotePeer =
                             responseMessage.Sender.ChangePeerSocketAddresses(responseMessage.PeerSocketAddresses);
                         responseMessage.SetSender(remotePeer);

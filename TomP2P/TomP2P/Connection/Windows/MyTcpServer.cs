@@ -68,10 +68,10 @@ namespace TomP2P.Connection.Windows
                 // get stream for reading and writing
                 var stream = client.GetStream();
 
-                // loop to receive all data sent by the client
+                // loop to receive all content sent by the client
                 while (await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length) != 0)
                 {
-                    // process data
+                    // process content
                     // TODO implement
                     throw new NotImplementedException();
 

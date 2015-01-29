@@ -56,7 +56,7 @@ namespace TomP2P.Connection.Windows
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception(String.Format("Error when processing data received from {0}:\r\n{1}", handler.RemoteEndPoint, ex));
+                    throw new Exception(String.Format("Error when processing content received from {0}:\r\n{1}", handler.RemoteEndPoint, ex));
                 }
             }
             else
@@ -77,18 +77,18 @@ namespace TomP2P.Connection.Windows
                     if (handler.Available == 0)
                     {
                         // return / send back
-                        // TODO process data, maybe use abstract method
+                        // TODO process content, maybe use abstract method
                         Array.Copy(token.RecvBuffer, token.SendBuffer, BufferSize);
 
                         await SendAsync(token);
 
-                        // read next block of data sent by the client
+                        // read next block of content sent by the client
                         var t = ReceiveAsync(token);
                         await ProcessReceive(t.Result, token);
                     }
                     else
                     {
-                        // read next block of data sent by the client
+                        // read next block of content sent by the client
                         var t = ReceiveAsync(token);
                         await ProcessReceive(t.Result, token);
                     }

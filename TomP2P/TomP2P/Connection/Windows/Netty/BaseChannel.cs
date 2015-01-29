@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -7,20 +6,16 @@ namespace TomP2P.Connection.Windows.Netty
     {
         public event ClosedEventHandler Closed;
 
-        private readonly Pipeline _pipeline;
+        private Pipeline _pipeline;
 
-        protected BaseChannel(Pipeline pipeline)
+        public void SetPipeline(Pipeline pipeline)
         {
             _pipeline = pipeline;
         }
 
-        protected void ProcessOutboundPipeline(Message.Message message)
+        public Pipeline Pipeline
         {
-            if (_pipeline == null)
-            {
-                throw new NullReferenceException("No pipeline is set for this channel.");
-            }
-            // query current outbound handlers and execute
+            get { return _pipeline; }
         }
 
         /// <summary>
@@ -43,11 +38,6 @@ namespace TomP2P.Connection.Windows.Netty
         }
 
         public abstract Socket Socket { get; }
-
-        public Pipeline Pipeline
-        {
-            get { return _pipeline; }
-        }
 
         public abstract bool IsUdp { get; }
 

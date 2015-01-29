@@ -77,7 +77,7 @@ namespace TomP2P.Message
                 {
                     // This ID was the same as the last and the last message already
                     // finished the parsing. So this message is finished as well, although
-                    // it may send only partial data.
+                    // it may send only partial content.
                     if (_lastId == _decoder.Message.MessageId)
                     {
                         finished = true;

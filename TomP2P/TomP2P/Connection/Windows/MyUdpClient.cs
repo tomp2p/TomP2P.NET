@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
@@ -13,24 +14,29 @@ namespace TomP2P.Connection.Windows
     /// </summary>
     public class MyUdpClient : BaseChannel, IUdpChannel
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         // wrapped member
         private readonly UdpClient _udpClient;
 
-        public MyUdpClient(IPEndPoint localEndPoint, Pipeline pipeline)
-            : base(pipeline)
+        public MyUdpClient(IPEndPoint localEndPoint)
         {
             // bind
             _udpClient = new UdpClient(localEndPoint);    
         }
 
-        public async Task SendAsync(Message.Message message, IPEndPoint receiverEndPoint)
+        public async Task SendAsync(Message.Message message)
         {
             // TODO check if works
             // execute outbound pipeline
             var bytes = Pipeline.Write(message);
 
             // finally, send bytes over the wire
-            await _udpClient.SendAsync(bytes, bytes.Length, receiverEndPoint);
+            var senderEp = ConnectionHelper.ExtractSenderEp(message);
+            var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
+            Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
+
+            await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
         }
 
         public async Task ReceiveAsync()

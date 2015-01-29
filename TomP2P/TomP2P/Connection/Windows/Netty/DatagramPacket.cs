@@ -11,18 +11,18 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public class DatagramPacket
     {
-        private readonly ByteBuf _data;
+        private readonly ByteBuf _content;
         private readonly IPEndPoint _recipient;
         private readonly IPEndPoint _sender;
 
-        public DatagramPacket(ByteBuf data, IPEndPoint recipient, IPEndPoint sender)
+        public DatagramPacket(ByteBuf content, IPEndPoint recipient, IPEndPoint sender)
         {
-            if (data == null)
+            if (content == null)
             {
-                throw new NullReferenceException("data");
+                throw new NullReferenceException("content");
             }
 
-            _data = data;
+            _content = content;
             _recipient = recipient;
             _sender = sender;
         }
@@ -31,9 +31,9 @@ namespace TomP2P.Connection.Windows.Netty
         /// Equivalent to Java Netty's content().
         /// </summary>
         /// <returns></returns>
-        public ByteBuf Data
+        public ByteBuf Content
         {
-            get { return _data; }
+            get { return _content; }
         }
 
         public IPEndPoint Recipient
@@ -50,11 +50,11 @@ namespace TomP2P.Connection.Windows.Netty
         {
             if (_sender != null)
             {
-                return String.Format("Datagram ({0} => {1}, {2})", _sender, _recipient, _data);
+                return String.Format("Datagram ({0} => {1}, {2})", _sender, _recipient, _content);
             }
             else
             {
-                return String.Format("Datagram (=> {0}, {1})", _recipient, _data);
+                return String.Format("Datagram (=> {0}, {1})", _recipient, _content);
             }
         }
     }

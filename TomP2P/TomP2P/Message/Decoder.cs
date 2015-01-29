@@ -59,7 +59,7 @@ namespace TomP2P.Message
             _signatureFactory = signatureFactory;
         }
 
-        // TODO handle the Netty specific stuff, needed in .NET?
+        // TODO ctx needed?
         public bool Decode(AlternativeCompositeByteBuf buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", buffer.ReadableBytes);
@@ -78,7 +78,7 @@ namespace TomP2P.Message
                     {
                         // TODO store the sender as an attribute??
 
-                        Message.SetIsUdp(false); // TODO how to get whether it's UDP? -> provide as isUdp flag
+                        Message.SetIsUdp(false); // TODO how to get whether it's UDP? -> provide via ctx
                         if (Message.IsFireAndForget() && Message.IsUdp)
                         {
                             // TODO remove timeout
