@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TomP2P.Connection;
-using TomP2P.Connection.NET_Helper;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 

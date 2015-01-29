@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TomP2P.Connection.Windows.Netty;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
@@ -22,27 +23,28 @@ namespace TomP2P.Connection.Windows
             _udpClient = new UdpClient(localEndPoint);    
         }
 
-        public Task SendAsync(Message.Message message, IPEndPoint receiverEndPoint)
+        public async Task SendAsync(Message.Message message, IPEndPoint receiverEndPoint)
         {
             // TODO check if works
-            var tcs = new TaskCompletionSource<object>();
             // execute outbound pipeline
-            Pipeline.OutboundFinished += async (pipeline, bytes) =>
-            {
-                // finally, send bytes over the wire
-                await _udpClient.SendAsync(bytes, bytes.Length, receiverEndPoint);
-                tcs.SetResult(null);
-            };
-            Pipeline.Write(message);
-            return tcs.Task;
+            var bytes = Pipeline.Write(message);
+
+            // finally, send bytes over the wire
+            await _udpClient.SendAsync(bytes, bytes.Length, receiverEndPoint);
         }
 
-        public Task ReceiveAsync()
+        public async Task ReceiveAsync()
         {
-            var t = _udpClient.ReceiveAsync();
+            // receive bytes, create a datagram wrapper
+            var udpRes = await _udpClient.ReceiveAsync();
+
+            ByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(udpRes.Buffer.ToSByteArray());
+            // TODO correct?
+            var dgram = new DatagramPacket(buf, Socket.LocalEndPoint as IPEndPoint, udpRes.RemoteEndPoint);
 
             // execute inbound pipeline
-            Pipeline.Read(bytes);
+            Pipeline.Read(dgram);
         }
 
         protected override void DoClose()

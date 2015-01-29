@@ -22,7 +22,7 @@ namespace TomP2P.Message
         /// <summary>
         /// .NET-specific decoding handler for incoming UDP messages.
         /// </summary>
-        public Message Read(byte[] msgBytes, IPEndPoint recipient, IPEndPoint sender)
+        public void Read(ChannelHandlerContext ctx, object msg)
         {
             // setup buffer from bytes
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();

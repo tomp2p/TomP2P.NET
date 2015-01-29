@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using TomP2P.Connection.NET_Helper;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;

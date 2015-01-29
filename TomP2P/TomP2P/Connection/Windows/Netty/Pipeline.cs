@@ -13,15 +13,13 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public delegate void PipelineEventHandler(Pipeline pipeline, byte[] bytes);
-        public event PipelineEventHandler OutboundFinished;
-
         private readonly IDictionary<string, HandlerItem> _name2Item;
         private readonly LinkedList<HandlerItem> _handlers;
 
         private readonly IChannel _channel;
         private readonly ChannelHandlerContext _ctx;
         private IOutboundHandler _currentOutbound = null;
+        private IInboundHandler _currentInbound = null;
 
         public Pipeline(IChannel channel)
         {
@@ -32,7 +30,7 @@ namespace TomP2P.Connection.Windows.Netty
             _ctx = new ChannelHandlerContext(channel, this);
         }
 
-        public void Write(object msg) // TODO called from API and ctx, problematic?
+        public byte[] Write(object msg) // TODO called from API and ctx, problematic? (should not due to while-checks)
         {
             if (msg == null)
             {
@@ -44,8 +42,22 @@ namespace TomP2P.Connection.Windows.Netty
                 Logger.Debug("Processing outbound handler '{0}'.", _currentOutbound);
                 _currentOutbound.Write(_ctx, msg);
             }
-            var bytes = ConnectionHelper.ExtractBytes(msg); // TODO check if correct
-            OnOutboundFinished(bytes);
+            return ConnectionHelper.ExtractBytes(msg); // TODO check if correct
+        }
+
+        public void Read(object msg)
+        {
+            if (msg == null)
+            {
+                throw new NullReferenceException("msg");
+            }
+            // find next inbound handler
+            while (GetNextInbound() != null)
+            {
+                Logger.Debug("Processing inbound handler '{0}'.", _currentInbound);
+                _currentInbound.Read(_ctx, msg);
+            }
+            
         }
 
         private IOutboundHandler GetNextOutbound()
@@ -71,12 +83,27 @@ namespace TomP2P.Connection.Windows.Netty
             return null;
         }
 
-        protected void OnOutboundFinished(byte[] bytes)
+        private IInboundHandler GetNextInbound()
         {
-            if (OutboundFinished != null)
+            var inbounds = CurrentInboundHandlers;
+            if (inbounds.Count != 0)
             {
-                OutboundFinished(this, bytes);
+                if (_currentInbound == null)
+                {
+                    _currentInbound = inbounds.First.Value;
+                }
+                else
+                {
+                    var node = inbounds.Find(_currentInbound);
+                    if (node != null && node.Next != null)
+                    {
+                        _currentInbound = node.Next.Value;
+                    }
+                    return null;
+                }
+                return _currentInbound;
             }
+            return null;
         }
 
         /// <summary>
@@ -176,6 +203,19 @@ namespace TomP2P.Connection.Windows.Netty
                     Where(handler => handler is IOutboundHandler).
                     Cast<IOutboundHandler>();
                 return new LinkedList<IOutboundHandler>(outbounds);
+            }
+        }
+
+        private LinkedList<IInboundHandler> CurrentInboundHandlers
+        {
+            // TODO check if works
+            get
+            {
+                var inbounds = _handlers.
+                    Select(item => item.Handler).
+                    Where(handler => handler is IInboundHandler).
+                    Cast<IInboundHandler>();
+                return new LinkedList<IInboundHandler>(inbounds);
             }
         }
 
