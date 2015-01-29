@@ -104,12 +104,11 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupUdp(IPEndPoint listenAddress)
         {
-            // pipeline is implemented in MyUdpServer.UdpPipeline
             try
             {
-                var pipeline = GetPipeline(true);
                 // binds in constructor
-                _udpServer = new MyUdpServer(listenAddress, _udpDecoderHandler, _encoderHandler, _dispatcher, pipeline);
+                _udpServer = new MyUdpServer(listenAddress);
+                _udpServer.SetPipeline(GetPipeline(_udpServer));
                 _udpServer.Socket.EnableBroadcast = true;
                 _udpServer.Start();
                 return true;
@@ -129,11 +128,10 @@ namespace TomP2P.Connection
         private bool StartupTcp(IPEndPoint listenAddress)
         {
             // TODO implement and use TimeoutFactory stuff!
-            // pipeline is implemented in MyTcpServer.TcpPipeline
             try
             {
-                var pipeline = GetPipeline(true);
-                _tcpServer = new MyTcpServer(listenAddress, _tcpDecoderHandler, _encoderHandler, _dispatcher, pipeline);
+                _tcpServer = new MyTcpServer(listenAddress);
+                _tcpServer.SetPipeline(GetPipeline(_tcpServer));
                 _tcpServer.Socket.LingerState = new LingerOption(false, 0); // TODO correct?
                 _tcpServer.Socket.NoDelay = true; // TODO correct?
                 _tcpServer.Start();
@@ -150,21 +148,21 @@ namespace TomP2P.Connection
         /// Creates the handler pipeline. After this, it passes the user-set pipeline 
         /// filter where the handlers can be modified.
         /// </summary>
-        /// <param name="isTcp"></param>
-        private Pipeline GetPipeline(bool isTcp)
+        /// <param name="channel">The channel for which the pipeline will be created.</param>
+        private Pipeline GetPipeline(IChannel channel)
         {
             var timeoutFactory = new TimeoutFactory(null, ChannelServerConfiguration.IdleTcpSeconds,
                 _peerStatusListeners, "Server");
-            var pipeline = new Pipeline();
+            var pipeline = new Pipeline(channel);
 
-            if (isTcp)
+            if (channel.IsTcp)
             {
                 // TODO add dropconnection
                 pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
                 pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
                 pipeline.AddLast("decoder", _tcpDecoderHandler);
             }
-            else
+            else if (channel.IsUdp)
             {
                 // no need for a timeout handler, since whole packet arrives or nothing
                 // different from TCP where the stream can be closed by the remote peer
@@ -175,7 +173,7 @@ namespace TomP2P.Connection
             pipeline.AddLast("encoder", _encoderHandler);
             pipeline.AddLast("dispatcher", _dispatcher);
 
-            var filteredPipeline = ChannelServerConfiguration.PipelineFilter.Filter(pipeline, isTcp, false);
+            var filteredPipeline = ChannelServerConfiguration.PipelineFilter.Filter(pipeline, channel.IsTcp, false);
             return filteredPipeline;
         }
 

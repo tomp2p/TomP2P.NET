@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TomP2P.Connection.Windows.Netty;
-using TomP2P.Message;
 
 namespace TomP2P.Connection.Windows
 {
@@ -11,21 +10,11 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly UdpClient _udpServer;
 
-        private readonly TomP2PSinglePacketUdp _decoder;
-        private readonly TomP2POutbound _encoder;
-        private readonly Dispatcher _dispatcher;
-
         private volatile bool _isStopped; // volatile!
 
-        public MyUdpServer(IPEndPoint localEndPoint, TomP2PSinglePacketUdp decoder, 
-            TomP2POutbound encoder, Dispatcher dispatcher, Pipeline pipeline)
-            : base(pipeline)
+        public MyUdpServer(IPEndPoint localEndPoint)
         {
             _udpServer = new UdpClient(localEndPoint);
-
-            _decoder = decoder;
-            _encoder = encoder;
-            _dispatcher = dispatcher;
         }
 
         public void Start()
@@ -40,7 +29,7 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
-            this.Close();
+            Close();
         }
 
         protected override void DoClose()

@@ -12,22 +12,12 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly TcpListener _tcpServer;
 
-        private readonly TomP2PCumulationTcp _decoder;
-        private readonly TomP2POutbound _encoder;
-        private readonly Dispatcher _dispatcher;
-
         private volatile bool _isStopped; // volatile!
 
-        public MyTcpServer(IPEndPoint localEndPoint, TomP2PCumulationTcp decoder,
-            TomP2POutbound encoder, Dispatcher dispatcher, Pipeline pipeline)
-            : base(pipeline)
+        public MyTcpServer(IPEndPoint localEndPoint)
         {
             // local endpoint
             _tcpServer = new TcpListener(localEndPoint);
-
-            _decoder = decoder;
-            _encoder = encoder;
-            _dispatcher = dispatcher;
         }
 
         public void Start()
@@ -44,7 +34,7 @@ namespace TomP2P.Connection.Windows
 
         public void Stop()
         {
-            this.Close();
+            Close();
         }
 
         protected override void DoClose()
