@@ -54,9 +54,8 @@ namespace TomP2P.Connection
         /// <param name="idleUdpSeconds">The idle time of a message until fail.</param>
         /// <param name="broadcast">True, if the message is to be sent via layer 2 broadcast.</param>
         /// <returns>The response message or null, if it is fire-and-forget or a failure occurred.</returns>
-        public void SendUdp(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
+        public async Task SendUdpAsync(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse, Message.Message message, ChannelCreator channelCreator, int idleUdpSeconds, bool broadcast)
         {
-            // TODO add RequestHandler as inbound handler to pipeline (passed via argument)
             // no need to continue if already finished
             if (tcsResponse.Task.IsCompleted)
             {
@@ -107,8 +106,9 @@ namespace TomP2P.Connection
             var handlers = new Dictionary<string, IChannelHandler>();
             if (!isFireAndForget)
             {
-                handlers.Add("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
-                handlers.Add("timeout1", timeoutFactory.CreateTimeHandler());
+                // TODO add timeout handlers
+                //handlers.Add("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                //handlers.Add("timeout1", timeoutFactory.CreateTimeHandler());
             }
             handlers.Add("decoder", new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory));
             handlers.Add("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
@@ -143,7 +143,7 @@ namespace TomP2P.Connection
 
             // send request message
             // processes client-side outbound pipeline
-            udpClient.SendAsync(message); // TODO await?
+            await udpClient.SendAsync(message); // TODO await?
 
             // if not fire-and-forget, receive response
             if (isFireAndForget)
@@ -156,7 +156,7 @@ namespace TomP2P.Connection
                 // TODO correct? or should MyUdpServer receive answer?
                 // receive response message
                 // processes client-side inbound pipeline
-                udpClient.ReceiveAsync();
+                await udpClient.ReceiveAsync();
             }
             udpClient.Close();
         }

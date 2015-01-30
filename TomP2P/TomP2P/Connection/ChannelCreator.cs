@@ -58,8 +58,14 @@ namespace TomP2P.Connection
             _maxPermitsTcp = maxPermitsTcp;
             _channelClientConfiguration = channelClientConfiguration;
             _externalBindings = channelClientConfiguration.BindingsOutgoing;
-            _semaphoreUdp = new Semaphore(maxPermitsUdp, maxPermitsUdp);
-            _semaphoreTcp = new Semaphore(maxPermitsUdp, maxPermitsTcp);
+            if (maxPermitsUdp > 0)
+            {
+                _semaphoreUdp = new Semaphore(maxPermitsUdp, maxPermitsUdp);
+            }
+            if (maxPermitsTcp > 0)
+            {
+                _semaphoreTcp = new Semaphore(maxPermitsTcp, maxPermitsTcp);
+            }
         }
 
         /// <summary>
@@ -79,7 +85,7 @@ namespace TomP2P.Connection
                     return null;
                 }
                 // try to aquire resources for the channel
-                if (!_semaphoreUdp.TryAcquire())
+                if (_semaphoreUdp != null && !_semaphoreUdp.TryAcquire())
                 {
                     const string errorMsg = "Tried to acquire more resources (UDP) than announced.";
                     Logger.Error(errorMsg);
@@ -126,7 +132,7 @@ namespace TomP2P.Connection
                     return null;
                 }
                 // try to acquire resources for the channel
-                if (!_semaphoreTcp.TryAcquire())
+                if (_semaphoreTcp != null && !_semaphoreTcp.TryAcquire())
                 {
                     const string errorMsg = "Tried to acquire more resources (TCP) than announced.";
                     Logger.Error(errorMsg);

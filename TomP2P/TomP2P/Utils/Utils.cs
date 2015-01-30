@@ -165,18 +165,26 @@ namespace TomP2P.Utils
 
         #region .NET only
 
+        private static int _nrOfCores = 0;
         /// <summary>
         /// Evaluates a reasonable number of clients that can be served on a server on this machine.
         /// NrOfClients = #cores + 1
         /// </summary>
         public static int GetMaxNrOfClients()
         {
-            int coreCount = 0;
-            foreach (var item in new ManagementObjectSearcher("Select * from Win32_Processor").Get())
+            if (_nrOfCores == 0)
             {
-                coreCount += int.Parse(item["NumberOfCores"].ToString());
+                foreach (var item in new ManagementObjectSearcher("Select * from Win32_Processor").Get())
+                {
+                    _nrOfCores += int.Parse(item["NumberOfCores"].ToString());
+                }
+                _nrOfCores += 1;
             }
-            return coreCount + 1;
+            if (_nrOfCores <= 0)
+            {
+                throw new SystemException("This machine seems not to have any cores. Fix #core evaluation.");
+            }
+            return _nrOfCores;
         }
 
         #endregion

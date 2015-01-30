@@ -25,11 +25,16 @@ namespace TomP2P.Connection.Windows
             _udpClient = new UdpClient(localEndPoint);    
         }
 
+        /// <summary>
+        /// Executes the client-side outbound pipeline and sends message over the wire.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task SendAsync(Message.Message message)
         {
-            // TODO check if works
             // execute outbound pipeline
             var bytes = Pipeline.Write(message);
+            Pipeline.Reset(); // TODO find a cleaner way!
 
             // finally, send bytes over the wire
             var senderEp = ConnectionHelper.ExtractSenderEp(message);
@@ -39,6 +44,10 @@ namespace TomP2P.Connection.Windows
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
         }
 
+        /// <summary>
+        /// Receives bytes from the remote host and executes the client-side inbound pipeline.
+        /// </summary>
+        /// <returns></returns>
         public async Task ReceiveAsync()
         {
             // receive bytes, create a datagram wrapper

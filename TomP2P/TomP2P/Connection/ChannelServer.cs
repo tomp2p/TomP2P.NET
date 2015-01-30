@@ -158,8 +158,9 @@ namespace TomP2P.Connection
             if (channel.IsTcp)
             {
                 // TODO add dropconnection
-                pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
-                pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
+                // TODO add timeout handlers
+                //pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                //pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
                 pipeline.AddLast("decoder", _tcpDecoderHandler);
             }
             else if (channel.IsUdp)

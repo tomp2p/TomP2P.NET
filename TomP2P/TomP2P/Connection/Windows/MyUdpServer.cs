@@ -22,7 +22,8 @@ namespace TomP2P.Connection.Windows
         public void Start()
         {
            // accept MaxNrOfClients simultaneous connections
-            for (int i = 0; i < Utils.Utils.GetMaxNrOfClients(); i++)
+            var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
+            for (int i = 0; i < maxNrOfClients; i++)
             {
                 ServiceLoopAsync();
             }
@@ -58,6 +59,7 @@ namespace TomP2P.Connection.Windows
                 
                 // server-side outbound pipeline
                 var bytes = Pipeline.Write(obj);
+                Pipeline.Reset();
 
                 // return / send back
                 await _udpServer.SendAsync(bytes, bytes.Length, remoteEndPoint);

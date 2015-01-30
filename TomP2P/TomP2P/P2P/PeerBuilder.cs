@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Timers;
-using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
@@ -238,7 +235,7 @@ namespace TomP2P.P2P
             return new ChannelServerConfiguration().
                 SetBindingsIncoming(new Bindings()).
                 SetIsBehindFirewall(false).
-                //SetPipelineFilter(...).
+                SetPipelineFilter(new DefaultPipelineFilter()).
                 SetSignatureFactory(new DsaSignatureFactory()).
                 // these two values may be overwritten in the peer builder
                 SetPorts(new Ports(Ports.DefaultPort, Ports.DefaultPort)).
@@ -252,7 +249,7 @@ namespace TomP2P.P2P
                 SetMaxPermitsPermanentTcp(MaxPermitsPermanentTcp).
                 SetMaxPermitsTcp(MaxPermitsTcp).
                 SetMaxPermitsUdp(MaxPermitsUdp).
-                //SetPipelineFilter(...).
+                SetPipelineFilter(new DefaultPipelineFilter()).
                 SetSignatureFactory(new DsaSignatureFactory());
         }
 

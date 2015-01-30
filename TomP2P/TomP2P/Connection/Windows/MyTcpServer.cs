@@ -25,7 +25,8 @@ namespace TomP2P.Connection.Windows
             _tcpServer.Start();
 
             // accept MaxNrOfClients simultaneous connections
-            for (int i = 0; i < Utils.Utils.GetMaxNrOfClients(); i++)
+            var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
+            for (int i = 0; i < maxNrOfClients; i++)
             {
                 ServiceLoopAsync();
             }

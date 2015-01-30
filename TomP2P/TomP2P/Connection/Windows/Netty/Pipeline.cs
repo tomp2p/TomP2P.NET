@@ -21,6 +21,9 @@ namespace TomP2P.Connection.Windows.Netty
         private IOutboundHandler _currentOutbound = null;
         private IInboundHandler _currentInbound = null;
 
+        private object _msg;
+        private byte[] _writeResult;
+
         public Pipeline(IChannel channel)
             : this(channel, null)
         { }
@@ -48,13 +51,21 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 throw new NullReferenceException("msg");
             }
+
+            // set msg to newest provided value
+            _msg = msg;
+
             // find next outbound handler
             while (GetNextOutbound() != null)
             {
                 Logger.Debug("Processing outbound handler '{0}'.", _currentOutbound);
                 _currentOutbound.Write(_ctx, msg);
             }
-            return ConnectionHelper.ExtractBytes(msg); // TODO check if correct
+            if (_writeResult == null)
+            {
+                _writeResult = ConnectionHelper.ExtractBytes(_msg);
+            }
+            return _writeResult;
         }
 
         public object Read(object msg)
@@ -70,6 +81,12 @@ namespace TomP2P.Connection.Windows.Netty
                 _currentInbound.Read(_ctx, msg);
             }
             return msg;
+        }
+
+        public void Reset()
+        {
+            _msg = null;
+            _writeResult = null;
         }
 
         private IOutboundHandler GetNextOutbound()

@@ -81,7 +81,7 @@ namespace TomP2P.Connection
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(delegate
             {
-                ConnectionBean.Sender.SendUdp(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+                ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
             });
             return _tcsResponse.Task;
         }
@@ -95,7 +95,7 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(delegate
             {
-                ConnectionBean.Sender.SendUdp(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
+                ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
             });
             return _tcsResponse.Task;
         }
@@ -109,7 +109,7 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(delegate
             {
-                ConnectionBean.Sender.SendUdp(null, _tcsResponse, _message, channelCreator, 0, false);
+                ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
             });
             return _tcsResponse.Task;
         }
