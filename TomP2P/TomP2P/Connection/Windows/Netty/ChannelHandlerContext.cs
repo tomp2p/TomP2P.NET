@@ -44,6 +44,12 @@
             throw new System.NotImplementedException();
         }
 
+        public void Close()
+        {
+            // TODO correct?
+            _channel.Close();
+        }
+
         public IChannel Channel
         {
             get { return _channel; }

@@ -130,7 +130,6 @@ namespace TomP2P.Connection
 
         public void Read(ChannelHandlerContext ctx, object msg)
         {
-            // TODO implement Java-like
             // client-side:
             // Here, the result for the awaitable task can be set.
             // If it is not a fire-and-forget message, the "result" of the TCS
@@ -151,27 +150,27 @@ namespace TomP2P.Connection
                 string msg2 =
                     "Message was not delivered successfully. Unknown ID (peer may be offline or unknown RPC handler): " +
                     _message;
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
+                ExceptionCaught(ctx, new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
-            else if (responseMessage.Type == Message.Message.MessageType.Exception)
+            if (responseMessage.Type == Message.Message.MessageType.Exception)
             {
                 string msg2 = "Message caused an exception on the other side. Handle as PeerAbort: " + _message;
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
+                ExceptionCaught(ctx, new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
-            else if (responseMessage.IsRequest())
+            if (responseMessage.IsRequest())
             {
-                // TODO fireChannelRead -> go to next inbound handler
+                ctx.FireRead(responseMessage);
                 return;
             }
-            else if (!_sendMessageId.Equals(recvMessageId))
+            if (!_sendMessageId.Equals(recvMessageId))
             {
                 string msg2 =
                     String.Format(
                         "Response message [{0}] sent to the node is not the same as we expect. We sent request message [{1}].",
                         responseMessage, _message);
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
+                ExceptionCaught(ctx, new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
             // We need to exclude RCON messages from the sanity check because we
@@ -179,14 +178,14 @@ namespace TomP2P.Connection
             // RPC.Commands.RCON message on top of it. Therefore the response
             // type will never be the same Type as the one the user initially
             // used (e.g. DIRECT_DATA).
-            else if (responseMessage.Command != Rpc.Rpc.Commands.Rcon.GetNr()
+            if (responseMessage.Command != Rpc.Rpc.Commands.Rcon.GetNr()
                      && _message.Recipient.IsRelayed != responseMessage.Sender.IsRelayed)
             {
                 string msg2 =
                     String.Format(
                         "Response message [{0}] sent has a different relay flag than we sent with request message [{1}]. Recipient ({2}) / Sender ({3}).",
                         responseMessage, _message, _message.Recipient.IsRelayed, responseMessage.Sender.IsRelayed);
-                ExceptionCaught(new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
+                ExceptionCaught(ctx, new PeerException(PeerException.AbortCauseEnum.PeerAbort, msg2));
                 return;
             }
 
@@ -213,20 +212,24 @@ namespace TomP2P.Connection
             // TODO futureResponse.progress(responseMessage)
             if (!responseMessage.IsDone)
             {
-                Logger.Debug("Good message is streaming {0}.", responseMessage);
+                Logger.Debug("Good message is streaming. {0}", responseMessage);
                 return;
             }
 
             if (!_message.IsKeepAlive())
             {
-                Logger.Debug("Good message, close channel {0}, {1}.", responseMessage, "TODO"); // TODO use channel info here, and close channel
+                Logger.Debug("Good message {0}. Close channel {1}.", responseMessage, ctx.Channel);
                 // channel has already been closed in Sender, set result now
                 _tcsResponse.SetResult(responseMessage);
+                // in Java, the channel creator adds a listener that sets the 
+                // future response result when the channel is closed
+                ctx.Close();
             }
             else
             {
-                Logger.Debug("Good message, leave channel open {0}.", responseMessage);
+                Logger.Debug("Good message {0}. Leave channel {1} open.", responseMessage, ctx.Channel);
                 _tcsResponse.SetResult(responseMessage);
+                // TODO but shouldn't the Sender already have closed the channel?
             }
         }
 
@@ -273,8 +276,9 @@ namespace TomP2P.Connection
             }
 
             Logger.Debug("Report failure: ", cause);
-            // channel already closed in Sender
             _tcsResponse.SetException(cause);
+            // TODO channel not already closed in Sender?
+            ctx.Close();
         }
     }
 }
