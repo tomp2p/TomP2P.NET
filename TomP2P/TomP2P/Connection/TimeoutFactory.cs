@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Connection.Windows.Netty;
 using IChannelHandler = TomP2P.Connection.Windows.Netty.IChannelHandler;
 
 namespace TomP2P.Connection
@@ -44,10 +45,11 @@ namespace TomP2P.Connection
             throw new NotImplementedException();
         }
 
-        public static void RemoveTimeout()
+        public static void RemoveTimeout(ChannelHandlerContext ctx)
         {
             // TODO implement
             throw new NotImplementedException();
+            //ctx.Channel.Pipeline...
         }
     }
 }

@@ -2,6 +2,8 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TomP2P.Connection.Windows.Netty;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
@@ -44,22 +46,26 @@ namespace TomP2P.Connection.Windows
             while (!_isStopped)
             {
                 // receive request from client
-                UdpReceiveResult recvRes = await _udpServer.ReceiveAsync();
-                IPEndPoint remoteEndPoint = recvRes.RemoteEndPoint;
+                UdpReceiveResult udpRes = await _udpServer.ReceiveAsync();
+                IPEndPoint remoteEndPoint = udpRes.RemoteEndPoint;
 
                 // process content
-                byte[] sendBytes = UdpPipeline(recvRes.Buffer, _udpServer.Client.LocalEndPoint as IPEndPoint, remoteEndPoint);
+                // server-side inbound pipeline
+                ByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+                buf.WriteBytes(udpRes.Buffer.ToSByteArray());
+                var dgram = new DatagramPacket(buf, Socket.LocalEndPoint as IPEndPoint, remoteEndPoint);
+                var obj = Pipeline.Read(dgram);
+                
+                // server-side outbound pipeline
+                var bytes = Pipeline.Write(obj);
 
                 // return / send back
-                await _udpServer.SendAsync(sendBytes, sendBytes.Length, remoteEndPoint);
+                await _udpServer.SendAsync(bytes, bytes.Length, remoteEndPoint);
             }
         }
 
-        private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
+        /*private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
         {
-            // TODO implement a pipeline config somewhat similar to Java's ChannelServer.handlers()
-            // TODO this method then just executes the pipeline and guarantees the flow
-
             // 1. decode incoming message
             // 2. hand it to the Dispatcher
             // 3. encode outgoing message
@@ -74,7 +80,7 @@ namespace TomP2P.Connection.Windows
             var buffer = _encoder.Write(responseMessage);
             var sendBytes = ConnectionHelper.ExtractBytes(buffer);
             return sendBytes;
-        }
+        }*/
 
         public bool IsOpen
         {

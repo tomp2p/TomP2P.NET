@@ -161,6 +161,7 @@ namespace TomP2P.Connection
             udpClient.Close();
         }
 
+        /*
         /// <summary>
         /// Sends a message via TCP.
         /// </summary>
@@ -257,15 +258,7 @@ namespace TomP2P.Connection
             // otherwise we need to add a handler
             AddOrReplace();
             // TODO uncommented Java stuff needed?
-        }
-
-
-
-        private void AfterConnect(TaskCompletionSource<Message.Message> tcsResponse, Message.Message message,
-            MyTcpClient channel, bool isFireAndForget)
-        {
-            
-        }
+        }*/
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
         {

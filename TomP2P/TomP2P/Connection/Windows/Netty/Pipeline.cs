@@ -57,7 +57,7 @@ namespace TomP2P.Connection.Windows.Netty
             return ConnectionHelper.ExtractBytes(msg); // TODO check if correct
         }
 
-        public void Read(object msg)
+        public object Read(object msg)
         {
             if (msg == null)
             {
@@ -69,7 +69,7 @@ namespace TomP2P.Connection.Windows.Netty
                 Logger.Debug("Processing inbound handler '{0}'.", _currentInbound);
                 _currentInbound.Read(_ctx, msg);
             }
-            // TODO return message object?
+            return msg;
         }
 
         private IOutboundHandler GetNextOutbound()

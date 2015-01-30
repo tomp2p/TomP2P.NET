@@ -24,7 +24,7 @@ namespace TomP2P.Connection
     public class Dispatcher : IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
+        
         private readonly int _p2pId;
         private readonly PeerBean _peerBeanMaster;
         private readonly int _heartBeatMillis;
@@ -96,24 +96,24 @@ namespace TomP2P.Connection
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="isUdp"></param>
-        /// <param name="requestMessage"></param>
-        /// <param name="channel"></param>
-        /// <returns>In .NET, returns the response message to the server pipeline.</returns>
-        public Message.Message RequestMessageReceived(Message.Message requestMessage, bool isUdp, Socket channel) // TODO use appropriate socket class
+        public void Read(ChannelHandlerContext ctx, object msg)
         {
             // server-side:
             // message comes (over network) from sender
             // -> correct DispatchHandler handles response
+
+            // Java uses a SimpleChannelInboundHandler that only expects Message objects
+            var requestMessage = msg as Message.Message;
+            if (requestMessage == null)
+            {
+                return;
+            }
             
-            Logger.Debug("Received request message {0} from channel {1}.", requestMessage, channel);
+            Logger.Debug("Received request message {0} from channel {1}.", requestMessage, ctx.Channel);
             if (requestMessage.Version != _p2pId)
             {
                 Logger.Error("Wrong version. We are looking for {0}, but we got {1}. Received: {2}.", _p2pId, requestMessage.Version, requestMessage);
-                channel.Close(); // TODO correct?
+                ctx.Close(); // TODO correct?
                 lock (_peerBeanMaster.PeerStatusListeners)
                 {
                     foreach (IPeerStatusListener listener in _peerBeanMaster.PeerStatusListeners)
@@ -122,19 +122,20 @@ namespace TomP2P.Connection
                             new PeerException(PeerException.AbortCauseEnum.PeerError, "Wrong P2P version."));
                     }
                 }
-                return null; // TODO correct?
+                return;
             }
-
             if (!requestMessage.IsRequest())
             {
-                // fireChannelRead -> go to next inbound handler
-                // in Java probably means that goes to encoding
+                Logger.Debug("Handing request message to the next handler. {0}", requestMessage);
+                ctx.FireRead(msg);
+                return;
             }
 
-            IResponder responder = new DirectResponder(this, _peerBeanMaster, requestMessage);
+            IResponder responder = new DirectResponder(this, _peerBeanMaster, ctx, requestMessage);
             DispatchHandler myHandler = AssociatedHandler(requestMessage);
             if (myHandler != null)
             {
+                bool isUdp = ctx.Channel.IsUdp;
                 bool isRelay = requestMessage.Sender.IsRelayed;
                 if (!isRelay && requestMessage.PeerSocketAddresses.Count != 0)
                 {
@@ -143,10 +144,10 @@ namespace TomP2P.Connection
                     requestMessage.SetSender(sender);
                 }
                 Logger.Debug("About to respond to request message {0}.", requestMessage);
-                var peerConnection = new PeerConnection(requestMessage.Sender, channel, _heartBeatMillis);
+                var peerConnection = new PeerConnection(requestMessage.Sender, ctx.Channel, _heartBeatMillis);
 
                 // handle the request message
-                return myHandler.ForwardMessage(requestMessage, isUdp ? null : peerConnection, responder, isUdp, channel);
+                myHandler.ForwardMessage(requestMessage, isUdp ? null : peerConnection, responder);
             }
             else
             {
@@ -178,7 +179,7 @@ namespace TomP2P.Connection
                 var responseMessage = DispatchHandler.CreateResponseMessage(requestMessage,
                     Message.Message.MessageType.UnknownId, _peerBeanMaster.ServerPeerAddress);
 
-                return Respond(responseMessage, isUdp, channel); // TODO correct?
+                Respond(ctx, responseMessage);
             }
         }
 
@@ -196,30 +197,35 @@ namespace TomP2P.Connection
         /// Responds within a session. Keeps the connection open if told to do so.
         /// Connection is only kept alive for TCP content.
         /// </summary>
-        /// <param name="isUdp"></param>
+        /// <param name="ctx">The channel context.</param>
         /// <param name="responseMessage">The response message to send.</param>
-        internal Message.Message Respond(Message.Message responseMessage, bool isUdp, Socket channel) // TODO use appropriate socket
+        internal void Respond(ChannelHandlerContext ctx, Message.Message responseMessage)
         {
-            if (isUdp)
+            if (ctx.Channel is IUdpChannel)
             {
                 // Check, if channel is still open. If not, then do not send anything
                 // because this will cause an exception that will be logged.
-                // TODO check if UDP is open, how?
-                // TODO return null
+                var channel = ctx.Channel as IUdpChannel;
+                if (!channel.IsOpen)
+                {
+                    Logger.Debug("Channel UDP is not open. Do not reply {0}.", responseMessage);
+                    return;
+                }
                 Logger.Debug("Response UDP message {0}.", responseMessage);
             }
-            else
+            else if (ctx.Channel is ITcpChannel)
             {
                 // Check, if channel is still open. If not, then do not send anything
                 // because this will cause an exception that will be logged.
-                if (!channel.Connected)
+                var channel = ctx.Channel as ITcpChannel;
+                if (!channel.IsActive)
                 {
-                    Logger.Debug("Channel TCP is not open, do not reply {0}.", responseMessage);
-                    return null;
+                    Logger.Debug("Channel TCP is not open. Do not reply {0}.", responseMessage);
+                    return;
                 }
-                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, channel.RemoteEndPoint); // TODO correct?
+                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, ctx.Channel.Socket.RemoteEndPoint);
             }
-            return responseMessage;
+            ctx.FireRead(responseMessage); // TODO correct?
         }
 
         /// <summary>

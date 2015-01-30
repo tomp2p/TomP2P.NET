@@ -118,7 +118,7 @@ namespace TomP2P.Rpc
         /// <param name="requestMessage">The request requestMessage.</param>
         /// <param name="peerConnection">The peer connection that can be used for communication.</param>
         /// <param name="responder">The responder used to respond the response requestMessage.</param>
-        public Message.Message ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder, bool isUdp, Socket channel)
+        public void ForwardMessage(Message.Message requestMessage, PeerConnection peerConnection, IResponder responder)
         {
             // request requestMessage from Dispatcher (server-side)
             // -> forward to HandleResponse of this DispatchHandler
@@ -135,7 +135,7 @@ namespace TomP2P.Rpc
 
             try
             {
-                return HandleResponse(requestMessage, peerConnection, _sign, responder, isUdp, channel);
+                HandleResponse(requestMessage, peerConnection, _sign, responder);
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace TomP2P.Rpc
                     }
                 }
                 Logger.Error("Exception in custom dipatch handler.", ex);
-                return responder.Failed(Message.Message.MessageType.Exception, isUdp, channel);
+                responder.Failed(Message.Message.MessageType.Exception);
             }
         }
 
@@ -160,6 +160,6 @@ namespace TomP2P.Rpc
         /// <param name="sign">Flag indicating whether the requestMessage is signed.</param>
         /// <param name="responder"></param>
         public abstract Message.Message HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign,
-            IResponder responder, bool isUdp, Socket channel); // TODO last 2 params .NET-specific, maybe can be removed by not passing responder through hierarchy
+            IResponder responder);
     }
 }
