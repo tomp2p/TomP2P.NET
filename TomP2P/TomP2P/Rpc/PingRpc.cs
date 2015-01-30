@@ -157,11 +157,11 @@ namespace TomP2P.Rpc
             return new RequestHandler(tcs, PeerBean, ConnectionBean, configuration);
         }
 
-        public override Message.Message HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder, bool isUdp, Socket channel)
+        public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
         {
             // server-side:
             // comes from DispatchHandler
-            // Responder now responds the result...
+            // IResponder now responds the result...
 
             if (!((requestMessage.Type == Message.Message.MessageType.RequestFf1 
                 || requestMessage.Type == Message.Message.MessageType.Request1
@@ -172,7 +172,6 @@ namespace TomP2P.Rpc
             {
                 throw new ArgumentException("Request message type or command is wrong for this handler.");
             }
-
             Message.Message responseMessage;
 
             // probe
@@ -232,12 +231,12 @@ namespace TomP2P.Rpc
                 Logger.Debug("Respond to regular ping. {0}.", requestMessage.Sender);
                 // Test, if this is a broadcast message to ourselves.
                 // If it is, do not reply.
-                if (requestMessage.IsUdp // TODO this actually would be true for UDP --> see flag set in Decoder
+                if (requestMessage.IsUdp
                     && requestMessage.Sender.PeerId.Equals(PeerBean.ServerPeerAddress.PeerId)
                     && requestMessage.Recipient.PeerId.Equals(Number160.Zero))
                 {
                     Logger.Warn("Don't respond. We are on the same peer, you should make this call.");
-                    responder.ResponseFireAndForget(isUdp);
+                    responder.ResponseFireAndForget();
                 }
                 if (_enable)
                 {
@@ -255,7 +254,7 @@ namespace TomP2P.Rpc
                     {
                         Thread.Sleep(WaitTime);
                     }
-                    return null; // TODO correct?
+                    return;
                 }
                 if (requestMessage.Type == Message.Message.MessageType.Request4)
                 {
@@ -303,7 +302,7 @@ namespace TomP2P.Rpc
                     responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
                 }
             }
-            return responder.Response(responseMessage, isUdp, channel);
+            responder.Response(responseMessage);
         }
 
         /// <summary>

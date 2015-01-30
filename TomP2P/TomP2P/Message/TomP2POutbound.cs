@@ -1,5 +1,4 @@
 ﻿using System;
-using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions.Netty;
@@ -8,8 +7,6 @@ namespace TomP2P.Message
 {
     public class TomP2POutbound : IOutboundHandler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
         private readonly bool _preferDirect;
         private readonly Encoder _encoder;
         private readonly CompByteBufAllocator _alloc;
@@ -36,18 +33,17 @@ namespace TomP2P.Message
             try
             {
                 AlternativeCompositeByteBuf buf;
-                Message message;
                 bool done;
-                if (msg is Message)
+                var message = msg as Message;
+                if (message != null)
                 {
-                    message = (Message)msg;
                     buf = _preferDirect ? _alloc.CompDirectBuffer() : _alloc.CompBuffer();
                     // null means create signature
                     done = _encoder.Write(buf, message, null);
                 }
                 else
                 {
-                    ctx.Write(msg);
+                    ctx.FireWrite(msg); // TODO ok? Java uses ctx.write() (3x)
                     return;
                 }
 
@@ -56,7 +52,8 @@ namespace TomP2P.Message
                 // send buffer
                 if (buf.IsReadable)
                 {
-                    ctx.Write(buf);
+                    // sender/recipient information is extracted in MyUdpClient.SendAsync()
+                    ctx.FireWrite(buf);
 
                     if (done)
                     {
@@ -67,7 +64,7 @@ namespace TomP2P.Message
                 }
                 else
                 {
-                    ctx.Write(Unpooled.EmptyBuffer);
+                    ctx.FireWrite(Unpooled.EmptyBuffer);
                 }
             }
             catch (Exception ex)

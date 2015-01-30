@@ -170,7 +170,7 @@ namespace TomP2P.Connection
             {
                 if (_channel != null)
                 {
-                    return _channel.Client.IsOpen();
+                    return _channel.Socket.IsOpen();
                 }
                 return false;
             }

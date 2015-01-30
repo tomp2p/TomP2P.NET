@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Sockets;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Message;
@@ -159,7 +158,7 @@ namespace TomP2P.Rpc
         /// <param name="peerConnection"></param>
         /// <param name="sign">Flag indicating whether the requestMessage is signed.</param>
         /// <param name="responder"></param>
-        public abstract Message.Message HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign,
+        public abstract void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign,
             IResponder responder);
     }
 }

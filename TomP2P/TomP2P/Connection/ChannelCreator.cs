@@ -114,9 +114,9 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="remoteAddress">The remote address.</param>
         /// <param name="connectionTimeoutMillis">The timeout for establishing a TCP connection.</param>
-        /// <param name="pipeline">The pipeline to filter and set.</param>
+        /// <param name="handlers">The handlers to be added to the channel's pipeline.</param>
         /// <returns></returns>
-        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, Pipeline pipeline)
+        public MyTcpClient CreateTcp(IPEndPoint remoteAddress, int connectionTimeoutMillis, IDictionary<string, IChannelHandler> handlers)
         {
             _readWriteLockTcp.EnterReadLock();
             try
@@ -132,9 +132,15 @@ namespace TomP2P.Connection
                     Logger.Error(errorMsg);
                     throw new SystemException(errorMsg);
                 }
-                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, true, true);
                 
-                var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket(), filteredPipeline);
+                // create
+                var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket());
+                
+                // attach filtered pipeline
+                var pipeline = new Pipeline(tcpClient, handlers);
+                var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, true, true);
+                tcpClient.SetPipeline(filteredPipeline);
+                
                 // TODO how to set CONNECT_TIMEOUT_MILLIS option?
                 tcpClient.Socket.NoDelay = true;
                 tcpClient.Socket.LingerState = new LingerOption(false, 0);

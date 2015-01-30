@@ -3,7 +3,6 @@ using System.Net;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
-using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
@@ -22,15 +21,19 @@ namespace TomP2P.Message
             _decoder = new Decoder(signatureFactory);
         }
 
-        /// <summary>
-        /// .NET-specific decoding handler for incoming TCP messages.
-        /// </summary>
-        public Message Read(byte[] msgBytes, IPEndPoint recipient, IPEndPoint sender)
+        public void Read(ChannelHandlerContext ctx, object msg)
         {
-            // setup buffer from bytes
-            AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
-            buf.WriteBytes(msgBytes.ToSByteArray());
-
+            var buf = msg as ByteBuf;
+            if (buf == null)
+            {
+                ctx.FireRead(msg);
+                return;
+            }
+            
+            // TODO works?
+            var sender = (IPEndPoint) ctx.Channel.Socket.RemoteEndPoint;
+            var receiver = (IPEndPoint) ctx.Channel.Socket.LocalEndPoint;
+            
             try
             {
                 if (_cumulation == null)
@@ -41,7 +44,7 @@ namespace TomP2P.Message
                 {
                     _cumulation.AddComponent(buf);
                 }
-                return Decoding(recipient, sender);
+                Decoding(ctx, sender, receiver);
             }
             catch (Exception)
             {
@@ -58,20 +61,19 @@ namespace TomP2P.Message
             }
         }
 
-        private Message Decoding(IPEndPoint recipient, IPEndPoint sender)
+        private void Decoding(ChannelHandlerContext ctx, IPEndPoint sender, IPEndPoint receiver)
         {
             bool finished = true;
             bool moreData = true;
             while (finished && moreData)
             {
                 // receiver is server.localAddress
-                finished = _decoder.Decode(_cumulation, recipient, sender);
+                finished = _decoder.Decode(_cumulation, receiver, sender);
                 if (finished)
                 {
                     _lastId = _decoder.Message.MessageId;
                     moreData = _cumulation.ReadableBytes > 0;
-                    // Java's fireChannelRead
-                    return _decoder.PrepareFinish();
+                    ctx.FireRead(_decoder.PrepareFinish());
                 }
                 else
                 {
@@ -82,16 +84,17 @@ namespace TomP2P.Message
                     {
                         finished = true;
                         moreData = _cumulation.ReadableBytes > 0;
-                        return _decoder.PrepareFinish();
+                        ctx.FireRead(_decoder.PrepareFinish());
                     }
                     else if (_decoder.Message.IsStreaming())
                     {
-                        return _decoder.Message;
+                        ctx.FireRead(_decoder.Message);
                     }
                 }
             }
-            // TODO correct?
-            return null;
         }
+
+        // TODO find channelInactive equivalent
+        // TODO find exceptionCaught equivalent
     }
 }
