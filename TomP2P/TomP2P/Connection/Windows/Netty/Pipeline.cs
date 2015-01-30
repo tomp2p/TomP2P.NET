@@ -104,6 +104,7 @@ namespace TomP2P.Connection.Windows.Netty
                     if (node != null && node.Next != null)
                     {
                         _currentOutbound = node.Next.Value;
+                        return _currentOutbound;
                     }
                     return null;
                 }
@@ -127,6 +128,7 @@ namespace TomP2P.Connection.Windows.Netty
                     if (node != null && node.Next != null)
                     {
                         _currentInbound = node.Next.Value;
+                        return _currentInbound;
                     }
                     return null;
                 }

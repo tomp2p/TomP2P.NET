@@ -53,10 +53,11 @@ namespace TomP2P.Connection.Windows
             // receive bytes, create a datagram wrapper
             var udpRes = await _udpClient.ReceiveAsync();
 
-            ByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(udpRes.Buffer.ToSByteArray());
             // TODO correct?
             var dgram = new DatagramPacket(buf, Socket.LocalEndPoint as IPEndPoint, udpRes.RemoteEndPoint);
+            Logger.Debug("MyUdpClient received {0}.", dgram);
 
             // execute inbound pipeline
             Pipeline.Read(dgram);

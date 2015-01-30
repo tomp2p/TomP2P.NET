@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
@@ -9,6 +10,8 @@ namespace TomP2P.Connection.Windows
 {
     public class MyUdpServer : BaseChannel, IUdpChannel
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         // wrapped member
         private readonly UdpClient _udpServer;
 
@@ -52,9 +55,11 @@ namespace TomP2P.Connection.Windows
 
                 // process content
                 // server-side inbound pipeline
-                ByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
+                var buf = AlternativeCompositeByteBuf.CompBuffer();
                 buf.WriteBytes(udpRes.Buffer.ToSByteArray());
                 var dgram = new DatagramPacket(buf, Socket.LocalEndPoint as IPEndPoint, remoteEndPoint);
+                Logger.Debug("MyUdpServer received {0}.", dgram);
+
                 var obj = Pipeline.Read(dgram);
                 
                 // server-side outbound pipeline

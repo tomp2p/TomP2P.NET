@@ -29,7 +29,7 @@ namespace TomP2P.Message
             }
 
             var dgram = (DatagramPacket) msg;
-            var buf = AlternativeCompositeByteBuf.CompBuffer(dgram.Content);
+            var buf = dgram.Content;
             var sender = dgram.Sender;
             var recipient = dgram.Recipient;
 

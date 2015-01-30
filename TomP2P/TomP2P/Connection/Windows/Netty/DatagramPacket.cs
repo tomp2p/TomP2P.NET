@@ -11,11 +11,11 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public class DatagramPacket
     {
-        private readonly ByteBuf _content;
+        private readonly AlternativeCompositeByteBuf _content;
         private readonly IPEndPoint _recipient;
         private readonly IPEndPoint _sender;
 
-        public DatagramPacket(ByteBuf content, IPEndPoint recipient, IPEndPoint sender)
+        public DatagramPacket(AlternativeCompositeByteBuf content, IPEndPoint recipient, IPEndPoint sender)
         {
             if (content == null)
             {
@@ -31,7 +31,7 @@ namespace TomP2P.Connection.Windows.Netty
         /// Equivalent to Java Netty's content().
         /// </summary>
         /// <returns></returns>
-        public ByteBuf Content
+        public AlternativeCompositeByteBuf Content
         {
             get { return _content; }
         }

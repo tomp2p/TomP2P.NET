@@ -226,8 +226,14 @@ namespace TomP2P.Connection
                     client.Close();
                 }
                 // we can block here
-                _semaphoreUdp.Acquire(_maxPermitsUdp);
-                _semaphoreTcp.Acquire(_maxPermitsTcp);
+                if (_semaphoreUdp != null)
+                {
+                    _semaphoreUdp.Acquire(_maxPermitsUdp);
+                }
+                if (_semaphoreTcp != null)
+                {
+                    _semaphoreTcp.Acquire(_maxPermitsTcp);
+                }
                 _tcsChannelShutdownDone.SetResult(null); // completes the Task
             });
 
