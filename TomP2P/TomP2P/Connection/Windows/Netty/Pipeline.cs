@@ -5,6 +5,10 @@ using NLog;
 
 namespace TomP2P.Connection.Windows.Netty
 {
+    // TODO this pipeline can be optimized
+    // - read/write do query the next handlers multiple times
+    // - queries should be optimized
+
     /// <summary>
     /// Equivalent to Java Netty's ChannelPipeline. Represents a chain of inbound and outbound handlers.
     /// Only the required parts are implemented.

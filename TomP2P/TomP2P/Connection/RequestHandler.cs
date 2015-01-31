@@ -79,10 +79,12 @@ namespace TomP2P.Connection
         {
             // TODO find more efficient way instead of 1 thread per message
             // so far, everything is sync -> invoke async / new thread
-            ThreadPool.QueueUserWorkItem(delegate
+            /*ThreadPool.QueueUserWorkItem(async delegate
             {
-                ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
-            });
+                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+            });*/
+            ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+
             return _tcsResponse.Task;
         }
 

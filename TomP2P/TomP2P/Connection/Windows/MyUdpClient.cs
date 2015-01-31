@@ -55,8 +55,7 @@ namespace TomP2P.Connection.Windows
 
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(udpRes.Buffer.ToSByteArray());
-            // TODO correct?
-            var dgram = new DatagramPacket(buf, Socket.LocalEndPoint as IPEndPoint, udpRes.RemoteEndPoint);
+            var dgram = new DatagramPacket(buf, (IPEndPoint) Socket.LocalEndPoint, udpRes.RemoteEndPoint);
             Logger.Debug("MyUdpClient received {0}.", dgram);
 
             // execute inbound pipeline
