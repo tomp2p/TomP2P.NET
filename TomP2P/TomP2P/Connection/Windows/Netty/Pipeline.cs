@@ -8,6 +8,7 @@ namespace TomP2P.Connection.Windows.Netty
     // TODO this pipeline can be optimized
     // - read/write do query the next handlers multiple times
     // - queries should be optimized
+    // TODO add support for ExceptionCaught
 
     /// <summary>
     /// Equivalent to Java Netty's ChannelPipeline. Represents a chain of inbound and outbound handlers.
@@ -248,7 +249,6 @@ namespace TomP2P.Connection.Windows.Netty
 
         private LinkedList<IOutboundHandler> CurrentOutboundHandlers
         {
-            // TODO check if works
             get
             {
                 var outbounds = _handlers.
@@ -261,7 +261,6 @@ namespace TomP2P.Connection.Windows.Netty
 
         private LinkedList<IInboundHandler> CurrentInboundHandlers
         {
-            // TODO check if works
             get
             {
                 var inbounds = _handlers.
