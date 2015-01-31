@@ -12,7 +12,7 @@ namespace TomP2P.Connection.Windows
     /// <summary>
     /// Slightly extended <see cref="UdpClient"/>.
     /// </summary>
-    public class MyUdpClient : BaseChannel, IUdpChannel
+    public class MyUdpClient : BaseChannel, IUdpClientChannel
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -30,7 +30,7 @@ namespace TomP2P.Connection.Windows
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async override Task SendMessageAsync(Message.Message message)
+        public async Task SendMessageAsync(Message.Message message)
         {
             // execute outbound pipeline
             var writeRes = Pipeline.Write(message);
@@ -49,7 +49,7 @@ namespace TomP2P.Connection.Windows
         /// Receives bytes from the remote host and executes the client-side inbound pipeline.
         /// </summary>
         /// <returns></returns>
-        public async override Task ReceiveMessageAsync()
+        public async Task ReceiveMessageAsync()
         {
             // receive bytes, create a datagram wrapper
             var udpRes = await _udpClient.ReceiveAsync();

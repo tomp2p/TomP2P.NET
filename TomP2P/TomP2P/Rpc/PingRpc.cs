@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
-using TomP2P.Futures;
 using TomP2P.Message;
 using TomP2P.P2P;
 using TomP2P.Peers;
@@ -209,7 +204,7 @@ namespace TomP2P.Rpc
                         if (!t.IsFaulted)
                         {
                             Logger.Debug("Fire TCP to {0}.", requestMessage.Sender);
-                            var taskResponse = FireTcp(requestMessage.Sender, t.Result,
+                            var taskResponse = FireTcpAsync(requestMessage.Sender, t.Result,
                                 ConnectionBean.ChannelServer.ChannelServerConfiguration);
                             Utils.Utils.AddReleaseListener(t.Result, taskResponse);
                         }

@@ -84,8 +84,7 @@
     <Compile Include="Connection\Windows\Netty\ChannelHandlerContext.cs" />
     <Compile Include="Connection\Windows\Netty\IChannel.cs" />
     <Compile Include="Connection\Windows\Netty\IChannelHandler.cs" />
-    <Compile Include="Connection\Windows\Netty\ITcpChannel.cs" />
-    <Compile Include="Connection\Windows\Netty\IUdpChannel.cs" />
+    <Compile Include="Connection\Windows\Netty\IClientChannel.cs" />
     <Compile Include="Connection\Windows\Netty\Pipeline.cs" />
     <Compile Include="Connection\Windows\TcpClientSocket.cs" />
     <Compile Include="Connection\Windows\TcpServerSocket.cs" />
@@ -146,6 +145,9 @@
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\..\Desktop\Windows Netty.dgml">
+      <Link>Windows Netty.dgml</Link>
+    </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

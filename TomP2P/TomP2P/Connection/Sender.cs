@@ -189,7 +189,7 @@ namespace TomP2P.Connection
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
             }
 
-            ITcpChannel channel;
+            ITcpClientChannel channel;
             if (peerConnection != null && peerConnection.Channel != null && peerConnection.Channel.IsActive)
             {
                 channel = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcsResponse);
@@ -239,6 +239,7 @@ namespace TomP2P.Connection
             Message.Message message, ChannelCreator channelCreator, int connectTimeoutMillis,
             PeerConnection peerConnection, TimeoutFactory timeoutHandler)
         {
+            // TODO implement
             throw new NotImplementedException();
         }
 
@@ -246,10 +247,11 @@ namespace TomP2P.Connection
             Message.Message message, ChannelCreator channelCreator, int idleTcpSeconds, int connectTimeoutMillis,
             PeerConnection peerConnection, TimeoutFactory timeoutHandler)
         {
+            // TODO implement
             throw new NotImplementedException();
         }
 
-        private ITcpChannel SendTcpPeerConnection(PeerConnection peerConnection, IChannelHandler handler, ChannelCreator channelCreator,
+        private ITcpClientChannel SendTcpPeerConnection(PeerConnection peerConnection, IChannelHandler handler, ChannelCreator channelCreator,
             TaskCompletionSource<Message.Message> tcsResponse)
         {
             // if the channel gets closed, the future should get notified
@@ -266,7 +268,7 @@ namespace TomP2P.Connection
             // otherwise we need to add a handler
             AddOrReplace(channel.Pipeline, "dispatcher", "handler", handler);
             // TODO uncommented Java stuff needed?
-            return channel;
+            return channel as ITcpClientChannel; // TODO this will fail if its a server channel!!!
         }
 
         private void AddOrReplace(Pipeline pipeline, string before, string name, IChannelHandler handler)
@@ -297,7 +299,7 @@ namespace TomP2P.Connection
         }
 
         private async Task AfterConnectAsync(TaskCompletionSource<Message.Message> tcsResponse, Message.Message message,
-            IChannel channel, bool isFireAndForget)
+            IClientChannel channel, bool isFireAndForget)
         {
             // TODO use for UDP connections, too
             // TODO find clean-mechanism to show the channel-creation fails (UDP uses try/catch)
@@ -323,7 +325,7 @@ namespace TomP2P.Connection
         /// <param name="tcsResponse"></param>
         /// <param name="isFireAndForget">True, if we don't expect a response message.</param>
         /// <param name="channel"></param>
-        private async Task AfterSendAsync(Task sendTask, TaskCompletionSource<Message.Message> tcsResponse, bool isFireAndForget, IChannel channel)
+        private async Task AfterSendAsync(Task sendTask, TaskCompletionSource<Message.Message> tcsResponse, bool isFireAndForget, IClientChannel channel)
         {
             // TODO use for UDP connections, too
             await sendTask;
@@ -357,19 +359,12 @@ namespace TomP2P.Connection
             channel.Close();
         }
 
-        private ITcpChannel SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
+        private ITcpClientChannel SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
             PeerConnection peerConnection, IChannelHandler handler, TimeoutFactory timeoutHandler, int connectTimeoutMillis,
             TaskCompletionSource<Message.Message> tcsResponse)
         {
-            // TODO attach handlers
-
-            var channel = channelCreator.CreateTcp(recipient, connectTimeoutMillis, handlers, tcsResponse);
-            if (peerConnection != null && channel != null)
-            {
-                peerConnection.SetChannel(channel);
-                // TODO heartbeat
-            }
-            return channel;
+            // TODO implement
+            throw new NotImplementedException();
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)

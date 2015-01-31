@@ -1,5 +1,4 @@
 ﻿using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -14,10 +13,6 @@ namespace TomP2P.Connection.Windows.Netty
 
         void Close();
 
-        Task SendMessageAsync(Message.Message message);
-
-        Task ReceiveMessageAsync();
-
         /// <summary>
         /// The underlying socket that is used.
         /// </summary>
@@ -28,5 +23,21 @@ namespace TomP2P.Connection.Windows.Netty
         bool IsUdp { get; }
 
         bool IsTcp { get; }
+    }
+
+    /// <summary>
+    /// Interface for all TCP channels.
+    /// </summary>
+    public interface ITcpChannel : IChannel
+    {
+        bool IsActive { get; }
+    }
+
+    /// <summary>
+    /// Interface for all UDP channels.
+    /// </summary>
+    public interface IUdpChannel : IChannel
+    {
+        bool IsOpen { get; }
     }
 }

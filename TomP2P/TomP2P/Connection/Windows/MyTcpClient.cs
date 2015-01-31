@@ -9,7 +9,7 @@ namespace TomP2P.Connection.Windows
     /// <summary>
     /// Slightly extended <see cref="TcpClient"/>.
     /// </summary>
-    public class MyTcpClient : BaseChannel, ITcpChannel
+    public class MyTcpClient : BaseChannel, ITcpClientChannel
     {
         // wrapped member
         private readonly TcpClient _tcpClient;
@@ -24,6 +24,16 @@ namespace TomP2P.Connection.Windows
         {
             // just forward
             return _tcpClient.ConnectAsync(remoteEndPoint.Address, remoteEndPoint.Port);
+        }
+
+        public Task SendMessageAsync(Message.Message message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ReceiveMessageAsync()
+        {
+            throw new NotImplementedException();
         }
 
         protected override void DoClose()

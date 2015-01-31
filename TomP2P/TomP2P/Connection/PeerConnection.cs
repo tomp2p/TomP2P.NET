@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Peers;
@@ -78,7 +77,7 @@ namespace TomP2P.Connection
             _tcsClose = new TaskCompletionSource<object>();
         }
 
-        public PeerConnection SetChannel(ITcpChannel channel)
+        public PeerConnection SetChannel(ITcpClientChannel channel)
         {
             _channel = channel;
             AddCloseListener(channel);
@@ -170,7 +169,9 @@ namespace TomP2P.Connection
             {
                 if (_channel != null)
                 {
-                    return _channel.Socket.IsOpen();
+                    // TODO check if correct
+                    throw new NotImplementedException();
+                    return _channel.IsActive;
                 }
                 return false;
             }
