@@ -35,6 +35,8 @@ namespace TomP2P.Connection.Windows.Netty
 
         public abstract Task SendMessageAsync(Message.Message message);
 
+        public abstract Task ReceiveMessageAsync();
+
         protected abstract void DoClose();
 
         protected void OnClosed()

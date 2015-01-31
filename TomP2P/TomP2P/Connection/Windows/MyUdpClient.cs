@@ -49,7 +49,7 @@ namespace TomP2P.Connection.Windows
         /// Receives bytes from the remote host and executes the client-side inbound pipeline.
         /// </summary>
         /// <returns></returns>
-        public async Task ReceiveAsync()
+        public async override Task ReceiveMessageAsync()
         {
             // receive bytes, create a datagram wrapper
             var udpRes = await _udpClient.ReceiveAsync();

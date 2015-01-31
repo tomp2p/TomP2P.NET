@@ -16,6 +16,8 @@ namespace TomP2P.Connection.Windows.Netty
 
         Task SendMessageAsync(Message.Message message);
 
+        Task ReceiveMessageAsync();
+
         /// <summary>
         /// The underlying socket that is used.
         /// </summary>

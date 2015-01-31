@@ -193,33 +193,11 @@ namespace TomP2P.Connection
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
             }
 
-            ITcpChannel tcpClient;
+            ITcpChannel channel;
             if (peerConnection != null && peerConnection.Channel != null && peerConnection.Channel.IsActive)
             {
-                tcpClient = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcsResponse);
-                if (AfterConnect(tcsResponse, message, tcpClient, isFireAndForget))
-                {
-                    // only send if channel could be created
-                    // TODO merge SendAsync(message) into BaseChannel and create a unified send method here
-                    // send request message
-                    // processes client-side outbound pipeline
-                    // (await for possible exception re-throw, does not block)
-                    await tcpClient.SendMessageAsync(message);
-
-                    // if not fire-and-forget, receive response
-                    if (isFireAndForget)
-                    {
-                        Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, tcpClient);
-                        tcsResponse.SetResult(null); // set FF result
-                    }
-                    else
-                    {
-                        // receive response message
-                        // processes client-side inbound pipeline
-                        await udpClient.ReceiveAsync();
-                    }
-                    udpClient.Close();
-                }
+                channel = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcsResponse);
+                await AfterConnectAsync(tcsResponse, message, channel, isFireAndForget);
             }
             else if (channelCreator != null)
             {
@@ -241,25 +219,12 @@ namespace TomP2P.Connection
                 }
                 else
                 {
-                    // "connectAndSend"
-                    var recipient = message.Recipient.CreateSocketTcp();
-                    var channel = SendTcpCreateChannel(recipient, channelCreator, peerConnection, handler,
-                        timeoutHandler, connectTimeoutMillis, tcsResponse);
-                    AfterConnect(tcsResponse, message, channel, isFireAndFroget);
+
                 }
             }
         }
 
-        /// <summary>
-        /// .NET implementation of afterConnect(). Works somewhat different because the following
-        /// sending operations differ.
-        /// </summary>
-        /// <param name="tcsResponse"></param>
-        /// <param name="message"></param>
-        /// <param name="channel"></param>
-        /// <param name="isFireAndForget"></param>
-        /// <returns>True, if channel could be established. False, otherwise.</returns>
-        private void AfterConnect(TaskCompletionSource<Message.Message> tcsResponse, Message.Message message,
+        private async Task AfterConnectAsync(TaskCompletionSource<Message.Message> tcsResponse, Message.Message message,
             IChannel channel, bool isFireAndForget)
         {
             // TODO use for UDP connections, too
@@ -276,7 +241,7 @@ namespace TomP2P.Connection
             
             // sending
             var sendTask = channel.SendMessageAsync(message);
-            AfterSend(sendTask, tcsResponse, isFireAndForget, channel);
+            await AfterSendAsync(sendTask, tcsResponse, isFireAndForget, channel);
         }
 
         /// <summary>
@@ -286,33 +251,38 @@ namespace TomP2P.Connection
         /// <param name="tcsResponse"></param>
         /// <param name="isFireAndForget">True, if we don't expect a response message.</param>
         /// <param name="channel"></param>
-        private void AfterSend(Task sendTask, TaskCompletionSource<Message.Message> tcsResponse, bool isFireAndForget, IChannel channel)
+        private async Task AfterSendAsync(Task sendTask, TaskCompletionSource<Message.Message> tcsResponse, bool isFireAndForget, IChannel channel)
         {
             // TODO use for UDP connections, too
-            sendTask.ContinueWith(t =>
+            await sendTask;
+            if (sendTask.IsFaulted)
             {
-                if (t.IsFaulted)
+                string msg = String.Format("Failed to write channel the request {0} {1}.", tcsResponse.Task.AsyncState,
+                    sendTask.Exception);
+                Logger.Warn(msg);
+                if (sendTask.Exception != null)
                 {
-                    string msg = String.Format("Failed to write channel the request {0} {1}.", tcsResponse.Task.AsyncState,
-                        sendTask.Exception);
-                    Logger.Warn(msg);
-                    if (t.Exception != null)
-                    {
-                        tcsResponse.SetException(t.Exception);
-                    }
-                    else
-                    {
-                        tcsResponse.SetException(new TaskFailedException(msg));
-                    }
+                    tcsResponse.SetException(sendTask.Exception);
                 }
-                if (isFireAndForget)
+                else
                 {
-                    Logger.Debug("Fire and forget message {0} sent. Close channel {1} now. {0}", tcsResponse.Task.AsyncState, channel);
-                    tcsResponse.SetResult(null); // set FF result
-                    // close channel now
-                    channel.Close();
+                    tcsResponse.SetException(new TaskFailedException(msg));
                 }
-            });
+            }
+            if (isFireAndForget)
+            {
+                Logger.Debug("Fire and forget message {0} sent. Close channel {1} now. {0}", tcsResponse.Task.AsyncState, channel);
+                tcsResponse.SetResult(null); // set FF result
+                // close channel now
+            }
+            else
+            {
+                //.NET specific, we wait here for the response
+                // receive response message
+                // processes client-side inbound pipeline
+                await channel.ReceiveMessageAsync();
+            }
+            channel.Close();
         }
 
         private MyTcpClient SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
