@@ -33,8 +33,9 @@ namespace TomP2P.Connection.Windows
         public async Task SendAsync(Message.Message message)
         {
             // execute outbound pipeline
-            var bytes = Pipeline.Write(message);
-            Pipeline.Reset(); // TODO find a cleaner way!
+            var writeRes = Pipeline.Write(message);
+            Pipeline.ResetWrite();
+            var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
             // finally, send bytes over the wire
             var senderEp = ConnectionHelper.ExtractSenderEp(message);
@@ -60,6 +61,7 @@ namespace TomP2P.Connection.Windows
 
             // execute inbound pipeline
             Pipeline.Read(dgram);
+            Pipeline.ResetRead();
         }
 
         protected override void DoClose()
@@ -74,7 +76,7 @@ namespace TomP2P.Connection.Windows
 
         public bool IsOpen
         {
-            get { throw new NotImplementedException(); }
+            get { return !IsClosed; } // TODO ok?
         }
 
         public override bool IsUdp

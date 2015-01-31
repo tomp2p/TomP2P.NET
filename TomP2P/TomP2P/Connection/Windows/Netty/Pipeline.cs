@@ -25,8 +25,10 @@ namespace TomP2P.Connection.Windows.Netty
         private IOutboundHandler _currentOutbound = null;
         private IInboundHandler _currentInbound = null;
 
-        private object _msg;
-        private byte[] _writeResult;
+        private object _msgW;
+        private object _msgR;
+        private object _writeResult;
+        private object _readResult;
 
         public Pipeline(IChannel channel)
             : this(channel, null)
@@ -49,15 +51,15 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        public byte[] Write(object msg) // TODO called from API and ctx, problematic? (should not due to while-checks)
+        public object Write(object msg)
         {
             if (msg == null)
             {
                 throw new NullReferenceException("msg");
             }
 
-            // set msg to newest provided value
-            _msg = msg;
+            // set msgW to newest provided value
+            _msgW = msg;
 
             // find next outbound handler
             while (GetNextOutbound() != null)
@@ -67,7 +69,7 @@ namespace TomP2P.Connection.Windows.Netty
             }
             if (_writeResult == null)
             {
-                _writeResult = ConnectionHelper.ExtractBytes(_msg);
+                _writeResult = _msgW;
             }
             return _writeResult;
         }
@@ -78,19 +80,35 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 throw new NullReferenceException("msg");
             }
+
+            // set msgR to newest provided value
+            _msgR = msg;
+
             // find next inbound handler
             while (GetNextInbound() != null)
             {
                 Logger.Debug("Processing inbound handler '{0}'.", _currentInbound);
                 _currentInbound.Read(_ctx, msg);
             }
-            return msg;
+            if (_readResult == null)
+            {
+                _readResult = _msgR;
+            }
+            return _readResult;
         }
 
-        public void Reset()
+        public void ResetWrite()
         {
-            _msg = null;
+            _currentOutbound = null;
+            _msgW = null;
             _writeResult = null;
+        }
+
+        public void ResetRead()
+        {
+            _currentInbound = null;
+            _msgR = null;
+            _readResult = null;
         }
 
         private IOutboundHandler GetNextOutbound()

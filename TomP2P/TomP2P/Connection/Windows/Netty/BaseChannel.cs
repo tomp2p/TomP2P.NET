@@ -6,7 +6,7 @@ namespace TomP2P.Connection.Windows.Netty
     {
         public event ClosedEventHandler Closed;
 
-        private bool _isClosed;
+        protected bool IsClosed;
         private Pipeline _pipeline;
 
         public void SetPipeline(Pipeline pipeline)
@@ -24,9 +24,9 @@ namespace TomP2P.Connection.Windows.Netty
         /// </summary>
         public void Close()
         {
-            if (!_isClosed)
+            if (!IsClosed)
             {
-                _isClosed = true;
+                IsClosed = true;
                 DoClose();
                 OnClosed();
             }

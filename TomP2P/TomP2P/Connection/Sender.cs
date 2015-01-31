@@ -156,7 +156,8 @@ namespace TomP2P.Connection
                 // TODO correct? or should MyUdpServer receive answer?
                 // receive response message
                 // processes client-side inbound pipeline
-                await udpClient.ReceiveAsync();
+                // TODO re-enable
+                //await udpClient.ReceiveAsync();
             }
             udpClient.Close();
         }

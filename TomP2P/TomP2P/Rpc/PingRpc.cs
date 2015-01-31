@@ -228,7 +228,7 @@ namespace TomP2P.Rpc
             else if (requestMessage.Type == Message.Message.MessageType.Request1 ||
                      requestMessage.Type == Message.Message.MessageType.Request4)
             {
-                Logger.Debug("Respond to regular ping. {0}.", requestMessage.Sender);
+                Logger.Debug("Respond to regular ping from {0}.", requestMessage.Sender);
                 // Test, if this is a broadcast message to ourselves.
                 // If it is, do not reply.
                 if (requestMessage.IsUdp

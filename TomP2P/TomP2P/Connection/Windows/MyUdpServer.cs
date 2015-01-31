@@ -57,14 +57,16 @@ namespace TomP2P.Connection.Windows
                 // server-side inbound pipeline
                 var buf = AlternativeCompositeByteBuf.CompBuffer();
                 buf.WriteBytes(udpRes.Buffer.ToSByteArray());
-                var dgram = new DatagramPacket(buf, Socket.LocalEndPoint as IPEndPoint, remoteEndPoint);
+                var dgram = new DatagramPacket(buf, (IPEndPoint) Socket.LocalEndPoint, remoteEndPoint);
                 Logger.Debug("MyUdpServer received {0}.", dgram);
 
-                var obj = Pipeline.Read(dgram);
+                var readRes = Pipeline.Read(dgram);
+                Pipeline.ResetRead();
                 
                 // server-side outbound pipeline
-                var bytes = Pipeline.Write(obj);
-                Pipeline.Reset();
+                var writeRes = Pipeline.Write(readRes);
+                Pipeline.ResetWrite();
+                var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
                 // return / send back
                 await _udpServer.SendAsync(bytes, bytes.Length, remoteEndPoint);
@@ -91,7 +93,7 @@ namespace TomP2P.Connection.Windows
 
         public bool IsOpen
         {
-            get { throw new System.NotImplementedException(); }
+            get { return !IsClosed; } // TODO ok?
         }
 
         public override Socket Socket
