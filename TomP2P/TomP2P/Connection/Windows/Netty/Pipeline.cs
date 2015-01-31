@@ -166,6 +166,7 @@ namespace TomP2P.Connection.Windows.Netty
         /// <returns></returns>
         public Pipeline AddFirst(string name, IChannelHandler handler)
         {
+            // TODO check if works correctly!
             CheckDuplicateName(name);
             var item = new HandlerItem(name, handler);
             _name2Item.Add(name, item);
@@ -274,6 +275,14 @@ namespace TomP2P.Connection.Windows.Netty
         public IChannel Channel
         {
             get { return _channel; }
+        }
+
+        /// <summary>
+        /// Returns the list of handler names.
+        /// </summary>
+        public IList<string> Names
+        {
+            get { return _handlers.Select(hi => hi.Name).ToList(); }
         }
 
         private struct HandlerItem

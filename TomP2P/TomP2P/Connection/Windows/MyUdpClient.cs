@@ -30,7 +30,7 @@ namespace TomP2P.Connection.Windows
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task SendAsync(Message.Message message)
+        public async override Task SendMessageAsync(Message.Message message)
         {
             // execute outbound pipeline
             var writeRes = Pipeline.Write(message);

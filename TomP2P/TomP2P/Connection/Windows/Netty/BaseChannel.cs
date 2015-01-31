@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -31,6 +32,8 @@ namespace TomP2P.Connection.Windows.Netty
                 OnClosed();
             }
         }
+
+        public abstract Task SendMessageAsync(Message.Message message);
 
         protected abstract void DoClose();
 

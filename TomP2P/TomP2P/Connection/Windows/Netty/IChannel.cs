@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -12,6 +13,8 @@ namespace TomP2P.Connection.Windows.Netty
         event ClosedEventHandler Closed;
 
         void Close();
+
+        Task SendMessageAsync(Message.Message message);
 
         /// <summary>
         /// The underlying socket that is used.
