@@ -49,6 +49,8 @@ namespace TomP2P.Tests.Interop
 
                 Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
                 Assert.AreEqual(responseMessage.Sender, server);
+                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
             }
             finally
             {

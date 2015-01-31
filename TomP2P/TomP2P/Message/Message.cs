@@ -991,7 +991,7 @@ namespace TomP2P.Message
             var sb = new StringBuilder("msgid=");
             return sb.Append(MessageId)
                 .Append(",t=").Append(Type)
-                .Append(",c=").Append(Enum.GetName(typeof(Rpc.Rpc.Commands), Command)) // TODO check if this works, as Command is byte
+                .Append(",c=").Append(Enum.GetName(typeof(Rpc.Rpc.Commands), Command))
                 .Append(IsUdp ? "udp" : "tcp")
                 .Append(",s=").Append(Sender)
                 .Append(",r=").Append(Recipient).ToString();
