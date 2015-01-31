@@ -53,7 +53,7 @@ namespace TomP2P.Message
             }
             finally
             {
-                if (!_cumulation.IsReadable)
+                if (_cumulation != null && !_cumulation.IsReadable)
                 {
                     _cumulation = null;
                     // no need to discard bytes as this was done in the decoder already

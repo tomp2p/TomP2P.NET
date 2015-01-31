@@ -2,15 +2,17 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using NLog;
 using TomP2P.Connection.Windows.Netty;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
-    /// <summary>
-    /// Slightly extended <see cref="TcpClient"/>.
-    /// </summary>
     public class MyTcpClient : BaseChannel, ITcpClientChannel
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         // wrapped member
         private readonly TcpClient _tcpClient;
 
@@ -26,14 +28,33 @@ namespace TomP2P.Connection.Windows
             return _tcpClient.ConnectAsync(remoteEndPoint.Address, remoteEndPoint.Port);
         }
 
-        public Task SendMessageAsync(Message.Message message)
+        public async Task SendMessageAsync(Message.Message message)
         {
-            throw new NotImplementedException();
+            // execute outbound pipeline
+            var writeRes = Pipeline.Write(message);
+            Pipeline.ResetWrite();
+            var bytes = ConnectionHelper.ExtractBytes(writeRes);
+
+            // finally, send bytes over the wire
+            var senderEp = ConnectionHelper.ExtractSenderEp(message);
+            var receiverEp = _tcpClient.Client.RemoteEndPoint; // TODO correct?
+            Logger.Debug("Send TCP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
+
+            await _tcpClient.GetStream().WriteAsync(bytes, 0, bytes.Length);
         }
 
-        public Task ReceiveMessageAsync()
+        public async Task ReceiveMessageAsync()
         {
-            throw new NotImplementedException();
+            // receive bytes
+            var bytesRecv = new byte[100];
+            await _tcpClient.GetStream().ReadAsync(bytesRecv, 0, bytesRecv.Length);
+
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            buf.WriteBytes(bytesRecv.ToSByteArray());
+
+            // execute inbound pipeline
+            Pipeline.Read(buf); // TODO what to insert?
+            Pipeline.ResetRead();
         }
 
         protected override void DoClose()
