@@ -125,7 +125,18 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(delegate
             {
-                //var response = ConnectionBean.Sender.SendTcp
+                ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                    ConnectionTimeoutTcpMillis, null);
+            });
+            return _tcsResponse.Task;
+        }
+
+        public Task<Message.Message> SendTcpAsync(PeerConnection peerConnection)
+        {
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds,
+                    ConnectionTimeoutTcpMillis, peerConnection);
             });
             return _tcsResponse.Task;
         }

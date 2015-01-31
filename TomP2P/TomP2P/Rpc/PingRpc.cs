@@ -131,11 +131,15 @@ namespace TomP2P.Rpc
         /// <param name="channelCreator">The channel creator where we create a TCP channel.</param>
         /// <param name="configuration"></param>
         /// <returns></returns>
-        public Task<Message.Message> FireTcp(PeerAddress remotePeer, ChannelCreator channelCreator,
+        public Task<Message.Message> FireTcpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            throw new NotImplementedException();
+            return
+                CreateHandler(remotePeer, Message.Message.MessageType.RequestFf1, configuration)
+                    .SendTcpAsync(channelCreator);
         }
+
+        // TODO implement rest of ping methods
 
         /// <summary>
         /// Creates a RequestHandler.

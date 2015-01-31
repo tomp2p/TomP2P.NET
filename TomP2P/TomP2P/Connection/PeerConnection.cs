@@ -26,11 +26,11 @@ namespace TomP2P.Connection
         public int HeartBeatMillis { get; private set; }
 
         // these may be called from different threads, but they will never be called concurrently within this library
-        private volatile IChannel _channel;
+        private volatile ITcpChannel _channel;
 
         private PeerConnection(Semaphore oneConnection, PeerAddress remotePeer, ChannelCreator cc, bool initiator,
             IDictionary<TaskCompletionSource<ChannelCreator>, TaskCompletionSource<Message.Message>> map,
-            TaskCompletionSource<object> tcsClose, int heartBeatMillis, IChannel channel)
+            TaskCompletionSource<object> tcsClose, int heartBeatMillis, ITcpChannel channel)
         {
             _oneConnection = oneConnection;
             RemotePeer = remotePeer;
@@ -65,7 +65,7 @@ namespace TomP2P.Connection
         /// <param name="remotePeer">The remote peer to connect to.</param>
         /// <param name="channel">The already open TCP channel.</param>
         /// <param name="heartBeatMillis"></param>
-        public PeerConnection(PeerAddress remotePeer, IChannel channel, int heartBeatMillis)
+        public PeerConnection(PeerAddress remotePeer, ITcpChannel channel, int heartBeatMillis)
         {
             RemotePeer = remotePeer;
             _channel = channel;
@@ -78,14 +78,14 @@ namespace TomP2P.Connection
             _tcsClose = new TaskCompletionSource<object>();
         }
 
-        public PeerConnection SetChannel(MyTcpClient channel)
+        public PeerConnection SetChannel(ITcpChannel channel)
         {
             _channel = channel;
             AddCloseListener(channel);
             return this;
         }
 
-        public IChannel Channel
+        public ITcpChannel Channel
         {
             get { return _channel; }
         }
@@ -95,7 +95,7 @@ namespace TomP2P.Connection
             get { return _tcsClose.Task; }
         }
 
-        private void AddCloseListener(IChannel channel)
+        private void AddCloseListener(ITcpChannel channel)
         {
             channel.Closed += sender =>
             {

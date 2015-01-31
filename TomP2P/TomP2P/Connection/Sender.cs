@@ -143,7 +143,8 @@ namespace TomP2P.Connection
 
             // send request message
             // processes client-side outbound pipeline
-            await udpClient.SendAsync(message); // TODO await?
+            // (await for possible exception re-throw, does not block)
+            await udpClient.SendAsync(message);
 
             // if not fire-and-forget, receive response
             if (isFireAndForget)
@@ -153,7 +154,6 @@ namespace TomP2P.Connection
             }
             else
             {
-                // TODO correct? or should MyUdpServer receive answer?
                 // receive response message
                 // processes client-side inbound pipeline
                 await udpClient.ReceiveAsync();
@@ -161,11 +161,10 @@ namespace TomP2P.Connection
             udpClient.Close();
         }
 
-        /*
         /// <summary>
         /// Sends a message via TCP.
         /// </summary>
-        /// <param name="isFireAndFroget">True, if handler == null.</param>
+        /// <param name="handler">The handler to deal with the response message.</param>
         /// <param name="tcsResponse">The TCS for the response message. (FutureResponse equivalent.)</param>
         /// <param name="message">The message to send.</param>
         /// <param name="channelCreator">The channel creator for the TCP channel.</param>
@@ -173,14 +172,14 @@ namespace TomP2P.Connection
         /// <param name="connectTimeoutMillis">The idle time for the connection setup.</param>
         /// <param name="peerConnection"></param>
         /// <returns></returns>
-        public Message.Message SendTcp(bool isFireAndFroget, TaskCompletionSource<Message.Message> tcsResponse,
+        public async Task SendTcpAsync(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
             Message.Message message, ChannelCreator channelCreator, int idleTcpSeconds, int connectTimeoutMillis,
             PeerConnection peerConnection)
         {
             // no need to continue if already finished
             if (tcsResponse.Task.IsCompleted)
             {
-                return tcsResponse.Task.Result;
+                return;
             }
             RemovePeerIfFailed(tcsResponse, message);
 
@@ -190,6 +189,7 @@ namespace TomP2P.Connection
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
             }
 
+            MyTcpClient channel;
             if (peerConnection != null && peerConnection.Channel != null && peerConnection.Channel.IsActive)
             {
                 var channel = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcs);
@@ -258,7 +258,7 @@ namespace TomP2P.Connection
             // otherwise we need to add a handler
             AddOrReplace();
             // TODO uncommented Java stuff needed?
-        }*/
+        }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
         {

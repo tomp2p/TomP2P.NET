@@ -38,7 +38,8 @@ namespace TomP2P.Connection.Windows
 
         public bool IsActive
         {
-            get { throw new NotImplementedException(); }
+            // from Java Netty: "Return true if the Channel is active and so connected."
+            get { return _tcpClient.Connected; }
         }
 
         public override bool IsUdp
