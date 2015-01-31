@@ -2,19 +2,15 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Futures;
 using TomP2P.Message;
-using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
-using Pipeline = TomP2P.Connection.Windows.Netty.Pipeline;
 
 namespace TomP2P.Connection
 {
@@ -146,7 +142,7 @@ namespace TomP2P.Connection
             // send request message
             // processes client-side outbound pipeline
             // (await for possible exception re-throw, does not block)
-            await udpClient.SendAsync(message);
+            await udpClient.SendMessageAsync(message);
 
             // if not fire-and-forget, receive response
             if (isFireAndForget)
@@ -158,7 +154,7 @@ namespace TomP2P.Connection
             {
                 // receive response message
                 // processes client-side inbound pipeline
-                await udpClient.ReceiveAsync();
+                await udpClient.ReceiveMessageAsync();
             }
             udpClient.Close();
         }
@@ -219,9 +215,85 @@ namespace TomP2P.Connection
                 }
                 else
                 {
-
+                    await ConnectAndSendAsync(handler, tcsResponse, channelCreator, connectTimeoutMillis, peerConnection,
+                        timeoutHandler, message);
                 }
             }
+        }
+
+        /// <summary>
+        /// This method initiates the reverse connection setup.
+        /// It creates a new message and sends it via relay to the unreachable peer
+        /// which then connects to this peer again. After the connect message from the
+        /// unreachable peer, this peer weill send the original message and its content
+        /// directly.
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="tcsResponse"></param>
+        /// <param name="message"></param>
+        /// <param name="channelCreator"></param>
+        /// <param name="connectTimeoutMillis"></param>
+        /// <param name="peerConnection"></param>
+        /// <param name="timeoutHandler"></param>
+        private void HandleRcon(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
+            Message.Message message, ChannelCreator channelCreator, int connectTimeoutMillis,
+            PeerConnection peerConnection, TimeoutFactory timeoutHandler)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleRelay(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
+            Message.Message message, ChannelCreator channelCreator, int idleTcpSeconds, int connectTimeoutMillis,
+            PeerConnection peerConnection, TimeoutFactory timeoutHandler)
+        {
+            throw new NotImplementedException();
+        }
+
+        private ITcpChannel SendTcpPeerConnection(PeerConnection peerConnection, IChannelHandler handler, ChannelCreator channelCreator,
+            TaskCompletionSource<Message.Message> tcsResponse)
+        {
+            // if the channel gets closed, the future should get notified
+            var channel = peerConnection.Channel;
+
+            // channel creator can be null if we don't need to create any channels
+            if (channelCreator != null)
+            {
+                // TODO this doesn't do anything yet
+                channelCreator.SetupCloseListener(channel, tcsResponse);
+            }
+
+            // we need to replace the handler if this comes from the peer that created a peer connection,
+            // otherwise we need to add a handler
+            AddOrReplace(channel.Pipeline, "dispatcher", "handler", handler);
+            // TODO uncommented Java stuff needed?
+            return channel;
+        }
+
+        private void AddOrReplace(Pipeline pipeline, string before, string name, IChannelHandler handler)
+        {
+            if (pipeline.Names.Contains(name))
+            {
+                pipeline.Replace(name, name, handler);
+            }
+            else
+            {
+                if (before == null)
+                {
+                    pipeline.AddFirst(name, handler);
+                }
+                else
+                {
+                    pipeline.AddBefore(before, name, handler);
+                }
+            }
+        }
+
+        private async Task ConnectAndSendAsync(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse, ChannelCreator channelCreator, int connectTimeoutMillis, PeerConnection peerConnection, TimeoutFactory timeoutHandler, Message.Message message)
+        {
+            var recipient = message.Recipient.CreateSocketTcp();
+            var channel = SendTcpCreateChannel(recipient, channelCreator, peerConnection, handler, timeoutHandler,
+                connectTimeoutMillis, tcsResponse);
+            await AfterConnectAsync(tcsResponse, message, channel, handler == null);
         }
 
         private async Task AfterConnectAsync(TaskCompletionSource<Message.Message> tcsResponse, Message.Message message,
@@ -285,8 +357,8 @@ namespace TomP2P.Connection
             channel.Close();
         }
 
-        private MyTcpClient SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
-            PeerConnection peerConnection, handler , TimeoutFactory timeoutHandler, int connectTimeoutMillis,
+        private ITcpChannel SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
+            PeerConnection peerConnection, IChannelHandler handler, TimeoutFactory timeoutHandler, int connectTimeoutMillis,
             TaskCompletionSource<Message.Message> tcsResponse)
         {
             // TODO attach handlers
@@ -298,45 +370,6 @@ namespace TomP2P.Connection
                 // TODO heartbeat
             }
             return channel;
-        }
-
-        private ITcpChannel SendTcpPeerConnection(PeerConnection peerConnection, IChannelHandler handler , ChannelCreator channelCreator,
-            TaskCompletionSource<Message.Message> tcsResponse)
-        {
-            // if the channel gets closed, the future should get notified
-            var channel = peerConnection.Channel;
-
-            // channel creator can be null if we don't need to create any channels
-            if (channelCreator != null)
-            {
-                // TODO this doesn't do anything yet
-                channelCreator.SetupCloseListener(channel, tcsResponse);
-            }
-
-            // we need to replace the handler if this comes from the peer that created a peer connection,
-            // otherwise we need to add a handler
-            AddOrReplace(channel.Pipeline, "dispatcher", "handler", handler);
-            // TODO uncommented Java stuff needed?
-            return channel;
-        }
-
-        private void AddOrReplace(Pipeline pipeline, string before, string name, IChannelHandler handler)
-        {
-            if (pipeline.Names.Contains(name))
-            {
-                pipeline.Replace(name, name, handler);
-            }
-            else
-            {
-                if (before == null)
-                {
-                    pipeline.AddFirst(name, handler);
-                }
-                else
-                {
-                    pipeline.AddBefore(before, name, handler);
-                }
-            }
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
