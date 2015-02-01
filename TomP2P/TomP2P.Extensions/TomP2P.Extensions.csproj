@@ -61,8 +61,8 @@
     <Compile Include="Netty\Buffer\UnpooledByteBufAllocator.cs" />
     <Compile Include="Netty\Buffer\UnpooledHeapByteBuf.cs" />
     <Compile Include="SocketExtensions.cs" />
-    <Compile Include="Workaround\AtomicInteger.cs" />
-    <Compile Include="Workaround\AtomicLong.cs" />
+    <Compile Include="Workaround\VolatileInteger.cs" />
+    <Compile Include="Workaround\VolatileLong.cs" />
     <Compile Include="Workaround\IKey.cs" />
     <Compile Include="Workaround\IPrivateKey.cs" />
     <Compile Include="Workaround\IPublicKey.cs" />

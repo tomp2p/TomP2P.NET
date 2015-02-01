@@ -12,7 +12,7 @@ namespace TomP2P.Connection.Windows.Netty
     }
 
     /// <summary>
-    /// Marker interface for inbound channel handlers.
+    /// Interface for all inbound channel handlers.
     /// </summary>
     public interface IInboundHandler : IChannelHandler
     {
@@ -20,10 +20,16 @@ namespace TomP2P.Connection.Windows.Netty
     }
 
     /// <summary>
-    /// Marker interface for outbound channel handlers.
+    /// Interface for all outbound channel handlers.
     /// </summary>
     public interface IOutboundHandler : IChannelHandler
     {
         void Write(ChannelHandlerContext ctx, object msg);
     }
+
+    /// <summary>
+    /// Marker interface for all duplex (inbound and outbound) handlers.
+    /// </summary>
+    public interface IDuplexHandler : IInboundHandler, IOutboundHandler
+    { }
 }

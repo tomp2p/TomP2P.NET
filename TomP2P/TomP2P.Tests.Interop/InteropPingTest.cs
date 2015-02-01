@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -27,7 +23,7 @@ namespace TomP2P.Tests.Interop
             _tcs = new TaskCompletionSource<PeerAddress>();
             ThreadPool.QueueUserWorkItem(delegate
             {
-                JarRunner.Run("TestPingJavaUdp-start", DataReceived);
+                JarRunner.Run("JavaPingReceiver-start", DataReceived);
             });
             PeerAddress server = await _tcs.Task;
 
@@ -62,7 +58,7 @@ namespace TomP2P.Tests.Interop
                 {
                     sender.ShutdownAsync().Wait();
                 }
-                JarRunner.WriteToProcess("TestPingJavaUdp-stop");
+                JarRunner.WriteToProcess("JavaPingReceiver-stop");
             }
         }
 
@@ -73,7 +69,7 @@ namespace TomP2P.Tests.Interop
             _tcs = new TaskCompletionSource<PeerAddress>();
             ThreadPool.QueueUserWorkItem(delegate
             {
-                JarRunner.Run("TestPingJavaUdp-start", DataReceived);
+                JarRunner.Run("JavaPingReceiver-start", DataReceived);
             });
             PeerAddress server = await _tcs.Task;
 
@@ -108,7 +104,7 @@ namespace TomP2P.Tests.Interop
                 {
                     sender.ShutdownAsync().Wait();
                 }
-                JarRunner.WriteToProcess("TestPingJavaUdp-stop");
+                JarRunner.WriteToProcess("JavaPingReceiver-stop");
             }
         }
 
@@ -120,7 +116,7 @@ namespace TomP2P.Tests.Interop
             _tcs = new TaskCompletionSource<PeerAddress>();
             ThreadPool.QueueUserWorkItem(delegate
             {
-                JarRunner.Run("TestPingJavaUdp-start", DataReceived);
+                JarRunner.Run("JavaPingReceiver-start", DataReceived);
             });
             PeerAddress server = await _tcs.Task;
 
@@ -153,8 +149,61 @@ namespace TomP2P.Tests.Interop
                 {
                     sender.ShutdownAsync().Wait();
                 }
-                JarRunner.WriteToProcess("TestPingJavaUdp-stop");
+                JarRunner.WriteToProcess("JavaPingReceiver-stop");
             }
+        }
+
+        [Test]
+        public async void TestPingJavaTcp()
+        {
+            // setup Java server and get it's PeerAddress
+            _tcs = new TaskCompletionSource<PeerAddress>();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                JarRunner.Run("JavaPingReceiver-start", DataReceived);
+            });
+            PeerAddress server = await _tcs.Task;
+
+            // ping & test
+            Peer sender = null;
+            ChannelCreator cc = null;
+            try
+            {
+                // setup .NET sender
+                sender = new PeerBuilder(new Number160("0x9876")).
+                    SetP2PId(55).
+                    SetPorts(2424).
+                    Start();
+
+                cc = await sender.ConnectionBean.Reservation.CreateAsync(0, 1);
+                var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
+                var task = handshake.PingTcpAsync(server, cc, new DefaultConnectionConfiguration());
+                var responseMessage = await task;
+
+                Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
+                Assert.AreEqual(responseMessage.Sender, server);
+                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                JarRunner.WriteToProcess("JavaPingReceiver-stop");
+            }    
+        }
+
+        [Test]
+        public async void TestPingJavaTcp2()
+        {
+            // TODO implement
+            throw new NotImplementedException();
         }
 
         private void DataReceived(object sender, DataReceivedEventArgs args)

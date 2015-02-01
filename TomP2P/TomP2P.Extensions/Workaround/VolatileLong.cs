@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading;
 
 namespace TomP2P.Extensions.Workaround
 {
     /// <summary>
     /// An attempt to mimick Java's AtomicLong in .NET.
+    /// In .NET, however, it is reasonable to make it a struct rather than a class.
+    /// This is also used instead of Java's "volatile long", because long uses 64 bits.
     /// </summary>
-    public class AtomicLong
+    public struct VolatileLong
     {
         private long _value;
 
-        public AtomicLong(long initialValue)
+        public VolatileLong(long initialValue)
         {
             _value = initialValue;
         }

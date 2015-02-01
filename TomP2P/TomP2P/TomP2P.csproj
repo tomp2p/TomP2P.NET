@@ -48,6 +48,7 @@
     <Compile Include="Connection\DefaultPipelineFilter.cs" />
     <Compile Include="Connection\DirectResponder.cs" />
     <Compile Include="Connection\DiscoverNetworks.cs" />
+    <Compile Include="Connection\HeartBeat.cs" />
     <Compile Include="Connection\IPipelineFilter.cs" />
     <Compile Include="Connection\NET Helper\ConnectionHelper.cs" />
     <Compile Include="Connection\Bindings.cs" />

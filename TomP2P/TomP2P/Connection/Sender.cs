@@ -213,6 +213,7 @@ namespace TomP2P.Connection
                             peerConnection, timeoutHandler);
                     }
                 }
+                // normal connection
                 else
                 {
                     await ConnectAndSendAsync(handler, tcsResponse, channelCreator, connectTimeoutMillis, peerConnection,
@@ -363,8 +364,25 @@ namespace TomP2P.Connection
             PeerConnection peerConnection, IChannelHandler handler, TimeoutFactory timeoutHandler, int connectTimeoutMillis,
             TaskCompletionSource<Message.Message> tcsResponse)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            // create pipeline
+            var handlers = new Dictionary<string, IChannelHandler>();
+            if (timeoutHandler != null)
+            {
+                handlers.Add("timeout0", timeoutHandler.CreateIdleStateHandlerTomP2P());
+                handlers.Add("timeout1", timeoutHandler.CreateTimeHandler());
+            }
+            handlers.Add("decoder", new TomP2PCumulationTcp(ChannelClientConfiguration.SignatureFactory));
+            handlers.Add("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
+            if (peerConnection != null)
+            {
+                // we expect responses on this connection
+                handlers.Add("dispatcher", _dispatcher);
+            }
+            if (timeoutHandler != null)
+            {
+                handlers.Add("handler", handler);
+            }
+            HeartBeat heartBeat = null;
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)

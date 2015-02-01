@@ -4,12 +4,13 @@ namespace TomP2P.Extensions.Workaround
 {
     /// <summary>
     /// An attempt to mimick Java's AtomicInteger in .NET.
+    /// In .NET, however, it is reasonable to make it a struct rather than a class.
     /// </summary>
-    public class AtomicInteger
+    public struct VolatileInteger
     {
         private long _value;
 
-        public AtomicInteger(int initialValue)
+        public VolatileInteger(int initialValue)
         {
             _value = initialValue;
         }

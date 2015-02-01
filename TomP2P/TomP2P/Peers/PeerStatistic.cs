@@ -19,9 +19,9 @@ namespace TomP2P.Peers
         /// </summary>
         public long Created { private get; set; }
         
-        private readonly AtomicLong _lastSeenOnline = new AtomicLong(0);
-        private readonly AtomicInteger _successfullyChecked = new AtomicInteger(0);
-        private readonly AtomicInteger _failed = new AtomicInteger(0);
+        private readonly VolatileLong _lastSeenOnline = new VolatileLong(0);
+        private readonly VolatileInteger _successfullyChecked = new VolatileInteger(0);
+        private readonly VolatileInteger _failed = new VolatileInteger(0);
 
         private readonly Number160 _peerId;
         /// <summary>

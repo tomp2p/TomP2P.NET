@@ -150,7 +150,7 @@ namespace TomP2P.Utils
                 return;
             }
             int count = tasks.Count();
-            var finished = new AtomicInteger(0);
+            var finished = new VolatileInteger(0);
             foreach (var task in tasks)
             {
                 task.ContinueWith(delegate

@@ -260,7 +260,7 @@ namespace TomP2P.Connection
             }
             else
             {
-                var completeCounter = new AtomicInteger(0);
+                var completeCounter = new VolatileInteger(0);
                 foreach (var channelCreator in _channelCreators)
                 {
                     // It's important to set the listener before calling shutdown.
