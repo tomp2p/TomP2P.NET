@@ -65,7 +65,7 @@ namespace TomP2P.Connection.Windows.Netty
             // find next outbound handler
             while (GetNextOutbound() != null)
             {
-                Logger.Debug("Processing outbound handler '{0}'.", _currentOutbound);
+                Logger.Debug("Channel '{0}': Processing outbound handler '{1}'.", _channel, _currentOutbound);
                 _currentOutbound.Write(_ctx, msg);
             }
             if (_writeResult == null)
@@ -88,7 +88,7 @@ namespace TomP2P.Connection.Windows.Netty
             // find next inbound handler
             while (GetNextInbound() != null)
             {
-                Logger.Debug("Processing inbound handler '{0}'.", _currentInbound);
+                Logger.Debug("Channel '{0}': Processing inbound handler '{1}'.", _channel, _currentInbound);
                 _currentInbound.Read(_ctx, msg);
             }
             if (_readResult == null)
