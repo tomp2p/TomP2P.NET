@@ -104,8 +104,6 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupUdp(IPEndPoint listenAddress)
         {
-            // TODO re-enable
-            return true;
             try
             {
                 // binds in constructor

@@ -37,7 +37,7 @@ namespace TomP2P.Connection.Windows
 
             // finally, send bytes over the wire
             var senderEp = ConnectionHelper.ExtractSenderEp(message);
-            var receiverEp = _tcpClient.Client.RemoteEndPoint; // TODO correct?
+            var receiverEp = _tcpClient.Client.RemoteEndPoint;
             Logger.Debug("Send TCP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
             await _tcpClient.GetStream().WriteAsync(bytes, 0, bytes.Length);
