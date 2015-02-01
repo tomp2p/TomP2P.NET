@@ -23,6 +23,8 @@ namespace TomP2P.Connection.Windows.Netty
         bool IsUdp { get; }
 
         bool IsTcp { get; }
+
+        bool IsOpen { get; }
     }
 
     /// <summary>
@@ -37,7 +39,5 @@ namespace TomP2P.Connection.Windows.Netty
     /// Interface for all UDP channels.
     /// </summary>
     public interface IUdpChannel : IChannel
-    {
-        bool IsOpen { get; }
-    }
+    { }
 }

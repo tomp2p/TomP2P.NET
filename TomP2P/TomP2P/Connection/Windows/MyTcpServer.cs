@@ -100,7 +100,7 @@ namespace TomP2P.Connection.Windows
         public bool IsActive
         {
             // from Java Netty: "Return true if the Channel is active and so connected."
-            get { return !_isStopped; }
+            get { return IsOpen && !_isStopped; }
         }
 
         public override bool IsUdp

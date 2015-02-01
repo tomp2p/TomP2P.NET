@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Text;
 using System.Threading;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -58,6 +54,7 @@ namespace TomP2P.Connection
         public void Write(ChannelHandlerContext ctx, object msg)
         {
             // TODO find ChannelPromise.operationComplete event equivalent
+            throw new NotImplementedException();
             ctx.FireWrite(msg);
         }
 
@@ -71,6 +68,8 @@ namespace TomP2P.Connection
             _peerConnection = peerConnection;
             return this;
         }
+
+        // TODO find event equivalents for initializing/destroying the loop
 
         private void Initialize(ChannelHandlerContext ctx)
         {
@@ -91,9 +90,41 @@ namespace TomP2P.Connection
             _loop = new Timer(Heartbeating, ctx, TimeToHeartBeatMillis, TimeToHeartBeatMillis);
         }
 
+        private void Destroy()
+        {
+            _state = 2;
+
+            if (_loop != null)
+            {
+                _loop.Dispose();
+                _loop = null;
+            }
+        }
+
         private void Heartbeating(object state)
         {
-            throw new NotImplementedException();
+            var ctx = state as ChannelHandlerContext;
+            if (!ctx.Channel.IsOpen)
+            {
+                return;
+            }
+
+            var currentTime = Convenient.CurrentTimeMillis();
+            var lastIoTime = Math.Max(_lastReadTime.Get(), _lastWriteTime.Get());
+            var nextDelay = TimeToHeartBeatMillis - (currentTime - lastIoTime);
+
+            if (_peerConnection != null && nextDelay <= 0)
+            {
+                Logger.Debug("Sending heart beat to {0}. Channel: {1}.", _peerConnection.RemotePeer, _peerConnection.Channel);
+                var builder = _pingBuilderFactory.Create();
+                
+                // TODO finish implementation
+                throw new NotImplementedException();
+            }
+            else
+            {
+                Logger.Debug("Not sending heart beat to {0}. Channel: {1}.", _peerConnection.RemotePeer, _peerConnection.Channel);
+            }
         }
     }
 }

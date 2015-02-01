@@ -91,11 +91,6 @@ namespace TomP2P.Connection.Windows
             return sendBytes;
         }*/
 
-        public bool IsOpen
-        {
-            get { return !IsClosed; } // TODO ok?
-        }
-
         public override Socket Socket
         {
             get { return _udpServer.Client; }

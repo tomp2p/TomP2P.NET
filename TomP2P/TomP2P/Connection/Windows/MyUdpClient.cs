@@ -61,11 +61,6 @@ namespace TomP2P.Connection.Windows
             get { return _udpClient.Client; }
         }
 
-        public bool IsOpen
-        {
-            get { return !IsClosed; } // TODO ok?
-        }
-
         public override bool IsUdp
         {
             get { return true; }

@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -47,5 +48,10 @@ namespace TomP2P.Connection.Windows.Netty
         public abstract bool IsUdp { get; }
 
         public abstract bool IsTcp { get; }
+
+        public bool IsOpen
+        {
+            get { return !IsClosed; } // TODO ok?
+        }
     }
 }
