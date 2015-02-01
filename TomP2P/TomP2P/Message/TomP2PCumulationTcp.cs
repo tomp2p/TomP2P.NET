@@ -64,6 +64,9 @@ namespace TomP2P.Message
             }
         }
 
+        // TODO find channelInactive equivalent
+        // TODO find exceptionCaught equivalent
+
         private void Decoding(ChannelHandlerContext ctx, IPEndPoint sender, IPEndPoint receiver)
         {
             bool finished = true;
@@ -80,7 +83,14 @@ namespace TomP2P.Message
                 }
                 else
                 {
-                    if (_lastId == _decoder.Message.MessageId) // TODO Message is null, why?
+                    if (_decoder.Message == null)
+                    {
+                        // Wait for more data. This may happen if we don't get the first
+                        // 58 bytes, which is the size of the header.
+                        return;
+                    }
+
+                    if (_lastId == _decoder.Message.MessageId)
                     {
                         // This ID was the same as the last and the last message already
                         // finished the parsing. So this message is finished as well, although
@@ -96,8 +106,5 @@ namespace TomP2P.Message
                 }
             }
         }
-
-        // TODO find channelInactive equivalent
-        // TODO find exceptionCaught equivalent
     }
 }
