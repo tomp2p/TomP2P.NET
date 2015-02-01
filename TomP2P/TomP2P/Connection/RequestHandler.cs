@@ -79,11 +79,10 @@ namespace TomP2P.Connection
         {
             // TODO find more efficient way instead of 1 thread per message
             // so far, everything is sync -> invoke async / new thread
-            /*ThreadPool.QueueUserWorkItem(async delegate
+            ThreadPool.QueueUserWorkItem(async delegate
             {
                 await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
-            });*/
-            ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+            });
 
             return _tcsResponse.Task;
         }
@@ -95,9 +94,9 @@ namespace TomP2P.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendBroadcastUdpAsync(ChannelCreator channelCreator)
         {
-            ThreadPool.QueueUserWorkItem(delegate
+            ThreadPool.QueueUserWorkItem(async delegate
             {
-                ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
+                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
             });
             return _tcsResponse.Task;
         }
@@ -109,9 +108,9 @@ namespace TomP2P.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> FireAndForgetUdpAsync(ChannelCreator channelCreator)
         {
-            ThreadPool.QueueUserWorkItem(delegate
+            ThreadPool.QueueUserWorkItem(async delegate
             {
-                ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
+                await ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
             });
             return _tcsResponse.Task;
         }
@@ -123,9 +122,9 @@ namespace TomP2P.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendTcpAsync(ChannelCreator channelCreator)
         {
-            ThreadPool.QueueUserWorkItem(delegate
+            ThreadPool.QueueUserWorkItem(async delegate
             {
-                ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
                     ConnectionTimeoutTcpMillis, null);
             });
             return _tcsResponse.Task;
@@ -133,9 +132,9 @@ namespace TomP2P.Connection
 
         public Task<Message.Message> SendTcpAsync(PeerConnection peerConnection)
         {
-            ThreadPool.QueueUserWorkItem(delegate
+            ThreadPool.QueueUserWorkItem(async delegate
             {
-                ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds,
+                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds,
                     ConnectionTimeoutTcpMillis, peerConnection);
             });
             return _tcsResponse.Task;

@@ -30,7 +30,6 @@ namespace TomP2P.Message
                 return;
             }
             
-            // TODO works?
             var sender = (IPEndPoint) ctx.Channel.Socket.RemoteEndPoint;
             var receiver = (IPEndPoint) ctx.Channel.Socket.LocalEndPoint;
             
@@ -68,7 +67,7 @@ namespace TomP2P.Message
             while (finished && moreData)
             {
                 // receiver is server.localAddress
-                finished = _decoder.Decode(_cumulation, receiver, sender);
+                finished = _decoder.Decode(ctx, _cumulation, receiver, sender);
                 if (finished)
                 {
                     _lastId = _decoder.Message.MessageId;
@@ -77,11 +76,11 @@ namespace TomP2P.Message
                 }
                 else
                 {
-                    // This ID was the same as the last and the last message already
-                    // finished the parsing. So this message is finished as well, although
-                    // it may send only partial content.
                     if (_lastId == _decoder.Message.MessageId)
                     {
+                        // This ID was the same as the last and the last message already
+                        // finished the parsing. So this message is finished as well, although
+                        // it may send only partial content.
                         finished = true;
                         moreData = _cumulation.ReadableBytes > 0;
                         ctx.FireRead(_decoder.PrepareFinish());

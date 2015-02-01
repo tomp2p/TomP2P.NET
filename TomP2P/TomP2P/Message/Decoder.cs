@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
@@ -59,17 +60,14 @@ namespace TomP2P.Message
             _signatureFactory = signatureFactory;
         }
 
-        // TODO ctx needed?
-        public bool Decode(AlternativeCompositeByteBuf buffer, IPEndPoint recipient, IPEndPoint sender)
+        public bool Decode(ChannelHandlerContext ctx, AlternativeCompositeByteBuf buffer, IPEndPoint recipient, IPEndPoint sender)
         {
             Logger.Debug("Decoding of TomP2P starts now. Readable: {0}.", buffer.ReadableBytes);
 
             try
             {
-                // TODO review/redo: handle specific stuff
                 long readerBefore = buffer.ReaderIndex;
-
-                // TODO set sender of this message for handling timeout??
+                // TODO set sender for handling timeout?
 
                 if (Message == null)
                 {
@@ -78,10 +76,10 @@ namespace TomP2P.Message
                     {
                         // TODO store the sender as an attribute??
 
-                        Message.SetIsUdp(false); // TODO how to get whether it's UDP? -> provide via ctx
+                        Message.SetIsUdp(ctx.Channel.IsUdp);
                         if (Message.IsFireAndForget() && Message.IsUdp)
                         {
-                            // TODO remove timeout
+                            TimeoutFactory.RemoveTimeout(ctx);
                         }
                     }
                     else
@@ -92,12 +90,11 @@ namespace TomP2P.Message
 
                 bool donePayload = DecodePayload(buffer);
                 DecodeSignature(buffer, readerBefore, donePayload);
-                // TODO buffer.discardSomeReadBytes??
                 return donePayload;
             }
             catch (Exception ex)
             {
-                // TODO netty fire exception caught
+                ctx.FireExceptionCaught(ex);
                 Console.WriteLine(ex.ToString());
                 return true;
             }

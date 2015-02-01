@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using TomP2P.Connection.Windows;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Message;
@@ -775,11 +777,15 @@ namespace TomP2P.Tests.Interop
         {
             var decoder = new Decoder(null);
 
+            // mock a non-working ChannelHandlerContext
+            var channel = new MyTcpClient(new IPEndPoint(IPAddress.Any, 0));
+            var ctx = new ChannelHandlerContext(channel, null);
+
             // create dummy sender for decoding
             var message = Utils2.CreateDummyMessage();
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(bytes.ToSByteArray());
-            decoder.Decode(buf, message.Recipient.CreateSocketTcp(), message.Sender.CreateSocketTcp());
+            decoder.Decode(ctx, buf, message.Recipient.CreateSocketTcp(), message.Sender.CreateSocketTcp());
 
             return decoder.Message;
         }

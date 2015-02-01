@@ -28,6 +28,7 @@ namespace TomP2P.Connection.Windows
             var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
             for (int i = 0; i < maxNrOfClients; i++)
             {
+                // TODO find a way to await -> exceptions
                 ServiceLoopAsync();
             }
             _isStopped = false;

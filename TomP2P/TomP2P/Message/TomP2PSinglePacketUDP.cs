@@ -36,7 +36,7 @@ namespace TomP2P.Message
             try
             {
                 var decoder = new Decoder(_signatureFactory);
-                bool finished = decoder.Decode(buf, recipient, sender);
+                bool finished = decoder.Decode(ctx, buf, recipient, sender);
                 if (finished)
                 {
                     // prepare finish

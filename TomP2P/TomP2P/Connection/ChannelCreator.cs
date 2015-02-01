@@ -153,7 +153,7 @@ namespace TomP2P.Connection
                 tcpClient.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
                 // connect
-                tcpClient.ConnectAsync(remoteAddress);
+                tcpClient.ConnectAsync(remoteAddress).Wait();
 
                 _recipients.Add(tcpClient);
                 SetupCloseListener(tcpClient, _semaphoreTcp);
