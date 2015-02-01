@@ -46,11 +46,16 @@ namespace TomP2P.Connection.Windows
         public async Task ReceiveMessageAsync()
         {
             // receive bytes
-            var bytesRecv = new byte[100];
-            await _tcpClient.GetStream().ReadAsync(bytesRecv, 0, bytesRecv.Length);
+            var bytesRecv = new byte[256]; // TODO find ideal value
 
             var buf = AlternativeCompositeByteBuf.CompBuffer();
-            buf.WriteBytes(bytesRecv.ToSByteArray());
+            var stream = _tcpClient.GetStream();
+            do
+            {
+                var nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length);
+                buf.WriteBytes(bytesRecv.ToSByteArray());
+                Logger.Debug("Read {0} bytes.", nrBytes);
+            } while (stream.DataAvailable);
 
             // execute inbound pipeline
             Pipeline.Read(buf);
