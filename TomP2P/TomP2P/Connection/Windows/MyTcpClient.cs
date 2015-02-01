@@ -53,7 +53,7 @@ namespace TomP2P.Connection.Windows
             buf.WriteBytes(bytesRecv.ToSByteArray());
 
             // execute inbound pipeline
-            Pipeline.Read(buf); // TODO what to insert?
+            Pipeline.Read(buf);
             Pipeline.ResetRead();
         }
 
