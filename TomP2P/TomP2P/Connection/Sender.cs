@@ -9,6 +9,7 @@ using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Futures;
 using TomP2P.Message;
+using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
@@ -295,7 +296,7 @@ namespace TomP2P.Connection
         {
             var recipient = message.Recipient.CreateSocketTcp();
             var channel = SendTcpCreateChannel(recipient, channelCreator, peerConnection, handler, timeoutHandler,
-                connectTimeoutMillis, tcsResponse);
+                connectTimeoutMillis);
             await AfterConnectAsync(tcsResponse, message, channel, handler == null);
         }
 
@@ -361,15 +362,15 @@ namespace TomP2P.Connection
         }
 
         private ITcpClientChannel SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
-            PeerConnection peerConnection, IChannelHandler handler, TimeoutFactory timeoutHandler, int connectTimeoutMillis,
-            TaskCompletionSource<Message.Message> tcsResponse)
+            PeerConnection peerConnection, IChannelHandler handler, TimeoutFactory timeoutHandler, int connectTimeoutMillis)
         {
             // create pipeline
             var handlers = new Dictionary<string, IChannelHandler>();
             if (timeoutHandler != null)
             {
-                handlers.Add("timeout0", timeoutHandler.CreateIdleStateHandlerTomP2P());
-                handlers.Add("timeout1", timeoutHandler.CreateTimeHandler());
+                // TODO add timeout handlers
+                //handlers.Add("timeout0", timeoutHandler.CreateIdleStateHandlerTomP2P());
+                //handlers.Add("timeout1", timeoutHandler.CreateTimeHandler());
             }
             handlers.Add("decoder", new TomP2PCumulationTcp(ChannelClientConfiguration.SignatureFactory));
             handlers.Add("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
@@ -383,6 +384,20 @@ namespace TomP2P.Connection
                 handlers.Add("handler", handler);
             }
             HeartBeat heartBeat = null;
+            if (peerConnection != null)
+            {
+                heartBeat = new HeartBeat(peerConnection.HeartBeatMillis, PingBuilderFactory);
+                handlers.Add("heartbeat", heartBeat);
+            }
+
+            var channel = channelCreator.CreateTcp(recipient, connectTimeoutMillis, handlers);
+
+            if (peerConnection != null && channel != null)
+            {
+                peerConnection.SetChannel(channel);
+                heartBeat.SetPeerConnection(peerConnection);
+            }
+            return channel;
         }
 
         private void RemovePeerIfFailed(TaskCompletionSource<Message.Message> tcs, Message.Message message)
