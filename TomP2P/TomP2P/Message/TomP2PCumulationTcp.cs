@@ -3,6 +3,7 @@ using System.Net;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
@@ -37,7 +38,10 @@ namespace TomP2P.Message
             {
                 if (_cumulation == null)
                 {
-                    _cumulation = AlternativeCompositeByteBuf.CompBuffer(buf);
+                    // TODO CompBuffer(buf) seems not to set ReadableBytes property correctly
+                    // TODO optimize and use zero-copy
+                    _cumulation = AlternativeCompositeByteBuf.CompBuffer();
+                    _cumulation.WriteBytes(ConnectionHelper.ExtractBytes(buf).ToSByteArray());
                 }
                 else
                 {
@@ -76,7 +80,7 @@ namespace TomP2P.Message
                 }
                 else
                 {
-                    if (_lastId == _decoder.Message.MessageId)
+                    if (_lastId == _decoder.Message.MessageId) // TODO Message is null, why?
                     {
                         // This ID was the same as the last and the last message already
                         // finished the parsing. So this message is finished as well, although

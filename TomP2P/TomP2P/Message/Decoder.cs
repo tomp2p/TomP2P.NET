@@ -5,7 +5,6 @@ using System.Net;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
-using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Workaround;
 using TomP2P.P2P;
@@ -24,7 +23,7 @@ namespace TomP2P.Message
         private readonly Queue<Message.Content> _contentTypes = new Queue<Message.Content>();
 
         public Message Message { get; private set; }
-        public Message.Content LastContent { get; private set; } // TODO check if correct
+        public Message.Content LastContent { get; private set; }
 
         private int _neighborSize = -1;
         private NeighborSet _neighborSet = null;
