@@ -20,5 +20,17 @@ namespace TomP2P.Connection.Windows.Netty
             // do nothing by default
             // can be overridden
         }
+
+        public void HandlerAdded(ChannelHandlerContext ctx)
+        {
+            // do nothing by default
+            // can be overridden
+        }
+
+        public void HandlerRemoved(ChannelHandlerContext ctx)
+        {
+            // do nothing by default
+            // can be overridden
+        }
     }
 }

@@ -14,6 +14,10 @@ namespace TomP2P.Connection.Windows.Netty
         void ChannelActive(ChannelHandlerContext ctx);
 
         void ChannelInactive(ChannelHandlerContext ctx);
+
+        void HandlerAdded(ChannelHandlerContext ctx);
+
+        void HandlerRemoved(ChannelHandlerContext ctx);
     }
 
     /// <summary>

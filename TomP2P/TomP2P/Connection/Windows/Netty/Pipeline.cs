@@ -196,6 +196,7 @@ namespace TomP2P.Connection.Windows.Netty
             _name2Item.Add(name, item);
 
             _handlers.AddFirst(item);
+            handler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -212,6 +213,7 @@ namespace TomP2P.Connection.Windows.Netty
             _name2Item.Add(name, item);
 
             _handlers.AddLast(item);
+            handler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -239,6 +241,7 @@ namespace TomP2P.Connection.Windows.Netty
             var nNew = new LinkedListNode<HandlerItem>(item);
 
             _handlers.AddBefore(nBase, nNew);
+            handler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -259,8 +262,10 @@ namespace TomP2P.Connection.Windows.Netty
             }
             CheckDuplicateName(newName);
 
+            oldItem.Handler.HandlerRemoved(_ctx);
             oldItem.Name = newName;
             oldItem.Handler = newHandler;
+            newHandler.HandlerAdded(_ctx);
             return this;
         }
 
