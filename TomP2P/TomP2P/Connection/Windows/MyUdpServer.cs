@@ -9,7 +9,7 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyUdpServer : BaseServer, IUdpChannel
+    public class MyUdpServer : BaseServer, IUdpServerChannel
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -31,7 +31,7 @@ namespace TomP2P.Connection.Windows
             _udpServer.Close();
         }
 
-        protected override async Task ServiceLoopAsync(CancellationToken ct)
+        public override async Task ServiceLoopAsync(CancellationToken ct)
         {
             while (!ct.IsCancellationRequested)
             {

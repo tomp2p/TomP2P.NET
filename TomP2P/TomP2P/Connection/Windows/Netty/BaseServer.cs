@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TomP2P.Connection.Windows.Netty
 {
-    public abstract class BaseServer : BaseChannel
+    public abstract class BaseServer : BaseChannel, IServerChannel
     {
         private CancellationTokenSource _cts;
         private Task[] _tasks;
@@ -31,13 +31,17 @@ namespace TomP2P.Connection.Windows.Netty
         public async Task StopAsync()
         {
             Close();
-            if (_tasks != null)
+            if (_cts != null)
             {
                 _cts.Cancel();
-                await Task.WhenAll(_tasks);
             }
+            // TODO await closing of all service-loops
+            /*if (_tasks != null)
+            {
+                await Task.WhenAll(_tasks);
+            }*/
         }
 
-        protected abstract Task ServiceLoopAsync(CancellationToken ct);
+        public abstract Task ServiceLoopAsync(CancellationToken ct);
     }
 }

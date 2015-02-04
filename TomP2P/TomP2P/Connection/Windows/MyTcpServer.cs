@@ -9,7 +9,7 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyTcpServer : BaseServer, ITcpChannel
+    public class MyTcpServer : BaseServer, ITcpServerChannel
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -32,7 +32,7 @@ namespace TomP2P.Connection.Windows
             _tcpServer.Stop();
         }
 
-        protected override async Task ServiceLoopAsync(CancellationToken ct)
+        public override async Task ServiceLoopAsync(CancellationToken ct)
         {
             while (!ct.IsCancellationRequested)
             {

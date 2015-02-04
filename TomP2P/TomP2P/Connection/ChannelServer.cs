@@ -128,7 +128,6 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupTcp(IPEndPoint listenAddress)
         {
-            return true; // TODO re-enable
             // TODO implement and use TimeoutFactory stuff!
             try
             {
@@ -185,8 +184,8 @@ namespace TomP2P.Connection
         /// </summary>
         public async Task ShutdownAsync()
         {
-            var tasks = new List<Task>();
             // shutdown both UDP and TCP server sockets
+            var tasks = new List<Task>();
             if (_udpServer != null)
             {
                 Logger.Debug("Shutting down UDP server...");
