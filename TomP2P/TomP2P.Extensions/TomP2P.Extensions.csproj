@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncExtensions.cs" />
     <Compile Include="Netty\Buffer\AbstractByteBuf.cs" />
     <Compile Include="Netty\Buffer\AbstractByteBufAllocator.cs" />
     <Compile Include="Netty\Buffer\AbstractDerivedByteBuf.cs" />

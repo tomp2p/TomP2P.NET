@@ -235,7 +235,7 @@ namespace TomP2P.Connection
                 _tcsResponse.SetResult(responseMessage);
                 // in Java, the channel creator adds a listener that sets the 
                 // future response result when the channel is closed
-                ctx.Close();
+                ctx.Close(); // TODO needed?
             }
             else
             {
@@ -290,7 +290,7 @@ namespace TomP2P.Connection
             Logger.Debug("Report failure: ", cause);
             _tcsResponse.SetException(cause);
             // TODO channel not already closed in Sender?
-            ctx.Close();
+            ctx.Close(); // TODO used?
         }
     }
 }

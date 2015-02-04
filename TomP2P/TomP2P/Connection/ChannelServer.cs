@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
@@ -104,7 +105,6 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupUdp(IPEndPoint listenAddress)
         {
-            return true; // TODO re-enable
             try
             {
                 // binds in constructor
@@ -182,19 +182,22 @@ namespace TomP2P.Connection
         /// <summary>
         /// Shuts down the server.
         /// </summary>
-        public void Shutdown()
+        public async Task ShutdownAsync()
         {
-            // in Java, this method is async
-
+            Task t1 = null;
+            Task t2 = null;
             // shutdown both UDP and TCP server sockets
             if (_udpServer != null)
             {
-                _udpServer.Stop();
+                Logger.Debug("Shutting down UDP server...");
+                t1 = _udpServer.StopAsync().ContinueWith(task => Logger.Debug("UDP server shut down."));
             }
             if (_tcpServer != null)
             {
-                _tcpServer.Stop();
+                Logger.Debug("Shutting down TCP server...");
+                t2 = _tcpServer.StopAsync().ContinueWith(task => Logger.Debug("TCP server shut down."));
             }
+            await Task.WhenAll(new[] {t1, t2});
         }
     }
 }

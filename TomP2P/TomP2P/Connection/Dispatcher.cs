@@ -113,7 +113,7 @@ namespace TomP2P.Connection
             if (requestMessage.Version != _p2pId)
             {
                 Logger.Error("Wrong version. We are looking for {0}, but we got {1}. Received: {2}.", _p2pId, requestMessage.Version, requestMessage);
-                ctx.Close(); // TODO correct?
+                ctx.Close(); // TODO used?
                 lock (_peerBeanMaster.PeerStatusListeners)
                 {
                     foreach (IPeerStatusListener listener in _peerBeanMaster.PeerStatusListeners)

@@ -211,32 +211,54 @@ namespace TomP2P.Tests.Interop
         public void TestPingFromJavaUdp()
         {
             // setup .NET server and provide it's PeerAddress
-            Peer receiver = new PeerBuilder(new Number160("0x1234")).
-                SetP2PId(55).
-                SetPorts(7777).
-                Start();
+            Peer receiver = null;
+            try
+            {
+                receiver = new PeerBuilder(new Number160("0x1234")).
+                    SetP2PId(55).
+                    SetPorts(7777).
+                    Start();
 
-            var bytes = receiver.PeerAddress.ToByteArray().ToByteArray();
-            var res = JarRunner.WriteBytesAndTestInterop(bytes);
+                var bytes = receiver.PeerAddress.ToByteArray().ToByteArray();
+                var res = JarRunner.WriteBytesAndTestInterop(bytes);
 
-            Assert.IsTrue(res);
-            // debug server-side and analyse logs for testing
+                Assert.IsTrue(res);
+                // debug server-side and analyse logs for testing
+            }
+            finally
+            {
+                if (receiver != null)
+                {
+                    receiver.ShutdownAsync().Wait();
+                }
+            }
         }
 
         [Test]
         public void TestPingFromJavaTcp()
         {
             // setup .NET server and provide it's PeerAddress
-            Peer receiver = new PeerBuilder(new Number160("0x1234")).
-                SetP2PId(55).
-                SetPorts(7777).
-                Start();
+            Peer receiver = null;
+            try
+            {
+                receiver = new PeerBuilder(new Number160("0x1234")).
+                    SetP2PId(55).
+                    SetPorts(7777).
+                    Start();
 
-            var bytes = receiver.PeerAddress.ToByteArray().ToByteArray();
-            var res = JarRunner.WriteBytesAndTestInterop(bytes);
+                var bytes = receiver.PeerAddress.ToByteArray().ToByteArray();
+                var res = JarRunner.WriteBytesAndTestInterop(bytes);
 
-            Assert.IsTrue(res);
-            // debug server-side and analyse logs for testing
+                Assert.IsTrue(res);
+                // debug server-side and analyse logs for testing
+            }
+            finally
+            {
+                if (receiver != null)
+                {
+                    receiver.ShutdownAsync().Wait();
+                }
+            }
         }
 
         private void DataReceived(object sender, DataReceivedEventArgs args)

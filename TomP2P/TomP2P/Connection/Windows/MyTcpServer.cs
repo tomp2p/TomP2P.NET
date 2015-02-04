@@ -1,6 +1,6 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -9,14 +9,12 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyTcpServer : BaseChannel, ITcpChannel
+    public class MyTcpServer : BaseServer, ITcpChannel
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // wrapped member
         private readonly TcpListener _tcpServer;
-
-        private volatile bool _isStopped; // volatile!
 
         public MyTcpServer(IPEndPoint localEndPoint)
         {
@@ -24,35 +22,19 @@ namespace TomP2P.Connection.Windows
             _tcpServer = new TcpListener(localEndPoint);
         }
 
-        public void Start()
+        public override void DoStart()
         {
             _tcpServer.Start();
-
-            // accept MaxNrOfClients simultaneous connections
-            var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
-            for (int i = 0; i < maxNrOfClients; i++)
-            {
-                // TODO find a way to await -> exceptions
-                ServiceLoopAsync();
-            }
-            _isStopped = false;
-        }
-
-        public void Stop()
-        {
-            Close();
         }
 
         protected override void DoClose()
         {
             _tcpServer.Stop();
-            // TODO notify async wait in service loop (CancellationToken)
-            _isStopped = true;
         }
 
-        protected async Task ServiceLoopAsync()
+        protected override async Task ServiceLoopAsync(CancellationToken ct)
         {
-            while (!_isStopped)
+            while (!ct.IsCancellationRequested)
             {
                 // buffers
                 var recvBuffer = new byte[256];

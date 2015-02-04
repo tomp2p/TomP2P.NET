@@ -94,7 +94,7 @@ namespace TomP2P.Connection
         {
             if (_master)
             {
-                Logger.Debug("Shutdown is in progress...");
+                Logger.Debug("Shutting down...");
             }
             // unregister in dispatcher
             ConnectionBean.Dispatcher.RemoveIOHandlers(PeerBean.ServerPeerAddress.PeerId,
@@ -120,11 +120,13 @@ namespace TomP2P.Connection
             // shutdown the timer
             ConnectionBean.Timer.Stop(); // TODO sufficient?
 
-            Logger.Debug("Starting shutdown in client done...");
+            Logger.Debug("Shutting down client...");
             ConnectionBean.Reservation.ShutdownAsync().ContinueWith(delegate
             {
-                ConnectionBean.ChannelServer.Shutdown();
-                ShutdownNetty();
+                ConnectionBean.ChannelServer.ShutdownAsync().ContinueWith(delegate
+                {
+                    ShutdownNetty();
+                });
             });
 
             // this is blocking
@@ -167,7 +169,7 @@ namespace TomP2P.Connection
             // in .NET, there is nothing like Netty, so this method is only for
             // portability reasons (code-flow)
 
-            Logger.Debug("Shutdown done in client...");
+            Logger.Debug("Client shut down.");
             _tcsServerDone.SetResult(null); // complete task
         }
     }

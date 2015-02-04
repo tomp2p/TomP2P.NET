@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using NLog;
 using TomP2P.Connection;
@@ -26,6 +25,7 @@ namespace TomP2P.Message
 
         public void Read(ChannelHandlerContext ctx, object msg)
         {
+            // .NET: use a content wrapper for TCP, similar to TomP2PSinglePacketUdp
             var piece = msg as StreamPiece;
             if (piece == null)
             {
@@ -75,7 +75,6 @@ namespace TomP2P.Message
             bool moreData = true;
             while (finished && moreData)
             {
-                // receiver is server.localAddress
                 finished = _decoder.Decode(ctx, _cumulation, receiver, sender);
                 if (finished)
                 {
