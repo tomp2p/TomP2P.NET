@@ -10,7 +10,7 @@ namespace TomP2P.Connection
     /// <summary>
     /// Stripped-down version of the <see cref="IdleStateHandler"/>.
     /// </summary>
-    public class HeartBeat : IDuplexHandler
+    public class HeartBeat : BaseChannelHandler, IDuplexHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

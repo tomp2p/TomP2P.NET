@@ -31,6 +31,8 @@ namespace TomP2P.Connection.Windows.Netty
         private object _writeResult;
         private object _readResult;
 
+        private Exception _caughtException;
+
         public Pipeline(IChannel channel)
             : this(channel, null)
         { }
@@ -66,7 +68,14 @@ namespace TomP2P.Connection.Windows.Netty
             while (GetNextOutbound() != null)
             {
                 Logger.Debug("Channel '{0}': Processing outbound handler '{1}'.", _channel, _currentOutbound);
-                _currentOutbound.Write(_ctx, msg);
+                if (_caughtException == null)
+                {
+                    _currentOutbound.Write(_ctx, msg);
+                }
+                else
+                {
+                    _currentOutbound.ExceptionCaught(_ctx, _caughtException);
+                }
             }
             if (_writeResult == null)
             {
@@ -89,7 +98,15 @@ namespace TomP2P.Connection.Windows.Netty
             while (GetNextInbound() != null)
             {
                 Logger.Debug("Channel '{0}': Processing inbound handler '{1}'.", _channel, _currentInbound);
-                _currentInbound.Read(_ctx, msg);
+
+                if (_caughtException == null)
+                {
+                    _currentInbound.Read(_ctx, msg);
+                }
+                else
+                {
+                    _currentInbound.ExceptionCaught(_ctx, _caughtException);
+                }
             }
             if (_readResult == null)
             {
@@ -98,11 +115,17 @@ namespace TomP2P.Connection.Windows.Netty
             return _readResult;
         }
 
+        public void ExceptionCaught(Exception ex)
+        {
+            _caughtException = ex;
+        }
+
         public void ResetWrite()
         {
             _currentOutbound = null;
             _msgW = null;
             _writeResult = null;
+            _caughtException = null;
         }
 
         public void ResetRead()
@@ -110,6 +133,7 @@ namespace TomP2P.Connection.Windows.Netty
             _currentInbound = null;
             _msgR = null;
             _readResult = null;
+            _caughtException = null;
         }
 
         private IOutboundHandler GetNextOutbound()

@@ -14,7 +14,7 @@ namespace TomP2P.Connection
     /// (It is important that this class handles close() because if we shutdown the connections, 
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
-    public class RequestHandler : IInboundHandler
+    public class RequestHandler : BaseChannelHandler, IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -245,7 +245,7 @@ namespace TomP2P.Connection
             }
         }
 
-        public void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
+        public override void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
         {
             Logger.Debug("Error originating from {0}. Cause: {1}", _message, cause);
             if (_tcsResponse.Task.IsCompleted)

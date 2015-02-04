@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
@@ -7,8 +9,7 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public interface IChannelHandler
     {
-        // TODO ExceptionCaught needed?
-        //void ExceptionCaught(ChannelHandlerContext ctx, Exception cause);
+        void ExceptionCaught(ChannelHandlerContext ctx, Exception cause);
     }
 
     /// <summary>

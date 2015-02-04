@@ -1,4 +1,6 @@
-﻿namespace TomP2P.Connection.Windows.Netty
+﻿using System;
+
+namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
     /// Equivalent to Java Netty's ChannelHandlerContext. In .NET, this context is implemented as a class
@@ -39,9 +41,9 @@
             _pipeline.Read(msg);
         }
 
-        public void FireExceptionCaught(System.Exception ex)
+        public void FireExceptionCaught(Exception ex)
         {
-            throw new System.NotImplementedException();
+            _pipeline.ExceptionCaught(ex);
         }
 
         public void Close()

@@ -21,7 +21,7 @@ namespace TomP2P.Connection
     /// This class is able to cover several channels but only one P2P network!)
     /// </para>
     /// </summary>
-    public class Dispatcher : IInboundHandler
+    public class Dispatcher : BaseChannelHandler, IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         

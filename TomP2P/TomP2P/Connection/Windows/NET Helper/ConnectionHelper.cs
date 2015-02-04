@@ -3,7 +3,7 @@ using System.Net;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
-namespace TomP2P.Connection
+namespace TomP2P.Connection.Windows
 {
     public static class ConnectionHelper
     {

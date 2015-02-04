@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TomP2P.Connection
+namespace TomP2P.Connection.Windows
 {
     /// <summary>
     /// Used for TaskResponse.(Try)SetException().

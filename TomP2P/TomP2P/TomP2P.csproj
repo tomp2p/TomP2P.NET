@@ -50,7 +50,7 @@
     <Compile Include="Connection\DiscoverNetworks.cs" />
     <Compile Include="Connection\HeartBeat.cs" />
     <Compile Include="Connection\IPipelineFilter.cs" />
-    <Compile Include="Connection\NET Helper\ConnectionHelper.cs" />
+    <Compile Include="Connection\Windows\NET Helper\ConnectionHelper.cs" />
     <Compile Include="Connection\Bindings.cs" />
     <Compile Include="Connection\ChannelClientConfiguration.cs" />
     <Compile Include="Connection\ChannelCreator.cs" />
@@ -63,8 +63,9 @@
     <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
+    <Compile Include="Connection\Windows\Netty\BaseChannelHandler.cs" />
     <Compile Include="Connection\Windows\Netty\DatagramPacket.cs" />
-    <Compile Include="Connection\NET Helper\TaskFailedException.cs" />
+    <Compile Include="Connection\Windows\NET Helper\TaskFailedException.cs" />
     <Compile Include="Connection\PeerBean.cs" />
     <Compile Include="Connection\PeerConnection.cs" />
     <Compile Include="Connection\PeerCreator.cs" />
@@ -146,9 +147,6 @@
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\..\Desktop\Windows Netty.dgml">
-      <Link>Windows Netty.dgml</Link>
-    </None>
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

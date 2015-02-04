@@ -2,11 +2,10 @@
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
-using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PSinglePacketUdp : IInboundHandler
+    public class TomP2PSinglePacketUdp : BaseChannelHandler, IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

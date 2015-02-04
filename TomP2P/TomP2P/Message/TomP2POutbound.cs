@@ -1,12 +1,15 @@
 ﻿using System;
+using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2POutbound : IOutboundHandler
+    public class TomP2POutbound : BaseChannelHandler, IOutboundHandler
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         private readonly bool _preferDirect;
         private readonly Encoder _encoder;
         private readonly CompByteBufAllocator _alloc;
@@ -70,6 +73,20 @@ namespace TomP2P.Message
             catch (Exception ex)
             {
                 ctx.FireExceptionCaught(ex);
+            }
+        }
+
+        public override void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
+        {
+            if (_encoder.Message == null)
+            {
+                Logger.Error("Exception in encoding when starting.", cause);
+                Console.WriteLine(cause.StackTrace);
+            }
+            else if (_encoder.Message != null && !_encoder.Message.IsDone)
+            {
+                Logger.Error("Exception in encoding when started.", cause);
+                Console.WriteLine(cause.StackTrace);
             }
         }
     }

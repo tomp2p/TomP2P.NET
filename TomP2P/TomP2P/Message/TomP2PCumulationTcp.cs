@@ -2,13 +2,14 @@
 using System.Net;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PCumulationTcp : IInboundHandler
+    public class TomP2PCumulationTcp : BaseChannelHandler, IInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -65,8 +66,7 @@ namespace TomP2P.Message
         }
 
         // TODO find channelInactive equivalent
-        // TODO find exceptionCaught equivalent
-
+        
         private void Decoding(ChannelHandlerContext ctx, IPEndPoint sender, IPEndPoint receiver)
         {
             bool finished = true;
@@ -104,6 +104,17 @@ namespace TomP2P.Message
                         ctx.FireRead(_decoder.Message);
                     }
                 }
+            }
+        }
+
+        public override void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
+        {
+            if (_decoder.Message == null && _decoder.LastContent == Message.Content.Empty)
+            {
+                Logger.Error("Exception in decoding TCP. Occurred before starting to decode.", cause);
+            } else if (_decoder.Message != null && !_decoder.Message.IsDone)
+            {
+                Logger.Error("Exception in decoding TCP. Occurred after starting to decode.", cause);
             }
         }
     }
