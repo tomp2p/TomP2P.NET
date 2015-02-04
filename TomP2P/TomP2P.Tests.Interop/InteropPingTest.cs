@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -247,7 +248,7 @@ namespace TomP2P.Tests.Interop
 
             if (args.Data != null && args.Data.Contains("[---RESULT-READY---]"))
             {
-                var bytes = JarRunner.ReadJavaResult("TestPingJavaUdp-start");
+                var bytes = JarRunner.ReadJavaResult("JavaServerAddress");
                 var sbytes = bytes.ToSByteArray();
                 _tcs.SetResult(new PeerAddress(sbytes));
             }
