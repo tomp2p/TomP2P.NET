@@ -46,11 +46,11 @@ namespace TomP2P.Connection.Windows.Netty
         {
             if (_sender != null)
             {
-                return String.Format("TCP Piece ({0} => {1}, {2})", _sender, _recipient, _content);
+                return String.Format("StreamPiece ({0} => {1}, {2})", _sender, _recipient, _content);
             }
             else
             {
-                return String.Format("TCP Piece (=> {0}, {1})", _recipient, _content);
+                return String.Format("StreamPiece (=> {0}, {1})", _recipient, _content);
             }
         }
     }

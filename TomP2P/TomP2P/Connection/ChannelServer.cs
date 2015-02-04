@@ -128,7 +128,6 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupTcp(IPEndPoint listenAddress)
         {
-            return true; // TODO re-enable
             // TODO implement and use TimeoutFactory stuff!
             try
             {

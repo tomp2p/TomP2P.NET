@@ -228,9 +228,9 @@ namespace TomP2P.Connection
                     Logger.Debug("Channel TCP is not open. Do not reply {0}.", responseMessage);
                     return;
                 }
-                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, ctx.Channel.Socket.RemoteEndPoint);
+                Logger.Debug("Response TCP message {0} to {1}.", responseMessage, "TODO"); // TODO find way to log TCP remoteEndpoint
             }
-            ctx.FireRead(responseMessage); // TODO correct?
+            ctx.FireRead(responseMessage);
         }
 
         /// <summary>
