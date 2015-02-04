@@ -61,7 +61,7 @@ namespace TomP2P.Connection.Windows
                 // execute inbound pipeline
                 Pipeline.Read(piece);
                 Pipeline.ResetRead();
-            } while (stream.DataAvailable);
+            } while (!IsClosed && stream.DataAvailable); // attention: socket might have been already closed
         }
 
         protected override void DoClose()

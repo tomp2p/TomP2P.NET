@@ -42,12 +42,12 @@ namespace TomP2P.Connection.Windows
                 object readRes;
 
                 // accept a client connection
-                var client = await _tcpServer.AcceptTcpClientAsync();
+                var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
                 var stream = client.GetStream();
                 do
                 {
                     // TODO find zero-copy way
-                    var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length);
+                    var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length, ct);
                     buf.Deallocate();
                     buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
                     var piece = new StreamPiece(buf, (IPEndPoint) client.Client.LocalEndPoint, (IPEndPoint)client.Client.RemoteEndPoint);
@@ -56,7 +56,7 @@ namespace TomP2P.Connection.Windows
                     // execute inbound pipeline
                     readRes = Pipeline.Read(piece);
                     Pipeline.ResetRead();
-                } while (stream.DataAvailable);
+                } while (!IsClosed && stream.DataAvailable);
 
                 // server-side outbound pipeline
                 var writeRes = Pipeline.Write(readRes);
@@ -64,7 +64,7 @@ namespace TomP2P.Connection.Windows
                 var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
                 // send back
-                await stream.WriteAsync(bytes, 0, bytes.Length);
+                await stream.WriteAsync(bytes, 0, bytes.Length, ct);
             }
         }
 

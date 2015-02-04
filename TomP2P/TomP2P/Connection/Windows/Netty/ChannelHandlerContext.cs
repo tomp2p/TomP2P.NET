@@ -48,7 +48,6 @@ namespace TomP2P.Connection.Windows.Netty
 
         public void Close()
         {
-            // TODO correct?
             _channel.Close();
         }
 
