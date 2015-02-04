@@ -24,19 +24,25 @@ namespace TomP2P.Connection.Windows.Netty
 
         bool IsTcp { get; }
 
+        /// <summary>
+        /// Returns true, if the channel may get active later.
+        /// </summary>
         bool IsOpen { get; }
-    }
-
-    /// <summary>
-    /// Interface for all TCP channels.
-    /// </summary>
-    public interface ITcpChannel : IChannel
-    {
+        
+        /// <summary>
+        /// Returns true, if the channel is active and so connected.
+        /// </summary>
         bool IsActive { get; }
     }
 
     /// <summary>
-    /// Interface for all UDP channels.
+    /// Marker interface for all TCP channels.
+    /// </summary>
+    public interface ITcpChannel : IChannel
+    { }
+
+    /// <summary>
+    /// Marker interface for all UDP channels.
     /// </summary>
     public interface IUdpChannel : IChannel
     { }

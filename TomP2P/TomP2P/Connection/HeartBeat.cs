@@ -69,7 +69,9 @@ namespace TomP2P.Connection
             return this;
         }
 
-        // TODO find event equivalents for initializing/destroying the loop
+        public override void HandlerAdded(ChannelHandlerContext ctx)
+        {
+        }
 
         private void Initialize(ChannelHandlerContext ctx)
         {

@@ -52,5 +52,10 @@ namespace TomP2P.Connection.Windows.Netty
         {
             get { return !IsClosed; } // TODO ok?
         }
+
+        public bool IsActive
+        {
+            get { return IsOpen && Socket.Connected; } // TODO ok?
+        }
     }
 }
