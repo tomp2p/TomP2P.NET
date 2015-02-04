@@ -17,7 +17,7 @@ namespace TomP2P.Tests.Interop
         private TaskCompletionSource<PeerAddress> _tcs;
 
         [Test]
-        public async void TestPingJavaUdp()
+        public async void TestPingToJavaUdp()
         {
             // setup Java server and get it's PeerAddress
             _tcs = new TaskCompletionSource<PeerAddress>();
@@ -63,7 +63,7 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingJavaBroadcastUdp()
+        public async void TestPingToJavaBroadcastUdp()
         {
             // setup Java server and get it's PeerAddress
             _tcs = new TaskCompletionSource<PeerAddress>();
@@ -109,7 +109,7 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingJavaFireUdp()
+        public async void TestPingToJavaFireUdp()
         {
             // TODO find a way to check whether Java side received the ff ping
             // setup Java server and get it's PeerAddress
@@ -154,7 +154,7 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingJavaTcp()
+        public async void TestPingToJavaTcp()
         {
             // setup Java server and get it's PeerAddress
             _tcs = new TaskCompletionSource<PeerAddress>();
@@ -196,14 +196,46 @@ namespace TomP2P.Tests.Interop
                     sender.ShutdownAsync().Wait();
                 }
                 JarRunner.WriteToProcess("JavaPingReceiver-stop");
-            }    
+            }
         }
 
         [Test]
-        public async void TestPingJavaTcp2()
+        public async void TestPingToJavaTcp2()
         {
             // TODO implement
             throw new NotImplementedException();
+        }
+
+        [Test]
+        public void TestPingFromJavaUdp()
+        {
+            // setup .NET server and provide it's PeerAddress
+            Peer receiver = new PeerBuilder(new Number160("0x1234")).
+                SetP2PId(55).
+                SetPorts(7777).
+                Start();
+
+            var bytes = receiver.PeerAddress.ToByteArray().ToByteArray();
+            var res = JarRunner.WriteBytesAndTestInterop(bytes);
+
+            Assert.IsTrue(res);
+            // debug server-side and analyse logs for testing
+        }
+
+        [Test]
+        public void TestPingFromJavaTcp()
+        {
+            // setup .NET server and provide it's PeerAddress
+            Peer receiver = new PeerBuilder(new Number160("0x1234")).
+                SetP2PId(55).
+                SetPorts(7777).
+                Start();
+
+            var bytes = receiver.PeerAddress.ToByteArray().ToByteArray();
+            var res = JarRunner.WriteBytesAndTestInterop(bytes);
+
+            Assert.IsTrue(res);
+            // debug server-side and analyse logs for testing
         }
 
         private void DataReceived(object sender, DataReceivedEventArgs args)

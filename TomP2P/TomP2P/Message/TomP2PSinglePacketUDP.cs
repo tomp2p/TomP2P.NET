@@ -21,13 +21,13 @@ namespace TomP2P.Message
         /// </summary>
         public void Read(ChannelHandlerContext ctx, object msg)
         {
-            if (!(msg is DatagramPacket))
+            var dgram = msg as DatagramPacket;
+            if (dgram == null)
             {
                 ctx.FireRead(msg);
                 return;
             }
 
-            var dgram = (DatagramPacket) msg;
             var buf = dgram.Content;
             var sender = dgram.Sender;
             var recipient = dgram.Recipient;

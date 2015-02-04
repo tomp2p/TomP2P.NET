@@ -55,10 +55,11 @@ namespace TomP2P.Connection.Windows
                 var nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length);
                 buf.Deallocate();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
-                Logger.Debug("Read {0} bytes.", nrBytes);
+                var piece = new StreamPiece(buf, (IPEndPoint)Socket.LocalEndPoint, (IPEndPoint)Socket.RemoteEndPoint);
+                Logger.Debug("MyTcpClient received {0}.", piece);
                 
                 // execute inbound pipeline
-                Pipeline.Read(buf);
+                Pipeline.Read(piece);
                 Pipeline.ResetRead();
             } while (stream.DataAvailable);
         }

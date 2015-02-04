@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using NLog;
 using TomP2P.Connection;
@@ -25,15 +26,16 @@ namespace TomP2P.Message
 
         public void Read(ChannelHandlerContext ctx, object msg)
         {
-            var buf = msg as ByteBuf;
-            if (buf == null)
+            var piece = msg as StreamPiece;
+            if (piece == null)
             {
                 ctx.FireRead(msg);
                 return;
             }
-            
-            var sender = (IPEndPoint) ctx.Channel.Socket.RemoteEndPoint;
-            var receiver = (IPEndPoint) ctx.Channel.Socket.LocalEndPoint;
+
+            var buf = piece.Content;
+            var sender = piece.Sender;
+            var recipient = piece.Recipient;
             
             try
             {
@@ -48,7 +50,7 @@ namespace TomP2P.Message
                 {
                     _cumulation.AddComponent(buf);
                 }
-                Decoding(ctx, sender, receiver);
+                Decoding(ctx, sender, recipient);
             }
             catch (Exception)
             {

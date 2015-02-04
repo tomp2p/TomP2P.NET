@@ -73,24 +73,6 @@ namespace TomP2P.Connection.Windows
             }
         }
 
-        /*private byte[] UdpPipeline(byte[] recvBytes, IPEndPoint recipient, IPEndPoint sender)
-        {
-            // 1. decode incoming message
-            // 2. hand it to the Dispatcher
-            // 3. encode outgoing message
-            var recvMessage = _decoder.Read(recvBytes, recipient, sender);
-
-            // null means that no response is sent back
-            // TODO does this mean that we can close channel?
-            var responseMessage = _dispatcher.RequestMessageReceived(recvMessage, true, Socket);
-
-            // TODO channel might have been closed, check
-
-            var buffer = _encoder.Write(responseMessage);
-            var sendBytes = ConnectionHelper.ExtractBytes(buffer);
-            return sendBytes;
-        }*/
-
         public override Socket Socket
         {
             get { return _udpServer.Client; }

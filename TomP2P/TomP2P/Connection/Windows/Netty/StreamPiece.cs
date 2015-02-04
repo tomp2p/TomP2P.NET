@@ -5,17 +5,17 @@ using TomP2P.Extensions.Netty;
 namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
-    /// .NET equivalent for Java Netty's DatagramPacket. It is only used on the server-side to wrap
-    /// UDP information for server-side inbound pipeline processing.
+    /// Wrapper for a TCP piece. It is only used on the server-side to wrap
+    /// TCP information for server-side inbound pipeline processing.
     /// Stores sender, receiver and content.
     /// </summary>
-    public class DatagramPacket
+    public class StreamPiece
     {
         private readonly AlternativeCompositeByteBuf _content;
         private readonly IPEndPoint _recipient;
         private readonly IPEndPoint _sender;
 
-        public DatagramPacket(AlternativeCompositeByteBuf content, IPEndPoint recipient, IPEndPoint sender)
+        public StreamPiece(AlternativeCompositeByteBuf content, IPEndPoint recipient, IPEndPoint sender)
         {
             if (content == null)
             {
@@ -27,10 +27,6 @@ namespace TomP2P.Connection.Windows.Netty
             _sender = sender;
         }
 
-        /// <summary>
-        /// Equivalent to Java Netty's content().
-        /// </summary>
-        /// <returns></returns>
         public AlternativeCompositeByteBuf Content
         {
             get { return _content; }
@@ -50,11 +46,11 @@ namespace TomP2P.Connection.Windows.Netty
         {
             if (_sender != null)
             {
-                return String.Format("Datagram ({0} => {1}, {2})", _sender, _recipient, _content);
+                return String.Format("TCP Piece ({0} => {1}, {2})", _sender, _recipient, _content);
             }
             else
             {
-                return String.Format("Datagram (=> {0}, {1})", _recipient, _content);
+                return String.Format("TCP Piece (=> {0}, {1})", _recipient, _content);
             }
         }
     }
