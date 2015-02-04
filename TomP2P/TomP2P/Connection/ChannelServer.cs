@@ -104,6 +104,8 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupUdp(IPEndPoint listenAddress)
         {
+            // TODO re-enable
+            return true;
             try
             {
                 // binds in constructor
@@ -127,6 +129,8 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupTcp(IPEndPoint listenAddress)
         {
+            // TODO re-enable
+            return true;
             // TODO implement and use TimeoutFactory stuff!
             try
             {

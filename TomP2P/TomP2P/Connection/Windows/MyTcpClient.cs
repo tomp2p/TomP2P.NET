@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using NLog;
@@ -46,20 +45,22 @@ namespace TomP2P.Connection.Windows
         public async Task ReceiveMessageAsync()
         {
             // receive bytes
-            var bytesRecv = new byte[256]; // TODO find ideal value
+            var bytesRecv = new byte[256];
 
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             var stream = _tcpClient.GetStream();
             do
             {
+                // TODO find zero-copy way
                 var nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length);
-                buf.WriteBytes(bytesRecv.ToSByteArray());
+                buf.Deallocate();
+                buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
                 Logger.Debug("Read {0} bytes.", nrBytes);
+                
+                // execute inbound pipeline
+                Pipeline.Read(buf);
+                Pipeline.ResetRead();
             } while (stream.DataAvailable);
-
-            // execute inbound pipeline
-            Pipeline.Read(buf);
-            Pipeline.ResetRead();
         }
 
         protected override void DoClose()
