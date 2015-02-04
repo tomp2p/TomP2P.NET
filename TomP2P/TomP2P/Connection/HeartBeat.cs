@@ -81,9 +81,22 @@ namespace TomP2P.Connection
         // TODO works?
         public override void ChannelActive(ChannelHandlerContext ctx)
         {
+            // invoked when a pipeline is attached to a channel
             Initialize(ctx);
         }
 
+        // TODO works?
+        public override void HandlerRemoved(ChannelHandlerContext ctx)
+        {
+            Destroy();
+        }
+
+        // TODO works?
+        public override void ChannelInactive(ChannelHandlerContext ctx)
+        {
+            // invoked when a socket/channel is closed
+            Destroy();
+        }
 
         private void Initialize(ChannelHandlerContext ctx)
         {

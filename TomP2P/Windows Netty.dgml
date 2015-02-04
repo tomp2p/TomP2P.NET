@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph DataVirtualized="True" Layout="Sugiyama" ZoomLevel="-1" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="@10" Category="CodeSchema_Interface" Bounds="-373.63360959749,56.8245567464243,150.746666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IInboundHandler" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IInboundHandler" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannelHandler.cs StartLineNumber=16 StartCharacterOffset=4 EndLineNumber=16 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@11" Category="CodeSchema_Interface" Bounds="-147.339402902076,53.8553719937158,160.666666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IOutboundHandler" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IOutboundHandler" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannelHandler.cs StartLineNumber=24 StartCharacterOffset=4 EndLineNumber=24 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@12" Category="CodeSchema_Interface" Bounds="567.856404181198,-28.3252200410894,126.166666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="ITcpChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="ITcpChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannel.cs StartLineNumber=32 StartCharacterOffset=4 EndLineNumber=32 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@13" Category="CodeSchema_Interface" Bounds="909.840596112062,53.411692621874,156.543333333333,25" CodeSchemaProperty_IsPublic="True" CommonLabel="ITcpClientChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="ITcpClientChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IClientChannel.cs StartLineNumber=26 StartCharacterOffset=4 EndLineNumber=26 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@14" Category="CodeSchema_Interface" Bounds="408.209737514532,-29.1148820521992,129.646666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IUdpChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IUdpChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannel.cs StartLineNumber=40 StartCharacterOffset=4 EndLineNumber=40 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@15" Category="CodeSchema_Interface" Bounds="719.817262778728,52.411792621874,160.023333333334,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IUdpClientChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IUdpClientChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IClientChannel.cs StartLineNumber=33 StartCharacterOffset=4 EndLineNumber=33 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@17" Category="CodeSchema_Class" Bounds="489.474651468615,279,126.843333333333,25" CodeSchemaProperty_IsPublic="True" CommonLabel="MyTcpClient" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="MyTcpClient" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///c:/users/christian/source/repos/tomp2p-win/tomp2p/tomp2p/connection/windows/mytcpclient.cs StartLineNumber=11 StartCharacterOffset=4 EndLineNumber=11 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@18" Category="CodeSchema_Class" Bounds="868.317984801948,279.00005,129.486666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="MyTcpServer" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="MyTcpServer" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///c:/users/christian/source/repos/tomp2p-win/tomp2p/tomp2p/connection/windows/mytcpserver.cs StartLineNumber=9 StartCharacterOffset=4 EndLineNumber=9 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@19" Category="CodeSchema_Class" Bounds="487.836392999251,217,130.323333333333,25" CodeSchemaProperty_IsPublic="True" CommonLabel="MyUdpClient" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="MyUdpClient" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/MyUdpClient.cs StartLineNumber=10 StartCharacterOffset=4 EndLineNumber=10 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@20" Category="CodeSchema_Class" Bounds="865.213059665917,219.99995,132.966666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="MyUdpServer" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="MyUdpServer" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/MyUdpServer.cs StartLineNumber=10 StartCharacterOffset=4 EndLineNumber=10 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@21" Category="CodeSchema_Class" Bounds="154.706590402511,-49.887011946123,102.836666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="Pipeline" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="Pipeline" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/Pipeline.cs StartLineNumber=16 StartCharacterOffset=4 EndLineNumber=16 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@3" Category="CodeSchema_Class" Bounds="674.722565071908,127.188905393956,128.446666666667,25" CodeSchemaProperty_IsAbstract="True" CodeSchemaProperty_IsPublic="True" CommonLabel="BaseChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="BaseChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/BaseChannel.cs StartLineNumber=5 StartCharacterOffset=4 EndLineNumber=5 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@4" Category="CodeSchema_Class" Bounds="112.327263764591,10.112888053877,187.096666666667,25" CodeSchemaProperty_IsPublic="True" CommonLabel="ChannelHandlerContext" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="ChannelHandlerContext" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/ChannelHandlerContext.cs StartLineNumber=6 StartCharacterOffset=4 EndLineNumber=6 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@5" Category="CodeSchema_Class" Bounds="665.159726332584,218.885317947801,148.053333333333,25" CodeSchemaProperty_IsPublic="True" CommonLabel="DatagramPacket" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Class" Label="DatagramPacket" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/DatagramPacket.cs StartLineNumber=11 StartCharacterOffset=4 EndLineNumber=11 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@6" Category="CodeSchema_Interface" Bounds="655.559122610205,-104.513664035535,107.283333333333,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannel.cs StartLineNumber=9 StartCharacterOffset=4 EndLineNumber=9 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@7" Category="CodeSchema_Interface" Bounds="-256.745348531385,-74.1712050333206,149.123333333333,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IChannelHandler" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IChannelHandler" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannelHandler.cs StartLineNumber=7 StartCharacterOffset=4 EndLineNumber=7 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@8" Category="CodeSchema_Interface" Bounds="801.523070847865,-24.588407378126,137.66,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IClientChannel" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IClientChannel" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IClientChannel.cs StartLineNumber=7 StartCharacterOffset=4 EndLineNumber=7 EndCharacterOffset=4)" UseManualLocation="True" />
+    <Node Id="@9" Category="CodeSchema_Interface" Bounds="-250.420877389795,127.855471993716,142.98,25" CodeSchemaProperty_IsPublic="True" CommonLabel="IDuplexHandler" DelayedChildNodesState="NotFetched" DelayedCrossGroupLinksState="Fetched" Group="Collapsed" Icon="CodeSchema_Interface" Label="IDuplexHandler" Language="{B5E9BD34-6D3E-4B5D-925E-8A43B79820B4}" SourceLocation="(Assembly=file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/Connection/Windows/Netty/IChannelHandler.cs StartLineNumber=32 StartCharacterOffset=4 EndLineNumber=32 EndCharacterOffset=4)" UseManualLocation="True" />
+  </Nodes>
+  <Links>
+    <Link Source="@10" Target="@4" Category="References" Bounds="-222.990905761719,31.126256942749,326.356262207031,29.6839962005615" IsSourceVirtualized="True" Weight="1" />
+    <Link Source="@10" Target="@7" Category="Implements" Bounds="-287.183906996328,-42.0610123833008,87.623446315219,98.8855691297252" Weight="1" />
+    <Link Source="@11" Target="@4" Category="References" Bounds="9.72676017820058,36.5373877233487,109.282698212767,17.5178374196661" IsSourceVirtualized="True" Weight="1" />
+    <Link Source="@11" Target="@7" Category="Implements" Bounds="-164.584449609898,-42.1086405820068,86.3329012731366,95.9640125757226" Weight="1" />
+    <Link Source="@12" Target="@6" Category="Implements" Bounds="643.779783796361,-72.886890756261,45.773913150276,44.5616707151716" Weight="1" />
+    <Link Source="@13" Target="@12" Category="Implements" Bounds="694.822624453068,-1.20598261096861,238.667357885339,54.6176752328427" Weight="1" />
+    <Link Source="@13" Target="@6" Category="Implements" Bounds="724.98828125,-72.0641632080078,218.115051269531,125.475856781006" Weight="1" />
+    <Link Source="@13" Target="@8" Category="Implements" Bounds="897.14486271092,5.65765906672852,72.0957588886843,47.7540335551455" Weight="1" />
+    <Link Source="@14" Target="@6" Category="Implements" Bounds="512.186176544122,-76.6243744941249,148.81153433234,47.5094924419257" Weight="1" />
+    <Link Source="@15" Target="@14" Category="Implements" Bounds="532.356231676506,-1.81536759607894,217.36703298126,54.227160217953" Weight="1" />
+    <Link Source="@15" Target="@6" Category="Implements" Bounds="721.170901958205,-71.2870398847369,71.4389836415529,123.698832506611" Weight="1" />
+    <Link Source="@15" Target="@8" Category="Implements" Bounds="811.277623962174,7.41724719467274,41.2103044413888,44.9945454272013" Weight="1" />
+    <Link Source="@17" Target="@12" Category="Implements" Bounds="577.375366210938,6.1744966506958,53.39453125,272.825503349304" Weight="1" />
+    <Link Source="@17" Target="@13" Category="Implements" Bounds="571.068481445313,82.4601058959961,381.913879394531,196.539894104004" Weight="1" />
+    <Link Source="@17" Target="@21" Category="CodeSchema_Calls" Bounds="249.944076538086,-21.8854331970215,278.538772583008,300.885433197021" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="4" />
+    <Link Source="@17" Target="@3" Category="InheritsFrom" Bounds="570.079772949219,158.400115966797,147.211608886719,120.599884033203" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="7">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@17" Target="@6" Category="Implements" Bounds="577.375366210938,-70.0601196289063,129.709899902344,349.060119628906" Weight="1" />
+    <Link Source="@17" Target="@8" Category="Implements" Bounds="577.375366210938,3.45652294158936,247.037170410156,275.543477058411" Weight="1" />
+    <Link Source="@18" Target="@12" Category="Implements" Bounds="646.224243164063,4.22743368148804,259.403747558594,274.772627353668" Weight="1" />
+    <Link Source="@18" Target="@3" Category="InheritsFrom" Bounds="760.584411621094,158.403366088867,145.043579101563,120.596694946289" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="4">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@18" Target="@6" Category="Implements" Bounds="709.259887695313,-70.0136947631836,196.368103027344,349.01375579834" Weight="1" />
+    <Link Source="@19" Target="@14" Category="Implements" Bounds="480.030011464129,4.92018272991665,68.9066832331574,212.079817270083" Weight="1" />
+    <Link Source="@19" Target="@15" Category="Implements" Bounds="565.27685546875,80.7841644287109,192.751525878906,136.215835571289" Weight="1" />
+    <Link Source="@19" Target="@21" Category="CodeSchema_Calls" Bounds="249.944076538086,-21.8854331970215,289.860061645508,238.885433197021" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="4" />
+    <Link Source="@19" Target="@3" Category="InheritsFrom" Bounds="578.878470036566,156.320632186738,125.632555203099,60.6793678132619" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="7">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@19" Target="@5" Category="References" Bounds="618.159726332584,230.159818246804,38.0004613636703,0.384787545766244" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="3">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@19" Target="@6" Category="Implements" Bounds="561.600158691406,-70.1379852294922,144.026428222656,287.137985229492" Weight="1" />
+    <Link Source="@19" Target="@8" Category="Implements" Bounds="563.459228515625,3.45652294158936,260.953308105469,213.543477058411" Weight="1" />
+    <Link Source="@20" Target="@14" Category="Implements" Bounds="513.893005371094,-0.659304857254028,405.109130859375,220.659259080887" Weight="1" />
+    <Link Source="@20" Target="@21" Category="CodeSchema_Calls" Bounds="262.999694824219,-22.9875602722168,656.00244140625,242.98751449585" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="4" />
+    <Link Source="@20" Target="@3" Category="InheritsFrom" Bounds="773.465392776435,156.310343064511,132.270930571059,63.6896069354889" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="8">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@20" Target="@5" Category="References" Bounds="822.21290881149,231.866041108711,43.0001508544276,0.248970684077392" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="3">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@20" Target="@6" Category="Implements" Bounds="724.993225097656,-72.0680999755859,203.961547851563,292.068054199219" Weight="1" />
+    <Link Source="@21" Target="@10" Category="References" Bounds="-230.37241154767,-26.7437329816574,386.190583589003,81.7054167907242" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="12">
+      <Category Ref="CodeSchema_Calls" />
+      <Category Ref="CodeSchema_ReturnTypeLink" />
+    </Link>
+    <Link Source="@21" Target="@11" Category="References" Bounds="-25.6827682493991,-24.887011946123,198.897927560635,75.5466998313998" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="12">
+      <Category Ref="CodeSchema_Calls" />
+      <Category Ref="CodeSchema_ReturnTypeLink" />
+    </Link>
+    <Link Source="@21" Target="@4" Category="References" Bounds="208.267028808594,-24.8870124816895,0.134445190429688,25.9999016523361" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="2">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@21" Target="@6" Category="References" Bounds="257.543243408203,-89.0960464477539,389.132171630859,44.3682518005371" IsSourceVirtualized="True" Weight="6">
+      <Category Ref="CodeSchema_ReturnTypeLink" />
+    </Link>
+    <Link Source="@21" Target="@7" Category="References" Bounds="-98.639563463901,-56.4464907898456,253.346153866412,15.8438593161632" IsSourceVirtualized="True" Weight="30">
+      <Category Ref="CodeSchema_ReturnTypeLink" />
+    </Link>
+    <Link Source="@3" Target="@21" Category="References" Bounds="252.278091276409,-22.0486246285687,449.055339643622,149.237530022525" IsSourceVirtualized="True" Weight="3">
+      <Category Ref="CodeSchema_ReturnTypeLink" />
+    </Link>
+    <Link Source="@3" Target="@6" Category="Implements" Bounds="709.259887695313,-70.0136947631836,22.6709594726563,197.202598571777" Weight="1" />
+    <Link Source="@4" Target="@21" Category="References" Bounds="202.25309753418,-15.8872232437134,0.07647705078125,26.000111579895" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="4">
+      <Category Ref="CodeSchema_Calls" />
+    </Link>
+    <Link Source="@4" Target="@6" Category="References" Bounds="244.712066650391,-79.4279327392578,403.252166748047,89.5408210754395" IsSourceVirtualized="True" IsTargetVirtualized="True" Weight="4">
+      <Category Ref="CodeSchema_Calls" />
+      <Category Ref="CodeSchema_ReturnTypeLink" />
+    </Link>
+    <Link Source="@6" Target="@21" Category="CodeSchema_ReturnTypeLink" Bounds="266.415954589844,-84.6430511474609,389.143188476563,44.3240165710449" IsSourceVirtualized="True" Weight="1" />
+    <Link Source="@8" Target="@6" Category="Implements" Bounds="742.915144375625,-75.2926566874643,102.234334968344,50.7042493093384" Weight="1" />
+    <Link Source="@9" Target="@10" Category="Implements" Bounds="-269.097486065247,86.6837297459821,69.1670554423773,41.1717422477337" Weight="1" />
+    <Link Source="@9" Target="@11" Category="Implements" Bounds="-160.024685401363,84.0947692864088,66.1878597546428,43.760702707307" Weight="1" />
+    <Link Source="@9" Target="@7" Category="Implements" Bounds="-181.829482633005,-39.6724361739302,2.69734441699185,167.527908167646" Weight="1" />
+  </Links>
+  <Categories>
+    <Category Id="CodeSchema_Calls" Label="Calls" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Called By" OutgoingActionLabel="Calls" />
+    <Category Id="CodeSchema_Class" Label="Class" BasedOn="CodeSchema_Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Class" NavigationActionLabel="Classes" />
+    <Category Id="CodeSchema_Interface" Label="Interface" BasedOn="CodeSchema_Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Interface" NavigationActionLabel="Interfaces" />
+    <Category Id="CodeSchema_ReturnTypeLink" Label="Return" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Return types" OutgoingActionLabel="Return types" />
+    <Category Id="CodeSchema_Type" Label="Type" CanBeDataDriven="True" DefaultAction="Node:Both:CodeSchema_Member" Icon="CodeSchema_Class" NavigationActionLabel="Types" />
+    <Category Id="Implements" Label="Implements" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Implemented by" OutgoingActionLabel="Implements" />
+    <Category Id="InheritsFrom" Label="Inherits From" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Inherited By" OutgoingActionLabel="Inherits From" />
+    <Category Id="References" Label="References" CanBeDataDriven="True" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Referenced By" OutgoingActionLabel="References" />
+  </Categories>
+  <Properties>
+    <Property Id="Bounds" DataType="System.Windows.Rect" />
+    <Property Id="CanBeDataDriven" Label="CanBeDataDriven" Description="CanBeDataDriven" DataType="System.Boolean" />
+    <Property Id="CanLinkedNodesBeDataDriven" Label="CanLinkedNodesBeDataDriven" Description="CanLinkedNodesBeDataDriven" DataType="System.Boolean" />
+    <Property Id="CodeSchemaProperty_IsAbstract" Label="Is Abstract" Description="Flag to indicate member is 'Abstract' does not provide a full implementation" DataType="System.Boolean" />
+    <Property Id="CodeSchemaProperty_IsPublic" Label="Is Public" Description="Flag to indicate the scope is Public" DataType="System.Boolean" />
+    <Property Id="CommonLabel" DataType="System.String" />
+    <Property Id="DataVirtualized" Label="Data Virtualized" Description="If true, the graph can contain nodes and links that represent data for virtualized nodes/links (i.e. not actually created in the graph)." DataType="System.Boolean" />
+    <Property Id="DefaultAction" Label="DefaultAction" Description="DefaultAction" DataType="System.String" />
+    <Property Id="DelayedChildNodesState" Label="Delayed Child Nodes State" Description="Unspecified if the delayed child nodes state is not specified. NotFetched if the group contains child nodes that are not fetched into the graph yet. Fetched if the group has all its delayed child nodes already fetched." DataType="Microsoft.VisualStudio.GraphModel.DelayedDataState" />
+    <Property Id="DelayedCrossGroupLinksState" Label="Delayed Cross-Group Links State" Description="Unspecified if the delayed cross-group links state is not specified. NotFetched if delayed cross-group links on this node are not fetched into the graph yet. Fetched if all delayed cross-group links have already fetched." DataType="Microsoft.VisualStudio.GraphModel.DelayedDataState" />
+    <Property Id="Expression" DataType="System.String" />
+    <Property Id="Group" Label="Group" Description="Display the node as a group" DataType="Microsoft.VisualStudio.GraphModel.GraphGroupStyle" />
+    <Property Id="GroupLabel" DataType="System.String" />
+    <Property Id="Icon" Label="Icon" Description="Icon" DataType="System.String" />
+    <Property Id="IncomingActionLabel" Label="IncomingActionLabel" Description="IncomingActionLabel" DataType="System.String" />
+    <Property Id="IsEnabled" DataType="System.Boolean" />
+    <Property Id="IsSourceVirtualized" Label="Link Source Virtualized" Description="If true, the link source end contains data for virtualized nodes/links (i.e. not actually created in the graph)." DataType="System.Boolean" />
+    <Property Id="IsTargetVirtualized" Label="Link Target Virtualized" Description="If true, the link target end contains data for virtualized nodes/links (i.e. not actually created in the graph)." DataType="System.Boolean" />
+    <Property Id="Label" Label="Label" Description="Displayable label of an Annotatable object" DataType="System.String" />
+    <Property Id="Language" Label="Language" Description="Language" DataType="System.String" />
+    <Property Id="Layout" DataType="System.String" />
+    <Property Id="NavigationActionLabel" Label="NavigationActionLabel" Description="NavigationActionLabel" DataType="System.String" />
+    <Property Id="OutgoingActionLabel" Label="OutgoingActionLabel" Description="OutgoingActionLabel" DataType="System.String" />
+    <Property Id="SourceLocation" Label="Start Line Number" DataType="Microsoft.VisualStudio.GraphModel.CodeSchema.SourceLocation" />
+    <Property Id="TargetType" DataType="System.Type" />
+    <Property Id="UseManualLocation" DataType="System.Boolean" />
+    <Property Id="Value" DataType="System.String" />
+    <Property Id="ValueLabel" DataType="System.String" />
+    <Property Id="Visibility" Label="Visibility" Description="Defines whether a node in the graph is visible or not" DataType="System.Windows.Visibility" />
+    <Property Id="Weight" Label="Weight" Description="Weight" DataType="System.Double" />
+    <Property Id="ZoomLevel" DataType="System.String" />
+  </Properties>
+  <QualifiedNames>
+    <Name Id="Assembly" Label="Assembly" ValueType="Uri" />
+    <Name Id="Namespace" Label="Namespace" ValueType="System.String" />
+    <Name Id="Type" Label="Type" ValueType="System.Object" />
+  </QualifiedNames>
+  <IdentifierAliases>
+    <Alias n="1" Uri="Assembly=$(6806294c-0d0e-41e0-80c4-a17d6877f807.OutputPathUri)" />
+    <Alias n="2" Id="Namespace=TomP2P.Connection.Windows.Netty" />
+    <Alias n="3" Id="(@1 @2 Type=BaseChannel)" />
+    <Alias n="4" Id="(@1 @2 Type=ChannelHandlerContext)" />
+    <Alias n="5" Id="(@1 @2 Type=DatagramPacket)" />
+    <Alias n="6" Id="(@1 @2 Type=IChannel)" />
+    <Alias n="7" Id="(@1 @2 Type=IChannelHandler)" />
+    <Alias n="8" Id="(@1 @2 Type=IClientChannel)" />
+    <Alias n="9" Id="(@1 @2 Type=IDuplexHandler)" />
+    <Alias n="10" Id="(@1 @2 Type=IInboundHandler)" />
+    <Alias n="11" Id="(@1 @2 Type=IOutboundHandler)" />
+    <Alias n="12" Id="(@1 @2 Type=ITcpChannel)" />
+    <Alias n="13" Id="(@1 @2 Type=ITcpClientChannel)" />
+    <Alias n="14" Id="(@1 @2 Type=IUdpChannel)" />
+    <Alias n="15" Id="(@1 @2 Type=IUdpClientChannel)" />
+    <Alias n="16" Id="Namespace=TomP2P.Connection.Windows" />
+    <Alias n="17" Id="(@1 @16 Type=MyTcpClient)" />
+    <Alias n="18" Id="(@1 @16 Type=MyTcpServer)" />
+    <Alias n="19" Id="(@1 @16 Type=MyUdpClient)" />
+    <Alias n="20" Id="(@1 @16 Type=MyUdpServer)" />
+    <Alias n="21" Id="(@1 @2 Type=Pipeline)" />
+  </IdentifierAliases>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Results" ValueLabel="True">
+      <Condition Expression="HasCategory('QueryResult')" />
+      <Setter Property="Background" Value="#FFBCFFBE" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Assembly" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Assembly')" />
+      <Setter Property="Background" Value="#FF094167" />
+      <Setter Property="Stroke" Value="#FF094167" />
+      <Setter Property="Icon" Value="CodeSchema_Assembly" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Namespace" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Namespace')" />
+      <Setter Property="Background" Value="#FF0E619A" />
+      <Setter Property="Stroke" Value="#FF0E619A" />
+      <Setter Property="Icon" Value="CodeSchema_Namespace" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Interface" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Interface')" />
+      <Setter Property="Background" Value="#FF1382CE" />
+      <Setter Property="Stroke" Value="#FF1382CE" />
+      <Setter Property="Icon" Value="CodeSchema_Interface" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Struct" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Struct')" />
+      <Setter Property="Background" Value="#FF1382CE" />
+      <Setter Property="Stroke" Value="#FF1382CE" />
+      <Setter Property="Icon" Value="CodeSchema_Struct" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Enumeration" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Enum')" />
+      <Setter Property="Background" Value="#FF1382CE" />
+      <Setter Property="Stroke" Value="#FF1382CE" />
+      <Setter Property="Icon" Value="CodeSchema_Enum" />
+      <Setter Property="LayoutSettings" Value="List" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Delegate" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Delegate')" />
+      <Setter Property="Background" Value="#FF1382CE" />
+      <Setter Property="Stroke" Value="#FF1382CE" />
+      <Setter Property="Icon" Value="CodeSchema_Delegate" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Class" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Type')" />
+      <Setter Property="Background" Value="#FF1382CE" />
+      <Setter Property="Stroke" Value="#FF1382CE" />
+      <Setter Property="Icon" Value="CodeSchema_Class" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Property" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Property')" />
+      <Setter Property="Background" Value="#FFE0E0E0" />
+      <Setter Property="Stroke" Value="#FFE0E0E0" />
+      <Setter Property="Icon" Value="CodeSchema_Property" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Method" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Method') Or HasCategory('CodeSchema_CallStackUnresolvedMethod')" />
+      <Setter Property="Background" Value="#FFE0E0E0" />
+      <Setter Property="Stroke" Value="#FFE0E0E0" />
+      <Setter Property="Icon" Value="CodeSchema_Method" />
+      <Setter Property="LayoutSettings" Value="List" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Event" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Event')" />
+      <Setter Property="Background" Value="#FFE0E0E0" />
+      <Setter Property="Stroke" Value="#FFE0E0E0" />
+      <Setter Property="Icon" Value="CodeSchema_Event" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Field" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Field')" />
+      <Setter Property="Background" Value="#FFE0E0E0" />
+      <Setter Property="Stroke" Value="#FFE0E0E0" />
+      <Setter Property="Icon" Value="CodeSchema_Field" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Out Parameter" ValueLabel="Has category">
+      <Condition Expression="CodeSchemaProperty_IsOut = 'True'" />
+      <Setter Property="Icon" Value="CodeSchema_OutParameter" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Parameter" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Parameter')" />
+      <Setter Property="Icon" Value="CodeSchema_Parameter" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Local Variable" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_LocalExpression')" />
+      <Setter Property="Icon" Value="CodeSchema_LocalExpression" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Externals" ValueLabel="Has category">
+      <Condition Expression="HasCategory('Externals')" />
+      <Setter Property="Background" Value="#FF424242" />
+      <Setter Property="Stroke" Value="#FF424242" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Inherits From" ValueLabel="Has category">
+      <Condition Expression="HasCategory('InheritsFrom')" />
+      <Setter Property="Stroke" Value="#FF00A600" />
+      <Setter Property="StrokeDashArray" Value="2 0" />
+      <Setter Property="DrawArrow" Value="true" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Implements" ValueLabel="Has category">
+      <Condition Expression="HasCategory('Implements')" />
+      <Setter Property="Stroke" Value="#8000A600" />
+      <Setter Property="StrokeDashArray" Value="2 2" />
+      <Setter Property="DrawArrow" Value="true" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Calls" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_Calls')" />
+      <Setter Property="Stroke" Value="#FFFF00FF" />
+      <Setter Property="StrokeDashArray" Value="2 0" />
+      <Setter Property="DrawArrow" Value="true" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Function Pointer" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_FunctionPointer')" />
+      <Setter Property="Stroke" Value="#FFFF00FF" />
+      <Setter Property="StrokeDashArray" Value="2 2" />
+      <Setter Property="DrawArrow" Value="true" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Field Reference" ValueLabel="Has category">
+      <Condition Expression="HasCategory('CodeSchema_FieldReference')" />
+      <Setter Property="Stroke" Value="#FF00AEEF" />
+      <Setter Property="DrawArrow" Value="true" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Inherits From" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="HasCategory('InheritsFrom') And Target.HasCategory('CodeSchema_Class')" />
+      <Setter Property="TargetDecorator" Value="OpenArrow" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Implements" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="HasCategory('Implements') And Target.HasCategory('CodeSchema_Interface')" />
+      <Setter Property="TargetDecorator" Value="OpenArrow" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Field Read" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="Target.HasCategory('CodeSchema_Field') And HasCategory('CodeSchema_FieldRead')" />
+      <Setter Property="StrokeDashArray" Value="2 2" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Comment Link" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="Source.HasCategory('Comment')" />
+      <Setter Property="Stroke" Value="#FFE5C365" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Cursor Location Changed" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="IsCursorLocation" />
+      <Setter Property="IndicatorWest" Value="WestIndicator" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Disabled Breakpoint Location Changed" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="DisabledBreakpointCount" />
+      <Setter Property="IndicatorWest" Value="WestIndicator" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Enabled Breakpoint Location Changed" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="EnabledBreakpointCount" />
+      <Setter Property="IndicatorWest" Value="WestIndicator" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Instruction Pointer Location Changed" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="IsInstructionPointerLocation" />
+      <Setter Property="IndicatorWest" Value="WestIndicator" />
+    </Style>
+    <Style TargetType="Node" GroupLabel="Current Callstack Changed" ValueLabel="True" Visibility="Hidden">
+      <Condition Expression="IsCurrentCallstackFrame" />
+      <Setter Property="IndicatorWest" Value="WestIndicator" />
+    </Style>
+  </Styles>
+  <Paths>
+    <Path Id="6806294c-0d0e-41e0-80c4-a17d6877f807.OutputPathUri" Value="file:///C:/Users/Christian/Source/Repos/tomp2p-win/TomP2P/TomP2P/bin/Debug/TomP2P.dll" />
+  </Paths>
+</DirectedGraph>
