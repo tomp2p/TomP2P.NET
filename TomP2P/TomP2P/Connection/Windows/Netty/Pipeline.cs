@@ -32,6 +32,7 @@ namespace TomP2P.Connection.Windows.Netty
         private object _readResult;
 
         private Exception _caughtException;
+        public bool IsActive { get; private set; }
 
         public Pipeline(IChannel channel)
             : this(channel, null)
@@ -118,6 +119,24 @@ namespace TomP2P.Connection.Windows.Netty
         public void ExceptionCaught(Exception ex)
         {
             _caughtException = ex;
+        }
+
+        public void Active()
+        {
+            IsActive = true;
+            foreach (var handler in _handlers)
+            {
+                handler.Handler.ChannelActive(_ctx);
+            }
+        }
+
+        public void Inactive()
+        {
+            IsActive = false;
+            foreach (var handler in _handlers)
+            {
+                handler.Handler.ChannelInactive(_ctx);
+            }
         }
 
         public void ResetWrite()

@@ -69,9 +69,21 @@ namespace TomP2P.Connection
             return this;
         }
 
+        // TODO works?
         public override void HandlerAdded(ChannelHandlerContext ctx)
         {
+            if (ctx.Channel.IsActive)
+            {
+                Initialize(ctx);
+            }
         }
+
+        // TODO works?
+        public override void ChannelActive(ChannelHandlerContext ctx)
+        {
+            Initialize(ctx);
+        }
+
 
         private void Initialize(ChannelHandlerContext ctx)
         {
@@ -88,7 +100,7 @@ namespace TomP2P.Connection
             var currentMillis = Convenient.CurrentTimeMillis();
             _lastReadTime.Set(currentMillis);
             _lastWriteTime.Set(currentMillis);
-           
+
             _loop = new Timer(Heartbeating, ctx, TimeToHeartBeatMillis, TimeToHeartBeatMillis);
         }
 
@@ -119,7 +131,7 @@ namespace TomP2P.Connection
             {
                 Logger.Debug("Sending heart beat to {0}. Channel: {1}.", _peerConnection.RemotePeer, _peerConnection.Channel);
                 var builder = _pingBuilderFactory.Create();
-                
+
                 // TODO finish implementation
                 throw new NotImplementedException();
             }
