@@ -36,7 +36,7 @@ namespace TomP2P.Message
             var buf = piece.Content;
             var sender = piece.Sender;
             var recipient = piece.Recipient;
-            
+
             try
             {
                 if (_cumulation == null)
@@ -111,22 +111,17 @@ namespace TomP2P.Message
             if (_decoder.Message == null && _decoder.LastContent == Message.Content.Empty)
             {
                 Logger.Error("Exception in decoding TCP. Occurred before starting to decode.", cause);
-            } else if (_decoder.Message != null && !_decoder.Message.IsDone)
+            }
+            else if (_decoder.Message != null && !_decoder.Message.IsDone)
             {
                 Logger.Error("Exception in decoding TCP. Occurred after starting to decode.", cause);
             }
         }
 
-        public override void ChannelInactive(ChannelHandlerContext ctx, object msg)
+        public override void ChannelInactive(ChannelHandlerContext ctx)
         {
-            var piece = msg as StreamPiece;
-            if (piece == null)
-            {
-                // TODO ctx.FireInactive needed?
-                return;
-            }
-            var sender = piece.Sender;
-            var recipient = piece.Recipient;
+            var sender = ctx.Channel.RemoteEndPoint;
+            var recipient = ctx.Channel.LocalEndPoint;
 
             try
             {
@@ -142,10 +137,7 @@ namespace TomP2P.Message
             }
             finally
             {
-                if (_cumulation != null)
-                {
-                    _cumulation = null;
-                }
+                _cumulation = null;
                 // TODO ctx.FireInactive needed?
             }
         }
