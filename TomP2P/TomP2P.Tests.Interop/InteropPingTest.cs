@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -17,8 +16,10 @@ namespace TomP2P.Tests.Interop
     {
         private TaskCompletionSource<PeerAddress> _tcs;
 
+        #region Pings from .Net to Java
+
         [Test]
-        public async void TestPingToJavaUdp()
+        public async void TestPingUdpToJava()
         {
             // setup Java server and get it's PeerAddress
             _tcs = new TaskCompletionSource<PeerAddress>();
@@ -64,7 +65,7 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingToJavaBroadcastUdp()
+        public async void TestPingBroadcastUdpToJava()
         {
             // setup Java server and get it's PeerAddress
             _tcs = new TaskCompletionSource<PeerAddress>();
@@ -110,7 +111,7 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingToJavaFireUdp()
+        public async void TestFireUdpToJava()
         {
             // TODO find a way to check whether Java side received the ff ping
             // setup Java server and get it's PeerAddress
@@ -155,7 +156,7 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingToJavaTcp()
+        public async void TestPingTcpToJava()
         {
             // setup Java server and get it's PeerAddress
             _tcs = new TaskCompletionSource<PeerAddress>();
@@ -201,14 +202,41 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public async void TestPingToJavaTcp2()
+        public async void TestFireTcpToJava()
         {
-            // TODO implement
             throw new NotImplementedException();
         }
 
         [Test]
-        public void TestPingFromJavaUdp()
+        public async void TestPingUdpDiscoverToJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public async void TestPingTcpDiscoverToJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public async void TestPingUdpProbeToJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public async void TestPingTcpProbeToJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Pings from Java to .NET
+
+        [Test]
+        public void TestPingUdpFromJava()
         {
             // setup .NET server and provide it's PeerAddress
             Peer receiver = null;
@@ -235,7 +263,98 @@ namespace TomP2P.Tests.Interop
         }
 
         [Test]
-        public void TestPingFromJavaTcp()
+        public async void TestPingBroadcastUdpFromJava()
+        {
+            // setup Java server and get it's PeerAddress
+            _tcs = new TaskCompletionSource<PeerAddress>();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                JarRunner.Run("JavaPingReceiver-start", DataReceived);
+            });
+            PeerAddress server = await _tcs.Task;
+
+            // ping & test
+            Peer sender = null;
+            ChannelCreator cc = null;
+            try
+            {
+                // setup .NET sender
+                sender = new PeerBuilder(new Number160("0x9876")).
+                    SetP2PId(55).
+                    SetPorts(2424).
+                    Start();
+
+                cc = await sender.ConnectionBean.Reservation.CreateAsync(1, 0);
+                var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
+                var task = handshake.PingBroadcastUdpAsync(server, cc, new DefaultConnectionConfiguration());
+                var responseMessage = await task;
+
+                Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
+                Assert.AreEqual(responseMessage.Sender, server);
+                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                JarRunner.WriteToProcess("JavaPingReceiver-stop");
+            }
+        }
+
+        [Test]
+        public async void TestFireUdpFromJava()
+        {
+            // TODO find a way to check whether Java side received the ff ping
+            // setup Java server and get it's PeerAddress
+            _tcs = new TaskCompletionSource<PeerAddress>();
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                JarRunner.Run("JavaPingReceiver-start", DataReceived);
+            });
+            PeerAddress server = await _tcs.Task;
+
+            // ping & test
+            Peer sender = null;
+            ChannelCreator cc = null;
+            try
+            {
+                // setup .NET sender
+                sender = new PeerBuilder(new Number160("0x9876")).
+                    SetP2PId(55).
+                    SetPorts(2424).
+                    Start();
+
+                cc = await sender.ConnectionBean.Reservation.CreateAsync(1, 0);
+                var handshake = new PingRpc(sender.PeerBean, sender.ConnectionBean);
+                var task = handshake.FireUdpAsync(server, cc, new DefaultConnectionConfiguration());
+                var responseMessage = await task;
+
+                Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
+                Assert.IsTrue(responseMessage == null);
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                JarRunner.WriteToProcess("JavaPingReceiver-stop");
+            }
+        }
+
+        [Test]
+        public void TestPingTcpFromJava()
         {
             // setup .NET server and provide it's PeerAddress
             Peer receiver = null;
@@ -260,6 +379,38 @@ namespace TomP2P.Tests.Interop
                 }
             }
         }
+
+        [Test]
+        public void TestFireTcpFromJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public void TestPingUdpDiscoverFromJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public void TestPingTcpDiscoverFromJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public void TestPingUdpProbeFromJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Test]
+        public void TestPingTcpProbeFromJava()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
 
         private void DataReceived(object sender, DataReceivedEventArgs args)
         {
