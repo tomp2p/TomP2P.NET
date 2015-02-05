@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +8,10 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private CancellationTokenSource _cts;
         private Task[] _tasks;
+
+        protected BaseServer(IPEndPoint localEndPoint)
+            : base (localEndPoint)
+        { }
 
         public void Start()
         {

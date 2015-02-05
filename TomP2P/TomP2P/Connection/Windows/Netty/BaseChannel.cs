@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -9,10 +10,15 @@ namespace TomP2P.Connection.Windows.Netty
         protected bool IsClosed;
         private Pipeline _pipeline;
 
+        protected BaseChannel(IPEndPoint localEndPoint)
+        {
+            LocalEndPoint = localEndPoint;
+        }
+
         public void SetPipeline(Pipeline pipeline)
         {
             _pipeline = pipeline;
-            _pipeline.Active();
+            _pipeline.Active(); // active means getting open
         }
 
         public Pipeline Pipeline
@@ -27,7 +33,7 @@ namespace TomP2P.Connection.Windows.Netty
         {
             if (!IsClosed)
             {
-                _pipeline.Inactive();
+                _pipeline.Inactive(); // inactive means getting closed
                 IsClosed = true;
                 DoClose();
                 OnClosed();
@@ -45,6 +51,10 @@ namespace TomP2P.Connection.Windows.Netty
         }
 
         public abstract Socket Socket { get; }
+
+        public IPEndPoint LocalEndPoint { get; protected set; }
+
+        public IPEndPoint RemoteEndPoint { get; protected set; }
 
         public abstract bool IsUdp { get; }
 

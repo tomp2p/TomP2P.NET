@@ -16,9 +16,10 @@ namespace TomP2P.Connection.Windows
         private readonly UdpClient _udpClient;
 
         public MyUdpClient(IPEndPoint localEndPoint)
+            : base(localEndPoint)
         {
             // bind
-            _udpClient = new UdpClient(localEndPoint);    
+            _udpClient = new UdpClient(localEndPoint);
         }
 
         public async Task SendMessageAsync(Message.Message message)
@@ -43,7 +44,11 @@ namespace TomP2P.Connection.Windows
 
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(udpRes.Buffer.ToSByteArray());
-            var dgram = new DatagramPacket(buf, (IPEndPoint) Socket.LocalEndPoint, udpRes.RemoteEndPoint);
+
+            LocalEndPoint = (IPEndPoint) Socket.LocalEndPoint;
+            RemoteEndPoint = udpRes.RemoteEndPoint;
+
+            var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
             Logger.Debug("MyUdpClient received {0}.", dgram);
 
             // execute inbound pipeline

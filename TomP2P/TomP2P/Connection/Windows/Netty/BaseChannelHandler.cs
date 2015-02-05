@@ -15,7 +15,7 @@ namespace TomP2P.Connection.Windows.Netty
             // can be overridden
         }
 
-        public virtual void ChannelInactive(ChannelHandlerContext ctx)
+        public virtual void ChannelInactive(ChannelHandlerContext ctx, object msg)
         {
             // do nothing by default
             // can be overridden

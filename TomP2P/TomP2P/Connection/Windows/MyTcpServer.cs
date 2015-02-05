@@ -17,6 +17,7 @@ namespace TomP2P.Connection.Windows
         private readonly TcpListener _tcpServer;
 
         public MyTcpServer(IPEndPoint localEndPoint)
+            : base(localEndPoint)
         {
             // local endpoint
             _tcpServer = new TcpListener(localEndPoint);
@@ -50,8 +51,12 @@ namespace TomP2P.Connection.Windows
                     var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length, ct);
                     buf.Deallocate();
                     buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
-                    var piece = new StreamPiece(buf, (IPEndPoint) client.Client.LocalEndPoint, (IPEndPoint)client.Client.RemoteEndPoint);
-                    Logger.Debug("MyTcpServer received {0}.", piece);
+
+                    LocalEndPoint = (IPEndPoint) client.Client.LocalEndPoint;
+                    RemoteEndPoint = (IPEndPoint) client.Client.RemoteEndPoint;
+                    
+                    var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
+                    Logger.Debug("Received {0}.", piece);
 
                     // execute inbound pipeline
                     readRes = Pipeline.Read(piece);

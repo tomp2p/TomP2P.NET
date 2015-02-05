@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -17,6 +18,10 @@ namespace TomP2P.Connection.Windows.Netty
         /// The underlying socket that is used.
         /// </summary>
         Socket Socket { get; }
+
+        IPEndPoint LocalEndPoint { get; }
+
+        IPEndPoint RemoteEndPoint { get; }
 
         Pipeline Pipeline { get; }
 

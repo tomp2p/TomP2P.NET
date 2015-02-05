@@ -5,14 +5,21 @@ namespace TomP2P.Connection.Windows.Netty
 {
     /// <summary>
     /// Equivalent to Java Netty's ChannelHandler.
-    /// Does not provide any methods in .NET.
     /// </summary>
     public interface IChannelHandler
     {
         void ExceptionCaught(ChannelHandlerContext ctx, Exception cause);
 
+        /// <summary>
+        /// This channel is active now, which means it is open.
+        /// </summary>
+        /// <param name="ctx"></param>
         void ChannelActive(ChannelHandlerContext ctx);
 
+        /// <summary>
+        /// This channel is inactive now, which means it is closed.
+        /// </summary>
+        /// <param name="ctx"></param>
         void ChannelInactive(ChannelHandlerContext ctx);
 
         void HandlerAdded(ChannelHandlerContext ctx);

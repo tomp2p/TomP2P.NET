@@ -67,8 +67,6 @@ namespace TomP2P.Message
             }
         }
 
-        // TODO find channelInactive equivalent
-        
         private void Decoding(ChannelHandlerContext ctx, IPEndPoint sender, IPEndPoint receiver)
         {
             bool finished = true;
@@ -116,6 +114,39 @@ namespace TomP2P.Message
             } else if (_decoder.Message != null && !_decoder.Message.IsDone)
             {
                 Logger.Error("Exception in decoding TCP. Occurred after starting to decode.", cause);
+            }
+        }
+
+        public override void ChannelInactive(ChannelHandlerContext ctx, object msg)
+        {
+            var piece = msg as StreamPiece;
+            if (piece == null)
+            {
+                // TODO ctx.FireInactive needed?
+                return;
+            }
+            var sender = piece.Sender;
+            var recipient = piece.Recipient;
+
+            try
+            {
+                if (_cumulation != null)
+                {
+                    Decoding(ctx, sender, recipient);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Error in TCP decoding. (Inactive)", ex);
+                throw;
+            }
+            finally
+            {
+                if (_cumulation != null)
+                {
+                    _cumulation = null;
+                }
+                // TODO ctx.FireInactive needed?
             }
         }
     }
