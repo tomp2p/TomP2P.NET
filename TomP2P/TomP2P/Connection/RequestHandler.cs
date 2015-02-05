@@ -140,6 +140,22 @@ namespace TomP2P.Connection
             return _tcsResponse.Task;
         }
 
+        /// <summary>
+        /// Sends a TCP message and expects a response.
+        /// </summary>
+        /// <param name="channelCreator">The channel creator will create a TCP connection.</param>
+        /// <param name="peerConnection"></param>
+        /// <returns>The future task that was added in the constructor.</returns>
+        public Task<Message.Message> SendTcpAsync(ChannelCreator channelCreator, PeerConnection peerConnection)
+        {
+            ThreadPool.QueueUserWorkItem(async delegate
+            {
+                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                    ConnectionTimeoutTcpMillis, peerConnection);
+            });
+            return _tcsResponse.Task;
+        }
+
         public void Read(ChannelHandlerContext ctx, object msg)
         {
             // client-side:
