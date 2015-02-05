@@ -146,7 +146,8 @@ namespace TomP2P.Rpc
         public Task<Message.Message> PingUdpDiscoverAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration, PeerAddress senderAddress)
         {
-            throw new NotImplementedException();
+            var tcsResponse = CreateDiscoverHandler(remotePeer, senderAddress);
+            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration).SendUdpAsync(channelCreator);
         }
 
         /// <summary>
@@ -160,7 +161,8 @@ namespace TomP2P.Rpc
         public Task<Message.Message> PingTcpDiscoverAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration, PeerAddress senderAddress)
         {
-            throw new NotImplementedException();
+            var tcsResponse = CreateDiscoverHandler(remotePeer, senderAddress);
+            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration).SendTcpAsync(channelCreator);
         }
 
         /// <summary>
@@ -174,7 +176,10 @@ namespace TomP2P.Rpc
         public Task<Message.Message> PingUdpProbeAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            throw new NotImplementedException();
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(),
+                Message.Message.MessageType.Request3);
+            var tcsResponse = new TaskCompletionSource<Message.Message>(message);
+            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration).SendUdpAsync(channelCreator);
         }
 
         /// <summary>
@@ -188,7 +193,10 @@ namespace TomP2P.Rpc
         public Task<Message.Message> PingTcpProbeAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
-            throw new NotImplementedException();
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(),
+                Message.Message.MessageType.Request3);
+            var tcsResponse = new TaskCompletionSource<Message.Message>(message);
+            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration).SendTcpAsync(channelCreator);
         }
 
         /// <summary>
@@ -206,9 +214,32 @@ namespace TomP2P.Rpc
             // 2. store message as the TCS's AsyncState
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(), type);
 
-            var tcs = new TaskCompletionSource<Message.Message>(message);
+            var tcsResponse = new TaskCompletionSource<Message.Message>(message);
 
-            return new RequestHandler(tcs, PeerBean, ConnectionBean, configuration);
+            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration);
+        }
+
+        /// <summary>
+        /// Creates a discover handler.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="senderAddress"></param>
+        /// <returns></returns>
+        private TaskCompletionSource<Message.Message> CreateDiscoverHandler(PeerAddress remotePeer,
+            PeerAddress senderAddress)
+        {
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Ping.GetNr(),
+                Message.Message.MessageType.Request2);
+            if (senderAddress != null)
+            {
+                message.SetSender(senderAddress);
+                message.SetNeighborSet(CreateNeighborSet(senderAddress));
+            }
+            else
+            {
+                message.SetNeighborSet(CreateNeighborSet(PeerBean.ServerPeerAddress));
+            }
+            return new TaskCompletionSource<Message.Message>(message);
         }
 
         public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
@@ -363,7 +394,7 @@ namespace TomP2P.Rpc
         /// Create a neighbor set with one peer.
         /// We only support sending a neighbor set, so we need this wrapper class.
         /// </summary>
-        /// <param name="self">The peer that be stored in the neighbor set.</param>
+        /// <param name="self">The peer that will be stored in the neighbor set.</param>
         /// <returns>The neighbor set with exactly one peer.</returns>
         private static NeighborSet CreateNeighborSet(PeerAddress self)
         {
