@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using NLog;
@@ -28,7 +29,7 @@ namespace TomP2P.Connection
         private readonly InteropRandom _random;
 
         // this map caches all messages which are meant to be sent by a reverse connection setup
-        private readonly ConcurrentDictionary<int, FutureResponse> _cachedRequests = new ConcurrentDictionary<int, FutureResponse>();
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<Message.Message>> _cachedRequests = new ConcurrentDictionary<int, TaskCompletionSource<Message.Message>>();
 
         public IPingBuilderFactory PingBuilderFactory { get; private set; }
 
@@ -39,6 +40,12 @@ namespace TomP2P.Connection
             ChannelClientConfiguration = channelClientConfiguration;
             _dispatcher = dispatcher;
             _random = new InteropRandom((ulong)peerId.GetHashCode()); // TODO check if same results in Java
+        }
+
+        public Sender SetPingBuilderFactory(IPingBuilderFactory pingBuilderFactory)
+        {
+            PingBuilderFactory = pingBuilderFactory;
+            return this;
         }
 
         /// <summary>
@@ -205,7 +212,7 @@ namespace TomP2P.Connection
                     // check if reverse connection is possible
                     if (!message.Sender.IsRelayed)
                     {
-                        HandleRcon(handler, tcsResponse, message, channelCreator, connectTimeoutMillis, peerConnection,
+                        await HandleRconAsync(handler, tcsResponse, message, channelCreator, connectTimeoutMillis, peerConnection,
                             timeoutHandler);
                     }
                     else
@@ -227,7 +234,7 @@ namespace TomP2P.Connection
         /// This method initiates the reverse connection setup.
         /// It creates a new message and sends it via relay to the unreachable peer
         /// which then connects to this peer again. After the connect message from the
-        /// unreachable peer, this peer weill send the original message and its content
+        /// unreachable peer, this peer will send the original message and its content
         /// directly.
         /// </summary>
         /// <param name="handler"></param>
@@ -237,12 +244,69 @@ namespace TomP2P.Connection
         /// <param name="connectTimeoutMillis"></param>
         /// <param name="peerConnection"></param>
         /// <param name="timeoutHandler"></param>
-        private void HandleRcon(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
+        private async Task HandleRconAsync(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
             Message.Message message, ChannelCreator channelCreator, int connectTimeoutMillis,
             PeerConnection peerConnection, TimeoutFactory timeoutHandler)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            message.SetKeepAlive(true);
+
+            Logger.Debug("Initiate reverse connection setup to peer with address {0}.", message.Recipient);
+            var rconMessage = CreateRconMessage(message);
+
+            // TODO works?
+            // cache the original message until the connection is established
+            _cachedRequests.AddOrUpdate(message.MessageId, tcsResponse, (i, source) => tcsResponse);
+
+            // wait for response (whether the reverse connection setup was successful)
+            var tcsRconResponse = new TaskCompletionSource<Message.Message>(rconMessage);
+
+            // .NET-specific: specify and use a RconInboundHandler class
+            var rconInboundHandler = new RconInboundHandler(tcsRconResponse, tcsResponse);
+
+            // send reverse connection request instead of normal message
+            await SendTcpAsync(rconInboundHandler, tcsRconResponse, rconMessage, channelCreator, connectTimeoutMillis,
+                connectTimeoutMillis, peerConnection);
+        }
+
+        /// <summary>
+        /// This method makes a copy of the original message and prepares it for 
+        /// sending it to the relay.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        private static Message.Message CreateRconMessage(Message.Message message)
+        {
+            // get relay address from the unreachable peer
+            var relayAddresses = message.Recipient.PeerSocketAddresses.ToArray();
+            PeerSocketAddress socketAddress = null;
+
+            if (relayAddresses.Length > 0)
+            {
+                // we should be fair and choose one of the relays randomly
+                socketAddress = relayAddresses[Utils.Utils.RandomPositiveInt(relayAddresses.Length)];
+            }
+            else
+            {
+                throw new ArgumentException("There are no PeerSocketAddresses available for this relayed peer. This should not be possible!");
+            }
+
+            // we need to make a copy of the original message
+            var rconMessage = new Message.Message();
+            rconMessage.SetSender(message.Sender);
+            rconMessage.SetVersion(message.Version);
+            rconMessage.SetIntValue(message.MessageId);
+
+            // make the message ready to send
+            PeerAddress recipient =
+                message.Recipient
+                    .ChangeAddress(socketAddress.InetAddress)
+                    .ChangePorts(socketAddress.TcpPort, socketAddress.UdpPort)
+                    .ChangeIsRelayed(false);
+            rconMessage.SetRecipient(recipient);
+            rconMessage.SetCommand(Rpc.Rpc.Commands.Rcon.GetNr());
+            rconMessage.SetType(Message.Message.MessageType.Request1);
+
+            return rconMessage;
         }
 
         private void HandleRelay(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,

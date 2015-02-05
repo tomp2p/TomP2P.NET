@@ -17,6 +17,8 @@ namespace TomP2P.Utils
 {
     public static class Utils
     {
+        private static readonly Random Random = new Random();
+
         public const int IPv4Bytes = 4;         //  32 bits
         public const int IPv6Bytes = 16;        // 128 bits
         public const int ByteBits = 8;
@@ -161,6 +163,17 @@ namespace TomP2P.Utils
                     }
                 });
             }
+        }
+
+        /// <summary>
+        /// This method returns a random positive integer within a given upper limit.
+        /// </summary>
+        /// <param name="upperBound"></param>
+        /// <returns></returns>
+        public static int RandomPositiveInt(int upperBound)
+        {
+            // .NET's Random produces non-negative numbers by default
+            return Random.Next(upperBound);
         }
 
         #region .NET only

@@ -91,6 +91,7 @@
     <Compile Include="Connection\Windows\Netty\IServerChannel.cs" />
     <Compile Include="Connection\Windows\Netty\Pipeline.cs" />
     <Compile Include="Connection\Windows\Netty\StreamPiece.cs" />
+    <Compile Include="Connection\Windows\RconInboundHandler.cs" />
     <Compile Include="Connection\Windows\TcpClientSocket.cs" />
     <Compile Include="Connection\Windows\TcpServerSocket.cs" />
     <Compile Include="Connection\Windows\UdpClientSocket.cs" />
