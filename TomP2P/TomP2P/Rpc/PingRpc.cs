@@ -74,6 +74,7 @@ namespace TomP2P.Rpc
         public Task<Message.Message> PingUdpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
+            Logger.Debug("Pinging UDP the remote peer {0}.", remotePeer);
             return Ping(remotePeer, configuration).SendUdpAsync(channelCreator);
         }
 
@@ -125,7 +126,7 @@ namespace TomP2P.Rpc
         /// <param name="remotePeer">The destination peer.</param>
         /// <param name="channelCreator">The channel creator where we create a TCP channel.</param>
         /// <param name="configuration"></param>
-        /// <returns></returns>
+        /// <returns>The future response message.</returns>
         public Task<Message.Message> FireTcpAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
             IConnectionConfiguration configuration)
         {
@@ -134,7 +135,61 @@ namespace TomP2P.Rpc
                     .SendTcpAsync(channelCreator);
         }
 
-        // TODO implement rest of ping methods
+        /// <summary>
+        /// Ping a UDP peer and find out how the other peer sees us.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a UDP channel.</param>
+        /// <param name="configuration"></param>
+        /// <param name="senderAddress"></param>
+        /// <returns>The future response message.</returns>
+        public Task<Message.Message> PingUdpDiscoverAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration, PeerAddress senderAddress)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Ping a TCP peer and find out how the other peer sees us.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a TCP channel.</param>
+        /// <param name="configuration"></param>
+        /// <param name="senderAddress"></param>
+        /// <returns>The future response message.</returns>
+        public Task<Message.Message> PingTcpDiscoverAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration, PeerAddress senderAddress)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Ping a UDP peer and request the other peer to ping us on our public address with a
+        /// fire-and-forget message.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a UDP channel.</param>
+        /// <param name="configuration"></param>
+        /// <returns>The future response message.</returns>
+        public Task<Message.Message> PingUdpProbeAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Ping a TCP peer and request the other peer to ping us on our public address with a
+        /// fire-and-forget message.
+        /// </summary>
+        /// <param name="remotePeer">The destination peer.</param>
+        /// <param name="channelCreator">The channel creator where we create a TCP channel.</param>
+        /// <param name="configuration"></param>
+        /// <returns>The future response message.</returns>
+        public Task<Message.Message> PingTcpProbeAsync(PeerAddress remotePeer, ChannelCreator channelCreator,
+            IConnectionConfiguration configuration)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Creates a RequestHandler.
