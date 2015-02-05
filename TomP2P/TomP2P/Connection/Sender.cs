@@ -196,11 +196,9 @@ namespace TomP2P.Connection
             {
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
             }
-
-            ITcpClientChannel channel;
             if (peerConnection != null && peerConnection.Channel != null && peerConnection.Channel.IsActive)
             {
-                channel = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcsResponse);
+                var channel = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcsResponse);
                 await AfterConnectAsync(tcsResponse, message, channel, isFireAndForget);
             }
             else if (channelCreator != null)
@@ -217,7 +215,7 @@ namespace TomP2P.Connection
                     }
                     else
                     {
-                        HandleRelay(handler, tcsResponse, message, channelCreator, idleTcpSeconds, connectTimeoutMillis,
+                        await HandleRelayAsync(handler, tcsResponse, message, channelCreator, idleTcpSeconds, connectTimeoutMillis,
                             peerConnection, timeoutHandler);
                     }
                 }
@@ -309,9 +307,72 @@ namespace TomP2P.Connection
             return rconMessage;
         }
 
-        private void HandleRelay(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
+        /// <summary>
+        /// // TODO document
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="tcsResponse"></param>
+        /// <param name="message"></param>
+        /// <param name="channelCreator"></param>
+        /// <param name="idleTcpSeconds"></param>
+        /// <param name="connectTimeoutMillis"></param>
+        /// <param name="peerConnection"></param>
+        /// <param name="timeoutHandler"></param>
+        private async Task HandleRelayAsync(IInboundHandler handler, TaskCompletionSource<Message.Message> tcsResponse,
             Message.Message message, ChannelCreator channelCreator, int idleTcpSeconds, int connectTimeoutMillis,
             PeerConnection peerConnection, TimeoutFactory timeoutHandler)
+        {
+            var tcsPingDone = PingFirst(message.Recipient.PeerSocketAddresses);
+            var taskDone = tcsPingDone.Task;
+            await taskDone;
+            if (!taskDone.IsFaulted)
+            {
+                var recipient = PeerSocketAddress.CreateSocketTcp(taskDone.Result);
+                var channel = SendTcpCreateChannel(recipient, channelCreator, peerConnection, handler,
+                    timeoutHandler, connectTimeoutMillis);
+                await AfterConnectAsync(tcsResponse, message, channel, handler == null);
+
+                // TODO add this before AfterConnect?
+                var taskResponse = tcsResponse.Task;
+                await taskResponse;
+                if (taskResponse.IsFaulted)
+                {
+                    if (taskResponse.Result != null &&
+                        taskResponse.Result.Type != Message.Message.MessageType.User1)
+                    {
+                        // "clearInactivePeerSocketAddress"
+                        var tmp = new List<PeerSocketAddress>();
+                        foreach (var psa in message.Recipient.PeerSocketAddresses)
+                        {
+                            if (psa != null)
+                            {
+                                if (!psa.Equals(taskDone.Result))
+                                {
+                                    tmp.Add(psa);
+                                }
+                            }
+                        }
+                        message.SetPeerSocketAddresses(tmp);
+
+                        await SendTcpAsync(handler, tcsResponse, message, channelCreator, idleTcpSeconds,
+                            connectTimeoutMillis, peerConnection);
+                    }
+                }
+            }
+            else
+            {
+                // .NET-specific:
+                tcsResponse.SetException(new TaskFailedException("No relay could be contacted. <-> " + taskDone.Exception));
+            }
+        }
+
+        /// <summary>
+        /// Ping all relays of the receiver. The first one answering is picked 
+        /// as the responsible relay for this message.
+        /// </summary>
+        /// <param name="peerSocketAddresses">A collection of relay addresses.</param>
+        /// <returns></returns>
+        private TaskCompletionSource<PeerSocketAddress> PingFirst(ICollection<PeerSocketAddress> peerSocketAddresses)
         {
             // TODO implement
             throw new NotImplementedException();
