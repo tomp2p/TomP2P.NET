@@ -165,6 +165,20 @@ namespace TomP2P.Utils
             }
         }
 
+        public static void AddReleaseListener(Task<ChannelCreator> taskChannelCreator, Task task)
+        {
+            task.ContinueWith(t =>
+            {
+                taskChannelCreator.ContinueWith(tcc =>
+                {
+                    if (tcc.Result != null)
+                    {
+                        tcc.Result.ShutdownAsync();
+                    }
+                });
+            });
+        }
+
         /// <summary>
         /// This method returns a random positive integer within a given upper limit.
         /// </summary>
