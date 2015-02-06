@@ -372,9 +372,24 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="peerSocketAddresses">A collection of relay addresses.</param>
         /// <returns></returns>
-        private TaskCompletionSource<PeerSocketAddress> PingFirst(ICollection<PeerSocketAddress> peerSocketAddresses)
+        private TaskCompletionSource<PeerSocketAddress> PingFirst(IEnumerable<PeerSocketAddress> peerSocketAddresses)
         {
-            // TODO implement
+            var socketAddresses = peerSocketAddresses as PeerSocketAddress[] ?? peerSocketAddresses.ToArray();
+            var forks = new TaskCompletionSource<PeerAddress>[socketAddresses.Count()];
+            int index = 0;
+            foreach (var psa in socketAddresses)
+            {
+                if (psa != null)
+                {
+                    var socketAddress = PeerSocketAddress.CreateSocketUdp(psa);
+                    var pingBuilder = PingBuilderFactory.Create();
+                    forks[index++] = pingBuilder
+                        .SetInetAddress(socketAddress.Address)
+                        .SetPort(socketAddress.Port)
+                        .Start();
+                }
+            }
+            // TODO implement rest
             throw new NotImplementedException();
         }
 
