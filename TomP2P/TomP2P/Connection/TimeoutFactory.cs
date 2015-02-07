@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
-using IChannelHandler = TomP2P.Connection.Windows.Netty.IChannelHandler;
+using TomP2P.Peers;
 
 namespace TomP2P.Connection
 {
@@ -37,19 +38,80 @@ namespace TomP2P.Connection
 
         public IChannelHandler CreateIdleStateHandlerTomP2P()
         {
-            throw new NotImplementedException();
+            return new IdleStateHandlerTomP2P(_timeoutSeconds);
         }
 
         public IChannelHandler CreateTimeHandler()
         {
-            throw new NotImplementedException();
+            return new TimeHandler(_tcsResponse, _peerStatusListeners, _name);
         }
 
         public static void RemoveTimeout(ChannelHandlerContext ctx)
         {
-            // TODO implement
-            throw new NotImplementedException();
-            //ctx.Channel.Pipeline...
+            if (ctx.Channel.Pipeline.Names.Contains("timeout0"))
+            {
+                ctx.Channel.Pipeline.Remove("timeout0");
+            }
+            if (ctx.Channel.Pipeline.Names.Contains("timeout1"))
+            {
+                ctx.Channel.Pipeline.Remove("timeout1");
+            }
+        }
+
+        /// <summary>
+        /// The timeout handler that gets called from the <see cref="IdleStateHandler"/>
+        /// </summary>
+        private class TimeHandler : BaseChannelHandler, IDuplexHandler
+        {
+            private readonly TaskCompletionSource<Message.Message> _tcsResponse;
+            private readonly IList<IPeerStatusListener> _peerStatusListeners;
+            private readonly string _name;
+
+            public TimeHandler(TaskCompletionSource<Message.Message> tcsResponse,
+                IList<IPeerStatusListener> peerStatusListeners, string name)
+            {
+                _tcsResponse = tcsResponse;
+                _peerStatusListeners = peerStatusListeners;
+                _name = name;
+            }
+
+            // TODO when and where shall this get called?
+            public void UserEventTriggered(ChannelHandlerContext ctx, object evt)
+            {
+                if (evt is IdleStateHandlerTomP2P)
+                {
+                    Logger.Warn("Channel timeout for channel {0} {1}.", _name, ctx.Channel);
+                    PeerAddress recipient;
+                    if (_tcsResponse != null)
+                    {
+                        var requestMessage = (Message.Message) _tcsResponse.Task.AsyncState;
+
+                        Logger.Warn("Request status is {0}.", requestMessage);
+                        ctx.Channel.Closed +=
+                            channel => _tcsResponse.SetException(new TaskFailedException("Channel is idle " + evt));
+                        ctx.Channel.Close();
+
+                        recipient = requestMessage.Recipient;
+                    }
+                    else
+                    {
+                        ctx.Close();
+                        // check if we have set an attribute at least
+                        // (if we have already decoded the header)
+
+                    }
+                }
+            }
+
+            public void Read(ChannelHandlerContext ctx, object msg)
+            {
+                // nothing to read here
+            }
+
+            public void Write(ChannelHandlerContext ctx, object msg)
+            {
+                // nothing to write here
+            }
         }
     }
 }
