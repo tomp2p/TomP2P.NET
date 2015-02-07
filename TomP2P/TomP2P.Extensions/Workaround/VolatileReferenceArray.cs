@@ -8,9 +8,8 @@ namespace TomP2P.Extensions.Workaround
 {
     /// <summary>
     /// An attempt to mimick Java's AtomicReferenceArray in .NET.
-    /// In .NET, however, it is reasonable to make it a struct rather than a class.
     /// </summary>
-    public struct VolatileReferenceArray<T>
+    public class VolatileReferenceArray<T>
     {
         private readonly T[] _array;
         private object _lock;
@@ -38,5 +37,27 @@ namespace TomP2P.Extensions.Workaround
             get { return _array.Length; }
         }
 
+        /// <summary>
+        /// Gets the current value at the provided index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public T Get(int index)
+        {
+            return _array[index];
+        }
+
+        /// <summary>
+        /// Sets the element at the provided index to the given value.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        public void Set(int index, T value)
+        {
+            lock (_lock)
+            {
+                _array.SetValue(value, index);
+            }
+        }
     }
 }

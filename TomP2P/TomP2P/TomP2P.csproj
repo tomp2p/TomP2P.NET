@@ -96,6 +96,7 @@
     <Compile Include="Connection\Windows\TcpServerSocket.cs" />
     <Compile Include="Connection\Windows\UdpClientSocket.cs" />
     <Compile Include="Connection\Windows\UdpServerSocket.cs" />
+    <Compile Include="Futures\BaseTaskImpl.cs" />
     <Compile Include="Futures\ICancel.cs" />
     <Compile Include="Connection\PeerException.cs" />
     <Compile Include="Futures\TaskForkJoin.cs" />

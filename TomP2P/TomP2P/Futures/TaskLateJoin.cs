@@ -6,16 +6,12 @@ namespace TomP2P.Futures
     /// <summary>
     /// Equivalent for Java's FutureLateJoin.
     /// </summary>
-    public class TaskLateJoin<TTask> : TaskCompletionSource<object> where TTask : Task
+    public class TaskLateJoin<TTask> : BaseTaskImpl where TTask : Task
     {
         // K = FutureResponse = Task<Message>
         // FutureLateJoin = Task.WhenAll(FutureResponse[]) = Task.WhenAll(Task<Message>[])
         // = Task<Message[]>
         // --> TCS<Task<Message[]>>
-
-        // base
-        private readonly object _lock;
-        private bool _completed = false;
 
         private readonly int _nrMaxTasks;
         private readonly int _minSuccess;
@@ -32,9 +28,6 @@ namespace TomP2P.Futures
 
         public TaskLateJoin(int nrMaxTasks, int minSuccess)
         {
-            // base
-            _lock = this;
-
             _nrMaxTasks = nrMaxTasks;
             _minSuccess = minSuccess;
             _tasksDone = new List<TTask>(nrMaxTasks);
@@ -44,9 +37,9 @@ namespace TomP2P.Futures
 
         public bool Add(TTask task)
         {
-            lock (_lock)
+            lock (Lock)
             {
-                if (_completed)
+                if (Completed)
                 {
                     return false;
                 }
@@ -54,9 +47,9 @@ namespace TomP2P.Futures
                 task.ContinueWith(t =>
                 {
                     bool done = false;
-                    lock (_lock)
+                    lock (Lock)
                     {
-                        if (!_completed)
+                        if (!Completed)
                         {
                             if (!task.IsFaulted)
                             {
@@ -69,7 +62,7 @@ namespace TomP2P.Futures
                     }
                     if (done)
                     {
-                        this.SetResult(null); // "notify listeners"
+                        NotifyListeners();
                     }
                 });
                 return true;
@@ -80,7 +73,7 @@ namespace TomP2P.Futures
         {
             if (_tasksDone.Count >= _nrMaxTasks || _successCount >= _minSuccess)
             {
-                if (!Completed())
+                if (!CompletedAndNotify())
                 {
                     return false;
                 }
@@ -89,19 +82,7 @@ namespace TomP2P.Futures
             return false;
         }
 
-        // base
-        private bool Completed()
-        {
-            if (!_completed)
-            {
-                _completed = true;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+
 
         /// <summary>
         /// Returns the finished tasks.
@@ -109,7 +90,7 @@ namespace TomP2P.Futures
         /// <returns></returns>
         public IList<TTask> TasksDone()
         {
-            lock (_lock)
+            lock (Lock)
             {
                 return _tasksDone;
             }
@@ -121,7 +102,7 @@ namespace TomP2P.Futures
         /// <returns></returns>
         public IList<TTask> TasksSubmitted()
         {
-            lock (_lock)
+            lock (Lock)
             {
                 return _tasksSubmitted;
             }
@@ -133,7 +114,7 @@ namespace TomP2P.Futures
         /// <returns></returns>
         public TTask LastSuccessTask()
         {
-            lock (_lock)
+            lock (Lock)
             {
                 return _lastSuccessTask;
             }
