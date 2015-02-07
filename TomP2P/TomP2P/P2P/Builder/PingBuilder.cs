@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
@@ -15,7 +11,7 @@ namespace TomP2P.P2P.Builder
     public class PingBuilder
     {
         // TODO use Task<PeerAddress> instead?
-        private static readonly TaskCompletionSource<PeerAddress> FuturePingShutdown;
+        private static readonly Task<PeerAddress> FuturePingShutdown;
 
         private readonly Peer _peer;
 
@@ -36,8 +32,9 @@ namespace TomP2P.P2P.Builder
         // static constructor
         static PingBuilder()
         {
-            FuturePingShutdown = new TaskCompletionSource<PeerAddress>();
-            FuturePingShutdown.SetException(new TaskFailedException("Peer is shutting down."));
+            var tcsPingShutdown = new TaskCompletionSource<PeerAddress>();
+            tcsPingShutdown.SetException(new TaskFailedException("Peer is shutting down."));
+            FuturePingShutdown = tcsPingShutdown.Task;
         }
 
         public PingBuilder(Peer peer)
@@ -47,11 +44,11 @@ namespace TomP2P.P2P.Builder
 
         public PingBuilder NotifyAutomaticFutures(Task future)
         {
-            _peer.NotifyAutomaticFutures(future);
-            return this;
+            // TODO implement
+            throw new NotImplementedException();
         }
 
-        public TaskCompletionSource<PeerAddress> Start()
+        public Task<PeerAddress> Start()
         {
             if (_peer.IsShutdown)
             {
@@ -102,7 +99,7 @@ namespace TomP2P.P2P.Builder
             }
         }
 
-        private TaskCompletionSource<PeerAddress> PingBroadcast(int port)
+        private Task<PeerAddress> PingBroadcast(int port)
         {
             var tcsPing = new TaskCompletionSource<PeerAddress>();
             var bindings = _peer.ConnectionBean.Sender.ChannelClientConfiguration.BindingsOutgoing;
@@ -147,7 +144,7 @@ namespace TomP2P.P2P.Builder
             {
                 tcsPing.SetException(new TaskFailedException("No broadcast address found. Cannot ping nothing."));
             }
-            return tcsPing;
+            return tcsPing.Task;
         }
 
         /// <summary>
@@ -157,7 +154,7 @@ namespace TomP2P.P2P.Builder
         /// <param name="peerId"></param>
         /// <param name="isUdp">True, for UDP. False, for TCP.</param>
         /// <returns></returns>
-        private TaskCompletionSource<PeerAddress> Ping(IPEndPoint address, Number160 peerId, bool isUdp)
+        private Task<PeerAddress> Ping(IPEndPoint address, Number160 peerId, bool isUdp)
         {
             return Ping(new PeerAddress(peerId, address), isUdp);
         }
@@ -168,16 +165,89 @@ namespace TomP2P.P2P.Builder
         /// <param name="peerAddress">The peer address of the remote peer.</param>
         /// <param name="isUdp">True, for UDP. False, for TCP.</param>
         /// <returns></returns>
-        private TaskCompletionSource<PeerAddress> Ping(PeerAddress peerAddress, bool isUdp)
+        private Task<PeerAddress> Ping(PeerAddress peerAddress, bool isUdp)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            var tcsPing = new TaskCompletionSource<PeerAddress>();
+            var requestHandler = _peer.PingRpc.Ping(peerAddress, _connectionConfiguration);
+            if (isUdp)
+            {
+                // ping UDP
+                var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(1, 0);
+                Utils.Utils.AddReleaseListener(taskCc, tcsPing.Task);
+                taskCc.ContinueWith(tcc =>
+                {
+                    if (!tcc.IsFaulted)
+                    {
+                        var taskResponse = requestHandler.SendUdpAsync(tcc.Result);
+                        AddPingListener(tcsPing, taskResponse);
+                    }
+                    else
+                    {
+                        if (tcc.Exception != null)
+                        {
+                            tcsPing.SetException(tcc.Exception);
+                        }
+                        else
+                        {
+                            tcsPing.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
+                        }
+                    }
+                });
+            }
+            else
+            {
+                // ping TCP
+                var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(0, 1);
+                Utils.Utils.AddReleaseListener(taskCc, tcsPing.Task);
+                taskCc.ContinueWith(tcc =>
+                {
+                    if (!tcc.IsFaulted)
+                    {
+                        var taskResponse = requestHandler.SendTcpAsync(tcc.Result);
+                        AddPingListener(tcsPing, taskResponse);
+                    }
+                    else
+                    {
+                        if (tcc.Exception != null)
+                        {
+                            tcsPing.SetException(tcc.Exception);
+                        }
+                        else
+                        {
+                            tcsPing.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
+                        }
+                    }
+                });
+            }
+            return tcsPing.Task;
         }
 
-        private TaskCompletionSource<PeerAddress> PingPeerConnection(PeerConnection peerConnection)
+        private Task<PeerAddress> PingPeerConnection(PeerConnection peerConnection)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            var tcsPing = new TaskCompletionSource<PeerAddress>();
+            var requestHandler = _peer.PingRpc.Ping(peerConnection.RemotePeer, _connectionConfiguration);
+            var taskCc = peerConnection.AcquireAsync(requestHandler.TcsResponse);
+            taskCc.ContinueWith(tcc =>
+            {
+                if (!tcc.IsFaulted)
+                {
+                    requestHandler.TcsResponse.Task.Result.SetKeepAlive(true); // TODO correct?
+                    var taskResponse = requestHandler.SendTcpAsync(peerConnection);
+                    AddPingListener(tcsPing, taskResponse);
+                }
+                else
+                {
+                    if (tcc.Exception != null)
+                    {
+                        tcsPing.SetException(tcc.Exception);
+                    }
+                    else
+                    {
+                        tcsPing.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
+                    }
+                }
+            });
+            return tcsPing.Task;
         }
 
         private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing, TaskLateJoin<Task<Message.Message>> taskLateJoin)
@@ -205,21 +275,21 @@ namespace TomP2P.P2P.Builder
             });
         }
 
-        private void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing,
-            TaskCompletionSource<Message.Message> tcsResponse)
+        private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing,
+            Task<Message.Message> taskResponse)
         {
             // TODO works?
-            tcsResponse.Task.ContinueWith(taskResponse =>
+            taskResponse.ContinueWith(taskResponse2 =>
             {
-                if (!taskResponse.IsFaulted)
+                if (!taskResponse2.IsFaulted)
                 {
-                    tcsPing.SetResult(taskResponse.Result.Sender);
+                    tcsPing.SetResult(taskResponse2.Result.Sender);
                 }
                 else
                 {
-                    if (taskResponse.Exception != null)
+                    if (taskResponse2.Exception != null)
                     {
-                        tcsPing.SetException(taskResponse.Exception);
+                        tcsPing.SetException(taskResponse2.Exception);
                     }
                     else
                     {

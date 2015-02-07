@@ -22,7 +22,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// The FutureResponse that will be called when we get an answer.
         /// </summary>
-        private readonly TaskCompletionSource<Message.Message> _tcsResponseResponse;
+        private readonly TaskCompletionSource<Message.Message> _tcsResponse;
 
         // the node with which this request handler is associated with
         /// <summary>
@@ -60,7 +60,7 @@ namespace TomP2P.Connection
         /// <param name="configuration">The client-side connection configuration.</param>
         public RequestHandler(TaskCompletionSource<Message.Message> tcsResponse, PeerBean peerBean, ConnectionBean connectionBean, IConnectionConfiguration configuration)
         {
-            _tcsResponseResponse = tcsResponse;
+            _tcsResponse = tcsResponse;
             PeerBean = peerBean;
             ConnectionBean = connectionBean;
             _message = tcsResponse.Task.AsyncState as Message.Message;
@@ -68,6 +68,11 @@ namespace TomP2P.Connection
             IdleTcpSeconds = configuration.IdleTcpSeconds;
             IdleUdpSeconds = configuration.IdleUdpSeconds;
             ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis;
+        }
+
+        public TaskCompletionSource<Message.Message> TcsResponse
+        {
+            get { return _tcsResponse; }
         }
 
         /// <summary>
@@ -81,10 +86,10 @@ namespace TomP2P.Connection
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponseResponse, _message, channelCreator, IdleUdpSeconds, false);
+                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
             });
 
-            return _tcsResponseResponse.Task;
+            return _tcsResponse.Task;
         }
 
         /// <summary>
@@ -96,9 +101,9 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponseResponse, _message, channelCreator, IdleUdpSeconds, true);
+                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
             });
-            return _tcsResponseResponse.Task;
+            return _tcsResponse.Task;
         }
 
         /// <summary>
@@ -110,9 +115,9 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendUdpAsync(null, _tcsResponseResponse, _message, channelCreator, 0, false);
+                await ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
             });
-            return _tcsResponseResponse.Task;
+            return _tcsResponse.Task;
         }
 
         /// <summary>
@@ -124,20 +129,20 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponseResponse, _message, channelCreator, IdleTcpSeconds,
+                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
                     ConnectionTimeoutTcpMillis, null);
             });
-            return _tcsResponseResponse.Task;
+            return _tcsResponse.Task;
         }
 
         public Task<Message.Message> SendTcpAsync(PeerConnection peerConnection)
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponseResponse, _message, null, IdleTcpSeconds,
+                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds,
                     ConnectionTimeoutTcpMillis, peerConnection);
             });
-            return _tcsResponseResponse.Task;
+            return _tcsResponse.Task;
         }
 
         /// <summary>
@@ -150,10 +155,10 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponseResponse, _message, channelCreator, IdleTcpSeconds,
+                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
                     ConnectionTimeoutTcpMillis, peerConnection);
             });
-            return _tcsResponseResponse.Task;
+            return _tcsResponse.Task;
         }
 
         public void Read(ChannelHandlerContext ctx, object msg)
@@ -248,7 +253,7 @@ namespace TomP2P.Connection
             {
                 Logger.Debug("Good message {0}. Close channel {1}.", responseMessage, ctx.Channel);
                 // channel has already been closed in Sender, set result now
-                _tcsResponseResponse.SetResult(responseMessage);
+                _tcsResponse.SetResult(responseMessage);
                 // in Java, the channel creator adds a listener that sets the 
                 // future response result when the channel is closed
                 ctx.Close(); // TODO needed?
@@ -256,7 +261,7 @@ namespace TomP2P.Connection
             else
             {
                 Logger.Debug("Good message {0}. Leave channel {1} open.", responseMessage, ctx.Channel);
-                _tcsResponseResponse.SetResult(responseMessage);
+                _tcsResponse.SetResult(responseMessage);
                 // TODO but shouldn't the Sender already have closed the channel?
             }
         }
@@ -264,9 +269,9 @@ namespace TomP2P.Connection
         public override void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
         {
             Logger.Debug("Error originating from {0}. Cause: {1}", _message, cause);
-            if (_tcsResponseResponse.Task.IsCompleted)
+            if (_tcsResponse.Task.IsCompleted)
             {
-                Logger.Warn("Got exception, but ignored it. (Task completed.): {0}.", _tcsResponseResponse.Task.Exception);
+                Logger.Warn("Got exception, but ignored it. (Task completed.): {0}.", _tcsResponse.Task.Exception);
             }
             else
             {
@@ -304,7 +309,7 @@ namespace TomP2P.Connection
             }
 
             Logger.Debug("Report failure: ", cause);
-            _tcsResponseResponse.SetException(cause);
+            _tcsResponse.SetException(cause);
             // TODO channel not already closed in Sender?
             ctx.Close(); // TODO used?
         }
