@@ -71,6 +71,7 @@
     <Compile Include="Workaround\JavaBinaryWriter.cs" />
     <Compile Include="Workaround\KeyPair.cs" />
     <Compile Include="Workaround\ListIterator.cs" />
+    <Compile Include="Workaround\VolatileReferenceArray.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

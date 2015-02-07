@@ -98,6 +98,7 @@
     <Compile Include="Connection\Windows\UdpServerSocket.cs" />
     <Compile Include="Futures\ICancel.cs" />
     <Compile Include="Connection\PeerException.cs" />
+    <Compile Include="Futures\TaskForkJoin.cs" />
     <Compile Include="Futures\TaskLateJoin.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\CompByteBufAllocator.cs" />

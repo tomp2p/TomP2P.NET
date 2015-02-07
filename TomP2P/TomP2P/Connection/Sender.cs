@@ -374,8 +374,10 @@ namespace TomP2P.Connection
         /// <returns></returns>
         private TaskCompletionSource<PeerSocketAddress> PingFirst(IEnumerable<PeerSocketAddress> peerSocketAddresses)
         {
+            var tcsDone = new TaskCompletionSource<PeerSocketAddress>();
+
             var socketAddresses = peerSocketAddresses as PeerSocketAddress[] ?? peerSocketAddresses.ToArray();
-            var forks = new TaskCompletionSource<PeerAddress>[socketAddresses.Count()];
+            var forks = new Task<PeerAddress>[socketAddresses.Count()];
             int index = 0;
             foreach (var psa in socketAddresses)
             {
@@ -386,9 +388,10 @@ namespace TomP2P.Connection
                     forks[index++] = pingBuilder
                         .SetInetAddress(socketAddress.Address)
                         .SetPort(socketAddress.Port)
-                        .Start();
+                        .Start(); // TODO TCS or Task needed?
                 }
             }
+
             // TODO implement rest
             throw new NotImplementedException();
         }
