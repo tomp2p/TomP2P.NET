@@ -187,5 +187,20 @@ namespace TomP2P.Futures
                 }
             }
         }
+
+        public TTask First
+        {
+            get
+            {
+                lock (Lock)
+                {
+                    if (_forksCopy.Count != 0)
+                    {
+                        return _forksCopy[0];
+                    }
+                }
+                return null;
+            }
+        }
     }
 }

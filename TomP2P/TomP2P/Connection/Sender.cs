@@ -8,6 +8,7 @@ using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Futures;
 using TomP2P.Message;
 using TomP2P.P2P;
@@ -322,12 +323,11 @@ namespace TomP2P.Connection
             Message.Message message, ChannelCreator channelCreator, int idleTcpSeconds, int connectTimeoutMillis,
             PeerConnection peerConnection, TimeoutFactory timeoutHandler)
         {
-            var tcsPingDone = PingFirst(message.Recipient.PeerSocketAddresses);
-            var taskDone = tcsPingDone.Task;
-            await taskDone;
-            if (!taskDone.IsFaulted)
+            var taskPingDone = PingFirst(message.Recipient.PeerSocketAddresses);
+            await taskPingDone;
+            if (!taskPingDone.IsFaulted)
             {
-                var recipient = PeerSocketAddress.CreateSocketTcp(taskDone.Result);
+                var recipient = PeerSocketAddress.CreateSocketTcp(taskPingDone.Result);
                 var channel = SendTcpCreateChannel(recipient, channelCreator, peerConnection, handler,
                     timeoutHandler, connectTimeoutMillis);
                 await AfterConnectAsync(tcsResponse, message, channel, handler == null);
@@ -346,7 +346,7 @@ namespace TomP2P.Connection
                         {
                             if (psa != null)
                             {
-                                if (!psa.Equals(taskDone.Result))
+                                if (!psa.Equals(taskPingDone.Result))
                                 {
                                     tmp.Add(psa);
                                 }
@@ -362,7 +362,7 @@ namespace TomP2P.Connection
             else
             {
                 // .NET-specific:
-                tcsResponse.SetException(new TaskFailedException("No relay could be contacted. <-> " + taskDone.Exception));
+                tcsResponse.SetException(new TaskFailedException("No relay could be contacted. <-> " + taskPingDone.Exception));
             }
         }
 
@@ -372,7 +372,7 @@ namespace TomP2P.Connection
         /// </summary>
         /// <param name="peerSocketAddresses">A collection of relay addresses.</param>
         /// <returns></returns>
-        private TaskCompletionSource<PeerSocketAddress> PingFirst(IEnumerable<PeerSocketAddress> peerSocketAddresses)
+        private Task<PeerSocketAddress> PingFirst(IEnumerable<PeerSocketAddress> peerSocketAddresses)
         {
             var tcsDone = new TaskCompletionSource<PeerSocketAddress>();
 
@@ -392,8 +392,27 @@ namespace TomP2P.Connection
                 }
             }
 
-            // TODO implement rest
-            throw new NotImplementedException();
+            var ffk = new TaskForkJoin<Task<PeerAddress>>(1, true, new VolatileReferenceArray<Task<PeerAddress>>(forks));
+            ffk.Task.ContinueWith(tfj =>
+            {
+                if (!tfj.IsFaulted)
+                {
+                    tcsDone.SetResult(ffk.First.Result.PeerSocketAddress);
+                }
+                else
+                {
+                    if (tfj.Exception != null)
+                    {
+                        tcsDone.SetException(tfj.Exception);
+                    }
+                    else
+                    {
+                        tcsDone.SetException(new TaskFailedException("TaskForkJoin<Task<PeerAddress>> failed."));
+                    }
+                }
+            });
+
+            return tcsDone.Task;
         }
 
         private ITcpClientChannel SendTcpPeerConnection(PeerConnection peerConnection, IChannelHandler handler, ChannelCreator channelCreator,
