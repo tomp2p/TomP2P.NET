@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
+using TomP2P.Futures;
 using TomP2P.Peers;
 
 namespace TomP2P.P2P.Builder
@@ -103,19 +104,11 @@ namespace TomP2P.P2P.Builder
 
         private TaskCompletionSource<PeerAddress> PingBroadcast(int port)
         {
-            // TODO this method is very tricky to port --> check!
             var tcsPing = new TaskCompletionSource<PeerAddress>();
             var bindings = _peer.ConnectionBean.Sender.ChannelClientConfiguration.BindingsOutgoing;
             int size = bindings.BroadcastAddresses.Count;
 
-            // .NET-specific
-            // K = FutureResponse = Task<Message>
-            // FutureLateJoin = Task.WhenAll(FutureResponse[]) = Task.WhenAll(Task<Message>[])
-            // = Task<Message[]>
-            // --> TCS<Task<Message[]>>
-            var futureResponses = new Task<Message.Message>[1];
-            var tcsLateJoin = new TaskCompletionSource<Task<Message.Message[]>>(futureResponses);
-
+            var taskLateJoin = new TaskLateJoin<Task<Message.Message>>(size, 1);
             if (size > 0)
             {
                 var taskChannelCreator = _peer.ConnectionBean.Reservation.CreateAsync(size, 0);
@@ -124,39 +117,16 @@ namespace TomP2P.P2P.Builder
                 {
                     if (!taskCc.IsFaulted)
                     {
-                        AddPingListener(tcsPing, tcsLateJoin.Task); // TODO works?
+                        AddPingListener(tcsPing, taskLateJoin); // TODO works?
                         for (int i = 0; i < size; i++)
                         {
                             var broadcastAddress = bindings.BroadcastAddresses[i];
                             var peerAddress = new PeerAddress(Number160.Zero, broadcastAddress, port, port);
                             var taskValidBroadcastResponse = _peer.PingRpc.PingBroadcastUdpAsync(peerAddress, taskCc.Result,
                                 _connectionConfiguration);
-                            // .NET-specific:
-                            if (tcsLateJoin.Task.IsCompleted)
+                            if (!taskLateJoin.Add(taskValidBroadcastResponse))
                             {
                                 break;
-                            }
-                            else
-                            {
-                                var futureResponses2 = (Task<Message.Message>[]) tcsLateJoin.Task.AsyncState;
-                                futureResponses2[0] = taskValidBroadcastResponse; // since there is only 1 item in the array, this works --> if more needed, take list
-                                // TODO how to complete TCSLateJoin, when all AsyncState tasks are done???
-                                // --> in Java, each added future is attached a completion listener -> handler checks counter and decides if FLJ completes
-                                taskValidBroadcastResponse.ContinueWith(validResponse =>
-                                {
-                                    // succeed TLJ, since it has only one future item
-                                    var result = new TaskCompletionSource<Message.Message[]>();
-
-
-                                    tcsLateJoin.SetResult(new Task<Message.Message[]> );
-                                });
-
-
-                                /*
-                                Task<Message.Message>[] futureResponses2 = (Task<Message.Message>[])tcsLateJoin.Task.AsyncState;
-                                Task<Message.Message[]> whenAllTask = Task.WhenAll(futureResponses2);
-                                tcsLateJoin.SetResult(whenAllTask);
-                                */
                             }
                         }
                     }
@@ -173,6 +143,11 @@ namespace TomP2P.P2P.Builder
                     }
                 });
             }
+            else
+            {
+                tcsPing.SetException(new TaskFailedException("No broadcast address found. Cannot ping nothing."));
+            }
+            return tcsPing;
         }
 
         /// <summary>
@@ -205,17 +180,16 @@ namespace TomP2P.P2P.Builder
             throw new NotImplementedException();
         }
 
-        private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing, Task<Task<Message.Message[]>> taskLateJoin)
+        private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing, TaskLateJoin<Task<Message.Message>> taskLateJoin)
         {
             // TODO works?
             // we have one successful reply
-            taskLateJoin.ContinueWith(tlj =>
+            taskLateJoin.Task.ContinueWith(tlj =>
             {
-                // .NET-specific: tlj.Result.Result == future.futuresDone() -> means they're completed
-                if (!tlj.IsFaulted && tlj.Result.Result.Length > 0) // TODO works?
+                if (!tlj.IsFaulted && taskLateJoin.TasksDone().Count > 0)
                 {
-                    var responseMessage = tlj.Result.Result[0];
-                    tcsPing.SetResult(responseMessage.Sender);
+                    var taskResponse = taskLateJoin.TasksDone()[0];
+                    tcsPing.SetResult(taskResponse.Result.Sender);
                 }
                 else
                 {
