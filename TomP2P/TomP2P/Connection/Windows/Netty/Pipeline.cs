@@ -288,6 +288,28 @@ namespace TomP2P.Connection.Windows.Netty
             return this;
         }
 
+        /// <summary>
+        /// Removes the channel handler with the specified name from this pipeline.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Pipeline Remove(string name)
+        {
+            // TODO works?
+            if (_name2Item.ContainsKey(name))
+            {
+                var item = _name2Item[name];
+                _name2Item.Remove(name);
+
+                if (_handlers.Contains(item))
+                {
+                    _handlers.Remove(item);
+                    item.Handler.HandlerRemoved(_ctx);
+                }
+            }
+            return this;
+        }
+
         private void CheckDuplicateName(string name)
         {
             if (_name2Item.ContainsKey(name))

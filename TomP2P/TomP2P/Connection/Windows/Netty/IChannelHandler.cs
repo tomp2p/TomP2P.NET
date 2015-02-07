@@ -33,6 +33,9 @@ namespace TomP2P.Connection.Windows.Netty
     public interface IInboundHandler : IChannelHandler
     {
         void Read(ChannelHandlerContext ctx, object msg);
+
+        // TODO when is this called?
+        void UserEventTriggered(ChannelHandlerContext ctx, object evt);
     }
 
     /// <summary>

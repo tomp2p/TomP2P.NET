@@ -49,6 +49,7 @@
     <Compile Include="Connection\DirectResponder.cs" />
     <Compile Include="Connection\DiscoverNetworks.cs" />
     <Compile Include="Connection\HeartBeat.cs" />
+    <Compile Include="Connection\IdleStateHandlerTomP2P.cs" />
     <Compile Include="Connection\IPipelineFilter.cs" />
     <Compile Include="Connection\Windows\NET Helper\ConnectionHelper.cs" />
     <Compile Include="Connection\Bindings.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Connection\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
+    <Compile Include="Connection\Windows\Netty\AttributeKey.cs" />
     <Compile Include="Connection\Windows\Netty\BaseChannelHandler.cs" />
     <Compile Include="Connection\Windows\Netty\BaseServer.cs" />
     <Compile Include="Connection\Windows\Netty\DatagramPacket.cs" />
@@ -85,6 +87,8 @@
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpServer.cs" />
     <Compile Include="Connection\Windows\Netty\ChannelHandlerContext.cs" />
+    <Compile Include="Connection\Windows\Netty\IAttribute.cs" />
+    <Compile Include="Connection\Windows\Netty\IAttributeMap.cs" />
     <Compile Include="Connection\Windows\Netty\IChannel.cs" />
     <Compile Include="Connection\Windows\Netty\IChannelHandler.cs" />
     <Compile Include="Connection\Windows\Netty\IClientChannel.cs" />

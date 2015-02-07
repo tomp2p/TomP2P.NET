@@ -19,6 +19,7 @@ namespace TomP2P.Message
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // TODO add attribute keys??
+        public static readonly AttributeKey<IPEndPoint> InetAddressKey = AttributeKey.ValueOf("inet-addr");
 
         private readonly Queue<Message.Content> _contentTypes = new Queue<Message.Content>();
 
