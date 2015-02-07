@@ -141,6 +141,17 @@ namespace TomP2P.P2P.Builder
                                 var futureResponses2 = (Task<Message.Message>[]) tcsLateJoin.Task.AsyncState;
                                 futureResponses2[0] = taskValidBroadcastResponse; // since there is only 1 item in the array, this works --> if more needed, take list
                                 // TODO how to complete TCSLateJoin, when all AsyncState tasks are done???
+                                // --> in Java, each added future is attached a completion listener -> handler checks counter and decides if FLJ completes
+                                taskValidBroadcastResponse.ContinueWith(validResponse =>
+                                {
+                                    // succeed TLJ, since it has only one future item
+                                    var result = new TaskCompletionSource<Message.Message[]>();
+
+
+                                    tcsLateJoin.SetResult(new Task<Message.Message[]> );
+                                });
+
+
                                 /*
                                 Task<Message.Message>[] futureResponses2 = (Task<Message.Message>[])tcsLateJoin.Task.AsyncState;
                                 Task<Message.Message[]> whenAllTask = Task.WhenAll(futureResponses2);
@@ -218,7 +229,6 @@ namespace TomP2P.P2P.Builder
                     }
                 }
             });
-
         }
 
         private void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing,
