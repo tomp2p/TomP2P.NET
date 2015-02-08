@@ -8,6 +8,15 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private ConcurrentDictionary<AttributeKey, DefaultAttribute> _attributes;
 
+        /// <summary>
+        /// Gets the attribute for the given attribute key.
+        /// This method will never return null, but may return 
+        /// an attribute which does not have a value set yet.
+
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public IAttribute<T> Attr<T>(AttributeKey<T> key)
         {
             if (key == null)
@@ -62,13 +71,12 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
+        // TODO finish implementation of DefaultAttribute
         private class DefaultAttribute
         {
-            private readonly AttributeKey _key;
-
             internal DefaultAttribute(AttributeKey key)
             {
-                _key = key;
+                // ignore
             }
         }
     }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Peers;
+using Decoder = TomP2P.Message.Decoder;
 
 namespace TomP2P.Connection
 {
@@ -98,7 +100,42 @@ namespace TomP2P.Connection
                         ctx.Close();
                         // check if we have set an attribute at least
                         // (if we have already decoded the header)
+                        var attrPeerAddr = ctx.Attr(Decoder.PeerAddressKey);
+                        recipient = attrPeerAddr.Get();
+                    }
 
+                    if (_peerStatusListeners == null)
+                    {
+                        return;
+                    }
+                    lock (_peerStatusListeners)
+                    {
+                        foreach (var listener in _peerStatusListeners)
+                        {
+                            if (recipient != null)
+                            {
+                                listener.PeerFailed(recipient,
+                                    new PeerException(PeerException.AbortCauseEnum.Timeout, "Timeout!"));
+                            }
+                            else
+                            {
+                                var socketAddr = ctx.Channel.RemoteEndPoint;
+                                if (socketAddr == null)
+                                {
+                                    var attrInetAddr = ctx.Attr(Decoder.InetAddressKey);
+                                    socketAddr = attrInetAddr.Get();
+                                }
+                                if (socketAddr != null)
+                                {
+                                    listener.PeerFailed(new PeerAddress(Number160.Zero, socketAddr.Address),
+                                        new PeerException(PeerException.AbortCauseEnum.Timeout, "Timeout!"));
+                                }
+                                else
+                                {
+                                    Logger.Warn("Cannot determine the sender's address.");
+                                }
+                            }
+                        }
                     }
                 }
             }
