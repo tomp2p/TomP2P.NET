@@ -18,8 +18,8 @@ namespace TomP2P.Message
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        // TODO add attribute keys??
-        public static readonly AttributeKey<IPEndPoint> InetAddressKey = AttributeKey.ValueOf("inet-addr");
+        public static readonly AttributeKey<IPEndPoint> InetAddressKey = AttributeKey<IPEndPoint>.ValueOf("inet-addr");
+        public static readonly AttributeKey<PeerAddress> PeerAddressKey = AttributeKey<PeerAddress>.ValueOf("peer-addr");
 
         private readonly Queue<Message.Content> _contentTypes = new Queue<Message.Content>();
 
@@ -67,14 +67,18 @@ namespace TomP2P.Message
             try
             {
                 long readerBefore = buffer.ReaderIndex;
-                // TODO set sender for handling timeout?
+                // set the sender of this message for handling timeout
+                var attrInetAddr = ctx.Attr(InetAddressKey);
+                attrInetAddr.Set(sender);
 
                 if (Message == null)
                 {
                     bool doneHeader = DecodeHeader(buffer, recipient, sender);
                     if (doneHeader)
                     {
-                        // TODO store the sender as an attribute??
+                        // store the sender as an attribute
+                        var attrPeerAddr = ctx.Attr(PeerAddressKey);
+                        attrPeerAddr.Set(Message.Sender);
 
                         Message.SetIsUdp(ctx.Channel.IsUdp);
                         if (Message.IsFireAndForget() && Message.IsUdp)

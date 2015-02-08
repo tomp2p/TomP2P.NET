@@ -6,7 +6,7 @@ namespace TomP2P.Connection.Windows.Netty
     /// Equivalent to Java Netty's ChannelHandlerContext. In .NET, this context is implemented as a class
     /// with only the functionality required for this project.
     /// </summary>
-    public class ChannelHandlerContext
+    public class ChannelHandlerContext : DefaultAttributeMap
     {
         private readonly Pipeline _pipeline;
         private readonly IChannel _channel;

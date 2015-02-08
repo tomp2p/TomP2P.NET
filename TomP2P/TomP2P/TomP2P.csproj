@@ -87,6 +87,7 @@
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
     <Compile Include="Connection\Windows\MyUdpServer.cs" />
     <Compile Include="Connection\Windows\Netty\ChannelHandlerContext.cs" />
+    <Compile Include="Connection\Windows\Netty\DefaultAttributeMap.cs" />
     <Compile Include="Connection\Windows\Netty\IAttribute.cs" />
     <Compile Include="Connection\Windows\Netty\IAttributeMap.cs" />
     <Compile Include="Connection\Windows\Netty\IChannel.cs" />

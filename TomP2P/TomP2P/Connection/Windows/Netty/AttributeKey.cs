@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection.Windows.Netty
 {
-    public sealed class AttributeKey<T>
+    public sealed class AttributeKey<T> : AttributeKey, IComparable<AttributeKey<T>>
     {
+// ReSharper disable once StaticFieldInGenericType
         private static readonly ConcurrentDictionary<string, bool> Names = new ConcurrentDictionary<string, bool>();
+
+// ReSharper disable once StaticFieldInGenericType
+        private static VolatileInteger _nextId = new VolatileInteger(0);
+
+
 
         public static AttributeKey<T> ValueOf(string name)
         {
@@ -25,8 +29,34 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 throw new NullReferenceException("name");
             }
-            // TODO implement
-            throw new NotImplementedException();
+
+            Names.AddOrUpdate(name, true, delegate {
+                throw new ArgumentException(String.Format("'{0}' is already in use.", name));
+            });
+
+            Id = _nextId.IncrementAndGet();
+            Name = name;
+        }
+
+        public int CompareTo(AttributeKey<T> other)
+        {
+            if (this == other)
+            {
+                return 0;
+            }
+            int returnCode = String.Compare(Name, other.Name, StringComparison.Ordinal);
+            return returnCode != 0 ? returnCode : Id.CompareTo(other.Id);
+        }
+    }
+
+    public class AttributeKey
+    {
+        public int Id { get; protected set; }
+        public string Name { get; protected set; }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
