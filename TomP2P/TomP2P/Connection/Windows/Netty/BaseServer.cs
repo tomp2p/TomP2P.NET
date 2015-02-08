@@ -27,8 +27,6 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        public abstract void DoStart();
-
         public async Task StopAsync()
         {
             Close();
@@ -42,6 +40,8 @@ namespace TomP2P.Connection.Windows.Netty
                 await Task.WhenAll(_tasks);
             }*/
         }
+
+        public abstract void DoStart();
 
         public abstract Task ServiceLoopAsync(CancellationToken ct);
     }

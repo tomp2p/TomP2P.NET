@@ -1,9 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TomP2P.Connection.Windows.Netty;
@@ -12,16 +7,13 @@ using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection
 {
-    /// <summary>
-    /// Stripped-down version of the <see cref="IdleStateHandler"/>.
-    /// </summary>
     public class IdleStateHandlerTomP2P : BaseChannelHandler, IDuplexHandler
     {
         public int AllIdleTimeMillis { get; private set; }
 
-        private VolatileLong _lastReadTime;
+        private VolatileLong _lastReadTime = new VolatileLong(0);
 
-        private VolatileLong _lastWriteTime;
+        private VolatileLong _lastWriteTime = new VolatileLong(0);
 
         private volatile Task _allIdleTimeoutTask;
         private volatile CancellationTokenSource _cts;
@@ -107,10 +99,10 @@ namespace TomP2P.Connection
         }
 
         // use "async void" because it's an event-like task
-        private async void StartAllIdleTimeoutTask(ChannelHandlerContext ctx, long delay)
+        private async void StartAllIdleTimeoutTask(ChannelHandlerContext ctx, int delayMillis)
         {
             _cts = new CancellationTokenSource();
-            _allIdleTimeoutTask = Task.Delay(AllIdleTimeMillis, _cts.Token);
+            _allIdleTimeoutTask = Task.Delay(delayMillis, _cts.Token);
 
             await _allIdleTimeoutTask;
 
@@ -121,7 +113,7 @@ namespace TomP2P.Connection
             }
             var currentTime = Convenient.CurrentTimeMillis();
             var lastIoTime = Math.Max(_lastReadTime.Get(), _lastWriteTime.Get());
-            var nextDelay = AllIdleTimeMillis - (currentTime - lastIoTime);
+            var nextDelay = (int)(AllIdleTimeMillis - (currentTime - lastIoTime)); // TODO bad cast, possible data loss
             if (nextDelay <= 0)
             {
                 // both reader and writer are idle
@@ -139,7 +131,7 @@ namespace TomP2P.Connection
             else
             {
                 // either read or write occurred before the timeout
-                // --> set a new timeout with shorter delay
+                // --> set a new timeout with shorter delayMillis
                 StartAllIdleTimeoutTask(ctx, nextDelay);
             }
         }
