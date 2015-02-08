@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Management;
 using System.Threading;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -53,9 +54,11 @@ namespace TomP2P.Connection
 
         public override void Write(ChannelHandlerContext ctx, object msg)
         {
-            // TODO find ChannelPromise.operationComplete event equivalent
-            throw new NotImplementedException();
-            ctx.FireWrite(msg);
+            ctx.Channel.WriteCompleted += (channel) =>
+            {
+                _lastWriteTime.Set(Convenient.CurrentTimeMillis());
+            };
+            //ctx.FireWrite(msg); // TODO needed?
         }
 
         public PeerConnection PeerConnection

@@ -69,10 +69,11 @@ namespace TomP2P.Connection
 
         public void Write(ChannelHandlerContext ctx, object msg)
         {
-            // make channel.write async -> attach listener
-            throw new NotImplementedException();
-
-            ctx.FireWrite(msg);
+            ctx.Channel.WriteCompleted += (channel) =>
+            {
+                _lastWriteTime.Set(Convenient.CurrentTimeMillis());
+            };
+            //ctx.FireWrite(msg); // TODO needed?
         }
 
         private void Initialize(ChannelHandlerContext ctx)
