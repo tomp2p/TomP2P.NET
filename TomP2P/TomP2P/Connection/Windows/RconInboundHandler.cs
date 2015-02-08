@@ -9,7 +9,7 @@ namespace TomP2P.Connection.Windows
     /// Used in the <see cref="Sender"/> to wait for Rcon response.
     /// Checks whether the reverse connection setup was successful.
     /// </summary>
-    public class RconInboundHandler : BaseChannelHandler, IInboundHandler
+    public class RconInboundHandler : BaseInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
@@ -22,7 +22,7 @@ namespace TomP2P.Connection.Windows
             _tcsResponse = tcsResponse;
         }
 
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             // Java uses a SimpleChannelInboundHandler that only expects Message objects
             var responseMessage = msg as Message.Message;

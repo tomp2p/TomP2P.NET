@@ -59,7 +59,7 @@ namespace TomP2P.Connection.Windows
                 var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
                 // return / send back
-                await _udpServer.SendAsync(bytes, bytes.Length, remoteEndPoint);
+                await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
             }
         }
 

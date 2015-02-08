@@ -21,7 +21,7 @@ namespace TomP2P.Connection
     /// This class is able to cover several channels but only one P2P network!)
     /// </para>
     /// </summary>
-    public class Dispatcher : BaseChannelHandler, IInboundHandler
+    public class Dispatcher : BaseInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
@@ -96,7 +96,7 @@ namespace TomP2P.Connection
             _ioHandlers = new ReadOnlyDictionary<Number320, IDictionary<int, DispatchHandler>>(copy);
         }
 
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             // server-side:
             // message comes (over network) from sender

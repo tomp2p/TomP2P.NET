@@ -66,6 +66,9 @@
     <Compile Include="Connection\ISignatureFactory.cs" />
     <Compile Include="Connection\Windows\Netty\AttributeKey.cs" />
     <Compile Include="Connection\Windows\Netty\BaseChannelHandler.cs" />
+    <Compile Include="Connection\Windows\Netty\BaseDuplexHandler.cs" />
+    <Compile Include="Connection\Windows\Netty\BaseInboundHandler.cs" />
+    <Compile Include="Connection\Windows\Netty\BaseOutboundHandler.cs" />
     <Compile Include="Connection\Windows\Netty\BaseServer.cs" />
     <Compile Include="Connection\Windows\Netty\DatagramPacket.cs" />
     <Compile Include="Connection\Windows\NET Helper\TaskFailedException.cs" />

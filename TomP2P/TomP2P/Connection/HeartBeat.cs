@@ -10,7 +10,7 @@ namespace TomP2P.Connection
     /// <summary>
     /// Stripped-down version of the <see cref="IdleStateHandler"/>.
     /// </summary>
-    public class HeartBeat : BaseChannelHandler, IDuplexHandler
+    public class HeartBeat : BaseDuplexHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -45,13 +45,13 @@ namespace TomP2P.Connection
         }
 
 
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             _lastReadTime.Set(Convenient.CurrentTimeMillis());
             ctx.FireRead(msg);
         }
 
-        public void Write(ChannelHandlerContext ctx, object msg)
+        public override void Write(ChannelHandlerContext ctx, object msg)
         {
             // TODO find ChannelPromise.operationComplete event equivalent
             throw new NotImplementedException();

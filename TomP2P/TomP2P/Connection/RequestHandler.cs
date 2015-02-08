@@ -14,7 +14,7 @@ namespace TomP2P.Connection
     /// (It is important that this class handles close() because if we shutdown the connections, 
     /// then we need to notify the futures. In case of errors set the peer to offline.)
     /// </summary>
-    public class RequestHandler : BaseChannelHandler, IInboundHandler
+    public class RequestHandler : BaseInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -161,7 +161,7 @@ namespace TomP2P.Connection
             return _tcsResponse.Task;
         }
 
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             // client-side:
             // Here, the result for the awaitable task can be set.

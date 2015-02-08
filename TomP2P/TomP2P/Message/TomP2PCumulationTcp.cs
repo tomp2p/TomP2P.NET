@@ -9,7 +9,7 @@ using TomP2P.Extensions.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PCumulationTcp : BaseChannelHandler, IInboundHandler
+    public class TomP2PCumulationTcp : BaseInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -23,7 +23,7 @@ namespace TomP2P.Message
             _decoder = new Decoder(signatureFactory);
         }
 
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             // .NET: use a content wrapper for TCP, similar to TomP2PSinglePacketUdp
             var piece = msg as StreamPiece;

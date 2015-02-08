@@ -5,7 +5,7 @@ using TomP2P.Connection.Windows.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PSinglePacketUdp : BaseChannelHandler, IInboundHandler
+    public class TomP2PSinglePacketUdp : BaseInboundHandler
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -19,7 +19,7 @@ namespace TomP2P.Message
         /// <summary>
         /// .NET-specific decoding handler for incoming UDP messages.
         /// </summary>
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             var dgram = msg as DatagramPacket;
             if (dgram == null)

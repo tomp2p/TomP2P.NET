@@ -32,6 +32,7 @@ namespace TomP2P.Connection.Windows.Netty
         private object _readResult;
 
         private Exception _caughtException;
+        private object _evt;
         public bool IsActive { get; private set; }
 
         public Pipeline(IChannel channel)
@@ -69,13 +70,13 @@ namespace TomP2P.Connection.Windows.Netty
             while (GetNextOutbound() != null)
             {
                 Logger.Debug("Channel '{0}': Processing outbound handler '{1}'.", _channel, _currentOutbound);
-                if (_caughtException == null)
+                if (_caughtException != null)
                 {
-                    _currentOutbound.Write(_ctx, msg);
+                    _currentOutbound.ExceptionCaught(_ctx, _caughtException);
                 }
                 else
                 {
-                    _currentOutbound.ExceptionCaught(_ctx, _caughtException);
+                    _currentOutbound.Write(_ctx, msg);
                 }
             }
             if (_writeResult == null)
@@ -100,13 +101,17 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 Logger.Debug("Channel '{0}': Processing inbound handler '{1}'.", _channel, _currentInbound);
 
-                if (_caughtException == null)
+                if (_caughtException != null)
                 {
-                    _currentInbound.Read(_ctx, msg);
+                    _currentInbound.ExceptionCaught(_ctx, _caughtException);
+                }
+                else if (_evt != null)
+                {
+                    _currentInbound.UserEventTriggered(_ctx, _evt);
                 }
                 else
                 {
-                    _currentInbound.ExceptionCaught(_ctx, _caughtException);
+                    _currentInbound.Read(_ctx, msg);
                 }
             }
             if (_readResult == null)
@@ -119,6 +124,11 @@ namespace TomP2P.Connection.Windows.Netty
         public void ExceptionCaught(Exception ex)
         {
             _caughtException = ex;
+        }
+
+        public void UserEventTriggered(object evt)
+        {
+            _evt = evt;
         }
 
         public void Active()
@@ -145,6 +155,7 @@ namespace TomP2P.Connection.Windows.Netty
             _msgW = null;
             _writeResult = null;
             _caughtException = null;
+            _evt = null;
         }
 
         public void ResetRead()
@@ -153,6 +164,7 @@ namespace TomP2P.Connection.Windows.Netty
             _msgR = null;
             _readResult = null;
             _caughtException = null;
+            _evt = null;
         }
 
         private IOutboundHandler GetNextOutbound()
