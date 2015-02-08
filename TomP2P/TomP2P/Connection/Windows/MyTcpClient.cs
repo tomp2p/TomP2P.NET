@@ -41,6 +41,7 @@ namespace TomP2P.Connection.Windows
             Logger.Debug("Send TCP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
             await _tcpClient.GetStream().WriteAsync(bytes, 0, bytes.Length);
+            NotifyWriteCompleted();
         }
 
         public async Task ReceiveMessageAsync()

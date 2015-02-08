@@ -35,6 +35,7 @@ namespace TomP2P.Connection.Windows
             Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
+            NotifyWriteCompleted();
         }
 
         public async Task ReceiveMessageAsync()

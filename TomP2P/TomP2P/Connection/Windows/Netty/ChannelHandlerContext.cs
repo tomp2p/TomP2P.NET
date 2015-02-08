@@ -2,6 +2,8 @@
 
 namespace TomP2P.Connection.Windows.Netty
 {
+    // TODO use exactly same structure as Java Netty --> e.g., "write" instead of "fireWrite"
+
     /// <summary>
     /// Equivalent to Java Netty's ChannelHandlerContext. In .NET, this context is implemented as a class
     /// with only the functionality required for this project.
@@ -12,8 +14,9 @@ namespace TomP2P.Connection.Windows.Netty
         private readonly IChannel _channel;
 
         /// <summary>
-        /// 
+        /// Creates a context object for a specific channel and its pipeline.
         /// </summary>
+        /// <param name="channel">The channel this context is associated with.</param>
         /// <param name="pipeline">The pipeline this context is associated with.</param>
         public ChannelHandlerContext(IChannel channel, Pipeline pipeline)
         {

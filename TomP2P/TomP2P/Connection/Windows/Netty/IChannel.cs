@@ -3,14 +3,15 @@ using System.Net.Sockets;
 
 namespace TomP2P.Connection.Windows.Netty
 {
-    public delegate void ClosedEventHandler(IChannel channel);
+    public delegate void ChannelEventHandler(IChannel channel);
     
     /// <summary>
     /// Interface to expose Java Netty's Channel API that is needed for this project.
     /// </summary>
     public interface IChannel
     {
-        event ClosedEventHandler Closed;
+        event ChannelEventHandler Closed;
+        event ChannelEventHandler WriteCompleted;
 
         void Close();
 

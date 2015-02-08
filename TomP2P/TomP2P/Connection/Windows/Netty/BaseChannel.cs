@@ -5,7 +5,8 @@ namespace TomP2P.Connection.Windows.Netty
 {
     public abstract class BaseChannel : IChannel
     {
-        public event ClosedEventHandler Closed;
+        public event ChannelEventHandler Closed;
+        public event ChannelEventHandler WriteCompleted;
 
         protected bool IsClosed;
         private Pipeline _pipeline;
@@ -36,17 +37,28 @@ namespace TomP2P.Connection.Windows.Netty
                 _pipeline.Inactive(); // inactive means getting closed
                 IsClosed = true;
                 DoClose();
-                OnClosed();
+                NotifyClosed();
             }
         }
 
         protected abstract void DoClose();
 
-        protected void OnClosed()
+        private void NotifyClosed()
         {
             if (Closed != null)
             {
                 Closed(this);
+            }
+        }
+
+        /// <summary>
+        /// This should be called by all deriving types upon sending finished.
+        /// </summary>
+        protected void NotifyWriteCompleted()
+        {
+            if (WriteCompleted != null)
+            {
+                WriteCompleted(this);
             }
         }
 

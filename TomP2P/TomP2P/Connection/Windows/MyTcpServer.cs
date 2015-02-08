@@ -70,6 +70,7 @@ namespace TomP2P.Connection.Windows
 
                 // send back
                 await stream.WriteAsync(bytes, 0, bytes.Length, ct);
+                NotifyWriteCompleted();
             }
         }
 

@@ -60,6 +60,7 @@ namespace TomP2P.Connection.Windows
 
                 // return / send back
                 await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
+                NotifyWriteCompleted();
             }
         }
 
