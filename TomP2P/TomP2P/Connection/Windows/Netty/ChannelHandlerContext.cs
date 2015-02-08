@@ -46,6 +46,16 @@ namespace TomP2P.Connection.Windows.Netty
             _pipeline.ExceptionCaught(ex);
         }
 
+        /// <summary>
+        /// A channel received a user-defined event.
+        /// Results in having the next inbound handler called.
+        /// </summary>
+        /// <param name="evt"></param>
+        public void FireUserEventTriggered(object evt)
+        {
+            _pipeline.UserEventTriggered(evt);
+        }
+
         public void Close()
         {
             _channel.Close();
