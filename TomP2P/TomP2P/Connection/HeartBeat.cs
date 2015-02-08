@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Management;
 using System.Threading;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -133,7 +132,7 @@ namespace TomP2P.Connection
 
         private void Heartbeating(object state)
         {
-            var ctx = state as ChannelHandlerContext;
+            var ctx = (ChannelHandlerContext) state;
             if (!ctx.Channel.IsOpen)
             {
                 return;
@@ -147,12 +146,12 @@ namespace TomP2P.Connection
             {
                 Logger.Debug("Sending heart beat to {0}. Channel: {1}.", _peerConnection.RemotePeer, _peerConnection.Channel);
                 var builder = _pingBuilderFactory.Create();
-
-                // TODO finish implementation
-                throw new NotImplementedException();
+                var taskPing = builder.SetPeerConnection(_peerConnection).Start();
+                builder.NotifyAutomaticFutures(taskPing);
             }
             else
             {
+                // TODO fix possible NPE
                 Logger.Debug("Not sending heart beat to {0}. Channel: {1}.", _peerConnection.RemotePeer, _peerConnection.Channel);
             }
         }
