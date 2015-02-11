@@ -9,10 +9,10 @@ using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
-namespace TomP2P.Tests.Interop
+namespace TomP2P.Tests.Interop.Network
 {
     [TestFixture]
-    public class InteropPingTest
+    public class PingRpcTest
     {
         private TaskCompletionSource<PeerAddress> _tcs;
 

@@ -2,7 +2,7 @@
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
-namespace TomP2P.Tests.Interop
+namespace TomP2P.Tests.Interop.Protocol
 {
     /// <summary>
     /// These tests check the binary encoding/decoding of data types between Java and .NET.

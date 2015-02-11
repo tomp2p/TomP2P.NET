@@ -1,7 +1,7 @@
-﻿using System.Net;
-using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Net;
+using NUnit.Framework;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
@@ -10,9 +10,8 @@ using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 using TomP2P.Storage;
-using Decoder = TomP2P.Message.Decoder;
 
-namespace TomP2P.Tests.Interop
+namespace TomP2P.Tests.Interop.Protocol
 {
     [TestFixture]
     public class MessageEncodeDecodeTest

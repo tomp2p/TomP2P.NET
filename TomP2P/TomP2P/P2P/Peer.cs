@@ -33,6 +33,7 @@ namespace TomP2P.P2P
 
         // RPC
         private PingRpc _pingRpc;
+        private QuitRpc _quitRpc;
         // TODO add other Rpc's
 
         private volatile bool _shutdown = false;
