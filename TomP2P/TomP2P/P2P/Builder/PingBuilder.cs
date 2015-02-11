@@ -10,8 +10,7 @@ namespace TomP2P.P2P.Builder
 {
     public class PingBuilder
     {
-        // TODO use Task<PeerAddress> instead?
-        private static readonly Task<PeerAddress> FuturePingShutdown;
+        private static readonly Task<PeerAddress> TaskPingShutdown;
 
         private readonly Peer _peer;
 
@@ -34,7 +33,7 @@ namespace TomP2P.P2P.Builder
         {
             var tcsPingShutdown = new TaskCompletionSource<PeerAddress>();
             tcsPingShutdown.SetException(new TaskFailedException("Peer is shutting down."));
-            FuturePingShutdown = tcsPingShutdown.Task;
+            TaskPingShutdown = tcsPingShutdown.Task;
         }
 
         public PingBuilder(Peer peer)
@@ -52,7 +51,7 @@ namespace TomP2P.P2P.Builder
         {
             if (_peer.IsShutdown)
             {
-                return FuturePingShutdown;
+                return TaskPingShutdown;
             }
 
             if (_connectionConfiguration == null)

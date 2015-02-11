@@ -141,6 +141,7 @@
     <Compile Include="P2P\MaintenanceTask.cs" />
     <Compile Include="P2P\Peer.cs" />
     <Compile Include="P2P\PeerBuilder.cs" />
+    <Compile Include="P2P\RoutingConfiguration.cs" />
     <Compile Include="Peers\IBloomfilterFactory.cs" />
     <Compile Include="Peers\IMaintainable.cs" />
     <Compile Include="Peers\Number160.cs" />
