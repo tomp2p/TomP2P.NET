@@ -55,10 +55,34 @@ namespace TomP2P.P2P.Builder
                 _routingConfiguration = new RoutingConfiguration(8, 10, 2);
             }
 
-            int conn = _routingConfiguration.Parallel();
+            int conn = _routingConfiguration.Parallel;
+            var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
+            var tcsShutdownDone = new TaskCompletionSource<object>();
+            Utils.Utils.AddReleaseListener(taskCc, tcsShutdownDone.Task);
 
-            // TODO finsih impl
-            throw new NotImplementedException();
+            taskCc.ContinueWith(tcc =>
+            {
+                if (!tcc.IsFaulted)
+                {
+                    var cc = tcc.Result;
+                    var routingBuilder = BootstrapBuilder.
+                    // TODO implement
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    if (tcc.Exception != null)
+                    {
+                        tcsShutdownDone.SetException(tcc.Exception);
+                    }
+                    else
+                    {
+                        tcsShutdownDone.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
+                    }
+                }
+            });
+
+            return tcsShutdownDone.Task;
         }
     }
 }

@@ -129,6 +129,7 @@
     <Compile Include="Message\TomP2POutbound.cs" />
     <Compile Include="Message\TomP2PSinglePacketUDP.cs" />
     <Compile Include="Message\TrackerData.cs" />
+    <Compile Include="P2P\Builder\BootstrapBuilder.cs" />
     <Compile Include="P2P\Builder\ISignatureBuilder.cs" />
     <Compile Include="P2P\Builder\PingBuilder.cs" />
     <Compile Include="P2P\Builder\ShutdownBuilder.cs" />
