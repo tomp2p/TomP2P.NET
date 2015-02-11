@@ -19,11 +19,11 @@ namespace TomP2P.P2P.Builder
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // TODO do these need to be of type "FutureWrapper"?
-        private static readonly Task<IEnumerable<PeerAddress>> TaskBootstrapShutdown;
-        private static readonly Task<IEnumerable<PeerAddress>> TaskBootstrapNoAddress;
+        private static readonly Task<ICollection<PeerAddress>> TaskBootstrapShutdown;
+        private static readonly Task<ICollection<PeerAddress>> TaskBootstrapNoAddress;
 
         private readonly Peer _peer;
-        public IEnumerable<PeerAddress> BootstrapTo { get; private set; }
+        public ICollection<PeerAddress> BootstrapTo { get; private set; }
         public PeerAddress PeerAddress { get; private set; }
         public IPAddress InetAddress { get; private set; }
         public int PortUdp { get; private set; }
@@ -35,11 +35,11 @@ namespace TomP2P.P2P.Builder
         // static constructor
         static BootstrapBuilder()
         {
-            var tcsBootstrapShutdown = new TaskCompletionSource<IEnumerable<PeerAddress>>();
+            var tcsBootstrapShutdown = new TaskCompletionSource<ICollection<PeerAddress>>();
             tcsBootstrapShutdown.SetException(new TaskFailedException("Peer is shutting down."));
             TaskBootstrapShutdown = tcsBootstrapShutdown.Task;
 
-            var tcsBootstrapNoAddress = new TaskCompletionSource<IEnumerable<PeerAddress>>();
+            var tcsBootstrapNoAddress = new TaskCompletionSource<ICollection<PeerAddress>>();
             tcsBootstrapNoAddress.SetException(new TaskFailedException("No addresses to bootstrap to have been provided. Or maybe, the provided address has peer ID set to zero."));
             TaskBootstrapNoAddress = tcsBootstrapNoAddress.Task;
         }
@@ -52,7 +52,7 @@ namespace TomP2P.P2P.Builder
             PortTcp = Ports.DefaultPort;
         }
 
-        public BootstrapBuilder SetBootstrapTo(IEnumerable<PeerAddress> bootstrapTo)
+        public BootstrapBuilder SetBootstrapTo(ICollection<PeerAddress> bootstrapTo)
         {
             BootstrapTo = bootstrapTo;
             return this;
@@ -137,6 +137,45 @@ namespace TomP2P.P2P.Builder
             return this;
         }
 
+        public Task<ICollection<PeerAddress>> Start()
+        {
+            if (_peer.IsShutdown)
+            {
+                return TaskBootstrapShutdown;
+            }
 
+            if (RoutingConfiguration == null)
+            {
+                RoutingConfiguration = new RoutingConfiguration(8, 10, 2);
+            }
+
+            if (IsBroadcast)
+            {
+                return Broadcast0();
+            }
+            if (PeerAddress == null && InetAddress != null && BootstrapTo == null)
+            {
+                PeerAddress = new PeerAddress(Number160.Zero, InetAddress, PortTcp, PortUdp);
+                return BootstrapPing(PeerAddress);
+            }
+            else if (PeerAddress != null && BootstrapTo == null)
+            {
+                BootstrapTo = new List<PeerAddress>(1) {PeerAddress};
+                return Bootstrap();
+            }
+            else if (BootstrapTo != null)
+            {
+                return Bootstrap();
+            }
+            else
+            {
+                return TaskBootstrapNoAddress;
+            }
+        }
+
+        private Task<ICollection<PeerAddress>> Bootstrap()
+        {
+            
+        }
     }
 }

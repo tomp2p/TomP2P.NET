@@ -110,6 +110,7 @@
     <Compile Include="Connection\PeerException.cs" />
     <Compile Include="Futures\TaskForkJoin.cs" />
     <Compile Include="Futures\TaskLateJoin.cs" />
+    <Compile Include="Futures\TaskWrapper.cs" />
     <Compile Include="Message\Buffer.cs" />
     <Compile Include="Message\CompByteBufAllocator.cs" />
     <Compile Include="Message\DataMap.cs" />
