@@ -175,7 +175,7 @@ namespace TomP2P.P2P.Builder
 
         private Task<ICollection<PeerAddress>> Bootstrap()
         {
-            
+            var result = new TaskCompletionSource<Task<Pair<FutureRouting, FutureRouting>>>();
         }
     }
 }
