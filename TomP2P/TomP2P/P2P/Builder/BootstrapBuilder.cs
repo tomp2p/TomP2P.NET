@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using NLog;
@@ -179,8 +180,8 @@ namespace TomP2P.P2P.Builder
         {
             // TODO document
             //var result = new TaskCompletionSource<Task<Pair<TaskRouting, TaskRouting>>>(BootstrapTo);
-            var result = new TaskWrapper<Task<Pair<TaskRouting, TaskRouting>>>();
-            result.
+            var result = new TaskWrappedBootstrap<Task<Pair<TaskRouting, TaskRouting>>>();
+            result.SetBootstrapTo(BootstrapTo);
 
             int conn = RoutingConfiguration.Parallel;
             var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
@@ -191,9 +192,29 @@ namespace TomP2P.P2P.Builder
                 {
                     var routingBuilder = CreateBuilder(RoutingConfiguration, IsForceRoutingOnlyToSelf);
                     var tcsBootstrapDone = _peer.DistributedRouting.Bootstrap(BootstrapTo, routingBuilder, tcc.Result);
-                    result.
+                    result.WaitFor(tcsBootstrapDone);
+                }
+                else
+                {
+                    if (tcc.Exception != null)
+                    {
+                        result.SetException(tcc.Exception);
+                    }
+                    else
+                    {
+                        result.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
+                    }
                 }
             });
+
+            return result;
+        }
+
+        private static RoutingBuilder CreateBuilder(RoutingConfiguration routingConfiguration,
+            bool forceRoutingOnlyToSelf)
+        {
+            // TODO implement
+            throw new NotImplementedException();
         }
     }
 }
