@@ -23,14 +23,14 @@ namespace TomP2P.P2P.Builder
         private static readonly Task<IEnumerable<PeerAddress>> TaskBootstrapNoAddress;
 
         private readonly Peer _peer;
-        private IEnumerable<PeerAddress> _bootstrapTo;
-        private PeerAddress _peerAddress;
-        private IPEndPoint _inetAddress;
-        private int _portUdp = Ports.DefaultPort;
-        private int _portTcp = Ports.DefaultPort;
-        private RoutingConfiguration _routingConfiguration;
-        private bool _forceRoutingOnlyToSelf = false;
-        private bool _broadcast = false;
+        public IEnumerable<PeerAddress> BootstrapTo { get; private set; }
+        public PeerAddress PeerAddress { get; private set; }
+        public IPAddress InetAddress { get; private set; }
+        public int PortUdp { get; private set; }
+        public int PortTcp { get; private set; }
+        public RoutingConfiguration RoutingConfiguration { get; private set; }
+        public bool IsForceRoutingOnlyToSelf { get; private set; }
+        public bool IsBroadcast { get; private set; }
 
         // static constructor
         static BootstrapBuilder()
@@ -42,6 +42,99 @@ namespace TomP2P.P2P.Builder
             var tcsBootstrapNoAddress = new TaskCompletionSource<IEnumerable<PeerAddress>>();
             tcsBootstrapNoAddress.SetException(new TaskFailedException("No addresses to bootstrap to have been provided. Or maybe, the provided address has peer ID set to zero."));
             TaskBootstrapNoAddress = tcsBootstrapNoAddress.Task;
+        }
+
+        public BootstrapBuilder(Peer peer)
+        {
+            _peer = peer;
+
+            PortUdp = Ports.DefaultPort;
+            PortTcp = Ports.DefaultPort;
+        }
+
+        public BootstrapBuilder SetBootstrapTo(IEnumerable<PeerAddress> bootstrapTo)
+        {
+            BootstrapTo = bootstrapTo;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the peer address to bootstrap to.
+        /// Please note that the peer address needs to know the peer ID of the bootstrap peer.
+        /// If this is not known, use SetInetAddress(IPEndPoint) instead.
+        /// </summary>
+        /// <param name="peerAddress">The full address of the peer to bootstrap to (including the peer ID of the bootstrap peer).</param>
+        /// <returns></returns>
+        public BootstrapBuilder SetPeerAddress(PeerAddress peerAddress)
+        {
+            if (peerAddress != null && peerAddress.PeerId.Equals(Number160.Zero))
+            {
+                Logger.Warn("Peer address with peer ID zero provided. Bootstrapping is impossible, because no peer with peer ID set to zero is allowed to exist.");
+                return this;
+            }
+            PeerAddress = peerAddress;
+            return this;
+        }
+
+        public BootstrapBuilder SetInetAddress(IPAddress inetAddress)
+        {
+            InetAddress = inetAddress;
+            return this;
+        }
+
+        public BootstrapBuilder SetInetSocketAddress(IPEndPoint socket)
+        {
+            InetAddress = socket.Address;
+            PortTcp = socket.Port;
+            PortUdp = socket.Port;
+            return this;
+        }
+
+        public BootstrapBuilder SetPortUdp(int portUdp)
+        {
+            PortUdp = portUdp;
+            return this;
+        }
+
+        public BootstrapBuilder SetPortTcp(int portTcp)
+        {
+            PortTcp = portTcp;
+            return this;
+        }
+
+        public BootstrapBuilder SetPorts(int port)
+        {
+            PortTcp = port;
+            PortUdp = port;
+            return this;
+        }
+
+        public BootstrapBuilder SetRoutingConfiguration(RoutingConfiguration routingConfiguration)
+        {
+            RoutingConfiguration = routingConfiguration;
+            return this;
+        }
+
+        public BootstrapBuilder SetIsForceRoutingOnlyToSelf()
+        {
+            return SetIsForceRoutingOnlyToSelf(true);
+        }
+
+        public BootstrapBuilder SetIsForceRoutingOnlyToSelf(bool forceRoutingOnlyToSelf)
+        {
+            IsForceRoutingOnlyToSelf = forceRoutingOnlyToSelf;
+            return this;
+        }
+
+        public BootstrapBuilder SetIsBroadcast()
+        {
+            return SetIsBroadcast(true);
+        }
+
+        public BootstrapBuilder SetIsBroadcast(bool broadcast)
+        {
+            IsBroadcast = broadcast;
+            return this;
         }
 
 
