@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
+using TomP2P.Futures;
 using TomP2P.Peers;
+using TomP2P.Utils;
 
 namespace TomP2P.P2P.Builder
 {
@@ -175,7 +177,23 @@ namespace TomP2P.P2P.Builder
 
         private Task<ICollection<PeerAddress>> Bootstrap()
         {
-            var result = new TaskCompletionSource<Task<Pair<FutureRouting, FutureRouting>>>();
+            // TODO document
+            //var result = new TaskCompletionSource<Task<Pair<TaskRouting, TaskRouting>>>(BootstrapTo);
+            var result = new TaskWrapper<Task<Pair<TaskRouting, TaskRouting>>>();
+            result.
+
+            int conn = RoutingConfiguration.Parallel;
+            var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
+            Utils.Utils.AddReleaseListener(taskCc, result.Task); // TODO correct?
+            taskCc.ContinueWith(tcc =>
+            {
+                if (!tcc.IsFaulted)
+                {
+                    var routingBuilder = CreateBuilder(RoutingConfiguration, IsForceRoutingOnlyToSelf);
+                    var tcsBootstrapDone = _peer.DistributedRouting.Bootstrap(BootstrapTo, routingBuilder, tcc.Result);
+                    result.
+                }
+            });
         }
     }
 }

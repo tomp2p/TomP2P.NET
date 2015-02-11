@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using TomP2P.Peers;
+using TomP2P.Rpc;
 
 namespace TomP2P.Futures
 {
