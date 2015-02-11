@@ -30,7 +30,8 @@ namespace TomP2P.Connection
         private readonly Dispatcher _dispatcher;
         private readonly IList<IPeerStatusListener> _peerStatusListeners;
 
-        // TODO DropConnectionInboundHandlers needed?
+        private readonly DropConnectionInboundHandler _tcpDropConnectionInboundHandler;
+        private readonly DropConnectionInboundHandler _udpDropConnectionInboundHandler;
         private readonly TomP2PSinglePacketUdp _udpDecoderHandler;
 
         // .NET
@@ -53,7 +54,8 @@ namespace TomP2P.Connection
             string status = DiscoverNetworks.DiscoverInterfaces(_interfaceBindings);
             Logger.Info("Status of interface search: {0}.", status);
 
-            // TODO DropConnectionInboundHandlers needed?
+            _tcpDropConnectionInboundHandler = new DropConnectionInboundHandler(channelServerConfiguration.MaxTcpIncomingConnections);
+            _udpDropConnectionInboundHandler = new DropConnectionInboundHandler(channelServerConfiguration.MaxUdpIncomingConnections);
             _udpDecoderHandler = new TomP2PSinglePacketUdp(channelServerConfiguration.SignatureFactory);
             _tcpDecoderHandler = new TomP2PCumulationTcp(channelServerConfiguration.SignatureFactory);
             _encoderHandler = new TomP2POutbound(false, channelServerConfiguration.SignatureFactory);
@@ -128,7 +130,6 @@ namespace TomP2P.Connection
         /// <returns>True, if startup was successful.</returns>
         private bool StartupTcp(IPEndPoint listenAddress)
         {
-            // TODO implement and use TimeoutFactory stuff!
             try
             {
                 _tcpServer = new MyTcpServer(listenAddress);
@@ -158,10 +159,9 @@ namespace TomP2P.Connection
 
             if (channel.IsTcp)
             {
-                // TODO add dropconnection
-                // TODO add timeout handlers
-                //pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
-                //pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
+                pipeline.AddLast("dropconnection", _tcpDropConnectionInboundHandler);
+                pipeline.AddLast("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                pipeline.AddLast("timeout1", timeoutFactory.CreateTimeHandler());
                 pipeline.AddLast("decoder", _tcpDecoderHandler);
             }
             else if (channel.IsUdp)
@@ -169,7 +169,7 @@ namespace TomP2P.Connection
                 // no need for a timeout handler, since whole packet arrives or nothing
                 // different from TCP where the stream can be closed by the remote peer
                 // in the middle of the transmission
-                // TODO add dropconnection
+                pipeline.AddLast("dropconnection", _udpDropConnectionInboundHandler);
                 pipeline.AddLast("decoder", _udpDecoderHandler);
             }
             pipeline.AddLast("encoder", _encoderHandler);

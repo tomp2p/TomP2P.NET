@@ -133,18 +133,18 @@ namespace TomP2P.Connection.Windows.Netty
         public void Active()
         {
             IsActive = true;
-            foreach (var handler in _handlers)
+            foreach (var item in _handlers)
             {
-                handler.Handler.ChannelActive(_ctx);
+                item.Handler.ChannelActive(_ctx);
             }
         }
 
         public void Inactive()
         {
             IsActive = false;
-            foreach (var handler in _handlers)
+            foreach (var item in _handlers)
             {
-                handler.Handler.ChannelInactive(_ctx);
+                item.Handler.ChannelInactive(_ctx);
             }
         }
 

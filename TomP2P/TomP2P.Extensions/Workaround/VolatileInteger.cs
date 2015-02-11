@@ -8,7 +8,7 @@ namespace TomP2P.Extensions.Workaround
     /// </summary>
     public struct VolatileInteger
     {
-        private long _value;
+        private int _value;
 
         public VolatileInteger(int initialValue)
         {
@@ -22,13 +22,25 @@ namespace TomP2P.Extensions.Workaround
 
         public int Get()
         {
-            return (int) Interlocked.Read(ref _value);
+            var longVal = (long) _value;
+            return (int) Interlocked.Read(ref longVal);
         }
 
         public int IncrementAndGet()
         {
             Interlocked.Increment(ref _value);
             return Get();
+        }
+
+        public int DecrementAndGet()
+        {
+            Interlocked.Decrement(ref _value);
+            return Get();
+        }
+
+        public void Decrement()
+        {
+            Interlocked.Decrement(ref _value);
         }
     }
 }
