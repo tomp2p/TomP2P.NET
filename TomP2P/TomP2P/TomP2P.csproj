@@ -135,6 +135,7 @@
     <Compile Include="P2P\Builder\BootstrapBuilder.cs" />
     <Compile Include="P2P\Builder\ISignatureBuilder.cs" />
     <Compile Include="P2P\Builder\PingBuilder.cs" />
+    <Compile Include="P2P\Builder\RoutingBuilder.cs" />
     <Compile Include="P2P\Builder\ShutdownBuilder.cs" />
     <Compile Include="P2P\DistributedRouting.cs" />
     <Compile Include="P2P\IBroadcastHandler.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="P2P\RoutingConfiguration.cs" />
     <Compile Include="Peers\IBloomfilterFactory.cs" />
     <Compile Include="Peers\IMaintainable.cs" />
+    <Compile Include="Peers\IPeerFilter.cs" />
     <Compile Include="Peers\Number160.cs" />
     <Compile Include="Peers\Number320.cs" />
     <Compile Include="Peers\Number480.cs" />
