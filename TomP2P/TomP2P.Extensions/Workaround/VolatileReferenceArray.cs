@@ -59,5 +59,19 @@ namespace TomP2P.Extensions.Workaround
                 _array.SetValue(value, index);
             }
         }
+
+        /// <summary>
+        /// Sets the element at the provided index to the provided value 
+        /// and returns the old value.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public T GetAndSet(int index, T value)
+        {
+            var res = Get(index);
+            Set(index, value);
+            return res;
+        }
     }
 }

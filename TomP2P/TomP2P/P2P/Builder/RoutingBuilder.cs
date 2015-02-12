@@ -54,8 +54,23 @@ namespace TomP2P.P2P.Builder
         /// <returns></returns>
         public SearchValues SearchValues()
         {
-            // TODO implement
-            throw new NotImplementedException();
+            if (ContentKey != null)
+            {
+                return new SearchValues(LocationKey, DomainKey, ContentKey);
+            }
+            if (From != null && To != null)
+            {
+                return new SearchValues(LocationKey, DomainKey, From, To);
+            }
+            if (ContentBloomFilter == null && KeyBloomFilter != null)
+            {
+                return new SearchValues(LocationKey, DomainKey, KeyBloomFilter);
+            }
+            if (ContentBloomFilter != null && KeyBloomFilter != null)
+            {
+                return new SearchValues(LocationKey, DomainKey, KeyBloomFilter, ContentBloomFilter);
+            }
+            return new SearchValues(LocationKey, DomainKey);
         }
 
         public RoutingMechanism CreateRoutingMechanism(TaskRouting taskRouting)
