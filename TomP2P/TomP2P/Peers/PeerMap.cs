@@ -29,5 +29,25 @@ namespace TomP2P.Peers
             return true;
             //throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Creates an XOR comparer based on this peer ID.
+        /// </summary>
+        /// <returns>The XOR comparer.</returns>
+        public IComparer<PeerAddress> CreateComparer()
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates the Kademlia distance comparer.
+        /// </summary>
+        /// <param name="id">The ID of this peer.</param>
+        /// <returns>The XOR comparer.</returns>
+        public static IComparer<PeerAddress> CreateComparer(Number160 id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

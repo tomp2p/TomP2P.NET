@@ -10,7 +10,7 @@ namespace TomP2P.Futures
     /// created task has finished.
     /// </summary>
     /// <typeparam name="TTask"></typeparam>
-    public class TaskWrapper<TTask> : BaseTaskImpl where TTask : Task
+    public class TcsWrapper<TTask> : BaseTcsImpl where TTask : Task
     {
         private TTask _wrappedTask;
 

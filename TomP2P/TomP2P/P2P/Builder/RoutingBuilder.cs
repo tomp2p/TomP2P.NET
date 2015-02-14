@@ -74,11 +74,11 @@ namespace TomP2P.P2P.Builder
             return new SearchValues(LocationKey, DomainKey);
         }
 
-        public RoutingMechanism CreateRoutingMechanism(TaskRouting taskRouting)
+        public RoutingMechanism CreateRoutingMechanism(TcsRouting tcsRouting)
         {
             var tcsResponses = new TaskCompletionSource<Message.Message>[Parallel];
             var tcsResponses2 = new VolatileReferenceArray<TaskCompletionSource<Message.Message>>(tcsResponses);
-            var routingMechanism = new RoutingMechanism(tcsResponses2, taskRouting, PeerFilters)
+            var routingMechanism = new RoutingMechanism(tcsResponses2, tcsRouting, PeerFilters)
             {
                 MaxDirectHits = MaxDirectHits,
                 MaxFailures = MaxFailures,

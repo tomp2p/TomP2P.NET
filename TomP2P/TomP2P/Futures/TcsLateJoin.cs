@@ -6,7 +6,7 @@ namespace TomP2P.Futures
     /// <summary>
     /// Equivalent for Java's FutureLateJoin.
     /// </summary>
-    public class TaskLateJoin<TTask> : BaseTaskImpl where TTask : Task
+    public class TcsLateJoin<TTask> : BaseTcsImpl where TTask : Task
     {
         // K = FutureResponse = Task<Message>
         // FutureLateJoin = Task.WhenAll(FutureResponse[]) = Task.WhenAll(Task<Message>[])
@@ -22,11 +22,11 @@ namespace TomP2P.Futures
         private TTask _lastSuccessTask;
         private int _successCount;
 
-        public TaskLateJoin(int nrMaxTasks)
+        public TcsLateJoin(int nrMaxTasks)
             : this(nrMaxTasks, nrMaxTasks)
         { }
 
-        public TaskLateJoin(int nrMaxTasks, int minSuccess)
+        public TcsLateJoin(int nrMaxTasks, int minSuccess)
         {
             _nrMaxTasks = nrMaxTasks;
             _minSuccess = minSuccess;

@@ -20,7 +20,7 @@ namespace TomP2P.P2P
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public VolatileReferenceArray<TaskCompletionSource<Message.Message>> TcsResponses { get; private set; }
-        public TaskRouting TaskRoutingResponse { get; private set; }
+        public TcsRouting TcsRoutingResponse { get; private set; }
         private readonly ICollection<IPeerFilter> _peerFilters;
 
         private SortedSet<PeerAddress> _queueToAsk;
@@ -42,19 +42,19 @@ namespace TomP2P.P2P
         /// <summary>
         /// True, if we should stop creating more tasks. False, otherwise.
         /// </summary>
-        public bool IsStopCreatingNewFutures { get; private set; }
+        public bool IsStopCreatingNewFutures { get; set; }
 
         /// <summary>
         /// Creates the routing mechanism. Make sure to set the Max* fields.
         /// </summary>
         /// <param name="tcsResponses">The current task responses that are running.</param>
-        /// <param name="taskRoutingResponse">The response task from this routing request.</param>
+        /// <param name="tcsRoutingResponse">The response task from this routing request.</param>
         /// <param name="peerFilters"></param>
         public RoutingMechanism(VolatileReferenceArray<TaskCompletionSource<Message.Message>> tcsResponses,
-            TaskRouting taskRoutingResponse, ICollection<IPeerFilter> peerFilters)
+            TcsRouting tcsRoutingResponse, ICollection<IPeerFilter> peerFilters)
         {
             TcsResponses = tcsResponses;
-            TaskRoutingResponse = taskRoutingResponse;
+            TcsRoutingResponse = tcsRoutingResponse;
             _peerFilters = peerFilters;
         }
 
@@ -208,7 +208,7 @@ namespace TomP2P.P2P
             lock (this)
             {
                 // TODO doesn't this create a deadlock due to property-locks?
-                TaskRoutingResponse.SetNeighbors(DirectHits, PotentialHits, AlreadyAsked, routingBuilder.IsBootstrap, routingBuilder.IsRoutingToOthers);
+                TcsRoutingResponse.SetNeighbors(DirectHits, PotentialHits, AlreadyAsked, routingBuilder.IsBootstrap, routingBuilder.IsRoutingToOthers);
             }
         }
 

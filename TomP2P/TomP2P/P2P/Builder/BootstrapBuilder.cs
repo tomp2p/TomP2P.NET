@@ -178,9 +178,7 @@ namespace TomP2P.P2P.Builder
 
         private Task<ICollection<PeerAddress>> Bootstrap()
         {
-            // TODO document
-            //var result = new TaskCompletionSource<Task<Pair<TaskRouting, TaskRouting>>>(BootstrapTo);
-            var result = new TaskWrappedBootstrap<Task<Pair<TaskRouting, TaskRouting>>>();
+            var result = new TcsWrappedBootstrap<Task<Pair<TcsRouting, TcsRouting>>>();
             result.SetBootstrapTo(BootstrapTo);
 
             int conn = RoutingConfiguration.Parallel;

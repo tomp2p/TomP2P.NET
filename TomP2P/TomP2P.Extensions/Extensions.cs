@@ -143,7 +143,7 @@ namespace TomP2P.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="c"></param>
         /// <param name="collection"></param>
-        public static void AddAll<T>(this ICollection<T> c, IEnumerable<T> collection)
+        public static void AddRange<T>(this ICollection<T> c, IEnumerable<T> collection)
         {
             foreach (var item in collection)
             {

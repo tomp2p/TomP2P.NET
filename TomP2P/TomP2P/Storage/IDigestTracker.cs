@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TomP2P.Peers;
+using TomP2P.Rpc;
 
 namespace TomP2P.Storage
 {
     public interface IDigestTracker
     {
-        // TODO implement IDigestTracker
+        DigestInfo Digest(Number160 locationKey, Number160 domainKey, Number160 contentKey);
     }
 }

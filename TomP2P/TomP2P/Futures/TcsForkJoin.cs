@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Futures
 {
-    public class TaskForkJoin<TTask> : BaseTaskImpl where TTask : Task
+    public class TcsForkJoin<TTask> : BaseTcsImpl where TTask : Task
     {
         private readonly VolatileReferenceArray<TTask> _forks;
 
@@ -30,12 +28,12 @@ namespace TomP2P.Futures
         /// <param name="forks">The tasks that can also be modified outside this class.
         /// If a task is finished, the the task in that array will be set to null.
         /// A task may be initially null, which is considered a failure.</param>
-        public TaskForkJoin(VolatileReferenceArray<TTask> forks)
+        public TcsForkJoin(VolatileReferenceArray<TTask> forks)
             : this(forks.Length, false, forks)
         { }
 
         /// <summary>
-        /// Creates a TaskForkJoin object.
+        /// Creates a TcsForkJoin object.
         /// </summary>
         /// <param name="nrFinishFuturesSuccess">The number of tasks expected to succeed.</param>
         /// <param name="cancelTasksOnFinish">Whether the remaining tasks should be cancelled.
@@ -43,7 +41,7 @@ namespace TomP2P.Futures
         /// <param name="forks">The tasks that can also be modified outside this class.
         /// If a task is finished, the the task in that array will be set to null.
         /// A task may be initially null, which is considered a failure.</param>
-        public TaskForkJoin(int nrFinishFuturesSuccess, bool cancelTasksOnFinish, VolatileReferenceArray<TTask> forks)
+        public TcsForkJoin(int nrFinishFuturesSuccess, bool cancelTasksOnFinish, VolatileReferenceArray<TTask> forks)
         {
             _nrFinishTaskSuccess = nrFinishFuturesSuccess;
             _cancelTasksOnFinish = cancelTasksOnFinish;
@@ -200,6 +198,20 @@ namespace TomP2P.Futures
                     }
                 }
                 return null;
+            }
+        }
+
+        public TTask Last
+        {
+            get
+            {
+                lock (Lock)
+                {
+                    if (_forksCopy.Count != 0)
+                    {
+                        return _forksCopy[_forksCopy.Count - 1];
+                    }
+                }
             }
         }
     }

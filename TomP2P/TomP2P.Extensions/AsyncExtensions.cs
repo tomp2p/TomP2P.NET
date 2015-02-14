@@ -28,5 +28,12 @@ namespace TomP2P.Extensions
             }
             return task.Result;
         }
+
+        /*
+        public static bool IsSuccess(this Task t)
+        {
+            return !t.IsFaulted; // TODO && t.IsCompleted?
+        }
+        */
     }
 }

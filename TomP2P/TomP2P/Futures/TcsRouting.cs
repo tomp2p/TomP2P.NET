@@ -9,7 +9,7 @@ namespace TomP2P.Futures
     /// The routing will always succeed if we do DHT operations or bootstrap to ourself.
     /// It will fail if we bootstrap to another peer, but could not contact any peer than ourself.
     /// </summary>
-    public class TaskRouting : BaseTaskImpl
+    public class TcsRouting : BaseTcsImpl
     {
         private SortedSet<PeerAddress> _potentialHits;
         private SortedDictionary<PeerAddress, DigestInfo> _directHits;

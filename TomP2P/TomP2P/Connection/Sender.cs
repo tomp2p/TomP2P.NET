@@ -392,7 +392,7 @@ namespace TomP2P.Connection
                 }
             }
 
-            var ffk = new TaskForkJoin<Task<PeerAddress>>(1, true, new VolatileReferenceArray<Task<PeerAddress>>(forks));
+            var ffk = new TcsForkJoin<Task<PeerAddress>>(1, true, new VolatileReferenceArray<Task<PeerAddress>>(forks));
             ffk.Task.ContinueWith(tfj =>
             {
                 if (!tfj.IsFaulted)
@@ -407,7 +407,7 @@ namespace TomP2P.Connection
                     }
                     else
                     {
-                        tcsDone.SetException(new TaskFailedException("TaskForkJoin<Task<PeerAddress>> failed."));
+                        tcsDone.SetException(new TaskFailedException("TcsForkJoin<Task<PeerAddress>> failed."));
                     }
                 }
             });

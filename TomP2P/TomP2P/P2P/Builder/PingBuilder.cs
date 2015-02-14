@@ -104,7 +104,7 @@ namespace TomP2P.P2P.Builder
             var bindings = _peer.ConnectionBean.Sender.ChannelClientConfiguration.BindingsOutgoing;
             int size = bindings.BroadcastAddresses.Count;
 
-            var taskLateJoin = new TaskLateJoin<Task<Message.Message>>(size, 1);
+            var taskLateJoin = new TcsLateJoin<Task<Message.Message>>(size, 1);
             if (size > 0)
             {
                 var taskChannelCreator = _peer.ConnectionBean.Reservation.CreateAsync(size, 0);
@@ -249,15 +249,15 @@ namespace TomP2P.P2P.Builder
             return tcsPing.Task;
         }
 
-        private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing, TaskLateJoin<Task<Message.Message>> taskLateJoin)
+        private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing, TcsLateJoin<Task<Message.Message>> tcsLateJoin)
         {
             // TODO works?
             // we have one successful reply
-            taskLateJoin.Task.ContinueWith(tlj =>
+            tcsLateJoin.Task.ContinueWith(tlj =>
             {
-                if (!tlj.IsFaulted && taskLateJoin.TasksDone().Count > 0)
+                if (!tlj.IsFaulted && tcsLateJoin.TasksDone().Count > 0)
                 {
-                    var taskResponse = taskLateJoin.TasksDone()[0];
+                    var taskResponse = tcsLateJoin.TasksDone()[0];
                     tcsPing.SetResult(taskResponse.Result.Sender);
                 }
                 else

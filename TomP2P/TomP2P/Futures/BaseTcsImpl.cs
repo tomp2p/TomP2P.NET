@@ -6,7 +6,7 @@ namespace TomP2P.Futures
     /// Equivalent to Java's BaseFutureImpl. Only required members for this project
     /// are implemented.
     /// </summary>
-    public abstract class BaseTaskImpl : TaskCompletionSource<object>
+    public abstract class BaseTcsImpl : TaskCompletionSource<object>
     {
         protected object Lock;
 
@@ -16,7 +16,7 @@ namespace TomP2P.Futures
         /// Default constructor that sets the lock object, which is used 
         /// for synchronization to this instance.
         /// </summary>
-        protected BaseTaskImpl()
+        protected BaseTcsImpl()
         {
             Lock = this;
         }
