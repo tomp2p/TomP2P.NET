@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TomP2P.Connection;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Futures;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -75,8 +76,16 @@ namespace TomP2P.P2P.Builder
 
         public RoutingMechanism CreateRoutingMechanism(TaskRouting taskRouting)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            var tcsResponses = new TaskCompletionSource<Message.Message>[Parallel];
+            var tcsResponses2 = new VolatileReferenceArray<TaskCompletionSource<Message.Message>>(tcsResponses);
+            var routingMechanism = new RoutingMechanism(tcsResponses2, taskRouting, PeerFilters)
+            {
+                MaxDirectHits = MaxDirectHits,
+                MaxFailures = MaxFailures,
+                MaxNoNewInfo = MaxNoNewInfo,
+                MaxSucess = MaxSuccess
+            };
+            return routingMechanism;
         }
     }
 }
