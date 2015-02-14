@@ -190,6 +190,37 @@ namespace TomP2P.Utils
             return Random.Next(upperBound);
         }
 
+        /// <summary>
+        /// Returns a random element from a collection.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection">The collection from which a random element is picked.</param>
+        /// <param name="rnd">The random instance.</param>
+        /// <returns>A random element from the collection.</returns>
+        public static T PollRandom<T>(ICollection<T> collection, Random rnd) where T : class
+        {
+            int size = collection.Count;
+            if (size == 0)
+            {
+                return null;
+            }
+            int index = rnd.Next(size);
+            var values = new List<T>(collection);
+            var res = values[index];
+            collection.Remove(res);
+            return res;
+        }
+
+        public static ICollection<T> Difference<T>(ICollection<T> coll1, ICollection<T> result, ICollection<T> coll2)
+        {
+            // TODO check if works
+            // .NET-specific
+            var diff = coll1.Except(coll2);
+            result.AddAll(diff);
+
+            return result;
+        }
+
         #region .NET only
 
         private static int _nrOfCores = 0;

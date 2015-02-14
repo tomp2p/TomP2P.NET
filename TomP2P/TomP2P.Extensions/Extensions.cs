@@ -137,6 +137,20 @@ namespace TomP2P.Extensions
             return new ListIterator<T>(list, index);
         }
 
+        /// <summary>
+        /// Extension to add multiple elements to a collection.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="c"></param>
+        /// <param name="collection"></param>
+        public static void AddAll<T>(this ICollection<T> c, IEnumerable<T> collection)
+        {
+            foreach (var item in collection)
+            {
+                c.Add(item);
+            }
+        }
+
         public static bool ScrambledEquals<T>(this IEnumerable<T> list1, IEnumerable<T> list2)
         {
             // TODO check if works
@@ -461,6 +475,55 @@ namespace TomP2P.Extensions
             // TODO does this work? correctly?
             return !((s.Poll(1000, SelectMode.SelectRead) && (s.Available == 0)) || !s.Connected);
         }
+
+        #region SortedSet
+
+        /// <summary>
+        /// Equivalent to Java's NavigableSet.pollFirst().
+        /// Retrieves and removes the first (lowest) element, or returns null if this set is empty.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ss"></param>
+        /// <returns></returns>
+        public static T PollFirst<T>(this SortedSet<T> ss)
+        {
+            // TODO works?
+            var first = ss.Min;
+            ss.Remove(first);
+            return first;
+        }
+
+        /// <summary>
+        /// Equivalent to Java's SortedSet.addAll().
+        /// Adds all of the elements in the specified collection to this set if they're 
+        /// not already present (optional operation). If the specified collection is also 
+        /// a set, the addAll operation effectively modifies this set so that its value 
+        /// is the union of the two sets.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ss"></param>
+        /// <param name="collection"></param>
+        public static void AddAll<T>(this SortedSet<T> ss, ICollection<T> collection)
+        {
+            ss.UnionWith(collection);
+        }
+
+        /// <summary>
+        /// Equivalent to Java's SortedSet.headSet().
+        /// Returns a view of the portion of this set whose elements are strictly 
+        /// less than toElement. The returned set is backed by this set, so changes 
+        /// in the returned set are reflected in this set, and vice-versa. 
+        /// The returned set supports all optional set operations that this set supports.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ss"></param>
+        /// <param name="end"></param>
+        public static SortedSet<T> HeadSet<T>(this SortedSet<T> ss, T end)
+        {
+            return ss.GetViewBetween(ss.Min, end);
+        }
+
+        #endregion
 
         #region Conversion
 
