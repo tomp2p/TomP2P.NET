@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
+using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
@@ -109,6 +110,11 @@ namespace TomP2P.P2P
         {
             // TODO find .NET equivalent
             throw new NotImplementedException();
+        }
+
+        public PingBuilder Ping()
+        {
+            return new PingBuilder(this);
         }
 
         // Basic P2P operations

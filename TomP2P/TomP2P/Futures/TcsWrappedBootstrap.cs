@@ -9,7 +9,7 @@ namespace TomP2P.Futures
     /// If this ping is successful, we can bootstrap.
     /// </summary>
     /// <typeparam name="TTask"></typeparam>
-    public class TcsWrappedBootstrap<TTask> : TcsWrapper<TTask> where TTask : Task
+    public class TcsWrappedBootstrap<TTask> : BaseTcsImpl //: TcsWrapper<TTask> where TTask : Task
     {
         private ICollection<PeerAddress> _bootsrapTo;
 

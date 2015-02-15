@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
+using TomP2P.Extensions;
 using TomP2P.Futures;
 using TomP2P.Peers;
 using TomP2P.Utils;
@@ -176,43 +177,76 @@ namespace TomP2P.P2P.Builder
             }
         }
 
-        private Task<ICollection<PeerAddress>> Bootstrap()
+        private TaskCompletionSource<Pair<TcsRouting, TcsRouting>> Bootstrap()
         {
-            var result = new TcsWrappedBootstrap<Task<Pair<TcsRouting, TcsRouting>>>();
-            result.SetBootstrapTo(BootstrapTo);
+            var tcsResult = new TaskCompletionSource<Pair<TcsRouting, TcsRouting>>(BootstrapTo);
+            //tcsResult.SetBootstrapTo(BootstrapTo);
 
             int conn = RoutingConfiguration.Parallel;
             var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
-            Utils.Utils.AddReleaseListener(taskCc, result.Task); // TODO correct?
+            Utils.Utils.AddReleaseListener(taskCc, tcsResult.Task); // TODO correct?
             taskCc.ContinueWith(tcc =>
             {
                 if (!tcc.IsFaulted)
                 {
                     var routingBuilder = CreateBuilder(RoutingConfiguration, IsForceRoutingOnlyToSelf);
-                    var tcsBootstrapDone = _peer.DistributedRouting.Bootstrap(BootstrapTo, routingBuilder, tcc.Result);
-                    result.WaitFor(tcsBootstrapDone);
+                    var taskBootstrapDone = _peer.DistributedRouting.Bootstrap(BootstrapTo, routingBuilder, tcc.Result);
+                    //result.WaitFor(tcsBootstrapDone);
+                    //--> waits for the future, which will cause this future to complete if the wrapped future completes.
+                    taskBootstrapDone.ContinueWith(tbd =>
+                    {
+                        tcsResult.SetResult(tbd.Result);
+                    });
                 }
                 else
                 {
-                    if (tcc.Exception != null)
-                    {
-                        result.SetException(tcc.Exception);
-                    }
-                    else
-                    {
-                        result.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
-                    }
+                    tcsResult.SetException(tcc.TryGetException());
                 }
             });
 
-            return result;
+            return tcsResult;
         }
 
         private static RoutingBuilder CreateBuilder(RoutingConfiguration routingConfiguration,
             bool forceRoutingOnlyToSelf)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            var routingBuilder = new RoutingBuilder
+            {
+                Parallel = routingConfiguration.Parallel,
+                MaxNoNewInfo = routingConfiguration.MaxNoNewInfoDiff,
+                MaxDirectHits = Int32.MaxValue,
+                MaxFailures = routingConfiguration.MaxFailures,
+                MaxSuccess = routingConfiguration.MaxSuccess
+            };
+            routingBuilder.SetIsRoutingOnlyToSelf(forceRoutingOnlyToSelf);
+            return routingBuilder;
+        }
+
+        private TcsWrappedBootstrap<Task<Pair<TcsRouting, TcsRouting>>> BootstrapPing(PeerAddress address)
+        {
+            // TODO implement like Bootstrap() above
+            // FutureBootstrap = TCS<Task<Pair<TcsRouting, TcsRouting>>> (from Broadcast())
+            // -> use extracted task
+            var result = new TcsWrappedBootstrap<Task<Pair<TcsRouting, TcsRouting>>>();
+
+            var taskPing = _peer.Ping().SetPeerAddress(address).SetIsTcpPing().Start();
+            taskPing.ContinueWith(tp =>
+            {
+                if (!tp.IsFaulted)
+                {
+                    PeerAddress = tp.Result;
+                    BootstrapTo = new List<PeerAddress>(1);
+                    BootstrapTo.Add(PeerAddress);
+                    result.SetBootstrapTo(BootstrapTo);
+                    result.WaitFor(Bootstrap());
+                }
+                else
+                {
+                    result.SetException(new TaskFailedException("Could not reach anyone with bootstrap."));
+                }
+            });
+
+            return result;
         }
     }
 }
