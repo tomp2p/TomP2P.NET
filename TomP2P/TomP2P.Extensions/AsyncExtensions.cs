@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Extensions
 {
@@ -27,6 +28,19 @@ namespace TomP2P.Extensions
                 }
             }
             return task.Result;
+        }
+
+        public static Exception TryGetException(this Task task)
+        {
+            if (task.IsCompleted)
+            {
+                if (task.Exception != null)
+                {
+                    return task.Exception;
+                }
+                return new TaskFailedException(String.Format("{0} failed.", task));
+            }
+            return null;
         }
 
         /*

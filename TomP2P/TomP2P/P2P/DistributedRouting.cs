@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
@@ -42,22 +40,63 @@ namespace TomP2P.P2P
         /// </summary>
         /// <param name="peerAddresses">The node to which bootstrap should be performed to.</param>
         /// <param name="routingBuilder">All relevant information for the routing process.</param>
-        /// <param name="channelCreator">The channel creator.</param>
+        /// <param name="cc">The channel creator.</param>
         /// <returns>A task object that is set to complete if the route has been found.</returns>
         public Task<Pair<TcsRouting, TcsRouting>> Bootstrap(ICollection<PeerAddress> peerAddresses,
             RoutingBuilder routingBuilder, ChannelCreator cc)
         {
             // search close peers
             Logger.Debug("Broadcast to {0}.", peerAddresses);
-            var taskDone = new TaskCompletionSource<Pair<TcsRouting, TcsRouting>>();
+            var tcsDone = new TaskCompletionSource<Pair<TcsRouting, TcsRouting>>();
 
             // first, we find close peers to us
             routingBuilder.IsBootstrap = true;
 
-            var taskRouting = Routing(peerAddresses, routingBuilder, Message.Message.MessageType.Request1, cc);
+            var tcsRouting0 = Routing(peerAddresses, routingBuilder, Message.Message.MessageType.Request1, cc);
             // we need to know other peers as well
             // this is important if this peer is passive and only replies on requests from other peers
-            taskRouting.
+            tcsRouting0.Task.ContinueWith(taskRouting =>
+            {
+                if (!taskRouting.IsFaulted)
+                {
+                    // setting this to null causes to search for a random number
+                    routingBuilder.LocationKey = null;
+                    var tcsRouting1 = Routing(peerAddresses, routingBuilder, Message.Message.MessageType.Request1, cc);
+                    tcsRouting1.Task.ContinueWith(taskRouting1 =>
+                    {
+                        var pair = new Pair<TcsRouting, TcsRouting>(tcsRouting0, tcsRouting1);
+                        tcsDone.SetResult(pair);
+                    });
+                }
+                else
+                {
+                    tcsDone.SetException(taskRouting.TryGetException());
+                }
+            });
+
+            return tcsDone.Task;
+        }
+
+        public TcsRouting Quit(RoutingBuilder routingBuilder, ChannelCreator cc)
+        {
+            ICollection<PeerAddress> startPeers = _peerBean.PeerMap.ClosePeers(routingBuilder.LocationKey,
+                routingBuilder.Parallel*2);
+            return Routing(startPeers, routingBuilder, Message.Message.MessageType.Request4, cc);
+        }
+
+        /// <summary>
+        /// Looks for a route to the location key given in the routing builder.
+        /// </summary>
+        /// <param name="routingBuilder">All relevant information for the routing process.</param>
+        /// <param name="type">The type of the routing. (4 types)</param>
+        /// <param name="cc">The channel creator.</param>
+        /// <returns>A task object that is set to complete if the route has been found.</returns>
+        public TcsRouting Route(RoutingBuilder routingBuilder, Message.Message.MessageType type, ChannelCreator cc)
+        {
+            // for bad distribution, use large #noNewInformation
+            ICollection<PeerAddress> startPeers = _peerBean.PeerMap.ClosePeers(routingBuilder.LocationKey,
+                routingBuilder.Parallel*2);
+            return Routing(startPeers, routingBuilder, type, cc);
         }
 
         /// <summary>
@@ -287,7 +326,6 @@ namespace TomP2P.P2P
                     RoutingRec(routingBuilder, routingMechanism, type, channelCreator);
                 }
             });
-
         }
     }
 }

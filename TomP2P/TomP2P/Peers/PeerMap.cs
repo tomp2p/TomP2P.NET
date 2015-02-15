@@ -49,5 +49,10 @@ namespace TomP2P.Peers
         {
             throw new NotImplementedException();
         }
+
+        public ICollection<PeerAddress> ClosePeers(Number160 number160, int p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
