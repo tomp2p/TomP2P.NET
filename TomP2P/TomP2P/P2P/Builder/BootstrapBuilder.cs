@@ -8,7 +8,6 @@ using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
 using TomP2P.Futures;
 using TomP2P.Peers;
-using TomP2P.Utils;
 
 namespace TomP2P.P2P.Builder
 {
@@ -22,9 +21,8 @@ namespace TomP2P.P2P.Builder
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        // TODO do these need to be of type "FutureWrapper"?
-        private static readonly Task<ICollection<PeerAddress>> TaskBootstrapShutdown;
-        private static readonly Task<ICollection<PeerAddress>> TaskBootstrapNoAddress;
+        private static readonly TcsWrappedBootstrap<Task> TcsBootstrapShutdown = new TcsWrappedBootstrap<Task>();
+        private static readonly TcsWrappedBootstrap<Task> TcsBootstrapNoAddress = new TcsWrappedBootstrap<Task>();
 
         private readonly Peer _peer;
         public ICollection<PeerAddress> BootstrapTo { get; private set; }
@@ -39,13 +37,8 @@ namespace TomP2P.P2P.Builder
         // static constructor
         static BootstrapBuilder()
         {
-            var tcsBootstrapShutdown = new TaskCompletionSource<ICollection<PeerAddress>>();
-            tcsBootstrapShutdown.SetException(new TaskFailedException("Peer is shutting down."));
-            TaskBootstrapShutdown = tcsBootstrapShutdown.Task;
-
-            var tcsBootstrapNoAddress = new TaskCompletionSource<ICollection<PeerAddress>>();
-            tcsBootstrapNoAddress.SetException(new TaskFailedException("No addresses to bootstrap to have been provided. Or maybe, the provided address has peer ID set to zero."));
-            TaskBootstrapNoAddress = tcsBootstrapNoAddress.Task;
+            TcsBootstrapShutdown.SetException(new TaskFailedException("Peer is shutting down."));
+            TcsBootstrapNoAddress.SetException(new TaskFailedException("No addresses to bootstrap to have been provided. Or maybe, the provided address has peer ID set to zero."));
         }
 
         public BootstrapBuilder(Peer peer)
@@ -141,11 +134,14 @@ namespace TomP2P.P2P.Builder
             return this;
         }
 
-        public Task<ICollection<PeerAddress>> Start()
+        // .NET-specific:
+        // returns TcsWrappedBootstrap instead of "FutureBootstrap"
+        // -> exposes "BootstrapTo" property as well
+        public TcsWrappedBootstrap<Task> Start()
         {
             if (_peer.IsShutdown)
             {
-                return TaskBootstrapShutdown;
+                return TcsBootstrapShutdown;
             }
 
             if (RoutingConfiguration == null)
@@ -162,49 +158,87 @@ namespace TomP2P.P2P.Builder
                 PeerAddress = new PeerAddress(Number160.Zero, InetAddress, PortTcp, PortUdp);
                 return BootstrapPing(PeerAddress);
             }
-            else if (PeerAddress != null && BootstrapTo == null)
+            if (PeerAddress != null && BootstrapTo == null)
             {
-                BootstrapTo = new List<PeerAddress>(1) {PeerAddress};
+                BootstrapTo = new List<PeerAddress>(1) { PeerAddress };
                 return Bootstrap();
             }
-            else if (BootstrapTo != null)
+            if (BootstrapTo != null)
             {
                 return Bootstrap();
             }
-            else
-            {
-                return TaskBootstrapNoAddress;
-            }
+            return TcsBootstrapNoAddress;
         }
 
-        private TaskCompletionSource<Pair<TcsRouting, TcsRouting>> Bootstrap()
+        private TcsWrappedBootstrap<Task> Broadcast0()
         {
-            var tcsResult = new TaskCompletionSource<Pair<TcsRouting, TcsRouting>>(BootstrapTo);
-            //tcsResult.SetBootstrapTo(BootstrapTo);
+            var tcsBootstrap = new TcsWrappedBootstrap<Task>();
+
+            var taskPing = _peer.Ping().SetIsBroadcast().SetPort(PortUdp).Start();
+            taskPing.ContinueWith(tp =>
+            {
+                if (!tp.IsFaulted)
+                {
+                    PeerAddress = tp.Result;
+                    BootstrapTo = new List<PeerAddress>(1) { PeerAddress };
+                    tcsBootstrap.SetBootstrapTo(BootstrapTo);
+                    tcsBootstrap.WaitFor(Bootstrap().Task);
+                }
+                else
+                {
+                    tcsBootstrap.SetException(new TaskFailedException("Could not reach anyone with the broadcast. " + tp.TryGetException()));
+                }
+            });
+
+            return tcsBootstrap;
+        }
+
+        private TcsWrappedBootstrap<Task> BootstrapPing(PeerAddress address)
+        {
+            var tcsBootstrap = new TcsWrappedBootstrap<Task>();
+
+            var taskPing = _peer.Ping().SetPeerAddress(address).SetIsTcpPing().Start();
+            taskPing.ContinueWith(tp =>
+            {
+                if (!tp.IsFaulted)
+                {
+                    PeerAddress = tp.Result;
+                    BootstrapTo = new List<PeerAddress>(1) { PeerAddress };
+                    tcsBootstrap.SetBootstrapTo(BootstrapTo);
+                    tcsBootstrap.WaitFor(Bootstrap().Task);
+                }
+                else
+                {
+                    tcsBootstrap.SetException(new TaskFailedException("Could not reach anyone with bootstrap."));
+                }
+            });
+
+            return tcsBootstrap;
+        }
+
+        private TcsWrappedBootstrap<Task> Bootstrap()
+        {
+            var tcsBootstrap = new TcsWrappedBootstrap<Task>();
+            tcsBootstrap.SetBootstrapTo(BootstrapTo);
 
             int conn = RoutingConfiguration.Parallel;
             var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
-            Utils.Utils.AddReleaseListener(taskCc, tcsResult.Task); // TODO correct?
+            Utils.Utils.AddReleaseListener(taskCc, tcsBootstrap.Task); // TODO correct?
             taskCc.ContinueWith(tcc =>
             {
                 if (!tcc.IsFaulted)
                 {
                     var routingBuilder = CreateBuilder(RoutingConfiguration, IsForceRoutingOnlyToSelf);
                     var taskBootstrapDone = _peer.DistributedRouting.Bootstrap(BootstrapTo, routingBuilder, tcc.Result);
-                    //result.WaitFor(tcsBootstrapDone);
-                    //--> waits for the future, which will cause this future to complete if the wrapped future completes.
-                    taskBootstrapDone.ContinueWith(tbd =>
-                    {
-                        tcsResult.SetResult(tbd.Result);
-                    });
+                    tcsBootstrap.WaitFor(taskBootstrapDone);
                 }
                 else
                 {
-                    tcsResult.SetException(tcc.TryGetException());
+                    tcsBootstrap.SetException(tcc.TryGetException());
                 }
             });
 
-            return tcsResult;
+            return tcsBootstrap;
         }
 
         private static RoutingBuilder CreateBuilder(RoutingConfiguration routingConfiguration,
@@ -220,33 +254,6 @@ namespace TomP2P.P2P.Builder
             };
             routingBuilder.SetIsRoutingOnlyToSelf(forceRoutingOnlyToSelf);
             return routingBuilder;
-        }
-
-        private TcsWrappedBootstrap<Task<Pair<TcsRouting, TcsRouting>>> BootstrapPing(PeerAddress address)
-        {
-            // TODO implement like Bootstrap() above
-            // FutureBootstrap = TCS<Task<Pair<TcsRouting, TcsRouting>>> (from Broadcast())
-            // -> use extracted task
-            var result = new TcsWrappedBootstrap<Task<Pair<TcsRouting, TcsRouting>>>();
-
-            var taskPing = _peer.Ping().SetPeerAddress(address).SetIsTcpPing().Start();
-            taskPing.ContinueWith(tp =>
-            {
-                if (!tp.IsFaulted)
-                {
-                    PeerAddress = tp.Result;
-                    BootstrapTo = new List<PeerAddress>(1);
-                    BootstrapTo.Add(PeerAddress);
-                    result.SetBootstrapTo(BootstrapTo);
-                    result.WaitFor(Bootstrap());
-                }
-                else
-                {
-                    result.SetException(new TaskFailedException("Could not reach anyone with bootstrap."));
-                }
-            });
-
-            return result;
         }
     }
 }

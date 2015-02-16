@@ -4,12 +4,13 @@ using TomP2P.Peers;
 
 namespace TomP2P.Futures
 {
+    // TODO remove this class
     /// <summary>
     /// The bootstrap will be a wrapped task because we need to ping a server first.
     /// If this ping is successful, we can bootstrap.
     /// </summary>
     /// <typeparam name="TTask"></typeparam>
-    public class TcsWrappedBootstrap<TTask> : BaseTcsImpl //: TcsWrapper<TTask> where TTask : Task
+    public class TcsWrappedBootstrap<TTask> : TcsWrapper<TTask> where TTask : Task
     {
         private ICollection<PeerAddress> _bootsrapTo;
 
