@@ -2,7 +2,7 @@
 
 namespace TomP2P.P2P.Builder
 {
-    public interface ISignatureBuilder<T> where T : ISignatureBuilder<T>
+    public interface ISignatureBuilder<out T> where T : ISignatureBuilder<T>
     {
         /// <summary>
         /// Indicates whether a message should be signed or not.

@@ -6,6 +6,7 @@ using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Futures;
 using TomP2P.Peers;
 
@@ -241,7 +242,7 @@ namespace TomP2P.P2P.Builder
             return tcsBootstrap;
         }
 
-        private static RoutingBuilder CreateBuilder(RoutingConfiguration routingConfiguration,
+        internal static RoutingBuilder CreateBuilder(RoutingConfiguration routingConfiguration,
             bool forceRoutingOnlyToSelf)
         {
             var routingBuilder = new RoutingBuilder

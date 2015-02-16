@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TomP2P.Connection;
-using TomP2P.Connection.Windows;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.P2P.Builder
@@ -18,9 +14,12 @@ namespace TomP2P.P2P.Builder
         private static readonly Task TaskShutdown;
 
         private readonly Peer _peer;
-        private KeyPair _keyPair;
-        private RoutingConfiguration _routingConfiguration;
-        private bool _forceRoutingOnlyToSelf = false;
+        /// <summary>
+        /// The current key pair to sign the message. If null, no signature is applied.
+        /// </summary>
+        public KeyPair KeyPair { get; private set; }
+        public RoutingConfiguration RoutingConfiguration { get; private set; }
+        public bool IsForceRoutingOnlyToSelf { get; private set; }
 
         // static constructor
         static ShutdownBuilder()
@@ -43,19 +42,19 @@ namespace TomP2P.P2P.Builder
         /// Starts the shutdown.
         /// </summary>
         /// <returns></returns>
-        public Task Start()
+        public Task StartAsync()
         {
             if (_peer.IsShutdown)
             {
                 return TaskShutdown;
             }
             SetIsForceUdp();
-            if (_routingConfiguration == null)
+            if (RoutingConfiguration == null)
             {
-                _routingConfiguration = new RoutingConfiguration(8, 10, 2);
+                RoutingConfiguration = new RoutingConfiguration(8, 10, 2);
             }
 
-            int conn = _routingConfiguration.Parallel;
+            int conn = RoutingConfiguration.Parallel;
             var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
             var tcsShutdownDone = new TaskCompletionSource<object>();
             Utils.Utils.AddReleaseListener(taskCc, tcsShutdownDone.Task);
@@ -65,24 +64,79 @@ namespace TomP2P.P2P.Builder
                 if (!tcc.IsFaulted)
                 {
                     var cc = tcc.Result;
-                    var routingBuilder = BootstrapBuilder.
-                    // TODO implement
-                    throw new NotImplementedException();
+                    var routingBuilder = BootstrapBuilder.CreateBuilder(RoutingConfiguration, IsForceRoutingOnlyToSelf);
+                    routingBuilder.LocationKey = _peer.PeerId;
+                    
+                    var tcsRouting = _peer.DistributedRouting.Quit(routingBuilder, cc);
+                    tcsRouting.Task.ContinueWith(taskRouting =>
+                    {
+                        if (!taskRouting.IsFaulted)
+                        {
+                            tcsShutdownDone.SetResult(null); // complete
+                        }
+                        else
+                        {
+                            tcsShutdownDone.SetException(taskRouting.TryGetException());
+                        }
+                    });
                 }
                 else
                 {
-                    if (tcc.Exception != null)
-                    {
-                        tcsShutdownDone.SetException(tcc.Exception);
-                    }
-                    else
-                    {
-                        tcsShutdownDone.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
-                    }
+                    tcsShutdownDone.SetException(tcc.TryGetException());
                 }
             });
 
             return tcsShutdownDone.Task;
+        }
+
+        /// <summary>
+        /// Gets whether the message should be signed.
+        /// </summary>
+        public bool IsSign
+        {
+            get { return KeyPair != null; }
+        }
+
+        public ShutdownBuilder SetSign(bool signMessage)
+        {
+            if (signMessage)
+            {
+                SetSign();
+            }
+            else
+            {
+                KeyPair = null;
+            }
+            return this;
+        }
+
+        public ShutdownBuilder SetSign()
+        {
+            KeyPair = _peer.PeerBean.KeyPair;
+            return this;
+        }
+
+        public ShutdownBuilder SetKeyPair(KeyPair keyPair)
+        {
+            KeyPair = keyPair;
+            return this;
+        }
+
+        public ShutdownBuilder SetRoutingConfiguration(RoutingConfiguration routingConfiguration)
+        {
+            RoutingConfiguration = routingConfiguration;
+            return this;
+        }
+
+        public ShutdownBuilder SetIsForceRoutingOnlyToSelf()
+        {
+            return SetIsForceRoutingOnlyToSelf(true);
+        }
+
+        public ShutdownBuilder SetIsForceRoutingOnlyToSelf(bool isForceRoutingOnlyToSelf)
+        {
+            IsForceRoutingOnlyToSelf = isForceRoutingOnlyToSelf;
+            return this;
         }
     }
 }

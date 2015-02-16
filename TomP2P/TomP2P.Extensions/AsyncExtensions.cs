@@ -40,7 +40,7 @@ namespace TomP2P.Extensions
                 }
                 return new TaskFailedException(String.Format("{0} failed.", task));
             }
-            return null;
+            return new TaskFailedException("This task has not yet completed.");
         }
 
         /*
