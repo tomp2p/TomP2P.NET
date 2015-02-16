@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 
 namespace TomP2P.Rpc
@@ -50,13 +51,50 @@ namespace TomP2P.Rpc
         public Task<Message.Message> Quit(PeerAddress remotePeer, ShutdownBuilder shutdownBuilder,
             ChannelCreator channelCreator)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Quit.GetNr(),
+                Message.Message.MessageType.RequestFf1);
+            if (shutdownBuilder.IsSign)
+            {
+                message.SetPublicKeyAndSign(shutdownBuilder.KeyPair);
+            }
+
+            var tcsResponse = new TaskCompletionSource<Message.Message>(message);
+            var requestHandler = new RequestHandler(tcsResponse, PeerBean, ConnectionBean, shutdownBuilder);
+            Logger.Debug("Send QUIT message {0}.", message);
+            if (!shutdownBuilder.IsForceTcp)
+            {
+                return requestHandler.FireAndForgetUdpAsync(channelCreator);
+            }
+            else
+            {
+                return requestHandler.SendTcpAsync(channelCreator);
+            }
         }
 
         public override void HandleResponse(Message.Message requestMessage, Connection.PeerConnection peerConnection, bool sign, Message.IResponder responder)
         {
-            throw new NotImplementedException();
+            if (!(requestMessage.Type == Message.Message.MessageType.RequestFf1 && requestMessage.Command == Rpc.Commands.Quit.GetNr()))
+            {
+                throw new ArgumentException("Message content is wrong for this handler.");
+            }
+            Logger.Debug("Received QUIT message {0}.", requestMessage);
+
+            lock (PeerBean.PeerStatusListeners)
+            {
+                foreach (var listener in PeerBean.PeerStatusListeners)
+                {
+                    listener.PeerFailed(requestMessage.Sender,
+                        new PeerException(PeerException.AbortCauseEnum.Shutdown, "shutdown"));
+                }
+            }
+            if (requestMessage.IsUdp)
+            {
+                responder.ResponseFireAndForget();
+            }
+            else
+            {
+                responder.Response(CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok));
+            }
         }
     }
 }
