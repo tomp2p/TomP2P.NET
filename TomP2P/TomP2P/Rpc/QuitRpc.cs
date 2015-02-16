@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
@@ -48,7 +46,7 @@ namespace TomP2P.Rpc
         /// <param name="shutdownBuilder">Used for the sign and force TCP flag. Set if the message should be signed.</param>
         /// <param name="channelCreator">The channel creator that creates connections.</param>
         /// <returns>The future response message.</returns>
-        public Task<Message.Message> Quit(PeerAddress remotePeer, ShutdownBuilder shutdownBuilder,
+        public Task<Message.Message> QuitAsync(PeerAddress remotePeer, ShutdownBuilder shutdownBuilder,
             ChannelCreator channelCreator)
         {
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.Quit.GetNr(),
@@ -71,7 +69,7 @@ namespace TomP2P.Rpc
             }
         }
 
-        public override void HandleResponse(Message.Message requestMessage, Connection.PeerConnection peerConnection, bool sign, Message.IResponder responder)
+        public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, Message.IResponder responder)
         {
             if (!(requestMessage.Type == Message.Message.MessageType.RequestFf1 && requestMessage.Command == Rpc.Commands.Quit.GetNr()))
             {

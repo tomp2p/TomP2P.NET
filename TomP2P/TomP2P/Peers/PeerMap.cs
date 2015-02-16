@@ -54,5 +54,21 @@ namespace TomP2P.Peers
         {
             throw new NotImplementedException();
         }
+
+        public IList<PeerAddress> All
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public IList<PeerAddress> AllOverflow
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

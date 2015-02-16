@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
+using TomP2P.Extensions.Workaround;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -73,6 +74,24 @@ namespace TomP2P.P2P
             return this;
         }
 
+        public QuitRpc QuitRpc
+        {
+            get
+            {
+                if (_quitRpc == null)
+                {
+                    throw new SystemException("Quit RPC not enabled. Please enable this RPC in the PeerBuilder.");
+                }
+                return _quitRpc;
+            }
+        }
+
+        public Peer SetQuitRpc(QuitRpc quitRpc)
+        {
+            _quitRpc = quitRpc;
+            return this;
+        }
+
         public DistributedRouting DistributedRouting
         {
             get
@@ -112,6 +131,11 @@ namespace TomP2P.P2P
             throw new NotImplementedException();
         }
 
+        public BootstrapBuilder Bootstrap()
+        {
+            return new BootstrapBuilder(this);
+        }
+
         public PingBuilder Ping()
         {
             return new PingBuilder(this);
@@ -144,7 +168,6 @@ namespace TomP2P.P2P
             }
             else
             {
-                // TODO correct?
                 var tcs = new TaskCompletionSource<object>();
                 tcs.SetException(new TaskFailedException("Already shutting / shut down."));
                 return tcs.Task;

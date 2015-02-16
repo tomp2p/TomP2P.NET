@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="InteropUtil.cs" />
     <Compile Include="JarRunner.cs" />
+    <Compile Include="Network\QuitRpcTest.cs" />
     <Compile Include="Protocol\JavaEncodeDecodeTest.cs" />
     <Compile Include="Protocol\MessageEncodeDecodeTest.cs" />
     <Compile Include="Network\PingRpcTest.cs" />

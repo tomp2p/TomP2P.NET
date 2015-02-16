@@ -136,13 +136,13 @@ namespace TomP2P.P2P.Builder
         }
 
         // .NET-specific:
-        // returns TcsWrappedBootstrap instead of "FutureBootstrap"
-        // -> exposes "BootstrapTo" property as well
-        public TcsWrappedBootstrap<Task> Start()
+        // returns TcsWrappedBootstrap.Task instead of "FutureBootstrap"
+        // TODO how to expose "BootstrapTo" property as well?
+        public Task  Start()
         {
             if (_peer.IsShutdown)
             {
-                return TcsBootstrapShutdown;
+                return TcsBootstrapShutdown.Task;
             }
 
             if (RoutingConfiguration == null)
@@ -152,23 +152,23 @@ namespace TomP2P.P2P.Builder
 
             if (IsBroadcast)
             {
-                return Broadcast0();
+                return Broadcast0().Task;
             }
             if (PeerAddress == null && InetAddress != null && BootstrapTo == null)
             {
                 PeerAddress = new PeerAddress(Number160.Zero, InetAddress, PortTcp, PortUdp);
-                return BootstrapPing(PeerAddress);
+                return BootstrapPing(PeerAddress).Task;
             }
             if (PeerAddress != null && BootstrapTo == null)
             {
                 BootstrapTo = new List<PeerAddress>(1) { PeerAddress };
-                return Bootstrap();
+                return Bootstrap().Task;
             }
             if (BootstrapTo != null)
             {
-                return Bootstrap();
+                return Bootstrap().Task;
             }
-            return TcsBootstrapNoAddress;
+            return TcsBootstrapNoAddress.Task;
         }
 
         private TcsWrappedBootstrap<Task> Broadcast0()

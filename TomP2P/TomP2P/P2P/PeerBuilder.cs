@@ -206,6 +206,12 @@ namespace TomP2P.P2P
                 var pingRpc = new PingRpc(peerBean, connectionBean);
                 peer.SetPingRpc(pingRpc);
             }
+            if (IsEnabledQuitRpc)
+            {
+                var quitRpc = new QuitRpc(peerBean, connectionBean);
+                quitRpc.AddPeerStatusListener(PeerMap);
+                peer.SetQuitRpc(quitRpc);
+            }
 
             // TODO initialize rest of RPC enablers
 

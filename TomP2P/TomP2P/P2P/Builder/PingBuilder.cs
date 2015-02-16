@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Futures;
 using TomP2P.Peers;
 
