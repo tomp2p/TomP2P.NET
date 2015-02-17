@@ -170,6 +170,8 @@
     <Compile Include="Storage\DataBuffer.cs" />
     <Compile Include="Storage\IDigestStorage.cs" />
     <Compile Include="Storage\IDigestTracker.cs" />
+    <Compile Include="Utils\CacheMap.cs" />
+    <Compile Include="Utils\ConcurrentCacheMap.cs" />
     <Compile Include="Utils\Pair.cs" />
     <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
