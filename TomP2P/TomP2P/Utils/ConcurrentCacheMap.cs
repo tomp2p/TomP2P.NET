@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Utils
 {
-    public class ConcurrentCacheMap<TKey, TValue> : ConcurrentDictionary<TKey, TValue> where TValue : class 
+    public class ConcurrentCacheMap<TKey, TValue> where TValue : class 
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -72,6 +67,165 @@ namespace TomP2P.Utils
         }
 
         /// <summary>
+        /// Returns the segment based on the key.
+        /// </summary>
+        /// <param name="key">The key where the hash code identifies the segment.</param>
+        /// <returns>The cache map that corresponds to this segment.</returns>
+        private CacheMap<TKey, ExpiringObject> Segment(object key)
+        {
+            // TODO works? interoperability concern if object.hashCode is impl by framework
+            return _segments[(key.GetHashCode() & Int32.MaxValue) % SegmentNr];
+        }
+
+        public TValue Put(TKey key, TValue value)
+        {
+            var newValue = new ExpiringObject(value, Convenient.CurrentTimeMillis(), _timeToLiveSeconds);
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            lock (segment)
+            {
+                oldValue = segment.Add(key, newValue);
+            }
+            if (oldValue == null || oldValue.IsExpired)
+            {
+                return null;
+            }
+            return oldValue.Value;
+        }
+
+        /// <summary>
+        /// This does not reset the timer!
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public TValue PutIfAbsent(TKey key, TValue value)
+        {
+            var newValue = new ExpiringObject(value, Convenient.CurrentTimeMillis(), _timeToLiveSeconds);
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            lock (segment)
+            {
+                if (!segment.ContainsKey(key))
+                {
+                    oldValue = segment.Add(key, newValue);
+                }
+                else
+                {
+                    oldValue = segment.Get(key);
+                    if (oldValue.IsExpired)
+                    {
+                        segment.Add(key, newValue);
+                    }
+                    else if (_refreshTimeout)
+                    {
+                        oldValue = new ExpiringObject(oldValue.Value, Convenient.CurrentTimeMillis(), _timeToLiveSeconds);
+                        segment.Add(key, oldValue);
+                    }
+                }
+            }
+            if (oldValue == null || oldValue.IsExpired)
+            {
+                return null;
+            }
+            return oldValue.Value;
+        }
+
+        // TODO in Java, this method allows key to be object
+        public TValue Get(TKey key)
+        {
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            lock (segment)
+            {
+                oldValue = segment.Get(key);
+            }
+            if (oldValue != null)
+            {
+                if (Expire(segment, key, oldValue))
+                {
+                    return null;
+                }
+                else
+                {
+                    Logger.Debug("Get found. Key: {0}. Value: {1}.", key, oldValue.Value);
+                    return oldValue.Value;
+                }
+            }
+            Logger.Debug("Get not found. Key: {0}.", key);
+            return null;
+        }
+
+        public TValue Remove(TKey key)
+        {
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            lock (segment)
+            {
+                oldValue = segment.Remove(key);
+            }
+            if (oldValue == null || oldValue.IsExpired)
+            {
+                return null;
+            }
+            return oldValue.Value;
+        }
+
+        public bool Remove(TKey key, TValue value)
+        {
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            bool removed = false;
+            lock (segment)
+            {
+                oldValue = segment.Get(key);
+                if (oldValue != null && oldValue.Equals(value) && !oldValue.IsExpired)
+                {
+                    removed = segment.Remove(key) != null;
+                }
+            }
+            if (oldValue != null)
+            {
+                Expire(segment, key, oldValue);
+            }
+            return removed;
+        }
+
+        public bool ContainsKey(TKey key)
+        {
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            lock (segment)
+            {
+                oldValue = segment.Get(key);
+            }
+            if (oldValue != null)
+            {
+                if (!Expire(segment, key, oldValue))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool ContainsValue(TValue value)
+        {
+            foreach (var segment in _segments)
+            {
+                lock (segment)
+                {
+                    ExpireSegment(segment);
+                    if (segment.ContainsValue(value))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// An object that also holds expiration information.
         /// </summary>
         private class ExpiringObject : IEquatable<ExpiringObject>
@@ -79,34 +233,41 @@ namespace TomP2P.Utils
             /// <summary>
             /// The wrapped value.
             /// </summary>
-            private TValue Value { get; set; }
-            private readonly long _lastAccessTime;
+            public TValue Value { get; private set; }
+            private readonly long _lastAccessTimeMillis;
+
+            //.NET-specific: use current _timeToLiveSeconds from ConcurrentCacheMap field
+            private readonly int _timeToLiveSeconds;
 
             /// <summary>
             /// Creates a new expiring object with the given time of access.
             /// </summary>
             /// <param name="value">The value that is wrapped in this instance.</param>
-            /// <param name="lastAccessTime">The time of access.</param>
-            public ExpiringObject(TValue value, long lastAccessTime)
+            /// <param name="lastAccessTimeMillis">The time of access in milliseconds.</param>
+            /// <param name="timeToLiveSeconds">.NET-specific: use current _timeToLiveSeconds from ConcurrentCacheMap field.</param>
+            public ExpiringObject(TValue value, long lastAccessTimeMillis, int timeToLiveSeconds)
             {
                 if (value == null)
                 {
                     throw new ArgumentException("An expiring object cannot be null.");
                 }
                 Value = value;
-                _lastAccessTime = lastAccessTime;
+                _lastAccessTimeMillis = lastAccessTimeMillis;
+                _timeToLiveSeconds = timeToLiveSeconds;
             }
 
             /// <summary>
             /// Indicates whether the entry is expired.
             /// </summary>
-            /// <param name="timeToLiveSeconds"></param>
             /// <returns></returns>
-            public bool IsExpired(int timeToLiveSeconds)
+            public bool IsExpired
             {
-                // TODO correct?
-                return Convenient.CurrentTimeMillis() >=
-                       _lastAccessTime + TimeSpan.FromSeconds(timeToLiveSeconds).Milliseconds;
+                get
+                {
+                    // TODO correct?
+                    return Convenient.CurrentTimeMillis() >=
+                           _lastAccessTimeMillis + TimeSpan.FromSeconds(_timeToLiveSeconds).Milliseconds;
+                }
             }
 
             public override bool Equals(object obj)

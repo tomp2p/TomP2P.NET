@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace TomP2P.Extensions.Workaround
@@ -32,7 +33,8 @@ namespace TomP2P.Extensions.Workaround
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
+        /// <returns>The previous value associated with the key, or the default value if there
+        /// was no mapping for the key.</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual TValue Add(TKey key, TValue value)
         {
@@ -50,6 +52,29 @@ namespace TomP2P.Extensions.Workaround
             UpdateLruPriority(node);
 
             return retVal.Value.Value;
+        }
+
+        /// <summary>
+        /// Removes the value associated with this key.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns>The previous value associated with the key, or the default value if there
+        /// was no mapping for the key.</returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public virtual TValue Remove(TKey key)
+        {
+            LinkedListNode<LruCacheItem<TKey, TValue>> node;
+            if (_cacheMap.TryGetValue(key, out node))
+            {
+                // remove from cache
+                _cacheMap.Remove(key);
+
+                // remove from LRU priority
+                _lruList.Remove(node);
+
+                return node.Value.Value;
+            }
+            return default(TValue);
         }
 
         /// <summary>
@@ -74,6 +99,13 @@ namespace TomP2P.Extensions.Workaround
         public bool ContainsKey(TKey key)
         {
             return _cacheMap.ContainsKey(key);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public bool ContainsValue(TValue value)
+        {
+            // TODO implement
+            throw new NotImplementedException();
         }
 
         private void RemoveEldest()
