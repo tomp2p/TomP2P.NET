@@ -17,12 +17,12 @@ namespace TomP2P.Utils
         /// Creates a new CacheMap with a fixed capacity.
         /// </summary>
         /// <param name="maxEntries">The number of entries that can be stored in this map.</param>
-        /// <param name="updateEntryOnInstert">True to update (overwrite) values. 
+        /// <param name="updateEntryOnInsert">True to update (overwrite) values. 
         /// False to not overwrite the values if there is a value.</param>
-        public CacheMap(int maxEntries, bool updateEntryOnInstert)
+        public CacheMap(int maxEntries, bool updateEntryOnInsert)
             : base(maxEntries)
         {
-            _updateEntryOnInsert = updateEntryOnInstert;
+            _updateEntryOnInsert = updateEntryOnInsert;
         }
 
         public override TValue Add(TKey key, TValue value)
