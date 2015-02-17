@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Utils
 {
-    public class ConcurrentCacheMap<TKey, TValue> : ConcurrentDictionary<TKey, TValue>
+    public class ConcurrentCacheMap<TKey, TValue> : ConcurrentDictionary<TKey, TValue> where TValue : class 
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -73,9 +74,67 @@ namespace TomP2P.Utils
         /// <summary>
         /// An object that also holds expiration information.
         /// </summary>
-        private class ExpiringObject
+        private class ExpiringObject : IEquatable<ExpiringObject>
         {
-            
+            /// <summary>
+            /// The wrapped value.
+            /// </summary>
+            private TValue Value { get; set; }
+            private readonly long _lastAccessTime;
+
+            /// <summary>
+            /// Creates a new expiring object with the given time of access.
+            /// </summary>
+            /// <param name="value">The value that is wrapped in this instance.</param>
+            /// <param name="lastAccessTime">The time of access.</param>
+            public ExpiringObject(TValue value, long lastAccessTime)
+            {
+                if (value == null)
+                {
+                    throw new ArgumentException("An expiring object cannot be null.");
+                }
+                Value = value;
+                _lastAccessTime = lastAccessTime;
+            }
+
+            /// <summary>
+            /// Indicates whether the entry is expired.
+            /// </summary>
+            /// <param name="timeToLiveSeconds"></param>
+            /// <returns></returns>
+            public bool IsExpired(int timeToLiveSeconds)
+            {
+                // TODO correct?
+                return Convenient.CurrentTimeMillis() >=
+                       _lastAccessTime + TimeSpan.FromSeconds(timeToLiveSeconds).Milliseconds;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(obj, null))
+                {
+                    return false;
+                }
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+                if (GetType() != obj.GetType())
+                {
+                    return false;
+                }
+                return Equals(obj as ExpiringObject);
+            }
+
+            public bool Equals(ExpiringObject other)
+            {
+                return Value.Equals(other.Value);
+            }
+
+            public override int GetHashCode()
+            {
+                return Value.GetHashCode();
+            }
         }
     }
 }
