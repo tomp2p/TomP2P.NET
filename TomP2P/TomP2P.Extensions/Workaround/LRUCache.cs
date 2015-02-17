@@ -10,7 +10,7 @@ namespace TomP2P.Extensions.Workaround
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class LruCache<TKey, TValue> : IEnumerable<Dictionary<TKey, TValue>>
+    public class LruCache<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         private readonly int _capacity;
         private readonly Dictionary<TKey, TValue> _cacheMap;
@@ -158,12 +158,7 @@ namespace TomP2P.Extensions.Workaround
             return _cacheMap.Values;
         }
 
-        public IEnumerator<Dictionary<TKey, TValue>> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
         {
             return _cacheMap.GetEnumerator();
         }

@@ -305,20 +305,29 @@ namespace TomP2P.Utils
         {
             get
             {
+                var values = new List<TValue>();
                 foreach (var segment in _segments)
                 {
                     lock (segment)
                     {
-                        foreach (var expObj in segment) // iterate over copy
+                        // .NET-specific: iterate over KeyValuePairs
+                        foreach (var kvp in segment.ToList()) // iterate over copy
                         {
+                            var expObj = kvp.Value;
                             if (expObj.IsExpired)
                             {
-                                // remove from original collection
-                                segment.Remove()
+                                segment.Remove(kvp.Key); // remove from original
+                                Logger.Debug("Removed from entry set: {0}.", expObj.Value);
+                                _removedCounter.IncrementAndGet();
+                            }
+                            else
+                            {
+                                values.Add(kvp.Value.Value);
                             }
                         }
                     }
                 }
+                return values;
             }
         }
 
