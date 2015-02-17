@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace TomP2P.Extensions.Workaround
@@ -8,7 +10,7 @@ namespace TomP2P.Extensions.Workaround
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class LruCache<TKey, TValue>
+    public class LruCache<TKey, TValue> : IEnumerable<Dictionary<TKey, TValue>>
     {
         private readonly int _capacity;
         private readonly Dictionary<TKey, TValue> _cacheMap;
@@ -123,6 +125,47 @@ namespace TomP2P.Extensions.Workaround
             }
             // set priority to max
             _lruList.AddLast(key);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void Clear()
+        {
+            _cacheMap.Clear();
+            _lruList.Clear();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public int Count()
+        {
+            return _cacheMap.Count;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public override int GetHashCode()
+        {
+            return _cacheMap.GetHashCode();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public Dictionary<TKey, TValue>.KeyCollection KeySet()
+        {
+            return _cacheMap.Keys;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public Dictionary<TKey, TValue>.ValueCollection Values()
+        {
+            return _cacheMap.Values;
+        }
+
+        public IEnumerator<Dictionary<TKey, TValue>> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _cacheMap.GetEnumerator();
         }
     }
 }

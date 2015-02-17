@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NLog;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
@@ -209,20 +211,115 @@ namespace TomP2P.Utils
             return false;
         }
 
-        public bool ContainsValue(TValue value)
+        // TODO ContainsValue(TValue value) needed?
+
+        public int Size
+        {
+            get
+            {
+                var size = 0;
+                foreach (var segment in _segments)
+                {
+                    lock (segment)
+                    {
+                        ExpireSegment(segment);
+                        size += segment.Count();
+                    }
+                }
+                return size;
+            }
+        }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                foreach (var segment in _segments)
+                {
+                    lock (segment)
+                    {
+                        ExpireSegment(segment);
+                        if (segment.Count() != 0)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+
+        public void Clear()
         {
             foreach (var segment in _segments)
             {
                 lock (segment)
                 {
+                    segment.Clear();
+                }
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 0;
+            foreach (var segment in _segments)
+            {
+                lock (segment)
+                {
                     ExpireSegment(segment);
-                    if (segment.ContainsValue(value))
+                    hashCode += segment.GetHashCode();
+                }
+            }
+            return hashCode;
+        }
+
+        public ISet<TKey> KeySet
+        {
+            get
+            {
+                var keySet = new HashSet<TKey>();
+                foreach (var segment in _segments)
+                {
+                    lock (segment)
                     {
-                        return true;
+                        ExpireSegment(segment);
+                        keySet.UnionWith(segment.KeySet());
+                    }
+                }
+                return keySet;
+            }
+        }
+
+        public void PutAll<TKey2, TValue2>(IDictionary<TKey2, TValue2> inMap)
+            where TKey2 : TKey
+            where TValue2 : TValue
+        {
+            foreach (var kvp in inMap)
+            {
+                Put(kvp.Key, kvp.Value);
+            }
+        }
+
+        public ICollection<TValue> Values
+        {
+            get
+            {
+                foreach (var segment in _segments)
+                {
+                    lock (segment)
+                    {
+                        foreach (var expObj in segment) // iterate over copy
+                        {
+                            if (expObj.IsExpired)
+                            {
+                                // remove from original collection
+                                segment.Remove()
+                            }
+                        }
                     }
                 }
             }
-            return false;
         }
 
         /// <summary>
