@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace TomP2P.Extensions.Workaround
@@ -12,8 +11,8 @@ namespace TomP2P.Extensions.Workaround
     public class LruCache<TKey, TValue>
     {
         private readonly int _capacity;
-        private readonly Dictionary<TKey, LinkedListNode<LruCacheItem<TKey, TValue>>> _cacheMap;
-        private readonly LinkedList<LruCacheItem<TKey, TValue>> _lruList;
+        private readonly Dictionary<TKey, TValue> _cacheMap;
+        private readonly LinkedList<TKey> _lruList; // ordering of keys is LRU
 
         /// <summary>
         /// Creates a LRU cache with a fixed capacity.
@@ -22,8 +21,8 @@ namespace TomP2P.Extensions.Workaround
         public LruCache(int capacity)
         {
             _capacity = capacity;
-            _cacheMap = new Dictionary<TKey, LinkedListNode<LruCacheItem<TKey, TValue>>>();
-            _lruList = new LinkedList<LruCacheItem<TKey, TValue>>();
+            _cacheMap = new Dictionary<TKey, TValue>();
+            _lruList = new LinkedList<TKey>();
         }
 
         /// <summary>
@@ -42,16 +41,14 @@ namespace TomP2P.Extensions.Workaround
             {
                 RemoveEldest();
             }
-            var cacheItem = new LruCacheItem<TKey, TValue>(key, value);
-            var node = new LinkedListNode<LruCacheItem<TKey, TValue>>(cacheItem);
 
             // add to cache
-            var retVal = _cacheMap.Put(key, node);
+            var retVal = _cacheMap.Put(key, value);
 
             // add to LRU priority
-            UpdateLruPriority(node);
+            UpdateLruPriority(key);
 
-            return retVal.Value.Value;
+            return retVal;
         }
 
         /// <summary>
@@ -63,16 +60,16 @@ namespace TomP2P.Extensions.Workaround
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual TValue Remove(TKey key)
         {
-            LinkedListNode<LruCacheItem<TKey, TValue>> node;
-            if (_cacheMap.TryGetValue(key, out node))
+            TValue value;
+            if (_cacheMap.TryGetValue(key, out value))
             {
                 // remove from cache
                 _cacheMap.Remove(key);
 
                 // remove from LRU priority
-                _lruList.Remove(node);
+                _lruList.Remove(key);
 
-                return node.Value.Value;
+                return value;
             }
             return default(TValue);
         }
@@ -86,11 +83,11 @@ namespace TomP2P.Extensions.Workaround
         [MethodImpl(MethodImplOptions.Synchronized)]
         public TValue Get(TKey key)
         {
-            LinkedListNode<LruCacheItem<TKey, TValue>> node;
-            if (_cacheMap.TryGetValue(key, out node))
+            TValue value;
+            if (_cacheMap.TryGetValue(key, out value))
             {
-                UpdateLruPriority(node);
-                return node.Value.Value;
+                UpdateLruPriority(key);
+                return value;
             }
             return default(TValue);
         }
@@ -104,40 +101,28 @@ namespace TomP2P.Extensions.Workaround
         [MethodImpl(MethodImplOptions.Synchronized)]
         public bool ContainsValue(TValue value)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return _cacheMap.ContainsValue(value);
         }
 
         private void RemoveEldest()
         {
             // remove from LRU priority
-            var node = _lruList.First;
-            _lruList.RemoveFirst();
+            var eldestKey = _lruList.First.Value;
+            _lruList.Remove(eldestKey);
 
             // remove from cache
-            _cacheMap.Remove(node.Value.Key);
+            _cacheMap.Remove(eldestKey);
         }
 
-        private void UpdateLruPriority(LinkedListNode<LruCacheItem<TKey, TValue>> node)
+        private void UpdateLruPriority(TKey key)
         {
             // if item exists already, reset priority
-            if (_lruList.Contains(node.Value))
+            if (_lruList.Contains(key))
             {
-                _lruList.Remove(node);
+                _lruList.Remove(key);
             }
             // set priority to max
-            _lruList.AddLast(node);
+            _lruList.AddLast(key);
         }
-    }
-
-    internal class LruCacheItem<TKey, TValue>
-    {
-        public LruCacheItem(TKey k, TValue v)
-        {
-            Key = k;
-            Value = v;
-        }
-        public TKey Key { get; private set; }
-        public TValue Value { get; private set; }
     }
 }
