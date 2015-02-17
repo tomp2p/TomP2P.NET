@@ -62,6 +62,7 @@
     <Compile Include="Netty\Buffer\UnpooledByteBufAllocator.cs" />
     <Compile Include="Netty\Buffer\UnpooledHeapByteBuf.cs" />
     <Compile Include="SocketExtensions.cs" />
+    <Compile Include="Workaround\LruCache.cs" />
     <Compile Include="Workaround\TaskFailedException.cs" />
     <Compile Include="Workaround\VolatileInteger.cs" />
     <Compile Include="Workaround\VolatileLong.cs" />

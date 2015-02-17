@@ -1,16 +1,17 @@
-﻿using System.Collections.Generic;
-using TomP2P.Extensions;
+﻿using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Utils
 {
-    public class CacheMap<TKey, TValue> : Dictionary<TKey, TValue>
+    /// <summary>
+    /// The CacheMap is a LRU cache with a given capacity. The elements that do not fit into the cache will be removed.
+    /// The flag "updateEntryOnInsert" will determine if Put() or PutIfAbsent() will be used. This is useful for entries 
+    /// that have timing information and that should not be updated if the same key is going to be used.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
+    /// <typeparam name="TValue">The type of the value.</typeparam>
+    public class CacheMap<TKey, TValue> : LruCache<TKey, TValue>
     {
-        private readonly int _maxEntries;
         private readonly bool _updateEntryOnInsert;
-
-        // .NET-specific:
-        // keeps track of the order of items (key only)
-        private readonly LinkedList<TKey> _linkedList;
 
         /// <summary>
         /// Creates a new CacheMap with a fixed capacity.
@@ -19,20 +20,16 @@ namespace TomP2P.Utils
         /// <param name="updateEntryOnInstert">True to update (overwrite) values. 
         /// False to not overwrite the values if there is a value.</param>
         public CacheMap(int maxEntries, bool updateEntryOnInstert)
+            : base(maxEntries)
         {
-            _maxEntries = maxEntries;
             _updateEntryOnInsert = updateEntryOnInstert;
-            _linkedList = new LinkedList<TKey>();
         }
 
-        public new TValue Add(TKey key, TValue value)
+        public override TValue Add(TKey key, TValue value)
         {
             if (_updateEntryOnInsert)
             {
-                var retVal = this.Put(key, value);
-                _linkedList.AddLast(key);
-                RemoveEldestEntry();
-                return retVal;
+                return base.Add(key, value);
             }
             return PutIfAbsent(key, value);
         }
@@ -47,31 +44,9 @@ namespace TomP2P.Utils
         {
             if (!ContainsKey(key))
             {
-                var retVal = this.Put(key, value);
-                _linkedList.AddLast(key);
-                RemoveEldestEntry();
-                return retVal;
+                return base.Add(key, value);
             }
-            return base[key];
-        }
-
-        /// <summary>
-        /// From Java. Enables a dictionary to keep a certain capacity. It is invoked
-        /// by Put() and PutAll().
-        /// </summary>
-        private void RemoveEldestEntry()
-        {
-            // .NET-specific: it is ok to remove the eldest element in this mehtod directly
-            // -> return false
-            if (Count > _maxEntries)
-            {
-                // remove from odering list
-                var eldest = _linkedList.First;
-                _linkedList.Remove(eldest);
-
-                // remove from dictionary
-                Remove(eldest.Value);
-            }
+            return base.Get(key);
         }
     }
 }
