@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using TomP2P.Connection;
+using TomP2P.P2P;
+using TomP2P.Utils;
 
 namespace TomP2P.Peers
 {
@@ -14,7 +17,28 @@ namespace TomP2P.Peers
     /// </summary>
     public class PeerMap : IPeerStatusListener, IMaintainable
     {
-        // TODO implement PeerMap
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        // each distance bit has its own bag
+        // this is the size of the verified peers (the ones we know are reachable)
+        private readonly int _bagSizeVerified;
+        private readonly int _bagSizeOverflow;
+
+        // the ID of this node
+        private readonly Number160 _self;
+
+        // the storage for the peers that are verified
+        private readonly IList<IDictionary<Number160, PeerStatistic>> _peerMapVerified;
+ 
+        // the storage for the peers that are not verified or overflown
+        private readonly IList<IDictionary<Number160, PeerStatistic>> _peerMapOverflow;
+
+        private readonly ConcurrentCacheMap<Number160, PeerAddress> _offlineMap;
+        private readonly ConcurrentCacheMap<Number160, PeerAddress> _shutdownMap;
+        private readonly ConcurrentCacheMap<Number160, PeerAddress> _exceptionMap;
+
+        // stores listeners that will be notified if a peer gets removed or added
+        private readonly IList<> 
 
         public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
         {
