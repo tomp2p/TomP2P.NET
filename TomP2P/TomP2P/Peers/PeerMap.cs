@@ -223,9 +223,115 @@ namespace TomP2P.Peers
         /// <returns>True, if the neighbor could be added or updated. False, otherwise.</returns>
         public bool PeerFound(PeerAddress remotePeer, PeerAddress referrer, PeerConnection peerConnection)
         {
-            // TODO implement
+            Logger.Debug("Peer {0} is online. Reporter was {1}.", remotePeer, referrer);
+            bool firstHand = referrer == null;
+            // if we got contacted by this peer, but we did not initiate the connection
+            bool secondHand = remotePeer.Equals(referrer);
+            // if a peer reported about other peers
+            bool thirdHand = !firstHand && !secondHand;
+            // always trust first hand information
+            if (firstHand)
+            {
+                _offlineMap.Remove(remotePeer.PeerId);
+                _shutdownMap.Remove(remotePeer.PeerId);
+            }
+            if (secondHand && !_peerVerification)
+            {
+                _offlineMap.Remove(remotePeer.PeerId);
+                _shutdownMap.Remove(remotePeer.PeerId);
+            }
+
+            // don't add nodes with zero node ID, don't add myself and don't add nodes marked as bad
+            if (remotePeer.PeerId.IsZero || Self.Equals(remotePeer.PeerId) || Reject(remotePeer))
+            {
+                return false;
+            }
+
+            if (remotePeer.IsFirewalledTcp || remotePeer.IsFirewalledUdp)
+            {
+                return false;
+            }
+
+            // if a peer is relayed but cannot provide any relays, it is useless
+            if (remotePeer.IsRelayed && remotePeer.PeerSocketAddresses.Count == 0)
+            {
+                return false;
+            }
+
+            bool probablyDead = _offlineMap.ContainsKey(remotePeer.PeerId) ||
+                                _shutdownMap.ContainsKey(remotePeer.PeerId) ||
+                                _exceptionMap.ContainsKey(remotePeer.PeerId);
+            if (thirdHand && probablyDead)
+            {
+                Logger.Debug("Don't add {0}.", remotePeer.PeerId);
+                return false;
+            }
+
+            int classMember = ClassMember(remotePeer.PeerId);
+
+            // the peer might have a new port
+            var oldPeerStatistic = UpdateExistingVerifiedPeerAddress(_peerMapVerified[classMember], remotePeer,
+                firstHand);
+            if (oldPeerStatistic != null)
+            {
+                // we update the peer, so we can exit here and report that we have updated it
+                NotifyUpdate(remotePeer, oldPeerStatistic);
+                return true;
+            }
+            else
+            {
+                if (firstHand || (secondHand && !_peerVerification))
+                {
+                    var map = _peerMapVerified[classMember];
+                    bool inserted = false;
+                    lock (map)
+                    {
+                        // check again, now we are synchronized
+                        if (map.ContainsKey(remotePeer.PeerId))
+                        {
+                            return PeerFound(remotePeer, referrer, peerConnection);
+                        }
+                        if (map.Count < _bagSizeVerified)
+                        {
+                            var peerStatistic = new PeerStatistic(remotePeer);
+                            peerStatistic.SuccessfullyChecked();
+                            map.Add(remotePeer.PeerId, peerStatistic);
+                            inserted = true;
+                        }
+                    }
+
+                    if (inserted)
+                    {
+                        // if we inserted into the verified map, remove it from the non-verified map
+                        var mapOverflow = _peerMapOverflow[classMember];
+                        lock (mapOverflow)
+                        {
+                            mapOverflow.Remove(remotePeer.PeerId);
+                        }
+                        NotifyInsert(remotePeer, true);
+                        return true;
+                    }
+                }
+            }
+
+            // if we are here, we did not have this peer, but our verified map was full
+            // check if we have it stored in the non-verified map
+            var mapOverflow2 = _peerMapOverflow[classMember];
+            lock (mapOverflow2)
+            {
+                var peerStatistic = mapOverflow2[remotePeer.PeerId];
+                if (peerStatistic == null)
+                {
+                    peerStatistic = new PeerStatistic(remotePeer);
+                }
+                if (firstHand)
+                {
+                    peerStatistic.SuccessfullyChecked();
+                }
+                mapOverflow2.Add(remotePeer.PeerId, peerStatistic);
+            }
+            NotifyInsert(remotePeer, false);
             return true;
-            //throw new NotImplementedException();
         }
 
         public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
