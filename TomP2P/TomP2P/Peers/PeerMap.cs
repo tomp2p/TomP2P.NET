@@ -38,7 +38,13 @@ namespace TomP2P.Peers
         private readonly ConcurrentCacheMap<Number160, PeerAddress> _exceptionMap;
 
         // stores listeners that will be notified if a peer gets removed or added
-        private readonly IList<> 
+        private readonly IList<IPeerMapChangeListener> _peerMapChangeListeners = new List<IPeerMapChangeListener>();
+
+        private readonly ICollection<IPeerFilter> _peerFilters;
+
+        // the number of failures until a peer is considered offline
+        private readonly int _offlineCount;
+        private readonly Main
 
         public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
         {
