@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Extensions;
 using TomP2P.P2P;
 using TomP2P.Utils;
 
@@ -334,12 +335,125 @@ namespace TomP2P.Peers
             return true;
         }
 
-        public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
+        /// <summary>
+        /// Removes a peer from the list. In order to not reappear, the node is put in a cache list
+        /// for a certain time to keep the node removed. This method is thread-safe.
+        /// </summary>
+        /// <param name="remotePeer">The node to be removed.</param>
+        /// <param name="peerException"></param>
+        /// <returns>True, if the neighbor was removed and added to a cache list.
+        /// False, if it has not been removed or is already in the temporarily removed list.</returns>
+        public bool PeerFailed(PeerAddress remotePeer, PeerException peerException)
         {
-            // TODO implement
-            return true;
-            //throw new NotImplementedException();
+            Logger.Debug("Peer {0} is offline with reason {1}.", remotePeer, peerException);
+
+            // TB: ignore zero peer ID for the moment, but we should filter for the IP address
+            if (remotePeer.PeerId.IsZero || Self.Equals(remotePeer.PeerId))
+            {
+                return false;
+            }
+            int classMember = ClassMember(remotePeer.PeerId);
+            var reason = peerException.AbortCause;
+            if (reason != PeerException.AbortCauseEnum.Timeout)
+            {
+                if (reason == PeerException.AbortCauseEnum.ProbablyOffline)
+                {
+                    _offlineMap.Put(remotePeer.PeerId, remotePeer);
+                }
+                else if (reason == PeerException.AbortCauseEnum.Shutdown)
+                {
+                    _shutdownMap.Put(remotePeer.PeerId, remotePeer);
+                }
+                else
+                {
+                    // reason is exception
+                    _exceptionMap.Put(remotePeer.PeerId, remotePeer);
+                }
+                var tmp = _peerMapOverflow[classMember];
+                if (tmp != null)
+                {
+                    lock (tmp)
+                    {
+                        tmp.Remove(remotePeer.PeerId);
+                    }
+                }
+                tmp = _peerMapVerified[classMember];
+                if (tmp != null)
+                {
+                    bool removed = false;
+                    PeerStatistic peerStatistic;
+                    lock (tmp)
+                    {
+                        peerStatistic = tmp.Remove2(remotePeer.PeerId);
+                        if (peerStatistic != null)
+                        {
+                            removed = true;
+                        }
+                    }
+                    if (removed)
+                    {
+                        NotifyRemove(remotePeer, peerStatistic);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            // not forced
+            if (UpdatePeerStatistic(remotePeer, _peerMapVerified[classMember], _offlineCount))
+            {
+                return PeerFailed(remotePeer,
+                    new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in verified map."));
+            }
+            if (UpdatePeerStatistic(remotePeer, _peerMapOverflow[classMember], _offlineCount))
+            {
+                return PeerFailed(remotePeer,
+                    new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in overflow map."));
+            }
+            return false;
         }
+
+        /// <summary>
+        /// Checks if a peer address is in the verified map.
+        /// </summary>
+        /// <param name="peerAddress">The peer address to check.</param>
+        /// <returns>True, if the peer address is in the verified map.</returns>
+        public bool Contains(PeerAddress peerAddress)
+        {
+            int classMember = ClassMember(peerAddress.PeerId);
+            if (classMember == -1)
+            {
+                // -1 means we searched for ourself and we never are our neighbor
+                return false;
+            }
+            var tmp = _peerMapVerified[classMember];
+            lock (tmp)
+            {
+                return tmp.ContainsKey(peerAddress.PeerId);
+            }
+        }
+
+        /// <summary>
+        /// Checks if a peer address is in the overflow / non-verified map.
+        /// </summary>
+        /// <param name="peerAddress">The peer address to check.</param>
+        /// <returns>True, if the peer address is in the overflow / non-verified map.</returns>
+        public bool ContainsOverflow(PeerAddress peerAddress)
+        {
+            int classMember = ClassMember(peerAddress.PeerId);
+            if (classMember == -1)
+            {
+                // -1 means we searched for ourself and we never are our neighbor
+                return false;
+            }
+            var tmp = _peerMapOverflow[classMember];
+            lock (tmp)
+            {
+                return tmp.ContainsKey(peerAddress.PeerId);
+            }
+        }
+
+
+
         /// <summary>
         /// Creates an XOR comparer based on this peer ID.
         /// </summary>

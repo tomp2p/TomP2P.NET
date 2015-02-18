@@ -113,6 +113,27 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's Map.remove(key).
+        /// In contrast to .NET's IDictionary.Remove(), this method returns the value that was
+        /// associated with the key or the default value if there was no mapping for the key.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="d"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static TValue Remove2<TKey, TValue>(this IDictionary<TKey, TValue> d, TKey key)
+        {
+            var retVal = default(TValue);
+            if (d.ContainsKey(key))
+            {
+                retVal = d[key];
+                d.Remove(key);
+            }
+            return retVal;
+        }
+
+        /// <summary>
         /// Equivalent to Java's Queue.peek() that returns null if empty.
         /// </summary>
         /// <typeparam name="T"></typeparam>
