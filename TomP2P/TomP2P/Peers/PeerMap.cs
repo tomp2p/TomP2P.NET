@@ -44,7 +44,10 @@ namespace TomP2P.Peers
 
         // the number of failures until a peer is considered offline
         private readonly int _offlineCount;
-        private readonly Main
+        private readonly IMaintenance _maintenance;
+        private readonly bool _peerVerification;
+
+        public PeerMap(PeerMapConfiguration)
 
         public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
         {

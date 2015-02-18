@@ -158,6 +158,7 @@
     <Compile Include="Peers\Number640.cs" />
     <Compile Include="Peers\PeerAddress.cs" />
     <Compile Include="Peers\PeerMap.cs" />
+    <Compile Include="Peers\PeerMapConfiguration.cs" />
     <Compile Include="Peers\PeerSocketAddress.cs" />
     <Compile Include="Peers\PeerStatistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
