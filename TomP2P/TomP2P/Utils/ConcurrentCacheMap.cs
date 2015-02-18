@@ -331,6 +331,139 @@ namespace TomP2P.Utils
             }
         }
 
+        public ISet<KeyValuePair<TKey, TValue>> EntrySet
+        {
+            get
+            {
+                var keyValuePairs = new HashSet<KeyValuePair<TKey, TValue>>();
+                foreach (var segment in _segments)
+                {
+                    lock (segment)
+                    {
+                        // .NET-specific: iterate over KeyValuePairs
+                        foreach (var kvp in segment.ToList()) // iterate over copy
+                        {
+                            var expObj = kvp.Value;
+                            if (expObj.IsExpired)
+                            {
+                                segment.Remove(kvp.Key); // remove from original
+                                Logger.Debug("Removed from entry set: {0}.", expObj.Value);
+                            }
+                            else
+                            {
+                                // TODO solve generics problem, in Java first
+                                throw new NotImplementedException();
+                            }
+                        }
+                    }
+                }
+                return keyValuePairs;
+            }
+        }
+
+        public bool Replace(TKey key, TValue oldValue, TValue newValue)
+        {
+            var oldValue2 = new ExpiringObject(oldValue, 0, _timeToLiveSeconds);
+            var newValue2 = new ExpiringObject(newValue, Convenient.CurrentTimeMillis(), _timeToLiveSeconds);
+
+            var segment = Segment(key);
+            ExpiringObject oldValue3;
+            bool replaced = false;
+            lock (segment)
+            {
+                oldValue3 = segment.Get(key);
+                // TODO equals() seems wrong!
+                if (oldValue3 != null && !oldValue3.IsExpired && oldValue2.Equals(oldValue3.Value))
+                {
+                    segment.Add(key, newValue2);
+                    replaced = true;
+                }
+            }
+            if (oldValue3 != null)
+            {
+                Expire(segment, key, oldValue3);
+            }
+            return replaced;
+        }
+
+        public TValue Replace(TKey key, TValue value)
+        {
+            var newValue = new ExpiringObject(value, Convenient.CurrentTimeMillis(), _timeToLiveSeconds);
+            var segment = Segment(key);
+            ExpiringObject oldValue;
+            lock (segment)
+            {
+                oldValue = segment.Get(key);
+                if (oldValue != null && !oldValue.IsExpired)
+                {
+                    segment.Add(key, newValue);
+                }
+            }
+            if (oldValue == null)
+            {
+                return null;
+            }
+            return oldValue.Value;
+        }
+
+        /// <summary>
+        /// Expires a key in a segment. If a key value pair is expired, it will get removed.
+        /// </summary>
+        /// <param name="segment">The segment.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>True, if expired. False, otherwise.</returns>
+        private bool Expire(CacheMap<TKey, ExpiringObject> segment, TKey key, ExpiringObject value)
+        {
+            if (value.IsExpired)
+            {
+                lock (segment)
+                {
+                    var tmp = segment.Get(key);
+                    if (tmp != null && tmp.Equals(value))
+                    {
+                        segment.Remove(key);
+                        Logger.Debug("Removed in expire: {0}.", value.Value);
+                        _removedCounter.IncrementAndGet();
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Fast expiration. Since the ExpiringObject is ordered, the for-loop can break
+        /// eaely if an object is not expired.
+        /// </summary>
+        /// <param name="segment">The segment.</param>
+        private void ExpireSegment(CacheMap<TKey, ExpiringObject> segment)
+        {
+            //.NET-specific: iterate over KeyValuePairs
+            foreach (var kvp in segment.ToList()) // iterate over copy
+            {
+                var expObj = kvp.Value;
+                if (expObj.IsExpired)
+                {
+                    segment.Remove(kvp.Key); // remove from original
+                    Logger.Debug("Removed in expire segment: {0}.", expObj.Value);
+                    _removedCounter.IncrementAndGet();
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The number of expired objects.
+        /// </summary>
+        public int ExpiredCounter
+        {
+            get { return _removedCounter.Get(); }
+        }
+
         /// <summary>
         /// An object that also holds expiration information.
         /// </summary>
