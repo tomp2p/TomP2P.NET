@@ -24,8 +24,11 @@ namespace TomP2P.Peers
         private readonly int _bagSizeVerified;
         private readonly int _bagSizeOverflow;
 
-        // the ID of this node
-        private readonly Number160 _self;
+        /// <summary>
+        /// The ID of this node.
+        /// Each node that has a bag has an ID itself to define what is close.
+        /// </summary>
+        public Number160 Self { get; private set; }
 
         // the storage for the peers that are verified
         private readonly IList<IDictionary<Number160, PeerStatistic>> _peerMapVerified;
@@ -55,8 +58,8 @@ namespace TomP2P.Peers
         /// <param name="peerMapConfiguration">The configuration values for this map.</param>
         public PeerMap(PeerMapConfiguration peerMapConfiguration)
         {
-            _self = peerMapConfiguration.Self;
-            if (_self == null || _self.IsZero)
+            Self = peerMapConfiguration.Self;
+            if (Self == null || Self.IsZero)
             {
                 throw new ArgumentException("Zero or null are not valid peer IDs.");
             }
@@ -99,15 +102,125 @@ namespace TomP2P.Peers
             return tmp.AsReadOnly();
         }
 
-
-
-        public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
+        /// <summary>
+        /// Adds a map change listener. This is thread-safe.
+        /// </summary>
+        /// <param name="peerMapChangeListener">The listener to be added.</param>
+        public void AddPeerMapChangeListener(IPeerMapChangeListener peerMapChangeListener)
         {
-            // TODO implement
-            return true;
-            //throw new NotImplementedException();
+            lock (_peerMapChangeListeners)
+            {
+                _peerMapChangeListeners.Add(peerMapChangeListener);
+            }
         }
 
+        /// <summary>
+        /// Removes a map change listener. This is thread-safe.
+        /// </summary>
+        /// <param name="peerMapChangeListener">The listener to be removed.</param>
+        public void RemovePeerMapChangeListener(IPeerMapChangeListener peerMapChangeListener)
+        {
+            lock (_peerMapChangeListeners)
+            {
+                _peerMapChangeListeners.Remove(peerMapChangeListener);
+            }
+        }
+
+        /// <summary>
+        /// Notifies on insert. This is called after the peer has been added to the map.
+        /// This method is thread-safe.
+        /// </summary>
+        /// <param name="peerAddress">The address of the inserted peer.</param>
+        /// <param name="verified">True, if the peer was inserted into the verified map.</param>
+        private void NotifyInsert(PeerAddress peerAddress, bool verified)
+        {
+            lock (_peerMapChangeListeners)
+            {
+                foreach (var listener in _peerMapChangeListeners)
+                {
+                    listener.PeerInserted(peerAddress, verified);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Notifies on remove. This method is thread-safe.
+        /// </summary>
+        /// <param name="peerAddress">The address of the removed peer.</param>
+        /// <param name="storedPeerAddress">Contains statistical information.</param>
+        private void NotifyRemove(PeerAddress peerAddress, PeerStatistic storedPeerAddress)
+        {
+            lock (_peerMapChangeListeners)
+            {
+                foreach (var listener in _peerMapChangeListeners)
+                {
+                    listener.PeerRemoved(peerAddress, storedPeerAddress);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Notifies on update. This method is thread-safe.
+        /// </summary>
+        /// <param name="peerAddress">The address of the updated peer.</param>
+        /// <param name="storedPeerAddress">Contains statistical information.</param>
+        private void NotifyUpdate(PeerAddress peerAddress, PeerStatistic storedPeerAddress)
+        {
+            lock (_peerMapChangeListeners)
+            {
+                foreach (var listener in _peerMapChangeListeners)
+                {
+                    listener.PeerUpdated(peerAddress, storedPeerAddress);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The number of the peers in the verified map.
+        /// </summary>
+        public int Size
+        {
+            get
+            {
+                int size = 0;
+                foreach (var map in _peerMapVerified)
+                {
+                    lock (map)
+                    {
+                        size += map.Count;
+                    }
+                }
+                return size;
+            }
+        }
+
+        private bool Reject(PeerAddress peerAddress)
+        {
+            if (_peerFilters == null || _peerFilters.Count == 0)
+            {
+                return false;
+            }
+            ICollection<PeerAddress> all = All;
+            foreach (var filter in _peerFilters)
+            {
+                if (filter.Reject(peerAddress, all, Self))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Adds a neighbor to the neighbor list. If the bag is full, the ID zero or the same
+        /// as our ID, the neighbor is not added. This method is thread-safe.
+        /// </summary>
+        /// <param name="remotePeer">The node to be added.</param>
+        /// <param name="referrer">If we had direct contact and we know for sure that this node 
+        /// is online, we set first hand to true. Information from 3rd party peers are always 
+        /// second hand and treated as such </param>
+        /// <param name="peerConnection"></param>
+        /// <returns>True, if the neighbor could be added or updated. False, otherwise.</returns>
         public bool PeerFound(PeerAddress remotePeer, PeerAddress referrer, PeerConnection peerConnection)
         {
             // TODO implement
@@ -115,6 +228,12 @@ namespace TomP2P.Peers
             //throw new NotImplementedException();
         }
 
+        public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
+        {
+            // TODO implement
+            return true;
+            //throw new NotImplementedException();
+        }
         /// <summary>
         /// Creates an XOR comparer based on this peer ID.
         /// </summary>
