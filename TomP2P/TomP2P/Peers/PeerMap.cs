@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Extensions;
@@ -452,7 +453,95 @@ namespace TomP2P.Peers
             }
         }
 
+        /// <summary>
+        /// Returns close peers to the peer itself.
+        /// </summary>
+        /// <param name="atLeast">The number we want to find at least.</param>
+        /// <returns>A sorted set with close peers first in this set.</returns>
+        public SortedSet<PeerAddress> ClosePeers(int atLeast)
+        {
+            return ClosePeers(Self, atLeast);
+        }
 
+        /// <summary>
+        /// Returns close peers from the set to a given key. This method is thread-safe.
+        /// You can use the returned set as it is a copy of the actual peer map and changes
+        /// in the return set do not affect the peer map.
+        /// </summary>
+        /// <param name="id">The key that should be close to the keys in the map.</param>
+        /// <param name="atLeast">The number we want to find at least.</param>
+        /// <returns>A sorted set with close peers first in this set.</returns>
+        public SortedSet<PeerAddress> ClosePeers(Number160 id, int atLeast)
+        {
+            return ClosePeers(Self, id, atLeast, _peerMapVerified);
+        }
+
+        public static SortedSet<PeerAddress> ClosePeers(Number160 self, Number160 other, int atLeast,
+            IList<IDictionary<Number160, PeerStatistic>> peerMap)
+        {
+            var set = new SortedSet<PeerAddress>(CreateComparer(other));
+            int classMember = ClassMember(self, other);
+            // special treatment, as we can start iterating from 0
+            if (classMember == -1)
+            {
+                for (int j = 0; j < Number160.Bits; j++)
+                {
+                    var tmp = peerMap[j];
+                    if (FillSet(atLeast, set, tmp))
+                    {
+                        return set;
+                    }
+                }
+                return set;
+            }
+
+            var tmp2 = peerMap[classMember];
+            if (FillSet(atLeast, set, tmp2))
+            {
+                return set;
+            }
+
+            // in this case we have to go over all the bags that are smaller
+            bool last = false;
+            for (int i = 0; i < classMember; i++)
+            {
+                tmp2 = peerMap[i];
+                last = FillSet(atLeast, set, tmp2);
+            }
+            if (last)
+            {
+                return set;
+            }
+            // in this case we have to go over all the bags that are larger
+            for (int i = 0; i < Number160.Bits; i++)
+            {
+                tmp2 = peerMap[i];
+                FillSet(atLeast, set, tmp2);
+            }
+            return set;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder("I'm node ");
+            sb.Append(Self).Append("\n");
+            for (int i = 0; i < Number160.Bits; i++)
+            {
+                var tmp = _peerMapVerified[i];
+                lock (tmp)
+                {
+                    if (tmp.Count > 0)
+                    {
+                        sb.Append("class:").Append(i).Append("->\n");
+                        foreach (var node in tmp.Values)
+                        {
+                            sb.Append("node:").Append(node.PeerAddress).Append(",");
+                        }
+                    }
+                }
+            }
+            return sb.ToString();
+        }
 
         /// <summary>
         /// Creates an XOR comparer based on this peer ID.
@@ -460,8 +549,7 @@ namespace TomP2P.Peers
         /// <returns>The XOR comparer.</returns>
         public IComparer<PeerAddress> CreateComparer()
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return CreateComparer(Self);
         }
 
         /// <summary>
@@ -471,12 +559,7 @@ namespace TomP2P.Peers
         /// <returns>The XOR comparer.</returns>
         public static IComparer<PeerAddress> CreateComparer(Number160 id)
         {
-            throw new NotImplementedException();
-        }
-
-        public ICollection<PeerAddress> ClosePeers(Number160 number160, int p)
-        {
-            throw new NotImplementedException();
+            return new 
         }
 
         public IList<PeerAddress> All
@@ -492,6 +575,42 @@ namespace TomP2P.Peers
             get
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Returns -1 if the first remote node is closer to the key.
+        /// If the second node is closer, then 1 is returned.
+        /// If both are equal, 0 is returned.
+        /// </summary>
+        /// <param name="id">The ID as a distance reference.</param>
+        /// <param name="rn">The peer to test if closer to the ID.</param>
+        /// <param name="rn2">The other peer to test if closer to the ID.</param>
+        /// <returns></returns>
+        public static int IsKadCloser(Number160 id, PeerAddress rn, PeerAddress rn2)
+        {
+            
+        }
+
+        /// <summary>
+        /// The Kademlia distance comparer.
+        /// </summary>
+        private class KademliaComparer : IComparer<PeerAddress>
+        {
+            private readonly Number160 _id;
+
+            /// <summary>
+            /// Creates a Kademlia distance comparer.
+            /// </summary>
+            /// <param name="id">The ID of this peer.</param>
+            public KademliaComparer(Number160 id)
+            {
+                _id = id;
+            }
+
+            public int Compare(PeerAddress remotePeer, PeerAddress remotePeer2)
+            {
+                return IsKadCloser(_id, remotePeer, remotePeer2);
             }
         }
     }
