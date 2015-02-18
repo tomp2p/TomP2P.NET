@@ -8,7 +8,8 @@ namespace TomP2P.Extensions.Workaround
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class LruCache<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    public class LruCache<TKey, TValue> : IDictionary<TKey, TValue>
+        where TValue : class
     {
         private readonly int _capacity;
         private readonly Dictionary<TKey, TValue> _cacheMap;
@@ -58,7 +59,7 @@ namespace TomP2P.Extensions.Workaround
         /// <returns>The previous value associated with the key, or the default value if there
         /// was no mapping for the key.</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public virtual TValue Remove(TKey key)
+        public TValue Remove(TKey key)
         {
             TValue value;
             if (_cacheMap.TryGetValue(key, out value))
@@ -156,9 +157,80 @@ namespace TomP2P.Extensions.Workaround
             return _cacheMap.Values;
         }
 
+        #region IDictionary implementation
+
+        void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
+        {
+            Add(key, value);
+        }
+
+        public ICollection<TKey> Keys
+        {
+            get { return KeySet(); }
+        }
+
+        bool IDictionary<TKey, TValue>.Remove(TKey key)
+        {
+            var res = Remove(key);
+            return res != default(TValue);
+        }
+
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        ICollection<TValue> IDictionary<TKey, TValue>.Values
+        {
+            get { return Values(); }
+        }
+
+        public TValue this[TKey key]
+        {
+            get { return Get(key); }
+            set { Add(key, value); }
+        }
+
+        public void Add(KeyValuePair<TKey, TValue> item)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool Contains(KeyValuePair<TKey, TValue> item)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        int ICollection<KeyValuePair<TKey, TValue>>.Count
+        {
+            get { return Count(); }
+        }
+
+        public bool IsReadOnly
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+        public bool Remove(KeyValuePair<TKey, TValue> item)
+        {
+            throw new System.NotImplementedException();
+        }
+
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
         {
             return _cacheMap.GetEnumerator();
         }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        #endregion
     }
 }

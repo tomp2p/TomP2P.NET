@@ -47,7 +47,59 @@ namespace TomP2P.Peers
         private readonly IMaintenance _maintenance;
         private readonly bool _peerVerification;
 
-        public PeerMap(PeerMapConfiguration)
+        /// <summary>
+        /// Creates a bag for the peers. This peer knows a lot about close peers. The further away the peers are,
+        /// the less known they are. Distance is measured with XOR of the peer ID.
+        /// E.g., the distance of peer with ID 0x12 and peer with ID 0x28 is 0x3a. 
+        /// </summary>
+        /// <param name="peerMapConfiguration">The configuration values for this map.</param>
+        public PeerMap(PeerMapConfiguration peerMapConfiguration)
+        {
+            _self = peerMapConfiguration.Self;
+            if (_self == null || _self.IsZero)
+            {
+                throw new ArgumentException("Zero or null are not valid peer IDs.");
+            }
+            _bagSizeVerified = peerMapConfiguration.BagSizeVerified;
+            _bagSizeOverflow = peerMapConfiguration.BagSizeOverflow;
+            _offlineCount = peerMapConfiguration.OfflineCount;
+            _peerFilters = peerMapConfiguration.PeerFilters;
+            _peerMapVerified = InitFixedMap(_bagSizeVerified, false);
+            _peerMapOverflow = InitFixedMap(_bagSizeVerified, true);
+            // _bagSizeVerified * Number160.Bits should be enough
+            _offlineMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.OfflineTimeout, _bagSizeVerified * Number160.Bits);
+            _shutdownMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ShutdownTimeout, _bagSizeVerified * Number160.Bits);
+            _exceptionMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ExceptionTimeout, _bagSizeVerified * Number160.Bits);
+            _maintenance = peerMapConfiguration.Maintenance.Init(_peerMapVerified, _peerMapOverflow, _offlineMap,
+                _shutdownMap, _exceptionMap);
+            _peerVerification = peerMapConfiguration.IsPeerVerification;
+        }
+
+        /// <summary>
+        /// Creates a fixed size bag with an unmodifiable map.
+        /// </summary>
+        /// <param name="bagSize">The bag size.</param>
+        /// <param name="caching">If a caching map should be created.</param>
+        /// <returns>The list of bags containing an unmodifiable map.</returns>
+        private static IList<IDictionary<Number160, PeerStatistic>> InitFixedMap(int bagSize, bool caching)
+        {
+            var tmp = new List<IDictionary<Number160, PeerStatistic>>();
+            for (int i = 0; i < Number160.Bits; i++)
+            {
+                if (caching)
+                {
+                    tmp.Add(new CacheMap<Number160, PeerStatistic>(bagSize, true));
+                }
+                else
+                {
+                    int memAlloc = Math.Max(0, bagSize - (Number160.Bits - i));
+                    tmp.Add(new Dictionary<Number160, PeerStatistic>(memAlloc));
+                }
+            }
+            return tmp.AsReadOnly();
+        }
+
+
 
         public bool PeerFailed(PeerAddress remotePeer, PeerException exception)
         {

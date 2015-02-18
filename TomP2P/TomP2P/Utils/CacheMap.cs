@@ -10,6 +10,7 @@ namespace TomP2P.Utils
     /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <typeparam name="TValue">The type of the value.</typeparam>
     public class CacheMap<TKey, TValue> : LruCache<TKey, TValue>
+        where TValue : class
     {
         private readonly bool _updateEntryOnInsert;
 

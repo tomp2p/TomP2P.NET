@@ -9,7 +9,7 @@ namespace TomP2P.Peers
     /// </summary>
     public sealed class Number160 : IComparable<Number160>, IEquatable<Number160>
     {
-        // This key has ALWAYS 160 bit. Do not change.
+        // This key has ALWAYS 160 bits. Do not change.
         public const int Bits = 160;
 
         private const long LongMask = 0xffffffffL;
