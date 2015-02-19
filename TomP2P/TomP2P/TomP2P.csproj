@@ -136,6 +136,7 @@
     <Compile Include="P2P\Builder\PingBuilder.cs" />
     <Compile Include="P2P\Builder\RoutingBuilder.cs" />
     <Compile Include="P2P\Builder\ShutdownBuilder.cs" />
+    <Compile Include="P2P\DefaultBroadcastHandler.cs" />
     <Compile Include="P2P\DistributedRouting.cs" />
     <Compile Include="P2P\IBroadcastHandler.cs" />
     <Compile Include="P2P\IPeerInit.cs" />

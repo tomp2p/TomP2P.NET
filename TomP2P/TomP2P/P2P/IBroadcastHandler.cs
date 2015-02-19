@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TomP2P.P2P
+﻿namespace TomP2P.P2P
 {
     /// <summary>
     /// The handler that is called when a broadcast message is received.
