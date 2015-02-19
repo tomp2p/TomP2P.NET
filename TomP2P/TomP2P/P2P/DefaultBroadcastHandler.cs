@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Storage;
 using TomP2P.Utils;
@@ -123,6 +124,9 @@ namespace TomP2P.P2P
                     if (!tcc.IsFaulted)
                     {
                         var broadcastBuilder = new BroadcastBuilder(_peer, messageKey);
+                        broadcastBuilder.SetDataMap(dataMap);
+                        broadcastBuilder.SetHopCounter(hopCounter + 1);
+                        broadcastBuilder.SetIsUdp(isUdp);
 
                         // TODO finish implementation
                         throw new NotImplementedException();
@@ -145,8 +149,23 @@ namespace TomP2P.P2P
         /// <param name="isUdp">Flag indicating whether the message can be sent with UDP.</param>
         private void OtherPeer(Number160 messageKey, IDictionary<Number640, Data> dataMap, int hopCounter, bool isUdp)
         {
-            // TODO finish implementation
-            throw new NotImplementedException();
+            Logger.Debug("Other");
+            var list = _peer.PeerBean.PeerMap.All;
+            int max = Math.Min(Nr, list.Count);
+
+            var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(isUdp ? max : 0, isUdp ? 0 : max);
+            taskCc.ContinueWith(tcc =>
+            {
+                if (!tcc.IsFaulted)
+                {
+                    // TODO finish implementation
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    Utils.Utils.AddReleaseListener(tcc.Result);
+                }
+            });
         }
     }
 }
