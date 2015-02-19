@@ -255,7 +255,7 @@ namespace TomP2P.P2P
                         // TODO find .NET-specific way to show sanity check warning
 
                         routingMechanism.TcsResponse(i,
-                            _neighbors.CloseNeighbors(next, routingBuilder.SearchValues(), type, channelCreator,
+                            _neighbors.CloseNeighborsTcs(next, routingBuilder.SearchValues(), type, channelCreator,
                                 routingBuilder));
                         Logger.Debug("Get close neighbours: {0} on {1}.", next, i);
                     }

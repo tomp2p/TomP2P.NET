@@ -216,7 +216,7 @@ namespace TomP2P.Utils
             // TODO check if works
             // .NET-specific
             var diff = coll1.Except(coll2);
-            result.AddAll(diff);
+            result.ToList().AddRange(diff);
 
             return result;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Timers;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
+using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
@@ -157,10 +158,7 @@ namespace TomP2P.P2P
 
             if (PeerMap == null)
             {
-                // TODO uncomment
-                //PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
-                // TODO remove
-                PeerMap = new PeerMap();
+                PeerMap = new PeerMap(new PeerMapConfiguration(PeerId));
             }
 
             if (MasterPeer == null && Timer == null)
@@ -180,24 +178,22 @@ namespace TomP2P.P2P
 
             var peer = new Peer(P2PId, PeerId, peerCreator);
 
-            PeerBean peerBean = peerCreator.PeerBean;
+            var peerBean = peerCreator.PeerBean;
             peerBean.AddPeerStatusListener(PeerMap);
 
-            ConnectionBean connectionBean = peerCreator.ConnectionBean;
+            var connectionBean = peerCreator.ConnectionBean;
 
             peerBean.SetPeerMap(PeerMap);
             peerBean.SetKeyPair(KeyPair);
 
             if (BloomfilterFactory == null)
             {
-                // TODO uncomment
-                //peerBean.SetBloomfilterFactory(new DefaultBloomfilterFactory());
+                peerBean.SetBloomfilterFactory(new DefaultBloomFilterFactory());
             }
 
             if (BroadcastHandler == null)
             {
-                // TODO uncomment
-                //BroadcastHandler = new DefaultBroadcastHandler(peer, new Random());
+                BroadcastHandler = new DefaultBroadcastHandler(peer, new Random());
             }
 
             // set/enable RPC
@@ -212,8 +208,8 @@ namespace TomP2P.P2P
                 quitRpc.AddPeerStatusListener(PeerMap);
                 peer.SetQuitRpc(quitRpc);
             }
-
-            // TODO initialize rest of RPC enablers
+            
+            // TODO enable rest of RPCs
 
             if (MaintenanceTask == null && IsEnabledMaintenanceRpc)
             {
@@ -227,7 +223,7 @@ namespace TomP2P.P2P
             peerBean.SetMaintenanceTask(MaintenanceTask);
 
             // set the ping builder for the heart beat
-            // TODO implement
+            connectionBean.Sender.SetPingBuilderFactory(new PingBuilderFactory(peer));
 
             foreach (var peerInit in _toInitialize)
             {
@@ -481,6 +477,24 @@ namespace TomP2P.P2P
         {
             _behindFirewall = behindFirewall;
             return this;
+        }
+
+        /// <summary>
+        /// Default ping builder factory for the sender (heart beat).
+        /// </summary>
+        private class PingBuilderFactory : IPingBuilderFactory
+        {
+            private readonly Peer _peer;
+
+            public PingBuilderFactory(Peer peer)
+            {
+                _peer = peer;
+            }
+
+            public PingBuilder Create()
+            {
+                return _peer.Ping();
+            }
         }
     }
 }

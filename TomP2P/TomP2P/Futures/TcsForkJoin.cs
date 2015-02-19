@@ -212,6 +212,7 @@ namespace TomP2P.Futures
                         return _forksCopy[_forksCopy.Count - 1];
                     }
                 }
+                return null;
             }
         }
     }

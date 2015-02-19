@@ -21,7 +21,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// The dispatcher object that receives all messages.
         /// </summary>
-        public Dispatcher Dispatcher { get; private set; } // TODO needed?
+        public Dispatcher Dispatcher { get; private set; }
         /// <summary>
         /// The sender object that sends out messages.
         /// </summary>

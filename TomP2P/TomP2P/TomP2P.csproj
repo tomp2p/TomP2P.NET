@@ -163,8 +163,10 @@
     <Compile Include="Peers\PeerSocketAddress.cs" />
     <Compile Include="Peers\PeerStatistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rpc\DefaultBloomFilterFactory.cs" />
     <Compile Include="Rpc\DigestInfo.cs" />
     <Compile Include="Rpc\DispatchHandler.cs" />
+    <Compile Include="Rpc\NeighborRpc.cs" />
     <Compile Include="Rpc\PingRpc.cs" />
     <Compile Include="Rpc\QuitRpc.cs" />
     <Compile Include="Rpc\Rpc.cs" />
