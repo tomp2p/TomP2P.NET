@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Win32.SafeHandles;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Extensions;
-using TomP2P.P2P;
 using TomP2P.Utils;
 
 namespace TomP2P.Peers
@@ -23,8 +19,8 @@ namespace TomP2P.Peers
 
         // each distance bit has its own bag
         // this is the size of the verified peers (the ones we know are reachable)
-        private readonly int _bagSizeVerified;
-        private readonly int _bagSizeOverflow;
+        public int BagSizeVerified { get; private set; }
+        public int BagSizeOverflow { get; private set; }
 
         /// <summary>
         /// The ID of this node.
@@ -33,10 +29,10 @@ namespace TomP2P.Peers
         public Number160 Self { get; private set; }
 
         // the storage for the peers that are verified
-        private readonly IList<IDictionary<Number160, PeerStatistic>> _peerMapVerified;
- 
+        public IList<IDictionary<Number160, PeerStatistic>> PeerMapVerified { get; private set; }
+
         // the storage for the peers that are not verified or overflown
-        private readonly IList<IDictionary<Number160, PeerStatistic>> _peerMapOverflow;
+        public IList<IDictionary<Number160, PeerStatistic>> PeerMapOverflow { get; private set; }
 
         private readonly ConcurrentCacheMap<Number160, PeerAddress> _offlineMap;
         private readonly ConcurrentCacheMap<Number160, PeerAddress> _shutdownMap;
@@ -65,17 +61,17 @@ namespace TomP2P.Peers
             {
                 throw new ArgumentException("Zero or null are not valid peer IDs.");
             }
-            _bagSizeVerified = peerMapConfiguration.BagSizeVerified;
-            _bagSizeOverflow = peerMapConfiguration.BagSizeOverflow;
+            BagSizeVerified = peerMapConfiguration.BagSizeVerified;
+            BagSizeOverflow = peerMapConfiguration.BagSizeOverflow;
             _offlineCount = peerMapConfiguration.OfflineCount;
             _peerFilters = peerMapConfiguration.PeerFilters;
-            _peerMapVerified = InitFixedMap(_bagSizeVerified, false);
-            _peerMapOverflow = InitFixedMap(_bagSizeVerified, true);
+            PeerMapVerified = InitFixedMap(BagSizeVerified, false);
+            PeerMapOverflow = InitFixedMap(BagSizeVerified, true);
             // _bagSizeVerified * Number160.Bits should be enough
-            _offlineMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.OfflineTimeout, _bagSizeVerified * Number160.Bits);
-            _shutdownMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ShutdownTimeout, _bagSizeVerified * Number160.Bits);
-            _exceptionMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ExceptionTimeout, _bagSizeVerified * Number160.Bits);
-            _maintenance = peerMapConfiguration.Maintenance.Init(_peerMapVerified, _peerMapOverflow, _offlineMap,
+            _offlineMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.OfflineTimeout, BagSizeVerified * Number160.Bits);
+            _shutdownMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ShutdownTimeout, BagSizeVerified * Number160.Bits);
+            _exceptionMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ExceptionTimeout, BagSizeVerified * Number160.Bits);
+            _maintenance = peerMapConfiguration.Maintenance.Init(PeerMapVerified, PeerMapOverflow, _offlineMap,
                 _shutdownMap, _exceptionMap);
             _peerVerification = peerMapConfiguration.IsPeerVerification;
         }
@@ -185,7 +181,7 @@ namespace TomP2P.Peers
             get
             {
                 int size = 0;
-                foreach (var map in _peerMapVerified)
+                foreach (var map in PeerMapVerified)
                 {
                     lock (map)
                     {
@@ -272,7 +268,7 @@ namespace TomP2P.Peers
             int classMember = ClassMember(remotePeer.PeerId);
 
             // the peer might have a new port
-            var oldPeerStatistic = UpdateExistingVerifiedPeerAddress(_peerMapVerified[classMember], remotePeer,
+            var oldPeerStatistic = UpdateExistingVerifiedPeerAddress(PeerMapVerified[classMember], remotePeer,
                 firstHand);
             if (oldPeerStatistic != null)
             {
@@ -284,7 +280,7 @@ namespace TomP2P.Peers
             {
                 if (firstHand || (secondHand && !_peerVerification))
                 {
-                    var map = _peerMapVerified[classMember];
+                    var map = PeerMapVerified[classMember];
                     bool inserted = false;
                     lock (map)
                     {
@@ -293,7 +289,7 @@ namespace TomP2P.Peers
                         {
                             return PeerFound(remotePeer, referrer, peerConnection);
                         }
-                        if (map.Count < _bagSizeVerified)
+                        if (map.Count < BagSizeVerified)
                         {
                             var peerStatistic = new PeerStatistic(remotePeer);
                             peerStatistic.SuccessfullyChecked();
@@ -305,7 +301,7 @@ namespace TomP2P.Peers
                     if (inserted)
                     {
                         // if we inserted into the verified map, remove it from the non-verified map
-                        var mapOverflow = _peerMapOverflow[classMember];
+                        var mapOverflow = PeerMapOverflow[classMember];
                         lock (mapOverflow)
                         {
                             mapOverflow.Remove(remotePeer.PeerId);
@@ -318,7 +314,7 @@ namespace TomP2P.Peers
 
             // if we are here, we did not have this peer, but our verified map was full
             // check if we have it stored in the non-verified map
-            var mapOverflow2 = _peerMapOverflow[classMember];
+            var mapOverflow2 = PeerMapOverflow[classMember];
             lock (mapOverflow2)
             {
                 var peerStatistic = mapOverflow2[remotePeer.PeerId];
@@ -370,7 +366,7 @@ namespace TomP2P.Peers
                     // reason is exception
                     _exceptionMap.Put(remotePeer.PeerId, remotePeer);
                 }
-                var tmp = _peerMapOverflow[classMember];
+                var tmp = PeerMapOverflow[classMember];
                 if (tmp != null)
                 {
                     lock (tmp)
@@ -378,7 +374,7 @@ namespace TomP2P.Peers
                         tmp.Remove(remotePeer.PeerId);
                     }
                 }
-                tmp = _peerMapVerified[classMember];
+                tmp = PeerMapVerified[classMember];
                 if (tmp != null)
                 {
                     bool removed = false;
@@ -400,12 +396,12 @@ namespace TomP2P.Peers
                 return false;
             }
             // not forced
-            if (UpdatePeerStatistic(remotePeer, _peerMapVerified[classMember], _offlineCount))
+            if (UpdatePeerStatistic(remotePeer, PeerMapVerified[classMember], _offlineCount))
             {
                 return PeerFailed(remotePeer,
                     new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in verified map."));
             }
-            if (UpdatePeerStatistic(remotePeer, _peerMapOverflow[classMember], _offlineCount))
+            if (UpdatePeerStatistic(remotePeer, PeerMapOverflow[classMember], _offlineCount))
             {
                 return PeerFailed(remotePeer,
                     new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in overflow map."));
@@ -426,7 +422,7 @@ namespace TomP2P.Peers
                 // -1 means we searched for ourself and we never are our neighbor
                 return false;
             }
-            var tmp = _peerMapVerified[classMember];
+            var tmp = PeerMapVerified[classMember];
             lock (tmp)
             {
                 return tmp.ContainsKey(peerAddress.PeerId);
@@ -446,7 +442,7 @@ namespace TomP2P.Peers
                 // -1 means we searched for ourself and we never are our neighbor
                 return false;
             }
-            var tmp = _peerMapOverflow[classMember];
+            var tmp = PeerMapOverflow[classMember];
             lock (tmp)
             {
                 return tmp.ContainsKey(peerAddress.PeerId);
@@ -473,7 +469,7 @@ namespace TomP2P.Peers
         /// <returns>A sorted set with close peers first in this set.</returns>
         public SortedSet<PeerAddress> ClosePeers(Number160 id, int atLeast)
         {
-            return ClosePeers(Self, id, atLeast, _peerMapVerified);
+            return ClosePeers(Self, id, atLeast, PeerMapVerified);
         }
 
         public static SortedSet<PeerAddress> ClosePeers(Number160 self, Number160 other, int atLeast,
@@ -527,7 +523,7 @@ namespace TomP2P.Peers
             sb.Append(Self).Append("\n");
             for (int i = 0; i < Number160.Bits; i++)
             {
-                var tmp = _peerMapVerified[i];
+                var tmp = PeerMapVerified[i];
                 lock (tmp)
                 {
                     if (tmp.Count > 0)
@@ -559,23 +555,112 @@ namespace TomP2P.Peers
         /// <returns>The XOR comparer.</returns>
         public static IComparer<PeerAddress> CreateComparer(Number160 id)
         {
-            return new 
+            return new KademliaComparer(id);
         }
 
+        /// <summary>
+        /// Returns all addresses from the neighbor list. The collection is a copy
+        /// and it is partially sorted.
+        /// </summary>
         public IList<PeerAddress> All
         {
             get
             {
-                throw new NotImplementedException();
+                var all = new List<PeerAddress>();
+                foreach (var map in PeerMapVerified)
+                {
+                    lock (map)
+                    {
+                        foreach (var peerStatistic in map.Values)
+                        {
+                            all.Add(peerStatistic.PeerAddress);
+                        }
+                    }
+                }
+                return all;
             }
         }
 
+        /// <summary>
+        /// Returns all addresses from the overflow / non-verified list. The collection is a copy
+        /// and it is partially sorted.
+        /// </summary>
         public IList<PeerAddress> AllOverflow
         {
             get
             {
-                throw new NotImplementedException();
+                var allOverflow = new List<PeerAddress>();
+                foreach (var map in PeerMapOverflow)
+                {
+                    lock (map)
+                    {
+                        foreach (var peerStatistic in map.Values)
+                        {
+                            allOverflow.Add(peerStatistic.PeerAddress);
+                        }
+                    }
+                }
+                return allOverflow;
             }
+        }
+
+        /// <summary>
+        /// Checks of a peer is in the offline map.
+        /// </summary>
+        /// <param name="peerAddress">The peer address to look for.</param>
+        /// <returns>True, if the peer is in the offline map, meaning that we consider this
+        /// peer offline.</returns>
+        public bool IsPeerRemovedTemporarly(PeerAddress peerAddress)
+        {
+            return _offlineMap.ContainsKey(peerAddress.PeerId)
+                   || _shutdownMap.ContainsKey(peerAddress.PeerId)
+                   || _exceptionMap.ContainsKey(peerAddress.PeerId);
+        }
+
+        /// <summary>
+        /// Finds the next peer that should have a maintenance check. Returns null if no maintenance 
+        /// is needed at the moment. It will return the most important peers first. Importance is as 
+        /// follows: The most important peers are the close ones in the verified peer map. If a certain
+        /// threshold in a bag is not reached, the unverified becomes important too.
+        /// </summary>
+        /// <param name="notInterestedAddresses"></param>
+        /// <returns>The next most important peer to check if it is still alive.</returns>
+        public PeerStatistic NextForMaintenance(ICollection<PeerAddress> notInterestedAddresses)
+        {
+            return _maintenance.NextForMaintenance(notInterestedAddresses);
+        }
+
+        /// <summary>
+        /// Returns the number of the class that this ID belongs to.
+        /// </summary>
+        /// <param name="remoteId">The ID to test.</param>
+        /// <returns>The number of bits used in the difference.</returns>
+        private int ClassMember(Number160 remoteId)
+        {
+            return ClassMember(Self, remoteId);
+        }
+
+        /// <summary>
+        /// Returns the difference in terms of bit counts of two IDs, minus 1.
+        /// So two IDs with one bit difference are in the class 0.
+        /// </summary>
+        /// <param name="id1">The first ID.</param>
+        /// <param name="id2">The second ID.</param>
+        /// <returns>The bit difference and -1 if they are equal.</returns>
+        internal static int ClassMember(Number160 id1, Number160 id2)
+        {
+            return Distance(id1, id2).BitLength - 1;
+        }
+
+        /// <summary>
+        /// The distance metric is the XOR metric.
+        /// </summary>
+        /// <param name="id1">The first ID.</param>
+        /// <param name="id2">The second ID.</param>
+        /// <returns>The XOR distance.</returns>
+        internal static Number160 Distance(Number160 id1, Number160 id2)
+        {
+            return id1.Xor(id2);
         }
 
         /// <summary>
@@ -586,10 +671,104 @@ namespace TomP2P.Peers
         /// <param name="id">The ID as a distance reference.</param>
         /// <param name="rn">The peer to test if closer to the ID.</param>
         /// <param name="rn2">The other peer to test if closer to the ID.</param>
-        /// <returns></returns>
+        /// <returns>-1 if the first peer is closer, 1 otherwise. 0 if both are equal.</returns>
         public static int IsKadCloser(Number160 id, PeerAddress rn, PeerAddress rn2)
         {
-            
+            return Distance(id, rn.PeerId).CompareTo(Distance(id, rn2.PeerId));
+        }
+
+        /// <summary>
+        /// Updates the peer statistics and checks if the max failure has been reached.
+        /// </summary>
+        /// <param name="remotePeer">The remote peer.</param>
+        /// <param name="tmp">The bag of where the peer is supposed to be.</param>
+        /// <param name="maxFail">The number of max failure until a peer is considered offline.</param>
+        /// <returns>True, if this peer is considered offline. False, otherwise.</returns>
+        private static bool UpdatePeerStatistic(PeerAddress remotePeer, IDictionary<Number160, PeerStatistic> tmp,
+            int maxFail)
+        {
+            if (tmp != null)
+            {
+                lock (tmp)
+                {
+                    var peerStatistic = tmp[remotePeer.PeerId];
+                    if (peerStatistic != null)
+                    {
+                        if (peerStatistic.Failed() >= maxFail)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if a peer already exists in this map and if it does, it will update the entry
+        /// because the peer address (e.g., port) may have changed.
+        /// </summary>
+        /// <param name="tmp">The map where the peer is supposed to be.</param>
+        /// <param name="peerAddress">The address of the peer that may have been changed.</param>
+        /// <param name="firstHand">True, if this peer sent and received a message from the remote peer.</param>
+        /// <returns>The old peer address if we have updated the peer. Null, otherwise.</returns>
+        private static PeerStatistic UpdateExistingVerifiedPeerAddress(IDictionary<Number160, PeerStatistic> tmp,
+            PeerAddress peerAddress, bool firstHand)
+        {
+            lock (tmp)
+            {
+                var old = tmp[peerAddress.PeerId];
+                if (old != null)
+                {
+                    // TODO from Java: this should only be from firsthand
+                    old.SetPeerAddress(peerAddress);
+                    if (firstHand)
+                    {
+                        old.SuccessfullyChecked();
+                    }
+                    return old;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Fills the set with peer addresses. Fills it until a limit is reached.
+        /// However, this is a soft limit, as the bag may contain close peers in
+        /// a random manner.
+        /// </summary>
+        /// <param name="atLeast">The number of addresses we want at least.
+        /// It does not matter if it is more.</param>
+        /// <param name="set">The set where to store the results.</param>
+        /// <param name="tmp">The bag where to take the addresses from.</param>
+        /// <returns>True, if the desired size has been reached.</returns>
+        private static bool FillSet(int atLeast, SortedSet<PeerAddress> set, IDictionary<Number160, PeerStatistic> tmp)
+        {
+            lock (tmp)
+            {
+                foreach (var peerStatistic in tmp.Values)
+                {
+                    set.Add(peerStatistic.PeerAddress);
+                }
+            }
+            return set.Count >= atLeast;
+        }
+
+        // TODO method can be removed
+        public PeerAddress Find(Number160 peerId)
+        {
+            int classMember = ClassMember(Self, peerId);
+            if (classMember < 0)
+            {
+                return null;
+            }
+            var tmp = PeerMapVerified[classMember];
+            var peerStatistic = tmp[peerId];
+            if (peerStatistic != null)
+            {
+                return peerStatistic.PeerAddress;
+            }
+            return null;
         }
 
         /// <summary>
