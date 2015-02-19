@@ -4,6 +4,7 @@ using NLog;
 using TomP2P.Extensions.Workaround;
 using TomP2P.P2P;
 using TomP2P.Peers;
+using TomP2P.Rpc;
 using TomP2P.Storage;
 
 namespace TomP2P.Connection

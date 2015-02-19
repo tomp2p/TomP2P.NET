@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
 
 namespace TomP2P.Rpc

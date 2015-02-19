@@ -1,6 +1,6 @@
-﻿using TomP2P.Rpc;
+﻿using TomP2P.Peers;
 
-namespace TomP2P.Peers
+namespace TomP2P.Rpc
 {
     public interface IBloomfilterFactory
     {
