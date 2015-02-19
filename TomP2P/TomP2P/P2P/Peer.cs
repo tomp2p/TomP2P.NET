@@ -43,7 +43,7 @@ namespace TomP2P.P2P
         private QuitRpc _quitRpc;
         //private NeighborRpc _neighborRpc;
         //private DirectDataRpc _directDataRpc;
-        //private BroadcastRpc _broadcastRpc;
+        private BroadcastRpc _broadcastRpc;
 
         private volatile bool _shutdown = false;
 
@@ -134,7 +134,7 @@ namespace TomP2P.P2P
             _directDataRpc = directDataRpc;
             return this;
         }
-
+        */
         public BroadcastRpc BroadcastRpc
         {
             get
@@ -152,7 +152,7 @@ namespace TomP2P.P2P
             _broadcastRpc = broadcastRpc;
             return this;
         }
-        */
+        
         public DistributedRouting DistributedRouting
         {
             get

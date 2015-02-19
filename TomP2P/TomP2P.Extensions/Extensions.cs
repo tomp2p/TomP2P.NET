@@ -134,6 +134,23 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent to Java's List.remove(int).
+        /// In contrast to .NET's IList.RemoveAt(int), this method returns the value that was
+        /// associated with the index or the default value if there was none.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="l"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static T RemoveAt2<T>(this IList<T> l, int index)
+        {
+            // TODO works?
+            T retVal = l[index];
+            l.RemoveAt(index);
+            return retVal;
+        }
+
+        /// <summary>
         /// Equivalent to Java's Queue.peek() that returns null if empty.
         /// </summary>
         /// <typeparam name="T"></typeparam>

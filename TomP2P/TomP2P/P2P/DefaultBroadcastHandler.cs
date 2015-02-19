@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Extensions;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Storage;
@@ -119,6 +118,7 @@ namespace TomP2P.P2P
             foreach (var peerAddress in list)
             {
                 var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(isUdp ? 1 : 0, isUdp ? 0 : 1);
+                PeerAddress address = peerAddress;
                 taskCc.ContinueWith(tcc =>
                 {
                     if (!tcc.IsFaulted)
@@ -128,8 +128,10 @@ namespace TomP2P.P2P
                         broadcastBuilder.SetHopCounter(hopCounter + 1);
                         broadcastBuilder.SetIsUdp(isUdp);
 
-                        // TODO finish implementation
-                        throw new NotImplementedException();
+                        var taskResponse = _peer.BroadcastRpc.SendAsync(address, broadcastBuilder, tcc.Result,
+                            broadcastBuilder);
+                        Logger.Debug("1st broadcast to {0}.", address);
+                        Utils.Utils.AddReleaseListener(tcc.Result, taskResponse);
                     }
                     else
                     {
@@ -158,8 +160,21 @@ namespace TomP2P.P2P
             {
                 if (!tcc.IsFaulted)
                 {
-                    // TODO finish implementation
-                    throw new NotImplementedException();
+                    var taskResponses = new Task[max];
+                    for (int i = 0; i < max; i++)
+                    {
+                        var randomAddress = list.RemoveAt2(_rnd.Next(list.Count));
+
+                        var broadcastBuilder = new BroadcastBuilder(_peer, messageKey);
+                        broadcastBuilder.SetDataMap(dataMap);
+                        broadcastBuilder.SetHopCounter(hopCounter + 1);
+                        broadcastBuilder.SetIsUdp(isUdp);
+
+                        taskResponses[i] = _peer.BroadcastRpc.SendAsync(randomAddress, broadcastBuilder, tcc.Result,
+                            broadcastBuilder);
+                        Logger.Debug("2nd broadcast to {0}.", randomAddress);
+                    }
+                    Utils.Utils.AddReleaseListener(tcc.Result, taskResponses);
                 }
                 else
                 {
