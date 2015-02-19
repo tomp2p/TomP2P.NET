@@ -993,7 +993,7 @@
           <xs:element name="forceManaged" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="replaceFileContentsOnEachWrite" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="enableFileDelete" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="deleteOldFileOnStartTCPTCPup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="deleteOldFileOnStartAsyncTCPTCPup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="createDirs" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="archiveDateFormat" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="fileName" minOccurs="0" maxOccurs="1" type="Layout" />
@@ -1078,7 +1078,7 @@
             <xs:documentation>Indicates whether to enable log file(s) to be deleted.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="deleteOldFileOnStartTCPTCPup" type="xs:boolean">
+        <xs:attribute name="deleteOldFileOnStartAsyncTCPTCPup" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to delete old log file on startup.</xs:documentation>
           </xs:annotation>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TomP2P.Connection;
-using TomP2P.Connection.Windows;
 using TomP2P.Extensions.Workaround;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
@@ -12,10 +11,16 @@ using TomP2P.Rpc;
 namespace TomP2P.P2P
 {
     // TODO finish implementation of Peer class
+    // - enable RPCs
+    // - finish basic operations
 
-    // TODO document this class according to the newest version
     /// <summary>
-    /// This is the main class to start DHT operations.
+    /// This is the main class to start DHT operations. This class makes use of the build pattern
+    /// and for each DHT operation, a builder class is returned. The main operations can be initiated
+    /// with Put(), Get(), Add(), AddTracker(), GetTracker(), Remove(), Submit(), Send(), SendDirect(),
+    /// Broadcast(). Each of those operations returns a builder that offers more options.
+    /// One of the main difference to a "regular" DHT is that TomP2P can store a map (key-values) instead
+    /// of just values.
     /// </summary>
     public class Peer
     {
@@ -36,12 +41,14 @@ namespace TomP2P.P2P
         // RPC
         private PingRpc _pingRpc;
         private QuitRpc _quitRpc;
-        // TODO add other Rpc's
+        //private NeighborRpc _neighborRpc;
+        //private DirectDataRpc _directDataRpc;
+        //private BroadcastRpc _broadcastRpc;
 
         private volatile bool _shutdown = false;
 
-        // TODO add the two lists
-        private SynchronizedCollection<IShutdown> _shutdownListeners = new SynchronizedCollection<IShutdown>();
+        private IList<IAutomaticTask> _automaticTasks = new SynchronizedCollection<IAutomaticTask>();
+        private IList<IShutdown> _shutdownListeners = new SynchronizedCollection<IShutdown>();
 
         /// <summary>
         /// Creates a peer. Please use <see cref="PeerBuilder"/> to create a <see cref="Peer"/> instance.
@@ -91,7 +98,61 @@ namespace TomP2P.P2P
             _quitRpc = quitRpc;
             return this;
         }
+        /*
+        public NeighborRpc NeighborRpc
+        {
+            get
+            {
+                if (_neighborRpc == null)
+                {
+                    throw new SystemException("Neighbor RPC not enabled. Please enable this RPC in the PeerBuilder.");
+                }
+                return _neighborRpc;
+            }
+        }
+        
+        public Peer SetNeighborRpc(NeighborRpc neighborRpc)
+        {
+            _neighborRpc = neighborRpc;
+            return this;
+        }
 
+        public DirectDataRpc DirectDataRpc
+        {
+            get
+            {
+                if (_directDataRpc == null)
+                {
+                    throw new SystemException("Direct data RPC not enabled. Please enable this RPC in the PeerBuilder.");
+                }
+                return _directDataRpc;
+            }
+        }
+
+        public Peer SetDirectDataRpc(DirectDataRpc directDataRpc)
+        {
+            _directDataRpc = directDataRpc;
+            return this;
+        }
+
+        public BroadcastRpc BroadcastRpc
+        {
+            get
+            {
+                if (_broadcastRpc == null)
+                {
+                    throw new SystemException("Broadcast RPC not enabled. Please enable this RPC in the PeerBuilder.");
+                }
+                return _broadcastRpc;
+            }
+        }
+
+        public Peer SetBroadcastRpc(BroadcastRpc broadcastRpc)
+        {
+            _broadcastRpc = broadcastRpc;
+            return this;
+        }
+        */
         public DistributedRouting DistributedRouting
         {
             get
@@ -131,6 +192,14 @@ namespace TomP2P.P2P
             throw new NotImplementedException();
         }
 
+        #region Basic P2P operations
+
+        // TODO implement basic P2P operations in Peer
+
+        #region Direct, Bootstrap, Ping, Broadcast
+
+
+
         public BootstrapBuilder Bootstrap()
         {
             return new BootstrapBuilder(this);
@@ -141,8 +210,9 @@ namespace TomP2P.P2P
             return new PingBuilder(this);
         }
 
-        // Basic P2P operations
-        // TODO implement basic P2P operations in Peer
+        #endregion
+
+        #endregion
 
         /// <summary>
         /// Shuts down everything.
@@ -182,9 +252,27 @@ namespace TomP2P.P2P
             get { return _shutdown; }
         }
 
+        public Peer AddShutdownListener(IShutdown shutdown)
+        {
+            _shutdownListeners.Add(shutdown);
+            return this;
+        }
+
         public Peer RemoveShutdownListener(IShutdown shutdown)
         {
             _shutdownListeners.Remove(shutdown);
+            return this;
+        }
+
+        public Peer AddAutomaticTask(IAutomaticTask automaticTask)
+        {
+            _automaticTasks.Add(automaticTask);
+            return this;
+        }
+
+        public Peer RemoveAutomaticTask(IAutomaticTask automaticTask)
+        {
+            _automaticTasks.Remove(automaticTask);
             return this;
         }
     }

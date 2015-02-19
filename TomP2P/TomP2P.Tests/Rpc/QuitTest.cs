@@ -32,7 +32,7 @@ namespace TomP2P.Tests.Rpc
                     .SetPorts(7777)
                     .Start();
 
-                await sender.Bootstrap().SetPeerAddress(recv1.PeerAddress).Start();
+                await sender.Bootstrap().SetPeerAddress(recv1.PeerAddress).StartAsync();
 
                 Assert.IsTrue(sender.PeerBean.PeerMap.All.Count == 1);
                 Assert.IsTrue(sender.PeerBean.PeerMap.AllOverflow.Count == 1);

@@ -138,7 +138,7 @@ namespace TomP2P.P2P.Builder
         // .NET-specific:
         // returns TcsWrappedBootstrap.Task instead of "FutureBootstrap"
         // TODO how to expose "BootstrapTo" property as well?
-        public Task  Start()
+        public Task  StartAsync()
         {
             if (_peer.IsShutdown)
             {
