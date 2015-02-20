@@ -173,6 +173,7 @@
     <Compile Include="Rpc\DispatchHandler.cs" />
     <Compile Include="Rpc\IObjectDataReply.cs" />
     <Compile Include="Rpc\IRawDataReply.cs" />
+    <Compile Include="Rpc\ISendDirectBuilder.cs" />
     <Compile Include="Rpc\NeighborRpc.cs" />
     <Compile Include="Rpc\PingRpc.cs" />
     <Compile Include="Rpc\QuitRpc.cs" />
