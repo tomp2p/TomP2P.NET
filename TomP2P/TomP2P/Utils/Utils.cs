@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Extensions;
@@ -36,6 +34,18 @@ namespace TomP2P.Utils
         {
             // TODO check if works
             return (a == b) || (a != null && a.Equals(b));
+        }
+
+        public static sbyte[] EncodeObject(object attachment)
+        {
+            // TODO find a way to encode Java/.NET objects
+            throw new NotImplementedException();
+        }
+
+        public static object DecodeObject(ByteBuf buffer)
+        {
+            // TODO find a way to decode Java/.NET objects
+            throw new NotImplementedException();
         }
 
         public static bool IsSameSets<T>(IEnumerable<T> set1, IEnumerable<T> set2)
