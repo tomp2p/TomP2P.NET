@@ -41,7 +41,7 @@ namespace TomP2P.P2P
         // RPC
         private PingRpc _pingRpc;
         private QuitRpc _quitRpc;
-        //private NeighborRpc _neighborRpc;
+        private NeighborRpc _neighborRpc;
         //private DirectDataRpc _directDataRpc;
         private BroadcastRpc _broadcastRpc;
 
@@ -98,7 +98,7 @@ namespace TomP2P.P2P
             _quitRpc = quitRpc;
             return this;
         }
-        /*
+        
         public NeighborRpc NeighborRpc
         {
             get
@@ -116,7 +116,7 @@ namespace TomP2P.P2P
             _neighborRpc = neighborRpc;
             return this;
         }
-
+        /*
         public DirectDataRpc DirectDataRpc
         {
             get
