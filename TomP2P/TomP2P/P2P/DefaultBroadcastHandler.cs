@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Storage;
@@ -24,7 +25,7 @@ namespace TomP2P.P2P
 
         private readonly Peer _peer;
         private readonly Random _rnd;
-        private readonly ConcurrentCacheMap<Number160, bool?> _cache = new ConcurrentCacheMap<Number160, bool>();
+        private readonly ConcurrentCacheMap<Number160, ReferenceStruct<bool>> _cache = new ConcurrentCacheMap<Number160, ReferenceStruct<bool>>();
 
         /// <summary>
         /// Constructor.
@@ -91,10 +92,11 @@ namespace TomP2P.P2P
         /// <returns>True, if this message was sent withing the last 60 seconds.</returns>
         private bool TwiceSeen(Number160 messageKey)
         {
-            bool isInCache = _cache.PutIfAbsent(messageKey, true);
-            if (isInCache)
+            // TODO does this workaround work?
+            var isInCache = _cache.PutIfAbsent(messageKey, new ReferenceStruct<bool>(true));
+            if (isInCache.GetValue())
             {
-                _cache.Put(messageKey, false);
+                _cache.Put(messageKey, new ReferenceStruct<bool>(false));
             }
             else
             {
