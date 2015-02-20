@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
@@ -17,7 +16,7 @@ namespace TomP2P.Rpc
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public const int NeihborSize = 30;
+        public const int NeighborSize = 30;
         public const int NeighborLimit = 1000;
 
         public NeighborRpc(PeerBean peerBean, ConnectionBean connectionBean)
@@ -146,7 +145,131 @@ namespace TomP2P.Rpc
 
         public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
         {
-            throw new NotImplementedException();
+            if (requestMessage.KeyList.Count < 2)
+            {
+                throw new ArgumentException("At least location and domain keys are needed.");
+            }
+            if (!(requestMessage.Type == Message.Message.MessageType.Request1
+                || requestMessage.Type == Message.Message.MessageType.Request2
+                || requestMessage.Type == Message.Message.MessageType.Request3
+                || requestMessage.Type == Message.Message.MessageType.Request4)
+                && (requestMessage.Command == Rpc.Commands.Neighbor.GetNr()))
+            {
+                throw new ArgumentException("Message content is wrong for this handler.");
+            }
+
+            Number160 locationKey = requestMessage.Key(0);
+            Number160 domainKey = requestMessage.Key(1);
+
+            var neighbors = GetNeighbors(locationKey, NeighborSize);
+            if (neighbors == null)
+            {
+                // return empty neighbor set
+                var response = CreateResponseMessage(requestMessage, Message.Message.MessageType.NotFound);
+                response.SetNeighborSet(new NeighborSet(-1, new Collection<PeerAddress>()));
+                responder.Response(response);
+                return;
+            }
+
+            // create response message and set neighbors
+            var responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
+
+            Logger.Debug("Found the following neighbors: {0}.", neighbors);
+            var neighborSet = new NeighborSet(NeighborLimit, neighbors);
+            responseMessage.SetNeighborSet(neighborSet);
+
+            Number160 contentKey = requestMessage.Key(2);
+            var keyBloomFilter = requestMessage.BloomFilter(0);
+            var contentBloomFilter = requestMessage.BloomFilter(1);
+            var keyCollection = requestMessage.KeyCollection(0);
+
+            // it is important to set an integer if a value is present
+            bool isDigest = requestMessage.Type != Message.Message.MessageType.Request1;
+            if (isDigest)
+            {
+                if (requestMessage.Type == Message.Message.MessageType.Request2)
+                {
+                    DigestInfo digestInfo;
+                    if (PeerBean.DigestStorage == null)
+                    {
+                        // no storage to search
+                        digestInfo = new DigestInfo();
+                    }
+                    else if (contentKey != null && locationKey != null && domainKey != null)
+                    {
+                        var locationAndDomainKey = new Number320(locationKey, domainKey);
+                        var from = new Number640(locationAndDomainKey, contentKey, Number160.Zero);
+                        var to = new Number640(locationAndDomainKey, contentKey, Number160.MaxValue);
+                        digestInfo = PeerBean.DigestStorage.Digest(from, to, -1, true);
+                    }
+                    else if ((keyBloomFilter != null || contentBloomFilter != null) && locationKey != null && domainKey != null)
+                    {
+                        var locationAndDomainKey = new Number320(locationKey, domainKey);
+                        digestInfo = PeerBean.DigestStorage.Digest(locationAndDomainKey, keyBloomFilter,
+                                contentBloomFilter, -1, true, true);
+                    }
+                    else if (keyCollection != null && keyCollection.Keys.Count == 2)
+                    {
+                        var enumerator = keyCollection.Keys.GetEnumerator();
+                        var from = enumerator.MoveNext() ? enumerator.Current : null; // TODO works correctly?
+                        var to = enumerator.MoveNext() ? enumerator.Current : null;
+
+                        digestInfo = PeerBean.DigestStorage.Digest(from, to, -1, true);
+                    }
+                    else if (locationKey != null && domainKey != null)
+                    {
+                        var locationAndDomainKey = new Number320(locationKey, domainKey);
+                        var from = new Number640(locationAndDomainKey, Number160.Zero, Number160.Zero);
+                        var to = new Number640(locationAndDomainKey, Number160.MaxValue, Number160.MaxValue);
+                        digestInfo = PeerBean.DigestStorage.Digest(from, to, -1, true);
+                    }
+                    else
+                    {
+                        Logger.Warn("Did not search for anything.");
+                        digestInfo = new DigestInfo();
+                    }
+                    responseMessage.SetIntValue(digestInfo.Size);
+                    responseMessage.SetKey(digestInfo.KeyDigest);
+                    responseMessage.SetKey(digestInfo.ContentDigest);
+                }
+                else if (requestMessage.Type == Message.Message.MessageType.Request3)
+                {
+                    DigestInfo digestInfo;
+				    if (PeerBean.DigestTracker == null) {
+					    // no tracker to search
+					    digestInfo = new DigestInfo();
+				    }
+                    else
+                    {
+					    digestInfo = PeerBean.DigestTracker.Digest(locationKey, domainKey, contentKey);
+					    if (digestInfo.Size == 0)
+                        {
+						    Logger.Debug("No entry found on peer {0}.", requestMessage.Recipient);
+					    }
+				    }
+                    responseMessage.SetIntValue(digestInfo.Size);
+                }
+                else if (requestMessage.Type == Message.Message.MessageType.Request4)
+                {
+                    lock (PeerBean.PeerStatusListeners)
+                    {
+                        foreach (var listener in PeerBean.PeerStatusListeners)
+                        {
+                            listener.PeerFailed(requestMessage.Sender,
+                                new PeerException(PeerException.AbortCauseEnum.Shutdown, "shutdown"));
+                        }
+                    }
+                }
+            }
+
+            responder.Response(responseMessage);
+        }
+
+        // TODO in Java: explain why protected method here
+        protected ICollection<PeerAddress> GetNeighbors(Number160 id, int atLeast)
+        {
+            // TODO adapt to newest TomP2P version
+            return PeerBean.PeerMap.ClosePeers(id, atLeast);
         }
     }
 }

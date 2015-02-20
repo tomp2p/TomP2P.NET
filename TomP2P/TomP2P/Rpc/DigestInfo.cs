@@ -21,6 +21,12 @@ namespace TomP2P.Rpc
         private readonly SortedDictionary<Number640, ICollection<Number160>> _mapDigests = new SortedDictionary<Number640, ICollection<Number160>>();
 
         /// <summary>
+        /// Empty constructor is used to add the hashes to the list.
+        /// </summary>
+        public DigestInfo()
+        { }
+
+        /// <summary>
         /// Creates a digest with the size only.
         /// </summary>
         /// <param name="size"></param>
