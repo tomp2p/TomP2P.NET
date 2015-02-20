@@ -171,6 +171,7 @@
     <Compile Include="Rpc\DefaultBloomFilterFactory.cs" />
     <Compile Include="Rpc\DigestInfo.cs" />
     <Compile Include="Rpc\DispatchHandler.cs" />
+    <Compile Include="Rpc\IObjectDataReply.cs" />
     <Compile Include="Rpc\IRawDataReply.cs" />
     <Compile Include="Rpc\NeighborRpc.cs" />
     <Compile Include="Rpc\PingRpc.cs" />

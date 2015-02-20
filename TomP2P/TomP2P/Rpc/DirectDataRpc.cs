@@ -13,7 +13,7 @@ namespace TomP2P.Rpc
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private volatile RawDataReply _rawDataReply;
+        private volatile IRawDataReply _rawDataReply;
         private volatile ObjectDataReply _objectDataReply;
 
         public DirectDataRpc(PeerBean peerBean, ConnectionBean connectionBean)
