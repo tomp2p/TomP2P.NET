@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using NLog;
 using TomP2P.Extensions;
@@ -7,7 +8,7 @@ using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Utils
 {
-    public class ConcurrentCacheMap<TKey, TValue> where TValue : class 
+    public class ConcurrentCacheMap<TKey, TValue> where TValue : Nullable<TValue>
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

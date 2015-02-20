@@ -24,7 +24,7 @@ namespace TomP2P.P2P
 
         private readonly Peer _peer;
         private readonly Random _rnd;
-        private readonly ConcurrentCacheMap<Number160, bool> _cache = new ConcurrentCacheMap<Number160, bool>();
+        private readonly ConcurrentCacheMap<Number160, bool?> _cache = new ConcurrentCacheMap<Number160, bool>();
 
         /// <summary>
         /// Constructor.
