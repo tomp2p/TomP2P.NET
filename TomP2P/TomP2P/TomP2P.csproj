@@ -152,6 +152,7 @@
     <Compile Include="Peers\DefaultMaintenance.cs" />
     <Compile Include="Peers\IAutomaticTask.cs" />
     <Compile Include="Rpc\BroadcastRpc.cs" />
+    <Compile Include="Rpc\DirectDataRpc.cs" />
     <Compile Include="Rpc\IBloomfilterFactory.cs" />
     <Compile Include="Peers\IMaintainable.cs" />
     <Compile Include="Peers\IMaintenance.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Rpc\DefaultBloomFilterFactory.cs" />
     <Compile Include="Rpc\DigestInfo.cs" />
     <Compile Include="Rpc\DispatchHandler.cs" />
+    <Compile Include="Rpc\IRawDataReply.cs" />
     <Compile Include="Rpc\NeighborRpc.cs" />
     <Compile Include="Rpc\PingRpc.cs" />
     <Compile Include="Rpc\QuitRpc.cs" />
