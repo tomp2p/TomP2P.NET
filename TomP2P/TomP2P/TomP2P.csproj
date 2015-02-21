@@ -181,6 +181,7 @@
     <Compile Include="Rpc\Rpc.cs" />
     <Compile Include="Rpc\SearchValues.cs" />
     <Compile Include="Rpc\SimpleBloomFilter.cs" />
+    <Compile Include="Storage\AlternativeCompositeByteBuf.cs" />
     <Compile Include="Storage\Data.cs" />
     <Compile Include="Storage\DataBuffer.cs" />
     <Compile Include="Storage\IDigestStorage.cs" />

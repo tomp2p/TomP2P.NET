@@ -46,7 +46,6 @@
     <Compile Include="Netty\Buffer\AbstractByteBufAllocator.cs" />
     <Compile Include="Netty\Buffer\AbstractDerivedByteBuf.cs" />
     <Compile Include="Netty\Buffer\ByteBuf.cs" />
-    <Compile Include="Netty\Buffer\AlternativeCompositeByteBuf.cs" />
     <Compile Include="Netty\Buffer\ByteBufUtil.cs" />
     <Compile Include="Netty\Buffer\CompositeByteBuf.cs" />
     <Compile Include="Convenient.cs" />
