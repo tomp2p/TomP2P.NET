@@ -7,6 +7,7 @@ using NLog;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Message;
+using TomP2P.Peers;
 
 namespace TomP2P.Connection
 {

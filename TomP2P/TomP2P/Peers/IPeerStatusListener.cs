@@ -1,6 +1,6 @@
-﻿using TomP2P.Peers;
+﻿using TomP2P.Connection;
 
-namespace TomP2P.Connection
+namespace TomP2P.Peers
 {
     /// <summary>
     /// All classes that are interested if a new peer was discovered or a peer 

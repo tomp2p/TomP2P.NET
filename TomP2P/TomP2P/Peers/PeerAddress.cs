@@ -6,7 +6,6 @@ using System.Net;
 using System.Text;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Peers
 {
@@ -308,7 +307,6 @@ namespace TomP2P.Peers
             : this(peerId, new PeerSocketAddress(inetAddress, tcpPort, udpPort), ReadIsFirewalledTcp(options), ReadIsFirewalledUdp(options), ReadIsRelay(options), EmptyPeerSocketAddresses)
         { }
 
-        // TODO exception handling from invalid string format
         /// <summary>
         /// Facade for PeerAddress(Number160, IPAddress, int, int).
         /// </summary>
@@ -663,5 +661,4 @@ namespace TomP2P.Peers
             get { return PeerSocketAddress.TcpPort; }
         }
     }
-
 }

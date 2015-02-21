@@ -62,7 +62,7 @@
     <Compile Include="Connection\Dispatcher.cs" />
     <Compile Include="Connection\DsaSignatureFactory.cs" />
     <Compile Include="Connection\IConnectionConfiguration.cs" />
-    <Compile Include="Connection\IPeerStatusListener.cs" />
+    <Compile Include="Peers\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
     <Compile Include="Connection\Windows\Netty\AttributeKey.cs" />
