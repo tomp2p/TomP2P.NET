@@ -150,6 +150,7 @@
     <Compile Include="P2P\RoutingConfiguration.cs" />
     <Compile Include="P2P\RoutingMechanism.cs" />
     <Compile Include="Peers\DefaultMaintenance.cs" />
+    <Compile Include="Peers\DefaultPeerFilter.cs" />
     <Compile Include="Peers\IAutomaticTask.cs" />
     <Compile Include="Rpc\BroadcastRpc.cs" />
     <Compile Include="Rpc\DigestResult.cs" />
