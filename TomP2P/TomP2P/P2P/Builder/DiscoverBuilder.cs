@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
+using TomP2P.Futures;
 using TomP2P.Peers;
 
 namespace TomP2P.P2P.Builder
@@ -14,14 +17,14 @@ namespace TomP2P.P2P.Builder
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private static TcsDiscover TcsDiscoverShutdown;
+        private static readonly TcsDiscover TcsDiscoverShutdown = new TcsDiscover();
 
         private readonly Peer _peer;
         public IPAddress InetAddress { get; private set; }
         public int PortUdp { get; private set; }
         public int PortTcp { get; private set; }
         public PeerAddress PeerAddress { get; private set; }
-        private PeerAddress _senderAddress;
+        public PeerAddress SenderAddress { get; private set; }
 
         public int DiscoverTimeoutSec { get; private set; }
 
@@ -32,8 +35,7 @@ namespace TomP2P.P2P.Builder
         // static constructor
         static DiscoverBuilder()
         {
-            // TODO implement
-            throw new NotImplementedException();
+            TcsDiscoverShutdown.SetException(new TaskFailedException("Peer is shutting down."));
         }
 
         public DiscoverBuilder(Peer peer)
@@ -91,6 +93,12 @@ namespace TomP2P.P2P.Builder
             return this;
         }
 
+        public DiscoverBuilder SetSenderAddress(PeerAddress senderAddress)
+        {
+            SenderAddress = senderAddress;
+            return this;
+        }
+
         public DiscoverBuilder SetDiscoverTimeoutSec(int discoverTimeoutSec)
         {
             DiscoverTimeoutSec = discoverTimeoutSec;
@@ -109,6 +117,68 @@ namespace TomP2P.P2P.Builder
             {
                 return TcsDiscoverShutdown;
             }
+
+            if (PeerAddress == null && InetAddress != null)
+            {
+                PeerAddress = new PeerAddress(Number160.Zero, InetAddress, PortTcp, PortUdp);
+            }
+            if (PeerAddress == null)
+            {
+                throw new ArgumentException("Peer address or inet address required.");
+            }
+            if (_configuration == null)
+            {
+                _configuration = new DefaultConnectionConfiguration();
+            }
+            if (TcsDiscover == null)
+            {
+                TcsDiscover = new TcsDiscover();
+            }
+
+            return Discover(PeerAddress, _configuration, TcsDiscover);
+        }
+
+        /// <summary>
+        /// Discover attempts to find the external IP address of this peer. This is done by first trying to set
+        /// UPNP with port forwarding (gives us the external address), query UPNP for the external address, and
+        /// pinging a well-known peer. The fallback is NAT-PMP.
+        /// </summary>
+        /// <param name="peerAddress">The peer address. Since pings are used the peer ID can be Number160.Zero.</param>
+        /// <param name="configuration"></param>
+        /// <param name="tcsDiscover"></param>
+        /// <returns>The future discover. This holds also the real ID of the peer we send the discover request.</returns>
+        private TcsDiscover Discover(PeerAddress peerAddress, IConnectionConfiguration configuration,
+            TcsDiscover tcsDiscover)
+        {
+            var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(1, 2);
+            Utils.Utils.AddReleaseListener(taskCc, TcsDiscover.Task);
+            taskCc.ContinueWith(tcc =>
+            {
+                if (!tcc.IsFaulted)
+                {
+                    Discover(tcsDiscover, peerAddress, tcc.Result, configuration);
+                }
+                else
+                {
+                    tcsDiscover.SetException(tcc.TryGetException());
+                }
+            });
+
+            return tcsDiscover;
+        }
+
+        /// <summary>
+        /// Needs 3 connections. Cleans up channel creator, which means they will be released.
+        /// </summary>
+        /// <param name="tcsDiscover"></param>
+        /// <param name="peerAddress"></param>
+        /// <param name="cc"></param>
+        /// <param name="configuration"></param>
+        private void Discover(TcsDiscover tcsDiscover, PeerAddress peerAddress, ChannelCreator cc,
+            IConnectionConfiguration configuration)
+        {
+            // TODO implement
+            throw new NotImplementedException();
         }
     }
 }
