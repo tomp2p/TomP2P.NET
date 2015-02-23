@@ -85,11 +85,7 @@
     <Compile Include="Connection\Reservation.cs" />
     <Compile Include="Connection\Sender.cs" />
     <Compile Include="Connection\TimeoutFactory.cs" />
-    <Compile Include="Connection\Windows\AsyncClientSocket.cs" />
-    <Compile Include="Connection\Windows\AsyncServerSocket.cs" />
     <Compile Include="Connection\Windows\Netty\BaseChannel.cs" />
-    <Compile Include="Connection\Windows\ClientToken.cs" />
-    <Compile Include="Connection\Windows\ClientToken2.cs" />
     <Compile Include="Connection\Windows\MyTcpClient.cs" />
     <Compile Include="Connection\Windows\MyTcpServer.cs" />
     <Compile Include="Connection\Windows\MyUdpClient.cs" />
@@ -105,10 +101,6 @@
     <Compile Include="Connection\Windows\Netty\Pipeline.cs" />
     <Compile Include="Connection\Windows\Netty\StreamPiece.cs" />
     <Compile Include="Connection\Windows\RconInboundHandler.cs" />
-    <Compile Include="Connection\Windows\TcpClientSocket.cs" />
-    <Compile Include="Connection\Windows\TcpServerSocket.cs" />
-    <Compile Include="Connection\Windows\UdpClientSocket.cs" />
-    <Compile Include="Connection\Windows\UdpServerSocket.cs" />
     <Compile Include="Futures\BaseTcsImpl.cs" />
     <Compile Include="Futures\TcsRouting.cs" />
     <Compile Include="Futures\ICancel.cs" />
