@@ -130,7 +130,7 @@ namespace TomP2P.P2P
             // As presented by Kazuyuki Shudo at AIMS 2009, it is better to ask random
             // peers with the data than ask peers that are ordered by distance.
             // -> this balances load
-            var directHits = new SortedDictionary<PeerAddress, DigestInfo>(_peerBean.PeerMap.CreateComparer());
+            var directHits = new SortedDictionary<PeerAddress, DigestInfo>(comparer);
             var potentialHits = new SortedSet<PeerAddress>(comparer);
 
             // fill initially
@@ -150,11 +150,6 @@ namespace TomP2P.P2P
                 {
                     from = routingBuilder.From;
                     to = routingBuilder.To;
-                }
-                else if (routingBuilder.DomainKey == null)
-                {
-                    from = new Number640(routingBuilder.LocationKey, Number160.Zero, Number160.Zero, Number160.Zero);
-                    to = new Number640(routingBuilder.LocationKey, Number160.MaxValue, Number160.MaxValue, Number160.MaxValue);
                 }
                 else if (routingBuilder.ContentKey == null)
                 {

@@ -84,7 +84,7 @@ namespace TomP2P.Connection
                     PeerAddress recipient;
                     if (_tcsResponse != null)
                     {
-                        var requestMessage = (Message.Message) _tcsResponse.Task.AsyncState;
+                        var requestMessage = (Message.Message)_tcsResponse.Task.AsyncState;
 
                         Logger.Warn("Request status is {0}.", requestMessage);
                         ctx.Channel.Closed +=
@@ -106,6 +106,14 @@ namespace TomP2P.Connection
                     {
                         return;
                     }
+
+                    var socketAddr = ctx.Channel.RemoteEndPoint;
+                    if (socketAddr == null)
+                    {
+                        var attrInetAddr = ctx.Attr(Decoder.InetAddressKey);
+                        socketAddr = attrInetAddr.Get();
+                    }
+
                     lock (_peerStatusListeners)
                     {
                         foreach (var listener in _peerStatusListeners)
@@ -117,12 +125,6 @@ namespace TomP2P.Connection
                             }
                             else
                             {
-                                var socketAddr = ctx.Channel.RemoteEndPoint;
-                                if (socketAddr == null)
-                                {
-                                    var attrInetAddr = ctx.Attr(Decoder.InetAddressKey);
-                                    socketAddr = attrInetAddr.Get();
-                                }
                                 if (socketAddr != null)
                                 {
                                     listener.PeerFailed(new PeerAddress(Number160.Zero, socketAddr.Address),
