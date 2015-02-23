@@ -6,12 +6,10 @@ using NLog;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 using TomP2P.Peers;
+using TomP2P.Storage;
 
 namespace TomP2P.Rpc
 {
-    // TODO maybe there is a .NET bloomfilter that can be used
-    // TODO finish SimpleBloomFilter implementation (and documentation)
-
     /// <summary>
     /// A simple bloom filter that uses Random as a primitive hash function.
     /// </summary>
@@ -33,6 +31,10 @@ namespace TomP2P.Rpc
 
         private readonly int _byteArraySize;
         private readonly int _bitArraySize;
+        /// <summary>
+        /// The expected elements that was provided.
+        /// </summary>
+        public int ExpectedElements { get; private set; }
 
         /// <summary>
         /// Constructs an empty SimpleBloomFilter. You must specify the number of bits in the bloom filter and also specify the number of items being expected to be added.
@@ -85,7 +87,7 @@ namespace TomP2P.Rpc
         /// Constructs a SimpleBloomFilter out of existing data.
         /// </summary>
         /// <param name="buffer">The byte buffer with the data.</param>
-        public SimpleBloomFilter(AlternativeCompositeByteBuf buffer)
+        public SimpleBloomFilter(ByteBuf buffer)
         {
             _byteArraySize = buffer.ReadUShort() - SizeHeader;
             _bitArraySize = _byteArraySize*8;
@@ -124,10 +126,10 @@ namespace TomP2P.Rpc
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="E"></typeparam>
+        /// <typeparam name="T2"></typeparam>
         /// <param name="collection"></param>
         /// <returns>Always returns false.</returns>
-        public bool AddAll<E>(IEnumerable<E> collection) where E : T // TODO correct use of generics?
+        public bool AddAll<T2>(ICollection<T2> collection) where T2 : T
         {
             foreach (var e in collection)
             {
@@ -252,7 +254,7 @@ namespace TomP2P.Rpc
         {
             const int magic = 31;
             int hash = 7;
-            hash = magic*hash + BitArray.GetHashCode();
+            hash = magic*hash + BitArray.GetHashCode(); // TODO interop concern?
             hash = magic*hash + _k;
             hash = magic*hash + ExpectedElements;
             hash = magic*hash + _bitArraySize;
@@ -269,11 +271,6 @@ namespace TomP2P.Rpc
             }
             return sb.ToString();
         }
-
-        /// <summary>
-        /// The expected elements that was provided.
-        /// </summary>
-        public int ExpectedElements { get; private set; }
 
         /// <summary>
         /// The approximate probability of the contains() method returning true for an object that had not 

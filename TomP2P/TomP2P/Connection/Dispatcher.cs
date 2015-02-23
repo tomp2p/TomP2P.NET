@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -25,7 +24,7 @@ namespace TomP2P.Connection
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
-        private readonly int _p2pId;
+        private readonly int _p2PId;
         private readonly PeerBean _peerBeanMaster;
         private readonly int _heartBeatMillis;
 
@@ -39,12 +38,12 @@ namespace TomP2P.Connection
         /// <summary>
         /// Creates a dispatcher.
         /// </summary>
-        /// <param name="p2pId">The P2P ID the dispatcher is looking for incoming messages.</param>
+        /// <param name="p2PId">The P2P ID the dispatcher is looking for incoming messages.</param>
         /// <param name="peerBeanMaster"></param>
         /// <param name="heartBeatMillis"></param>
-        public Dispatcher(int p2pId, PeerBean peerBeanMaster, int heartBeatMillis)
+        public Dispatcher(int p2PId, PeerBean peerBeanMaster, int heartBeatMillis)
         {
-            _p2pId = p2pId;
+            _p2PId = p2PId;
             _peerBeanMaster = peerBeanMaster;
             _heartBeatMillis = heartBeatMillis;
         }
@@ -110,9 +109,9 @@ namespace TomP2P.Connection
             }
             
             Logger.Debug("Received request message {0} from channel {1}.", requestMessage, ctx.Channel);
-            if (requestMessage.Version != _p2pId)
+            if (requestMessage.Version != _p2PId)
             {
-                Logger.Error("Wrong version. We are looking for {0}, but we got {1}. Received: {2}.", _p2pId, requestMessage.Version, requestMessage);
+                Logger.Error("Wrong version. We are looking for {0}, but we got {1}. Received: {2}.", _p2PId, requestMessage.Version, requestMessage);
                 ctx.Close(); // TODO used?
                 lock (_peerBeanMaster.PeerStatusListeners)
                 {

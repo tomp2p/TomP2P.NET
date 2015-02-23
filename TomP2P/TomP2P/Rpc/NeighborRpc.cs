@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Message;
+using TomP2P.P2P;
 using TomP2P.Peers;
 
 namespace TomP2P.Rpc

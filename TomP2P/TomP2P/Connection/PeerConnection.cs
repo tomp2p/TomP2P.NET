@@ -169,9 +169,7 @@ namespace TomP2P.Connection
             {
                 if (_channel != null)
                 {
-                    // TODO check if correct
-                    throw new NotImplementedException();
-                    return _channel.IsActive;
+                    return Channel.IsOpen;
                 }
                 return false;
             }
@@ -210,6 +208,7 @@ namespace TomP2P.Connection
 
         public override int GetHashCode()
         {
+            // TODO implemend hashcode, also in Java
             throw new NotImplementedException();
         }
     }

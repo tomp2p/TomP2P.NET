@@ -8,7 +8,7 @@ using TomP2P.Extensions.Workaround;
 namespace TomP2P.Connection
 {
     /// <summary>
-    /// Stripped-down version of the <see cref="IdleStateHandler"/>.
+    /// Stripped-down version of the TimeoutFactory.IdleStateHandler.
     /// </summary>
     public class HeartBeat : BaseDuplexHandler
     {

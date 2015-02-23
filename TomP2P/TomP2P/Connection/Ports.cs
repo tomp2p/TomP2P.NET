@@ -15,7 +15,7 @@ namespace TomP2P.Connection
         public const int DefaultPort = 7700;
 
         private const int Range = MaxPort - MinDynPort;
-        private static readonly Random Random = new Random(); // TODO use InteropRandom?
+        private static readonly Random Random = new Random();
 
         // provide this information if you know your mapping beforehand
         // i.e., manual port-forwarding

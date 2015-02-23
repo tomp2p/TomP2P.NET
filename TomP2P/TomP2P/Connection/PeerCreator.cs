@@ -39,7 +39,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// Creates a master peer and starts UDP and TCP channels.
         /// </summary>
-        /// <param name="p2pId">The ID of the network.</param>
+        /// <param name="p2PId">The ID of the network.</param>
         /// <param name="peerId">The ID of this peer.</param>
         /// <param name="keyPair">The key pair or null.</param>
         /// <param name="channelServerConfiguration">The server configuration to create the 
@@ -47,7 +47,7 @@ namespace TomP2P.Connection
         /// <param name="channelClientConfiguration">The client-side configuration.</param>
         /// <param name="timer"></param>
         /// <param name="cts">.NET-specific: To be cancelled when the ConnectionBean.Timer stops.</param>
-        public PeerCreator(int p2pId, Number160 peerId, KeyPair keyPair,
+        public PeerCreator(int p2PId, Number160 peerId, KeyPair keyPair,
             ChannelServerConfiguration channelServerConfiguration,
             ChannelClientConfiguration channelClientConfiguration,
             Timer timer, CancellationTokenSource cts)
@@ -60,7 +60,7 @@ namespace TomP2P.Connection
 
             // start server
             // TODO find EventLoogGroup equivalents
-            var dispatcher = new Dispatcher(p2pId, PeerBean, channelServerConfiguration.HearBeatMillis);
+            var dispatcher = new Dispatcher(p2PId, PeerBean, channelServerConfiguration.HearBeatMillis);
             var channelServer = new ChannelServer(channelServerConfiguration, dispatcher, PeerBean.PeerStatusListeners);
             if (!channelServer.Startup())
             {
@@ -71,7 +71,7 @@ namespace TomP2P.Connection
             // connection bean
             var sender = new Sender(peerId, PeerBean.PeerStatusListeners, channelClientConfiguration, dispatcher);
             var reservation = new Reservation(channelClientConfiguration);
-            ConnectionBean = new ConnectionBean(p2pId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer, cts);
+            ConnectionBean = new ConnectionBean(p2PId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer, cts);
             _master = true;
         }
 

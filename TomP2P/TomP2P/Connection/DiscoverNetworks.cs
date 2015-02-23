@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
-using System.Threading.Tasks;
 using TomP2P.Extensions;
 
 namespace TomP2P.Connection
@@ -15,11 +11,8 @@ namespace TomP2P.Connection
     /// necessary information and then calls DiscoverInterfaces(Bindings).
     /// The results are stored in the <see cref="Bindings"/> instance as well.
     /// </summary>
-    public sealed class DiscoverNetworks
+    public static class DiscoverNetworks
     {
-        public DiscoverNetworks()
-        { }
-
         /// <summary>
         /// Searches for local interfaces. Hints how to search for those interfaces are
         /// provided by the user through the <see cref="Bindings"/> instance.

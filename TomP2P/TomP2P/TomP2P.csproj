@@ -122,7 +122,7 @@
     <Compile Include="Message\DataMap.cs" />
     <Compile Include="Message\Decoder.cs" />
     <Compile Include="Message\Encoder.cs" />
-    <Compile Include="Message\IResponder.cs" />
+    <Compile Include="Connection\IResponder.cs" />
     <Compile Include="Message\KeyCollection.cs" />
     <Compile Include="Message\KeyMap640Keys.cs" />
     <Compile Include="Message\KeyMapByte.cs" />
@@ -156,7 +156,7 @@
     <Compile Include="P2P\RoutingMechanism.cs" />
     <Compile Include="Peers\DefaultMaintenance.cs" />
     <Compile Include="Peers\DefaultPeerFilter.cs" />
-    <Compile Include="Peers\IAutomaticTask.cs" />
+    <Compile Include="P2P\IAutomaticTask.cs" />
     <Compile Include="Rpc\BroadcastRpc.cs" />
     <Compile Include="Rpc\DigestResult.cs" />
     <Compile Include="Rpc\DirectDataRpc.cs" />

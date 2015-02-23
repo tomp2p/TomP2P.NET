@@ -69,7 +69,7 @@ namespace TomP2P.Rpc
             }
         }
 
-        public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, Message.IResponder responder)
+        public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
         {
             if (!(requestMessage.Type == Message.Message.MessageType.RequestFf1 && requestMessage.Command == Rpc.Commands.Quit.GetNr()))
             {

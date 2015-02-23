@@ -2,6 +2,7 @@
 using System.Net;
 using TomP2P.Extensions.Netty;
 using TomP2P.Peers;
+using TomP2P.Storage;
 
 namespace TomP2P.Message
 {

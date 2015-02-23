@@ -11,7 +11,6 @@ using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Futures;
 using TomP2P.Message;
-using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 
@@ -40,7 +39,7 @@ namespace TomP2P.Connection
             _peerStatusListeners = peerStatusListeners;
             ChannelClientConfiguration = channelClientConfiguration;
             _dispatcher = dispatcher;
-            _random = new InteropRandom((ulong)peerId.GetHashCode()); // TODO check if same results in Java
+            _random = new InteropRandom((ulong)peerId.GetHashCode());
         }
 
         public Sender SetPingBuilderFactory(IPingBuilderFactory pingBuilderFactory)
@@ -111,9 +110,8 @@ namespace TomP2P.Connection
             var handlers = new Dictionary<string, IChannelHandler>();
             if (!isFireAndForget)
             {
-                // TODO add timeout handlers
-                //handlers.Add("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
-                //handlers.Add("timeout1", timeoutFactory.CreateTimeHandler());
+                handlers.Add("timeout0", timeoutFactory.CreateIdleStateHandlerTomP2P());
+                handlers.Add("timeout1", timeoutFactory.CreateTimeHandler());
             }
             handlers.Add("decoder", new TomP2PSinglePacketUdp(ChannelClientConfiguration.SignatureFactory));
             handlers.Add("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));
@@ -277,7 +275,7 @@ namespace TomP2P.Connection
         {
             // get relay address from the unreachable peer
             var relayAddresses = message.Recipient.PeerSocketAddresses.ToArray();
-            PeerSocketAddress socketAddress = null;
+            PeerSocketAddress socketAddress;
 
             if (relayAddresses.Length > 0)
             {

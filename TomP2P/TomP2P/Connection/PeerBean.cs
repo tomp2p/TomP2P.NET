@@ -9,8 +9,6 @@ using TomP2P.Storage;
 
 namespace TomP2P.Connection
 {
-    // TODO finish implementation of PeerBean
-
     /// <summary>
     /// A bean that holds non-sharable (unique for each peer) configuration settings for the peer.
     /// The sharable configurations are stored in a <see cref="ConnectionBean"/>.
@@ -156,11 +154,8 @@ namespace TomP2P.Connection
             {
                 return peerConnection;
             }
-            else
-            {
-                Logger.Error("There was no PeerConnection for peer ID = " + peerId);
-                return null;
-            }
+            Logger.Error("There was no PeerConnection for peer ID = " + peerId);
+            return null;
         }
     }
 }

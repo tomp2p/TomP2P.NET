@@ -1,5 +1,4 @@
-﻿
-namespace TomP2P.Connection
+﻿namespace TomP2P.Connection
 {
     /// <summary>
     /// The connection configuration with the default settings.

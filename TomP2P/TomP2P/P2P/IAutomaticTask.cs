@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace TomP2P.Peers
+namespace TomP2P.P2P
 {
     /// <summary>
     /// Use this interface to notify of a future has been generated from a maintenance task.

@@ -70,7 +70,7 @@ namespace TomP2P.Peers
             ShutdownTimeout = 20;
             ExceptionTimeout = 120;
             OfflineCount = 3;
-            Maintenance = new DefaultMaintenance(4, new int[] { 2, 4, 8, 16, 32, 64 });
+            Maintenance = new DefaultMaintenance(4, new[] { 2, 4, 8, 16, 32, 64 });
             IsPeerVerification = true;
 
             PeerFilters = new List<IPeerFilter>(2);

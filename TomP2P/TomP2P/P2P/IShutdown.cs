@@ -4,6 +4,6 @@ namespace TomP2P.P2P
 {
     public interface IShutdown
     {
-        Task ShutdownAsync(); // TODO correct?
+        Task ShutdownAsync();
     }
 }

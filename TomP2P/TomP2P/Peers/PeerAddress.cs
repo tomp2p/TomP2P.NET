@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
+using TomP2P.Storage;
 
 namespace TomP2P.Peers
 {

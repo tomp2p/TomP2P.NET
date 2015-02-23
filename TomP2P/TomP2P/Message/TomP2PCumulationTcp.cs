@@ -6,6 +6,7 @@ using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
+using TomP2P.Storage;
 
 namespace TomP2P.Message
 {

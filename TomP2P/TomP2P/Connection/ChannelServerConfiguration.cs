@@ -1,4 +1,6 @@
 ﻿
+using TomP2P.P2P;
+
 namespace TomP2P.Connection
 {
     /// <summary>

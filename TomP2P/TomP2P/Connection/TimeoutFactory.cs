@@ -59,7 +59,7 @@ namespace TomP2P.Connection
         }
 
         /// <summary>
-        /// The timeout handler that gets called from the <see cref="IdleStateHandler"/>
+        /// The timeout handler that gets called from the <see cref="IdleStateHandlerTomP2P"/>
         /// </summary>
         private class TimeHandler : BaseChannelHandler, IDuplexHandler
         {

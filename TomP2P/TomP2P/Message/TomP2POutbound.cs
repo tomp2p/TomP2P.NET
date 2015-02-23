@@ -3,6 +3,7 @@ using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions.Netty;
+using TomP2P.Storage;
 
 namespace TomP2P.Message
 {

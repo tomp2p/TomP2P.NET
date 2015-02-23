@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TomP2P.Futures;
+using TomP2P.Extensions;
 
 namespace TomP2P.Connection
 {
@@ -46,7 +46,7 @@ namespace TomP2P.Connection
         }
 
         public PeerException(TaskCompletionSource<Message.Message> tcs)
-            : base(tcs.Task.Exception.Message) // TODO find safer way (although, so far only invoked OnFaulted)
+            : base(tcs.Task.TryGetException().Message)
         {
             AbortCause = AbortCauseEnum.PeerError;
         }

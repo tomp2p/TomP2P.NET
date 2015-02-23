@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TomP2P.Connection.Windows;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 

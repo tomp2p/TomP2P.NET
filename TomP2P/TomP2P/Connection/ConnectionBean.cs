@@ -9,7 +9,6 @@ namespace TomP2P.Connection
     /// </summary>
     public class ConnectionBean
     {
-        // TODO THREAD_NAME needed?
         public static readonly int DefaultTcpIdleSeconds = 5;
         public static readonly int DefaultUdpIdleSeconds = 5;
         public static readonly int DefaultConnectionTimeoutTcp = 3000;
@@ -52,7 +51,7 @@ namespace TomP2P.Connection
         /// The connection bean with unmodifiable objects. Once it is set, it cannot be changed.
         /// If it is required to change, then the peer must be shut down and a new one created.
         /// </summary>
-        /// <param name="p2pId">The P2P ID.</param>
+        /// <param name="p2PId">The P2P ID.</param>
         /// <param name="dispatcher">The dispatcher object that receives all messages.</param>
         /// <param name="sender">The sender object that sends out messages.</param>
         /// <param name="channelServer">The channel server that listens on incoming connections.</param>
@@ -60,10 +59,10 @@ namespace TomP2P.Connection
         /// <param name="resourceConfiguration">The configuration that is responsible for the resource numbers.</param>
         /// <param name="timer">The timer for the discovery process.</param>
         /// <param name="cts">.NET-specific: To be cancelled when the ConnectionBean.Timer stops.</param>
-        public ConnectionBean(int p2pId, Dispatcher dispatcher, Sender sender, ChannelServer channelServer,
+        public ConnectionBean(int p2PId, Dispatcher dispatcher, Sender sender, ChannelServer channelServer,
             Reservation reservation, ChannelClientConfiguration resourceConfiguration, Timer timer, CancellationTokenSource cts)
         {
-            P2PId = p2pId;
+            P2PId = p2PId;
             Dispatcher = dispatcher;
             Sender = sender;
             ChannelServer = channelServer;

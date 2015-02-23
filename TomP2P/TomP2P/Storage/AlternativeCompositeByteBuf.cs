@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TomP2P.Extensions;
+using TomP2P.Extensions.Netty;
 
-namespace TomP2P.Extensions.Netty
+namespace TomP2P.Storage
 {
     /// <summary>
     /// Equivalent of Java TomP2P's AlternativeCompositeByteBuf, which is heavily inspired 
