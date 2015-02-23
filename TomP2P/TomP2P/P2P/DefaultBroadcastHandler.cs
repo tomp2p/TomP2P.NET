@@ -92,18 +92,12 @@ namespace TomP2P.P2P
         /// <returns>True, if this message was sent withing the last 60 seconds.</returns>
         private bool TwiceSeen(Number160 messageKey)
         {
-            // TODO update this to the new impl discussed in the meeting
             var isInCache = _cache.PutIfAbsent(messageKey, new ReferenceStruct<bool>(true));
             if (isInCache != null)
             {
-                if (isInCache.GetValue())
-                {
-                    _cache.Put(messageKey, new ReferenceStruct<bool>(false));
-                }
-                else
-                {
-                    return true;
-                }
+                // ttl refresh
+                _cache.Put(messageKey, new ReferenceStruct<bool>(true));
+                return true;
             }
             return false;
         }
