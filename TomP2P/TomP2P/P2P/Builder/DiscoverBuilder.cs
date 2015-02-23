@@ -177,6 +177,8 @@ namespace TomP2P.P2P.Builder
         private void Discover(TcsDiscover tcsDiscover, PeerAddress peerAddress, ChannelCreator cc,
             IConnectionConfiguration configuration)
         {
+            _peer.PingRpc.
+
             // TODO implement
             throw new NotImplementedException();
         }

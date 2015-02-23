@@ -199,6 +199,32 @@ namespace TomP2P.Rpc
             return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration).SendTcpAsync(channelCreator);
         }
 
+        public void AddPeerReachableListener(IPeerReachable peerReachable)
+        {
+            lock (_reachableListeners)
+            {
+                _reachableListeners.Add(peerReachable);
+            }
+        }
+
+        public void RemovePeerReachableListener(IPeerReachable peerReachable)
+        {
+            lock (_reachableListeners)
+            {
+                _reachableListeners.Remove(peerReachable);
+            }
+        }
+
+        public void AddPeerReceivedBroadcastPing(IPeerReceivedBroadcastPing peerReceivedBroadcastPing)
+        {
+            _receivedBroadcastPingListeners.Add(peerReceivedBroadcastPing);
+        }
+
+        public void RemovePeerReceivedBroadcastPing(IPeerReceivedBroadcastPing peerReceivedBroadcastPing)
+        {
+            _receivedBroadcastPingListeners.Remove(peerReceivedBroadcastPing);
+        }
+
         /// <summary>
         /// Creates a RequestHandler.
         /// </summary>
