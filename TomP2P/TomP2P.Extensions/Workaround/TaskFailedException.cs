@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TomP2P.Extensions.Workaround
 {
@@ -11,5 +12,12 @@ namespace TomP2P.Extensions.Workaround
         public TaskFailedException(string message)
             : base(message)
         { }
+
+        public TaskFailedException(string message, Task baseTask)
+            : base(
+                String.Format("{0}{1}", message, baseTask != null ? " <-> " + baseTask.TryGetException().Message : String.Empty))
+        {
+            
+        }
     }
 }

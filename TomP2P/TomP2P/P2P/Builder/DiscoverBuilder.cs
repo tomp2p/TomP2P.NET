@@ -177,10 +177,55 @@ namespace TomP2P.P2P.Builder
         private void Discover(TcsDiscover tcsDiscover, PeerAddress peerAddress, ChannelCreator cc,
             IConnectionConfiguration configuration)
         {
-            _peer.PingRpc.
+            _peer.PingRpc.AddPeerReachableListener(new DiscoverPeerReachableListener(tcsDiscover));
+
+            var taskResponseTcp = _peer.PingRpc.PingTcpDiscoverAsync(peerAddress, cc, configuration, SenderAddress);
+            taskResponseTcp.ContinueWith(taskResponse =>
+            {
+                var serverAddress = _peer.PeerBean.ServerPeerAddress;
+                if (!taskResponse.IsFaulted)
+                {
+                    
+                }
+                else
+                {
+                    tcsDiscover.SetException(new TaskFailedException("For discovery, we need at least the TCP connection.", taskResponse));
+                    return;
+                }
+            });
 
             // TODO implement
             throw new NotImplementedException();
+        }
+
+        private class DiscoverPeerReachableListener : IPeerReachable
+        {
+            private readonly TcsDiscover _tcsDiscover;
+            private bool _changedUdp = false;
+            private bool _changedTcp = false;
+
+            public DiscoverPeerReachableListener(TcsDiscover tcsDiscover)
+            {
+                _tcsDiscover = tcsDiscover;
+            }
+
+            public void PeerWellConnected(PeerAddress peerAddress, PeerAddress reporter, bool tcp)
+            {
+                if (tcp)
+                {
+                    _changedTcp = true;
+                    _tcsDiscover.SetDiscoveredTcp();
+                }
+                else
+                {
+                    _changedUdp = true;
+                    _tcsDiscover.SetDiscoveredUdp();
+                }
+                if (_changedTcp && _changedUdp)
+                {
+                    _tcsDiscover.Done(peerAddress, reporter);
+                }
+            }
         }
     }
 }

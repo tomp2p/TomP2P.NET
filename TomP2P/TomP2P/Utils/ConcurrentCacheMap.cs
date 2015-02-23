@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using NLog;
 using TomP2P.Extensions;
@@ -75,7 +76,7 @@ namespace TomP2P.Utils
         /// <returns>The cache map that corresponds to this segment.</returns>
         private CacheMap<TKey, ExpiringObject> Segment(object key)
         {
-            // TODO works? interoperability concern if object.hashCode is impl by framework
+            // hashing interop concern: OK, doesn't matter, as long as always in the same bag
             return _segments[(key.GetHashCode() & Int32.MaxValue) % SegmentNr];
         }
 
@@ -133,7 +134,6 @@ namespace TomP2P.Utils
             return oldValue.Value;
         }
 
-        // TODO in Java, this method allows key to be object
         public TValue Get(TKey key)
         {
             var segment = Segment(key);
@@ -211,7 +211,22 @@ namespace TomP2P.Utils
             return false;
         }
 
-        // TODO ContainsValue(TValue value) needed?
+        public bool ContainsValue(TValue value)
+        {
+            foreach (var segment in _segments)
+            {
+                lock (segment)
+                {
+                    ExpireSegment(segment);
+                    if (segment.ContainsValue(value as ExpiringObject)) // TODO find better way
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
 
         public int Size
         {
@@ -327,7 +342,7 @@ namespace TomP2P.Utils
                         }
                     }
                 }
-                return values;
+                return values.AsReadOnly(); // .NET-specific: instead of iterator that doesn't support remove()
             }
         }
 
@@ -348,11 +363,11 @@ namespace TomP2P.Utils
                             {
                                 segment.Remove(kvp.Key); // remove from original
                                 Logger.Debug("Removed from entry set: {0}.", expObj.Value);
+                                _removedCounter.IncrementAndGet();
                             }
                             else
                             {
-                                // TODO solve generics problem, in Java first
-                                throw new NotImplementedException();
+                                keyValuePairs.Add(new KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value.Value));
                             }
                         }
                     }
@@ -372,8 +387,7 @@ namespace TomP2P.Utils
             lock (segment)
             {
                 oldValue3 = segment.Get(key);
-                // TODO equals() seems wrong!
-                if (oldValue3 != null && !oldValue3.IsExpired && oldValue2.Equals(oldValue3.Value))
+                if (oldValue3 != null && !oldValue3.IsExpired && oldValue2.Value.Equals(oldValue3.Value))
                 {
                     segment.Add(key, newValue2);
                     replaced = true;

@@ -754,23 +754,6 @@ namespace TomP2P.Peers
             return set.Count >= atLeast;
         }
 
-        // TODO method can be removed
-        public PeerAddress Find(Number160 peerId)
-        {
-            int classMember = ClassMember(Self, peerId);
-            if (classMember < 0)
-            {
-                return null;
-            }
-            var tmp = PeerMapVerified[classMember];
-            var peerStatistic = tmp[peerId];
-            if (peerStatistic != null)
-            {
-                return peerStatistic.PeerAddress;
-            }
-            return null;
-        }
-
         /// <summary>
         /// The Kademlia distance comparer.
         /// </summary>

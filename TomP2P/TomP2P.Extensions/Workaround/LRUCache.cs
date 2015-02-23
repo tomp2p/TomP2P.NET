@@ -6,8 +6,8 @@ namespace TomP2P.Extensions.Workaround
     /// <summary>
     /// Simple LRU cache implementation for .NET.
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
+    /// <typeparam name="TValue">The type of the value.</typeparam>
     public class LruCache<TKey, TValue> : IDictionary<TKey, TValue>
         where TValue : class
     {
@@ -18,7 +18,7 @@ namespace TomP2P.Extensions.Workaround
         /// <summary>
         /// Creates a LRU cache with a fixed capacity.
         /// </summary>
-        /// <param name="capacity"></param>
+        /// <param name="capacity">The fixed capacity.</param>
         public LruCache(int capacity)
         {
             _capacity = capacity;
