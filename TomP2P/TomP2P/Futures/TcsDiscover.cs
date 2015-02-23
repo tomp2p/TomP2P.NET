@@ -31,19 +31,27 @@ namespace TomP2P.Futures
         public void Timeout(PeerAddress serverPeerAddress, CancellationTokenSource cts, int delaySec)
         {
             // .NET-specific: use CTS instead of Timer -> cancel in PeerCreator
+
+            // cancel cts2, if cts is cancelled
+            var cts2 = new CancellationTokenSource();
+            cts.Token.Register(cts2.Cancel);
+
             long start = Convenient.CurrentTimeMillis();
-            var delay = System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(delaySec).Milliseconds, cts.Token);
+            // one-shot action that becomes enabled after the delay
+            var delay = System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(delaySec).Milliseconds, cts2.Token);
             delay.ContinueWith(taskDelay =>
             {
                 // "DiscoverTimeoutTask"
                 // In case of no peer contacting us, we fire a failed
-                var ms = Convenient.CurrentTimeMillis() - start;
-                Failed(serverPeerAddress, String.Format("Timeout in Discover: {0} ms. However, I think my peer address is {1}.", ms, serverPeerAddress));
-
-            }, cts.Token);
+                if (!cts2.IsCancellationRequested)
+                {
+                    var ms = Convenient.CurrentTimeMillis() - start;
+                    Failed(serverPeerAddress, String.Format("Timeout in Discover: {0} ms. However, I think my peer address is {1}.", ms, serverPeerAddress));
+                }
+            });
 
             // cancel timeout if we are done
-            this.Task.ContinueWith(taskDiscover => cts.Cancel()); // TODO works?
+            this.Task.ContinueWith(taskDiscover => cts2.Cancel()); // TODO works?
         }
 
         private void Failed(PeerAddress serverPeerAddress, string failed)
