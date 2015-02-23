@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Timers;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
+using Timer = System.Timers.Timer;
 
 namespace TomP2P.Connection
 {
@@ -33,7 +34,7 @@ namespace TomP2P.Connection
 
         private readonly bool _master;
 
-        private readonly TaskCompletionSource<object> _tcsServerDone = new TaskCompletionSource<object>(); 
+        private readonly TaskCompletionSource<object> _tcsServerDone = new TaskCompletionSource<object>();
 
         /// <summary>
         /// Creates a master peer and starts UDP and TCP channels.
@@ -45,10 +46,11 @@ namespace TomP2P.Connection
         /// channel server that is used for listening for incoming connections.</param>
         /// <param name="channelClientConfiguration">The client-side configuration.</param>
         /// <param name="timer"></param>
+        /// <param name="cts">.NET-specific: To be cancelled when the ConnectionBean.Timer stops.</param>
         public PeerCreator(int p2pId, Number160 peerId, KeyPair keyPair,
             ChannelServerConfiguration channelServerConfiguration,
             ChannelClientConfiguration channelClientConfiguration,
-            Timer timer)
+            Timer timer, CancellationTokenSource cts)
         {
             // peer bean
             PeerBean = new PeerBean(keyPair);
@@ -69,7 +71,7 @@ namespace TomP2P.Connection
             // connection bean
             var sender = new Sender(peerId, PeerBean.PeerStatusListeners, channelClientConfiguration, dispatcher);
             var reservation = new Reservation(channelClientConfiguration);
-            ConnectionBean = new ConnectionBean(p2pId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer);
+            ConnectionBean = new ConnectionBean(p2pId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer, cts);
             _master = true;
         }
 
@@ -118,7 +120,8 @@ namespace TomP2P.Connection
             }
 
             // shutdown the timer
-            ConnectionBean.Timer.Stop(); // TODO sufficient?
+            ConnectionBean.Timer.Stop();
+            ConnectionBean.CancellationTokenSource.Cancel();
 
             Logger.Debug("Shutting down client...");
             ConnectionBean.Reservation.ShutdownAsync().ContinueWith(delegate

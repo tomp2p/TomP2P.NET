@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading;
 using TomP2P.Extensions;
 using TomP2P.Peers;
+using Timer = System.Timers.Timer;
 
 namespace TomP2P.Futures
 {
@@ -25,13 +26,11 @@ namespace TomP2P.Futures
         /// Creates a new future object and creates a timer that fires failed after a timeout.
         /// </summary>
         /// <param name="serverPeerAddress"></param>
-        /// <param name="timer">The timer to use.</param>
+        /// <param name="cts">.NET-specific: CTS instead of timer.</param>
         /// <param name="delaySec">The delay in seconds.</param>
-        public void Timeout(PeerAddress serverPeerAddress, Timer timer, int delaySec)
+        public void Timeout(PeerAddress serverPeerAddress, CancellationTokenSource cts, int delaySec)
         {
-            // .NET-specific
-            var cts = new CancellationTokenSource();
-
+            // .NET-specific: use CTS instead of Timer -> cancel in PeerCreator
             long start = Convenient.CurrentTimeMillis();
             var delay = System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(delaySec).Milliseconds, cts.Token);
             delay.ContinueWith(taskDelay =>

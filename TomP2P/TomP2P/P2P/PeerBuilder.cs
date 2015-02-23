@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Timers;
+using System.Threading;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Rpc;
+using Timer = System.Timers.Timer;
 
 namespace TomP2P.P2P
 {
@@ -43,6 +44,7 @@ namespace TomP2P.P2P
         public IBroadcastHandler BroadcastHandler { get; private set; }
         public IBloomfilterFactory BloomfilterFactory { get; private set; }
         public Timer Timer { get; private set; }
+        public CancellationTokenSource CancellationTokenSource { get; private set; }
         public MaintenanceTask MaintenanceTask { get; private set; }
         public Random Random { get; private set; }
         private IList<IPeerInit> _toInitialize = new List<IPeerInit>(1);
@@ -163,7 +165,12 @@ namespace TomP2P.P2P
 
             if (MasterPeer == null && Timer == null)
             {
-                Timer = new Timer(); // ok?
+                Timer = new Timer();
+            }
+            // .NET-specific:
+            if (CancellationTokenSource == null)
+            {
+                CancellationTokenSource = new CancellationTokenSource();
             }
 
             PeerCreator peerCreator;
@@ -173,7 +180,7 @@ namespace TomP2P.P2P
             }
             else
             {
-                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, Timer);
+                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, Timer, CancellationTokenSource);
             }
 
             var peer = new Peer(P2PId, PeerId, peerCreator);
@@ -405,6 +412,12 @@ namespace TomP2P.P2P
         public PeerBuilder SetTimer(Timer timer)
         {
             Timer = timer;
+            return this;
+        }
+
+        public PeerBuilder SetCancellationTokenSource(CancellationTokenSource cts)
+        {
+            CancellationTokenSource = cts;
             return this;
         }
 

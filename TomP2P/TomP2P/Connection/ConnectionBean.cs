@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿using System.Threading;
+using Timer = System.Timers.Timer;
 
 namespace TomP2P.Connection
 {
@@ -41,7 +42,11 @@ namespace TomP2P.Connection
         /// <summary>
         /// The timer used for the discovery.
         /// </summary>
-        public Timer Timer { get; private set; } // TODO correct equivalent?
+        public Timer Timer { get; private set; }
+        /// <summary>
+        /// .NET-specific: To be cancelled when the ConnectionBean.Timer stops.
+        /// </summary>
+        public CancellationTokenSource CancellationTokenSource { get; private set; }
 
         /// <summary>
         /// The connection bean with unmodifiable objects. Once it is set, it cannot be changed.
@@ -54,8 +59,9 @@ namespace TomP2P.Connection
         /// <param name="reservation">The connection reservation that is responsible for resource management.</param>
         /// <param name="resourceConfiguration">The configuration that is responsible for the resource numbers.</param>
         /// <param name="timer">The timer for the discovery process.</param>
+        /// <param name="cts">.NET-specific: To be cancelled when the ConnectionBean.Timer stops.</param>
         public ConnectionBean(int p2pId, Dispatcher dispatcher, Sender sender, ChannelServer channelServer,
-            Reservation reservation, ChannelClientConfiguration resourceConfiguration, Timer timer)
+            Reservation reservation, ChannelClientConfiguration resourceConfiguration, Timer timer, CancellationTokenSource cts)
         {
             P2PId = p2pId;
             Dispatcher = dispatcher;
@@ -64,6 +70,7 @@ namespace TomP2P.Connection
             Reservation = reservation;
             ResourceConfiguration = resourceConfiguration;
             Timer = timer;
+            CancellationTokenSource = cts;
         }
     }
 }

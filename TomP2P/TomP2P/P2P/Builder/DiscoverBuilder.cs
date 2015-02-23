@@ -185,7 +185,58 @@ namespace TomP2P.P2P.Builder
                 var serverAddress = _peer.PeerBean.ServerPeerAddress;
                 if (!taskResponse.IsFaulted)
                 {
-                    
+                    var tmp = taskResponseTcp.Result.NeighborsSet(0).Neighbors;
+                    tcsDiscover.SetReporter(taskResponseTcp.Result.Sender);
+                    if (tmp.Count == 1)
+                    {
+                        var seenAs = tmp.First();
+                        Logger.Info("This peer is seen as {0} by peer {1}. This peer sees itself as {2}.", seenAs, peerAddress, _peer.PeerAddress.InetAddress);
+                        if (!_peer.PeerAddress.InetAddress.Equals(seenAs.InetAddress))
+                        {
+                            // check if we have this interface on that we can listen to
+                            var bindings = new Bindings().AddAddress(seenAs.InetAddress);
+                            var status = DiscoverNetworks.DiscoverInterfaces(bindings);
+                            Logger.Info("2nd interface discovery: {0}.", status);
+                            if (bindings.FoundAddresses.Count > 0
+                                && bindings.FoundAddresses.Contains(seenAs.InetAddress))
+                            {
+                                serverAddress = serverAddress.ChangeAddress(seenAs.InetAddress);
+                                _peer.PeerBean.SetServerPeerAddress(serverAddress);
+                                Logger.Info("This peer had the wrong interface. Changed it to {0}.", serverAddress);
+                            }
+                            else
+                            {
+                                // now we know our internal IP, where we receive packets
+                                var ports =
+                                    _peer.ConnectionBean.ChannelServer.ChannelServerConfiguration.PortsForwarding;
+                                if (ports.IsManualPort)
+                                {
+                                    serverAddress = serverAddress.ChangePorts(ports.TcpPort, ports.UdpPort);
+                                    serverAddress = serverAddress.ChangeAddress(seenAs.InetAddress);
+                                    _peer.PeerBean.SetServerPeerAddress(serverAddress);
+                                    Logger.Info("This peer had manual ports. Changed it to {0}.", serverAddress);
+                                }
+                                else
+                                {
+                                    // we need to find a relay, because there is a NAT in the way
+                                    tcsDiscover.SetExternalHost(
+                                        "We are most likely behind a NAT. Try to UPNP, NAT-PMP or relay " + peerAddress, taskResponseTcp.Result.Recipient.InetAddress, seenAs.InetAddress);
+                                    return;
+                                }
+                            }
+                        }
+                        // else -> we announce exactly how the other peer sees us
+                        var taskResponse1 = _peer.PingRpc.PingTcpProbeAsync(peerAddress, cc, configuration);
+                        var taskResponse2 = _peer.PingRpc.PingUdpProbeAsync(peerAddress, cc, configuration);
+                        
+                        // from here we probe, set the timeout here
+                        tcsDiscover.Timeout(serverAddress, _peer.ConnectionBean.CancellationTokenSource, DiscoverTimeoutSec);
+                        return;
+                    }
+                    else
+                    {
+                        tcsDiscover.SetException(new TaskFailedException(String.Format("Peer {0} did not report our IP address.", peerAddress)));
+                    }
                 }
                 else
                 {
@@ -193,9 +244,6 @@ namespace TomP2P.P2P.Builder
                     return;
                 }
             });
-
-            // TODO implement
-            throw new NotImplementedException();
         }
 
         private class DiscoverPeerReachableListener : IPeerReachable

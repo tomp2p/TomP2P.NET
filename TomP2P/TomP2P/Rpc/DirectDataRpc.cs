@@ -116,7 +116,7 @@ namespace TomP2P.Rpc
                         responseMessage.SetType(Message.Message.MessageType.NotFound);
                     }
 // ReSharper disable once PossibleUnintendedReferenceComparison
-                    else if (responseBuffer != requestBuffer)
+                    else if (responseBuffer != requestBuffer) // reference equality ok
                     {
                         // can be partial as well
                         if (!responseBuffer.IsComplete)
