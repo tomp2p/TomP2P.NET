@@ -62,8 +62,11 @@
     <Compile Include="Connection\Dispatcher.cs" />
     <Compile Include="Connection\DsaSignatureFactory.cs" />
     <Compile Include="Connection\IConnectionConfiguration.cs" />
+    <Compile Include="Futures\IBaseTcs.cs" />
     <Compile Include="Futures\TcsDiscover.cs" />
     <Compile Include="P2P\Builder\DiscoverBuilder.cs" />
+    <Compile Include="P2P\Builder\IBasicBuilder.cs" />
+    <Compile Include="P2P\Builder\IBuilder.cs" />
     <Compile Include="Peers\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />

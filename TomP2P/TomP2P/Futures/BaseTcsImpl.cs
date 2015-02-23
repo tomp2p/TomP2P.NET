@@ -6,7 +6,7 @@ namespace TomP2P.Futures
     /// Equivalent to Java's BaseFutureImpl. Only required members for this project
     /// are implemented.
     /// </summary>
-    public abstract class BaseTcsImpl : TaskCompletionSource<object>
+    public abstract class BaseTcsImpl : TaskCompletionSource<object>, IBaseTcs
     {
         protected object Lock;
 
