@@ -1,6 +1,7 @@
-﻿using TomP2P.Connection.Windows.Netty;
+﻿using TomP2P.Connection;
+using TomP2P.Connection.Windows.Netty;
 
-namespace TomP2P.Connection
+namespace TomP2P.P2P
 {
     /// <summary>
     /// The default filter is no filter. It just returns the same pipeline.

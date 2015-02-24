@@ -11,10 +11,6 @@ using TomP2P.Rpc;
 
 namespace TomP2P.P2P
 {
-    // TODO finish implementation of Peer class
-    // - enable RPCs
-    // - finish basic operations
-
     /// <summary>
     /// This is the main class to start DHT operations. This class makes use of the build pattern
     /// and for each DHT operation, a builder class is returned. The main operations can be initiated

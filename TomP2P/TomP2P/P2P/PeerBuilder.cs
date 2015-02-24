@@ -44,7 +44,7 @@ namespace TomP2P.P2P
         public ExecutorService Timer { get; private set; }
         public MaintenanceTask MaintenanceTask { get; private set; }
         public Random Random { get; private set; }
-        private IList<IPeerInit> _toInitialize = new List<IPeerInit>(1);
+        private readonly IList<IPeerInit> _toInitialize = new List<IPeerInit>(1);
 
         // enable/disable RPC/P2P/other
         public bool IsEnabledHandshakeRpc { get; private set; }
@@ -207,8 +207,26 @@ namespace TomP2P.P2P
                 quitRpc.AddPeerStatusListener(PeerMap);
                 peer.SetQuitRpc(quitRpc);
             }
-            
-            // TODO enable rest of RPCs
+            if (IsEnabledNeighborRpc)
+            {
+                var neighborRpc = new NeighborRpc(peerBean, connectionBean);
+                peer.SetNeighborRpc(neighborRpc);
+            }
+            if (IsEnabledDirectDataRpc)
+            {
+                var directDataRpc = new DirectDataRpc(peerBean, connectionBean);
+                peer.SetDirectDataRpc(directDataRpc);
+            }
+            if (IsEnabledBroadcastRpc)
+            {
+                var broadcastRpc = new BroadcastRpc(peerBean, connectionBean, BroadcastHandler);
+                peer.SetBroadcastRpc(broadcastRpc);
+            }
+            if (IsEnabledRoutingRpc && IsEnabledNeighborRpc)
+            {
+                var routing = new DistributedRouting(peerBean, peer.NeighborRpc);
+                peer.SetDistributedRouting(routing);
+            }
 
             if (MaintenanceTask == null && IsEnabledMaintenanceRpc)
             {

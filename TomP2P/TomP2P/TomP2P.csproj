@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connection\DefaultConnectionConfiguration.cs" />
-    <Compile Include="Connection\DefaultPipelineFilter.cs" />
+    <Compile Include="P2P\DefaultPipelineFilter.cs" />
     <Compile Include="Connection\DirectResponder.cs" />
     <Compile Include="Connection\DiscoverNetworks.cs" />
     <Compile Include="Connection\DropConnectionInboundHandler.cs" />
