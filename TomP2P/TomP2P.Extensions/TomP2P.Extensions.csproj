@@ -64,6 +64,7 @@
     <Compile Include="Workaround\LruCache.cs" />
     <Compile Include="Workaround\ReferenceStruct.cs" />
     <Compile Include="Workaround\TaskFailedException.cs" />
+    <Compile Include="Workaround\ExecutorService.cs" />
     <Compile Include="Workaround\VolatileInteger.cs" />
     <Compile Include="Workaround\VolatileLong.cs" />
     <Compile Include="Workaround\IKey.cs" />

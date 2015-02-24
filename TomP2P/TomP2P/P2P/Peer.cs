@@ -186,10 +186,11 @@ namespace TomP2P.P2P
             get { return PeerBean.ServerPeerAddress; }
         }
 
-        public PeerAddress NotifyAutomaticFutures()
+        public Peer NotifyAutomaticFutures(Task task)
         {
             // TODO find .NET equivalent
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return null;
         }
 
         #region Basic P2P operations
