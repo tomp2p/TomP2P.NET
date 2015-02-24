@@ -70,6 +70,7 @@
     <Compile Include="P2P\Builder\IBasicBuilder.cs" />
     <Compile Include="P2P\Builder\IBuilder.cs" />
     <Compile Include="P2P\Builder\SendDirectBuilder.cs" />
+    <Compile Include="P2P\IRequestConfiguration.cs" />
     <Compile Include="Peers\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
