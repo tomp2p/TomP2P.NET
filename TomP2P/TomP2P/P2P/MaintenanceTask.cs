@@ -73,9 +73,7 @@ namespace TomP2P.P2P
             if (_timer != null)
             {
                 // .NET-specific
-                var waitHandle = new AutoResetEvent(false);
-                _timer.Dispose(waitHandle);
-                waitHandle.WaitOne();
+                ExecutorService.Cancel(_timer);
             }
             var tcsShutdown = new TaskCompletionSource<object>();
             lock (_lock)

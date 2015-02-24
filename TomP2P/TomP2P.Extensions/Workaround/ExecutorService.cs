@@ -24,6 +24,18 @@ namespace TomP2P.Extensions.Workaround
             return new Timer(callback, state, dueTime, period);
         }
 
-        // TODO find a shutdown for all!
+        /// <summary>
+        /// Stops the provided timer and blocks until all callbacks have finished.
+        /// </summary>
+        /// <param name="timer">The timer to stop.</param>
+        public static void Cancel(Timer timer)
+        {
+            // MSDN: Use this overload of the Dispose method if you want to be able to 
+            // block until you are certain that the timer has been disposed. The timer
+            // is not disposed until all currently queued callbacks have completed.
+            var waitHandle = new AutoResetEvent(false);
+            timer.Dispose(waitHandle);
+            waitHandle.WaitOne();
+        }
     }
 }
