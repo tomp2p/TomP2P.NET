@@ -155,6 +155,7 @@
     <Compile Include="Peers\DefaultMaintenance.cs" />
     <Compile Include="Peers\DefaultPeerFilter.cs" />
     <Compile Include="P2P\IAutomaticTask.cs" />
+    <Compile Include="Peers\PeerIpFilter.cs" />
     <Compile Include="Rpc\BroadcastRpc.cs" />
     <Compile Include="Rpc\DigestResult.cs" />
     <Compile Include="Rpc\DirectDataRpc.cs" />

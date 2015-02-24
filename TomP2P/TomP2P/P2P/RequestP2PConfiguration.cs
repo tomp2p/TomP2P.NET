@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace TomP2P.P2P
 {
@@ -47,6 +48,15 @@ namespace TomP2P.P2P
         public int Parallel
         {
             get { return MinimumResults + ParallelDiff; }
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append("minRes=").Append(MinimumResults)
+                .Append("maxFail=").Append(MaxFailure)
+                .Append("pDiff=").Append(ParallelDiff);
+            return sb.ToString();
         }
     }
 }
