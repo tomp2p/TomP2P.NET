@@ -457,7 +457,6 @@ namespace TomP2P.Message
         /// <returns>This class.</returns>
         public Message SetKeepAlive(bool isKeepAlive)
         {
-            // TODO check operator meanings
             if (isKeepAlive)
             {
                 Options |= 1;

@@ -63,6 +63,7 @@
     <Compile Include="Connection\DsaSignatureFactory.cs" />
     <Compile Include="Connection\IConnectionConfiguration.cs" />
     <Compile Include="Futures\IBaseTcs.cs" />
+    <Compile Include="Futures\TcsDirect.cs" />
     <Compile Include="Futures\TcsPeerConnection.cs" />
     <Compile Include="Futures\TcsDiscover.cs" />
     <Compile Include="P2P\Builder\DiscoverBuilder.cs" />
