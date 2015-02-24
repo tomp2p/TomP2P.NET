@@ -17,7 +17,6 @@ namespace TomP2P.Tests.Rpc
         [Test]
         public async void TestGracefulHalt()
         {
-            // TODO run test
             Peer sender = null;
             Peer recv1 = null;
             ChannelCreator cc = null;

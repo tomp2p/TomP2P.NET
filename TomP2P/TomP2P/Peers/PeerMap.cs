@@ -66,7 +66,7 @@ namespace TomP2P.Peers
             _offlineCount = peerMapConfiguration.OfflineCount;
             _peerFilters = peerMapConfiguration.PeerFilters;
             PeerMapVerified = InitFixedMap(BagSizeVerified, false);
-            PeerMapOverflow = InitFixedMap(BagSizeVerified, true);
+            PeerMapOverflow = InitFixedMap(BagSizeOverflow, true);
             // _bagSizeVerified * Number160.Bits should be enough
             _offlineMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.OfflineTimeout, BagSizeVerified * Number160.Bits);
             _shutdownMap = new ConcurrentCacheMap<Number160, PeerAddress>(peerMapConfiguration.ShutdownTimeout, BagSizeVerified * Number160.Bits);

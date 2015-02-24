@@ -63,10 +63,7 @@ namespace TomP2P.Rpc
             {
                 return requestHandler.FireAndForgetUdpAsync(channelCreator);
             }
-            else
-            {
-                return requestHandler.SendTcpAsync(channelCreator);
-            }
+            return requestHandler.SendTcpAsync(channelCreator);
         }
 
         public override void HandleResponse(Message.Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
