@@ -13,6 +13,10 @@ namespace TomP2P.Extensions.Workaround
             : base(message)
         { }
 
+        public TaskFailedException(Task baseTask)
+            : base(baseTask.TryGetException().Message)
+        { }
+
         public TaskFailedException(string message, Task baseTask)
             : base(
                 String.Format("{0}{1}", message, baseTask != null ? " <-> " + baseTask.TryGetException().Message : String.Empty))

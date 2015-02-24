@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
+using TomP2P.Futures;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -24,7 +25,7 @@ namespace TomP2P.P2P
     /// </summary>
     public class Peer
     {
-        // as soon as the user calls listen, this connection handler is set
+        // As soon as the user calls listen, this connection handler is set.
         public PeerCreator PeerCreator { get; private set; }
         /// <summary>
         /// The ID of this peer.
@@ -47,18 +48,18 @@ namespace TomP2P.P2P
 
         private volatile bool _shutdown = false;
 
-        private IList<IAutomaticTask> _automaticTasks = new SynchronizedCollection<IAutomaticTask>();
-        private IList<IShutdown> _shutdownListeners = new SynchronizedCollection<IShutdown>();
+        private readonly IList<IAutomaticTask> _automaticTasks = new SynchronizedCollection<IAutomaticTask>();
+        private readonly IList<IShutdown> _shutdownListeners = new SynchronizedCollection<IShutdown>();
 
         /// <summary>
         /// Creates a peer. Please use <see cref="PeerBuilder"/> to create a <see cref="Peer"/> instance.
         /// </summary>
-        /// <param name="p2pId">The P2P ID.</param>
+        /// <param name="p2PId">The P2P ID.</param>
         /// <param name="peerId">The ID of the peer.</param>
         /// <param name="peerCreator">The peer creator that holds the peer bean and the connection bean.</param>
-        internal Peer(int p2pId, Number160 peerId, PeerCreator peerCreator)
+        internal Peer(int p2PId, Number160 peerId, PeerCreator peerCreator)
         {
-            P2PId = p2pId;
+            P2PId = p2PId;
             PeerId = peerId;
             PeerCreator = peerCreator;
         }
@@ -195,20 +196,94 @@ namespace TomP2P.P2P
 
         #region Basic P2P operations
 
-        // TODO implement basic P2P operations in Peer
+        public void RawDataReply(IRawDataReply rawDataReply)
+        {
+            DirectDataRpc.SetRawDataReply(rawDataReply);
+        }
+
+        public void ObjectDataReply(IObjectDataReply objectDataReply)
+        {
+            DirectDataRpc.SetObjecDataReply(objectDataReply);
+        }
+
+        public TcsPeerConnection CreatePeerConnection(PeerAddress destination)
+        {
+            return CreatePeerConnection(destination, PeerConnection.HeartBeatMillisConst);
+        }
+
+        /// <summary>
+        /// Opens a TCP connection and keeps it open. The user can provide the idle timeout, which means 
+        /// that the connection gets closed after that time of inactivity. If the other peer goes offline
+        /// or closes the connection (due to inactivity), further requests with this connections re-opens 
+        /// the connection. This methods blocks until a connection can be reserved.
+        /// </summary>
+        /// <param name="destination">The endpoint to connect to.</param>
+        /// <param name="heartBeatMillis"></param>
+        /// <returns></returns>
+        public TcsPeerConnection CreatePeerConnection(PeerAddress destination, int heartBeatMillis)
+        {
+            var tcsPeerConnection = new TcsPeerConnection(destination);
+            var taskCc = ConnectionBean.Reservation.CreatePermanentAsync(1);
+            taskCc.ContinueWith(tcc =>
+            {
+                if (!tcc.IsFaulted)
+                {
+                    var cc = tcc.Result;
+                    var peerConnection = new PeerConnection(destination, cc, heartBeatMillis);
+                    tcsPeerConnection.Done(peerConnection);
+                }
+                else
+                {
+                    tcsPeerConnection.SetException(new TaskFailedException(tcc));
+                }
+            });
+            return tcsPeerConnection;
+        }
 
         #region Direct, Bootstrap, Ping, Broadcast
 
+        public SendDirectBuilder SendDirect(PeerAddress recipientAddress)
+        {
+            return new SendDirectBuilder(this, recipientAddress);
+        }
 
+        public SendDirectBuilder SendDirect(TcsPeerConnection tcsRecipientConnection)
+        {
+            return new SendDirectBuilder(this, tcsRecipientConnection);
+        }
+
+        public SendDirectBuilder SendDirect(PeerConnection peerConnection)
+        {
+            return new SendDirectBuilder(this, peerConnection);
+        }
 
         public BootstrapBuilder Bootstrap()
         {
             return new BootstrapBuilder(this);
         }
 
+        /// <summary>
+        /// Sends a friendly shutdown message to my close neighbors in the DHT.
+        /// </summary>
+        /// <returns></returns>
+        public ShutdownBuilder AnnounceShutdown()
+        {
+            return new ShutdownBuilder(this);
+        }
+
         public PingBuilder Ping()
         {
             return new PingBuilder(this);
+        }
+
+        public DiscoverBuilder Discover()
+        {
+            return new DiscoverBuilder(this);
+        }
+
+        public BroadcastBuilder Broadcast(Number160 messageKey)
+        {
+            return new BroadcastBuilder(this, messageKey);
         }
 
         #endregion
@@ -237,12 +312,9 @@ namespace TomP2P.P2P
                 tasks.Add(PeerCreator.ShutdownAsync());
                 return Task.WhenAll(tasks);
             }
-            else
-            {
-                var tcs = new TaskCompletionSource<object>();
-                tcs.SetException(new TaskFailedException("Already shutting / shut down."));
-                return tcs.Task;
-            }
+            var tcs = new TaskCompletionSource<object>();
+            tcs.SetException(new TaskFailedException("Already shutting / shut down."));
+            return tcs.Task;
         }
 
         /// <summary>
