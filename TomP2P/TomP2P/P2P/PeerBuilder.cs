@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
 using TomP2P.Rpc;
-using Timer = System.Timers.Timer;
 
 namespace TomP2P.P2P
 {
@@ -40,11 +38,10 @@ namespace TomP2P.P2P
         public Peer MasterPeer { get; private set; }
         public ChannelServerConfiguration ChannelServerConfiguration { get; private set; }
         public ChannelClientConfiguration ChannelClientConfiguration { get; private set; }
-        private bool _behindFirewall = false; // TODO Java uses reference type and null
+        private bool? _behindFirewall = null;
         public IBroadcastHandler BroadcastHandler { get; private set; }
         public IBloomfilterFactory BloomfilterFactory { get; private set; }
-        public Timer Timer { get; private set; }
-        public CancellationTokenSource CancellationTokenSource { get; private set; }
+        public ExecutorService Timer { get; private set; }
         public MaintenanceTask MaintenanceTask { get; private set; }
         public Random Random { get; private set; }
         private IList<IPeerInit> _toInitialize = new List<IPeerInit>(1);
@@ -113,10 +110,10 @@ namespace TomP2P.P2P
         /// <returns>The peer that can operate in the P2P network.</returns>
         public Peer Start()
         {
-            /*if (_behindFirewall == null)
+            if (_behindFirewall == null)
             {
                 _behindFirewall = false;
-            }*/
+            }
 
             if (ChannelServerConfiguration == null)
             {
@@ -131,7 +128,7 @@ namespace TomP2P.P2P
                     UdpPort = Ports.DefaultPort;
                 }
                 ChannelServerConfiguration.SetPorts(new Ports(TcpPort, UdpPort));
-                ChannelServerConfiguration.SetIsBehindFirewall(_behindFirewall);
+                ChannelServerConfiguration.SetIsBehindFirewall(_behindFirewall.Value);
             }
             if (ChannelClientConfiguration == null)
             {
@@ -165,12 +162,7 @@ namespace TomP2P.P2P
 
             if (MasterPeer == null && Timer == null)
             {
-                Timer = new Timer();
-            }
-            // .NET-specific:
-            if (CancellationTokenSource == null)
-            {
-                CancellationTokenSource = new CancellationTokenSource();
+                Timer = new ExecutorService();
             }
 
             PeerCreator peerCreator;
@@ -180,7 +172,7 @@ namespace TomP2P.P2P
             }
             else
             {
-                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, Timer, CancellationTokenSource);
+                peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, Timer);
             }
 
             var peer = new Peer(P2PId, PeerId, peerCreator);
@@ -268,9 +260,9 @@ namespace TomP2P.P2P
             return this;
         }
 
-        public PeerBuilder SetP2PId(int p2pId)
+        public PeerBuilder SetP2PId(int p2PId)
         {
-            P2PId = p2pId;
+            P2PId = p2PId;
             return this;
         }
 
@@ -409,15 +401,9 @@ namespace TomP2P.P2P
             return this;
         }
 
-        public PeerBuilder SetTimer(Timer timer)
+        public PeerBuilder SetTimer(ExecutorService timer)
         {
             Timer = timer;
-            return this;
-        }
-
-        public PeerBuilder SetCancellationTokenSource(CancellationTokenSource cts)
-        {
-            CancellationTokenSource = cts;
             return this;
         }
 
@@ -468,7 +454,7 @@ namespace TomP2P.P2P
         /// </summary>
         public bool IsBehindFirewall
         {
-            get { return _behindFirewall; }
+            get { return _behindFirewall != null && _behindFirewall.Value; }
         }
 
         /// <summary>

@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
-using Timer = System.Timers.Timer;
 
 namespace TomP2P.Connection
 {
@@ -34,7 +32,7 @@ namespace TomP2P.Connection
 
         private readonly bool _master;
 
-        private readonly TaskCompletionSource<object> _tcsServerDone = new TaskCompletionSource<object>();
+        private readonly TaskCompletionSource<object> _tcsShutdown = new TaskCompletionSource<object>();
 
         /// <summary>
         /// Creates a master peer and starts UDP and TCP channels.
@@ -46,11 +44,10 @@ namespace TomP2P.Connection
         /// channel server that is used for listening for incoming connections.</param>
         /// <param name="channelClientConfiguration">The client-side configuration.</param>
         /// <param name="timer"></param>
-        /// <param name="cts">.NET-specific: To be cancelled when the ConnectionBean.Timer stops.</param>
         public PeerCreator(int p2PId, Number160 peerId, KeyPair keyPair,
             ChannelServerConfiguration channelServerConfiguration,
             ChannelClientConfiguration channelClientConfiguration,
-            Timer timer, CancellationTokenSource cts)
+            ExecutorService timer)
         {
             // peer bean
             PeerBean = new PeerBean(keyPair);
@@ -71,7 +68,7 @@ namespace TomP2P.Connection
             // connection bean
             var sender = new Sender(peerId, PeerBean.PeerStatusListeners, channelClientConfiguration, dispatcher);
             var reservation = new Reservation(channelClientConfiguration);
-            ConnectionBean = new ConnectionBean(p2PId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer, cts);
+            ConnectionBean = new ConnectionBean(p2PId, dispatcher, sender, channelServer, reservation, channelClientConfiguration, timer);
             _master = true;
         }
 
@@ -105,7 +102,7 @@ namespace TomP2P.Connection
             // shutdown running tasks for this peer
             if (PeerBean.MaintenanceTask != null)
             {
-                PeerBean.MaintenanceTask.Shutdown();
+                PeerBean.MaintenanceTask.ShutdownAsync();
             }
 
             // shutdown all children
@@ -115,13 +112,12 @@ namespace TomP2P.Connection
                 {
                     peerCreator.ShutdownAsync();
                 }
-                _tcsServerDone.SetResult(null); // complete task
-                return _tcsServerDone.Task;
+                _tcsShutdown.SetResult(null); // complete task
+                return _tcsShutdown.Task;
             }
 
             // shutdown the timer
-            ConnectionBean.Timer.Stop();
-            ConnectionBean.CancellationTokenSource.Cancel();
+            ConnectionBean.Timer.Shutdown();
 
             Logger.Debug("Shutting down client...");
             ConnectionBean.Reservation.ShutdownAsync().ContinueWith(delegate
@@ -133,7 +129,7 @@ namespace TomP2P.Connection
             });
 
             // this is blocking
-            return _tcsServerDone.Task;
+            return _tcsShutdown.Task;
         }
 
         /// <summary>
@@ -173,7 +169,7 @@ namespace TomP2P.Connection
             // portability reasons (code-flow)
 
             Logger.Debug("Client shut down.");
-            _tcsServerDone.SetResult(null); // complete task
+            _tcsShutdown.SetResult(null); // complete task
         }
     }
 }

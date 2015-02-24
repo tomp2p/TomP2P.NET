@@ -230,7 +230,7 @@ namespace TomP2P.P2P.Builder
                         var taskResponse2 = _peer.PingRpc.PingUdpProbeAsync(peerAddress, cc, configuration);
                         
                         // from here we probe, set the timeout here
-                        tcsDiscover.Timeout(serverAddress, _peer.ConnectionBean.CancellationTokenSource, DiscoverTimeoutSec);
+                        tcsDiscover.Timeout(serverAddress, _peer.ConnectionBean.Timer, DiscoverTimeoutSec);
                         return;
                     }
                     else

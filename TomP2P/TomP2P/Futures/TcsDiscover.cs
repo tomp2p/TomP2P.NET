@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net;
-using System.Threading;
 using TomP2P.Extensions;
+using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
-using Timer = System.Timers.Timer;
 
 namespace TomP2P.Futures
 {
@@ -26,32 +25,25 @@ namespace TomP2P.Futures
         /// Creates a new future object and creates a timer that fires failed after a timeout.
         /// </summary>
         /// <param name="serverPeerAddress"></param>
-        /// <param name="cts">.NET-specific: CTS instead of timer.</param>
+        /// <param name="timer">.NET-specific: CTS instead of timer.</param>
         /// <param name="delaySec">The delay in seconds.</param>
-        public void Timeout(PeerAddress serverPeerAddress, CancellationTokenSource cts, int delaySec)
+        public void Timeout(PeerAddress serverPeerAddress, ExecutorService timer, int delaySec)
         {
-            // .NET-specific: use CTS instead of Timer -> cancel in PeerCreator
+            var cts = timer.Schedule(DiscoverTimeoutTask, serverPeerAddress, TimeSpan.FromSeconds(delaySec).Milliseconds);
 
-            // cancel cts2, if cts is cancelled
-            var cts2 = new CancellationTokenSource();
-            cts.Token.Register(cts2.Cancel);
-
-            long start = Convenient.CurrentTimeMillis();
-            // one-shot action that becomes enabled after the delay
-            var delay = System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(delaySec).Milliseconds, cts2.Token);
-            delay.ContinueWith(taskDelay =>
-            {
-                // "DiscoverTimeoutTask"
-                // In case of no peer contacting us, we fire a failed
-                if (!cts2.IsCancellationRequested)
-                {
-                    var ms = Convenient.CurrentTimeMillis() - start;
-                    Failed(serverPeerAddress, String.Format("Timeout in Discover: {0} ms. However, I think my peer address is {1}.", ms, serverPeerAddress));
-                }
-            });
-
+// ReSharper disable once MethodSupportsCancellation
             // cancel timeout if we are done
-            this.Task.ContinueWith(taskDiscover => cts2.Cancel()); // TODO works?
+            this.Task.ContinueWith(td => cts.Cancel());
+        }
+
+        private void DiscoverTimeoutTask(object state)
+        {
+            long start = Convenient.CurrentTimeMillis();
+            var serverPeerAddress = state as PeerAddress;
+
+            string msg = String.Format("Timeout in discover: {0}ms. However, I think my peer address is {1}.",
+                Convenient.CurrentTimeMillis() - start, serverPeerAddress);
+            Failed(serverPeerAddress, msg);
         }
 
         private void Failed(PeerAddress serverPeerAddress, string failed)
