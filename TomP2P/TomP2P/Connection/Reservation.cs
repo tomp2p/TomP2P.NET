@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
+using TomP2P.P2P;
 
 namespace TomP2P.Connection
 {
@@ -57,7 +58,48 @@ namespace TomP2P.Connection
             _channelClientConfiguration = channelClientConfiguration;
         }
 
-        // TODO implement the second Create() method
+        /// <summary>
+        /// Calculates the number of required connections for routing and request messages.
+        /// </summary>
+        /// <param name="routingConfiguration">Contains the number of routing requests in parallel.</param>
+        /// <param name="requestConfiguration">Contains the number of requests for P2P operations in parallel.</param>
+        /// <param name="builder">The builder that tells us if we should TCP or UDP.</param>
+        /// <returns>The future channel creator.</returns>
+        public Task<ChannelCreator> CreateAsyc(RoutingConfiguration routingConfiguration,
+            IRequestConfiguration requestConfiguration, DefaultConnectionConfiguration builder)
+        {
+            if (routingConfiguration == null && requestConfiguration == null)
+            {
+                throw new ArgumentException("Both routing configuration and request configuration must be set.");
+            }
+
+            int nrConnectionsUdp = 0;
+            int nrConnectionsTcp = 0;
+            if (requestConfiguration != null)
+            {
+                if (builder.IsForceUdp)
+                {
+                    nrConnectionsUdp = requestConfiguration.Parallel;
+                }
+                else
+                {
+                    nrConnectionsTcp = requestConfiguration.Parallel;
+                }
+            }
+            if (routingConfiguration != null)
+            {
+                if (!builder.IsForceTcp)
+                {
+                    nrConnectionsUdp = Math.Max(nrConnectionsUdp, routingConfiguration.Parallel);
+                }
+                else
+                {
+                    nrConnectionsTcp = Math.Max(nrConnectionsTcp, routingConfiguration.Parallel);
+                }
+            }
+
+            return CreateAsync(nrConnectionsUdp, nrConnectionsTcp);
+        }
 
         /// <summary>
         /// Creates a channel creator for short-lived connections.
