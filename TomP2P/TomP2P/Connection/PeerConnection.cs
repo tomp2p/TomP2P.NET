@@ -103,12 +103,12 @@ namespace TomP2P.Connection
             };
         }
 
-        public Task Close()
+        public Task CloseAsync()
         {
             // cc is not null if we opened the connection
             if (ChannelCreator != null)
             {
-                Logger.Debug("Close connection {0}. We were the initiator.", _channel);
+                Logger.Debug("CloseAsync connection {0}. We were the initiator.", _channel);
                 // maybe done on arrival? set close future in any case
                 ChannelCreator.ShutdownAsync().ContinueWith(delegate
                 {
@@ -119,7 +119,7 @@ namespace TomP2P.Connection
             {
                 // cc is null if it is an incoming connection
                 // we can close it here or it will be closed when the dispatcher is shut down
-                Logger.Debug("Close connection {0}. We are not the initiator.", _channel);
+                Logger.Debug("CloseAsync connection {0}. We are not the initiator.", _channel);
                 _channel.Close();
             }
             return _tcsClose.Task;

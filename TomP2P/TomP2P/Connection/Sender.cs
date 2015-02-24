@@ -154,7 +154,7 @@ namespace TomP2P.Connection
             // if not fire-and-forget, receive response
             if (isFireAndForget)
             {
-                Logger.Debug("Fire and forget message {0} sent. Close channel {1} now.", message, udpClient);
+                Logger.Debug("Fire and forget message {0} sent. CloseAsync channel {1} now.", message, udpClient);
                 tcsResponse.SetResult(null); // set FF result
             }
             else
@@ -507,7 +507,7 @@ namespace TomP2P.Connection
             }
             if (isFireAndForget)
             {
-                Logger.Debug("Fire and forget message {0} sent. Close channel {1} now. {0}", tcsResponse.Task.AsyncState, channel);
+                Logger.Debug("Fire and forget message {0} sent. CloseAsync channel {1} now. {0}", tcsResponse.Task.AsyncState, channel);
                 tcsResponse.SetResult(null); // set FF result
                 // close channel now
             }

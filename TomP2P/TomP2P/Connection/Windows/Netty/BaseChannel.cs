@@ -28,7 +28,7 @@ namespace TomP2P.Connection.Windows.Netty
         }
 
         /// <summary>
-        /// A Close() method that notfies the subscribed events.
+        /// A CloseAsync() method that notfies the subscribed events.
         /// </summary>
         public void Close()
         {
