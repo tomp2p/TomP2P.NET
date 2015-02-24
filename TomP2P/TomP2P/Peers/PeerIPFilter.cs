@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 using TomP2P.Extensions;
 
 namespace TomP2P.Peers
@@ -29,18 +25,42 @@ namespace TomP2P.Peers
 
         public bool Reject(PeerAddress peerAddress, ICollection<PeerAddress> all, Number160 target)
         {
-            // TODO implement
-            throw new NotImplementedException();
             if (peerAddress.InetAddress.IsIPv4())
             {
+                var ipv4 = IPv4.FromInetAddress(peerAddress.InetAddress);
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                foreach (var paddr in all)
+                {
+                    if (paddr.InetAddress.IsIPv4())
+                    {
+                        var ipv4Test = IPv4.FromInetAddress(paddr.InetAddress);
+                        if (ipv4.MaskWithNetworkMask(_mask4).Equals(ipv4Test.MaskWithNetworkMask(_mask4)))
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
             else
             {
-
+                var ipv6 = IPv6.FromInetAddress(peerAddress.InetAddress);
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                foreach (var paddr in all)
+                {
+                    if (paddr.InetAddress.IsIPv6())
+                    {
+                        var ipv6Test = IPv6.FromInetAddress(paddr.InetAddress);
+                        if (ipv6.MaskWithNetworkMask(_mask6).Equals(ipv6Test.MaskWithNetworkMask(_mask6)))
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
             return false;
         }
 
+        // ReSharper disable once InconsistentNaming
         private class IPv4 : IEquatable<IPv4>
         {
             private readonly int _bits;
@@ -56,11 +76,8 @@ namespace TomP2P.Peers
                 {
                     return this;
                 }
-                else
-                {
-                    // TODO works?
-                    return new IPv4((int)(_bits & (0xFFFFFFFF << (32 - networkMask))));
-                }
+                // TODO works?
+                return new IPv4((int)(_bits & (0xFFFFFFFF << (32 - networkMask))));
             }
 
             public static IPv4 FromInetAddress(IPAddress inetAddress)
@@ -69,7 +86,7 @@ namespace TomP2P.Peers
                 {
                     throw new ArgumentException("Cannot construct from null.");
                 }
-                else if (!inetAddress.IsIPv4())
+                if (!inetAddress.IsIPv4())
                 {
                     throw new ArgumentException("Must be IPv4.");
                 }
@@ -101,8 +118,14 @@ namespace TomP2P.Peers
             {
                 return _bits == other._bits;
             }
+
+            public override int GetHashCode()
+            {
+                return _bits;
+            }
         }
 
+        // ReSharper disable once InconsistentNaming
         private class IPv6 : IEquatable<IPv6>
         {
             private readonly long _highBits;
@@ -120,20 +143,17 @@ namespace TomP2P.Peers
                 {
                     return this;
                 }
-                else if (networkMask == 64)
+                if (networkMask == 64)
                 {
                     return new IPv6(_highBits, 0);
                 }
-                else if (networkMask > 64)
+                if (networkMask > 64)
                 {
                     int remainingPrefixLength = networkMask - 64;
                     // TODO works?
                     return new IPv6(_highBits, _lowBits & (long)(0xFFFFFFFFFFFFFFFFL << (64 - remainingPrefixLength)));
                 }
-                else
-                {
-                    return new IPv6(_highBits & (long)(0xFFFFFFFFFFFFFFFFL << (64 - networkMask)), 0);
-                }
+                return new IPv6(_highBits & (long)(0xFFFFFFFFFFFFFFFFL << (64 - networkMask)), 0);
             }
 
             public static IPv6 FromInetAddress(IPAddress inetAddress)
@@ -142,7 +162,7 @@ namespace TomP2P.Peers
                 {
                     throw new ArgumentException("Cannot construct from null.");
                 }
-                else if (!inetAddress.IsIPv6())
+                if (!inetAddress.IsIPv6())
                 {
                     throw new ArgumentException("Must be IPv6.");
                 }
@@ -179,6 +199,11 @@ namespace TomP2P.Peers
             public bool Equals(IPv6 other)
             {
                 return _highBits == other._highBits && _lowBits == other._lowBits;
+            }
+
+            public override int GetHashCode()
+            {
+                return (int)(_highBits ^ _lowBits);
             }
         }
     }
