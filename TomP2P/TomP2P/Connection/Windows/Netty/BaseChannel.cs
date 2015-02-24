@@ -79,7 +79,14 @@ namespace TomP2P.Connection.Windows.Netty
 
         public bool IsActive
         {
-            get { return Pipeline.IsActive; } // TODO ok?
+            get // TODO ok?
+            {
+                if (Pipeline == null)
+                {
+                    return false;
+                }
+                return Pipeline.IsActive;
+            }
         }
     }
 }
