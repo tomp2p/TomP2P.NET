@@ -34,7 +34,7 @@ namespace TomP2P.Connection
             }
             else
             {
-                AllIdleTimeMillis = TimeSpan.FromSeconds(allIdleTimeSeconds).Milliseconds;
+                AllIdleTimeMillis = (int) TimeSpan.FromSeconds(allIdleTimeSeconds).TotalMilliseconds;
             }
         }
 

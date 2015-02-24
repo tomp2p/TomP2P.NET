@@ -29,7 +29,7 @@ namespace TomP2P.Futures
         /// <param name="delaySec">The delay in seconds.</param>
         public void Timeout(PeerAddress serverPeerAddress, ExecutorService timer, int delaySec)
         {
-            var cts = timer.Schedule(DiscoverTimeoutTask, serverPeerAddress, TimeSpan.FromSeconds(delaySec).Milliseconds);
+            var cts = timer.Schedule(DiscoverTimeoutTask, serverPeerAddress, TimeSpan.FromSeconds(delaySec).TotalMilliseconds);
 
 // ReSharper disable once MethodSupportsCancellation
             // cancel timeout if we are done

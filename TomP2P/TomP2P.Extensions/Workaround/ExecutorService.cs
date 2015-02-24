@@ -39,7 +39,7 @@ namespace TomP2P.Extensions.Workaround
         /// <param name="state"></param>
         /// <param name="delayMs">The delay in milliseconds.</param>
         /// <returns></returns>
-        public CancellationTokenSource Schedule(TimerCallback callback, object state, long delayMs)
+        public CancellationTokenSource Schedule(TimerCallback callback, object state, double delayMs)
         {
             if (_cts.IsCancellationRequested)
             {
