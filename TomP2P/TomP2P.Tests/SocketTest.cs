@@ -1,10 +1,12 @@
-﻿using System;
+﻿
+// this is an older Windows Socket test, I'll leave it here for potential documentary reasons
+
+/*using System;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using TomP2P.Connection.Windows;
 
 namespace TomP2P.Tests
 {
@@ -141,3 +143,4 @@ namespace TomP2P.Tests
         }
     }
 }
+*/
