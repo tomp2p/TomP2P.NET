@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Globalization;
+using System.Threading;
 
 namespace TomP2P.Extensions.Workaround
 {
@@ -30,6 +31,11 @@ namespace TomP2P.Extensions.Workaround
         {
             Interlocked.Increment(ref _value);
             return Get();
+        }
+
+        public override string ToString()
+        {
+            return _value.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

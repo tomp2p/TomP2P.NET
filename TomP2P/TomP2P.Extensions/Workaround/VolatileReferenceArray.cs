@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TomP2P.Extensions.Workaround
 {
@@ -12,7 +8,7 @@ namespace TomP2P.Extensions.Workaround
     public class VolatileReferenceArray<T>
     {
         private readonly T[] _array;
-        private object _lock;
+        private readonly object _lock;
 
         public VolatileReferenceArray(int size)
         {
@@ -72,6 +68,11 @@ namespace TomP2P.Extensions.Workaround
             var res = Get(index);
             Set(index, value);
             return res;
+        }
+
+        public override string ToString()
+        {
+            return _array.ToString();
         }
     }
 }
