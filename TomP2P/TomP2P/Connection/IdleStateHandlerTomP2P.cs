@@ -14,7 +14,7 @@ namespace TomP2P.Connection
         private VolatileLong _lastWriteTime = new VolatileLong(0);
 
         // .NET-specific
-        private ExecutorService _executor; // TODO shutdown somewhere
+        private ExecutorService _executor;
         private volatile CancellationTokenSource _cts;
 
         private volatile int _state; // 0 - none, 1 - initialized, 2- destroyed

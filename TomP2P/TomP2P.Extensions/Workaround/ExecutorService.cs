@@ -53,7 +53,7 @@ namespace TomP2P.Extensions.Workaround
             var delay = Task.Delay(TimeSpan.FromMilliseconds(delayMs), taskCts.Token);
             delay.ContinueWith(taskDelay =>
             {
-                if (taskCts.IsCancellationRequested)
+                if (!taskCts.IsCancellationRequested)
                 {
                     // invoke callback
                     callback(state);
