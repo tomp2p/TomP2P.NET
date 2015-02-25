@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,12 +23,8 @@ namespace TomP2P.Connection
 
         private readonly ChannelClientConfiguration _channelClientConfiguration;
 
-        // TODO check if best equivalent
-        private readonly ConcurrentQueue<Task> _queue = new ConcurrentQueue<Task>();
-
-        // single thread
-        // TODO this class uses a threadpool that is not limited to 1 single thread!
-        // TODO find ExecutorService equivalent
+        // .NET-specific: tasks are just submitted to the thread pool, no queue is used
+        // to enqueue pending tasks, no shutdown on running tasks is done explicitly
 
         // we should be fair, otherwise, we see connection timeouts
         // due to unfairness if busy
@@ -295,7 +290,7 @@ namespace TomP2P.Connection
             // .NET-specific: queued tasks cannot be aborted, but the flag indicates
             // the shutdown and the result will be set to failed
 
-            // the channel creator doesn't change anymore from here on // TODO correct?
+            // the channel creator doesn't change anymore from here on
             int size = _channelCreators.Count;
             if (size == 0)
             {
@@ -349,12 +344,12 @@ namespace TomP2P.Connection
             _channelCreators.Add(channelCreator);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Gets the pending number of requests that are scheduled but not executed yet.
         /// </summary>
         public int PendingRequests
         {
             get { return _queue.Count; }
-        }
+        }*/
     }
 }
