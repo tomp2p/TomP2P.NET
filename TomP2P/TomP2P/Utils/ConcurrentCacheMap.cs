@@ -28,7 +28,7 @@ namespace TomP2P.Utils
 
         private readonly int _timeToLiveSeconds;
         private readonly bool _refreshTimeout;
-        private readonly VolatileInteger _removedCounter = new VolatileInteger();
+        private readonly VolatileInteger _removedCounter = new VolatileInteger(0);
 
         /// <summary>
         /// Creates a new instance of ConcurrentCacheMap using the default values

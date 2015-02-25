@@ -75,7 +75,7 @@ namespace TomP2P.Peers
         /// <summary>
         /// Finds the next peer that should have a maintenance check. Returns null if no maintenance is needed at the moment.
         /// It will return the most important peers first. Importance is as follows: The most important peers are the close
-        /// ones in the verified peer map. If a certain threshold in a bag is not reached, the unverified becomes important too.
+        /// ones in the verified peer map. If a certain threshold in a bag is not reached, the unverified becomes important, too.
         /// </summary>
         /// <param name="notInterestedAddress"></param>
         /// <returns>The next most important peer to check if it is still alive.</returns>

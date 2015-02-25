@@ -8,7 +8,7 @@ namespace TomP2P.Connection
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private VolatileInteger _counter = new VolatileInteger();
+        private readonly VolatileInteger _counter = new VolatileInteger(0);
         private readonly int _limit;
 
         public DropConnectionInboundHandler(int limit)

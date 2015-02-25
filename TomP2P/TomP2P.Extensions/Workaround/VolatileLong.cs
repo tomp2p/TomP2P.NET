@@ -5,10 +5,9 @@ namespace TomP2P.Extensions.Workaround
 {
     /// <summary>
     /// An attempt to mimick Java's AtomicLong in .NET.
-    /// In .NET, however, it is reasonable to make it a struct rather than a class.
     /// This is also used instead of Java's "volatile long", because long uses 64 bits.
     /// </summary>
-    public struct VolatileLong
+    public class VolatileLong
     {
         private long _value;
 
