@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
@@ -12,10 +11,10 @@ namespace TomP2P.Connection
         public int AllIdleTimeMillis { get; private set; }
 
         private VolatileLong _lastReadTime = new VolatileLong(0);
-
         private VolatileLong _lastWriteTime = new VolatileLong(0);
 
-        private volatile Task _allIdleTimeoutTask;
+        // .NET-specific
+        private ExecutorService _executor; // TODO shutdown somewhere
         private volatile CancellationTokenSource _cts;
 
         private volatile int _state; // 0 - none, 1 - initialized, 2- destroyed
@@ -88,6 +87,10 @@ namespace TomP2P.Connection
             _state = 1;
 
             // .NET-specific:
+            if (_executor == null)
+            {
+                _executor = new ExecutorService();
+            }
             var currentMillis = Convenient.CurrentTimeMillis();
             _lastReadTime.Set(currentMillis);
             _lastWriteTime.Set(currentMillis);
@@ -95,31 +98,28 @@ namespace TomP2P.Connection
             if (AllIdleTimeMillis > 0)
             {
                 // one-shot task
-                StartAllIdleTimeoutTask(ctx, AllIdleTimeMillis);
+                //StartAllIdleTimeoutTask(ctx, AllIdleTimeMillis);
+
+                _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
             }
         }
 
-        // use "async void" because it's an event-like task
-        private async void StartAllIdleTimeoutTask(ChannelHandlerContext ctx, int delayMillis)
+        private void Callback(object state)
         {
-            _cts = new CancellationTokenSource();
-            _allIdleTimeoutTask = Task.Delay(delayMillis, _cts.Token);
+            var ctx = state as ChannelHandlerContext;
 
-            await _allIdleTimeoutTask;
-
-            // continue with "AllIdleTimeoutTask"
             if (!ctx.Channel.IsOpen)
             {
                 return;
             }
-            var currentTime = Convenient.CurrentTimeMillis();
-            var lastIoTime = Math.Max(_lastReadTime.Get(), _lastWriteTime.Get());
-            var nextDelay = (int)(AllIdleTimeMillis - (currentTime - lastIoTime)); // TODO bad cast, possible data loss
+            long currentTime = Convenient.CurrentTimeMillis();
+            long lastIoTime = Math.Max(_lastReadTime.Get(), _lastWriteTime.Get());
+            long nextDelay = (AllIdleTimeMillis - (currentTime - lastIoTime));
             if (nextDelay <= 0)
             {
                 // both reader and writer are idle
                 // --> set a new timeout and notify the callback
-                StartAllIdleTimeoutTask(ctx, AllIdleTimeMillis);
+                _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
                 try
                 {
                     ctx.FireUserEventTriggered(this);
@@ -133,18 +133,22 @@ namespace TomP2P.Connection
             {
                 // either read or write occurred before the timeout
                 // --> set a new timeout with shorter delayMillis
-                StartAllIdleTimeoutTask(ctx, nextDelay);
+                _cts = _executor.Schedule(Callback, ctx, nextDelay);
             }
         }
 
         private void Destroy()
         {
             _state = 2;
-            if (_allIdleTimeoutTask != null)
+            // .NET-specific:
+            if (_cts != null)
             {
                 _cts.Cancel();
-                _allIdleTimeoutTask = null;
                 _cts = null;
+            }
+            if (_executor != null)
+            {
+                _executor.Shutdown();
             }
         }
 

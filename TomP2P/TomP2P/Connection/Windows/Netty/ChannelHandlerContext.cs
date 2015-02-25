@@ -1,4 +1,5 @@
 ﻿using System;
+using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection.Windows.Netty
 {
