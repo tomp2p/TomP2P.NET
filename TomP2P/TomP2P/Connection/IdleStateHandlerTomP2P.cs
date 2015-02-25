@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
@@ -8,6 +9,8 @@ namespace TomP2P.Connection
 {
     public class IdleStateHandlerTomP2P : BaseChannelHandler, IDuplexHandler
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public int AllIdleTimeMillis { get; private set; }
 
         private VolatileLong _lastReadTime = new VolatileLong(0);
@@ -97,9 +100,6 @@ namespace TomP2P.Connection
 
             if (AllIdleTimeMillis > 0)
             {
-                // one-shot task
-                //StartAllIdleTimeoutTask(ctx, AllIdleTimeMillis);
-
                 _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
             }
         }
@@ -119,6 +119,7 @@ namespace TomP2P.Connection
             {
                 // both reader and writer are idle
                 // --> set a new timeout and notify the callback
+                Logger.Debug("Both reader and writer are idle...");
                 _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
                 try
                 {

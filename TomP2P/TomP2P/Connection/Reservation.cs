@@ -292,7 +292,8 @@ namespace TomP2P.Connection
             // Let the executor finish since the shutdown-flag is set and the
             // future will be set as well to "shutting down".
             
-            // TODO find a way to abort the un-started tasks in the thread pool/executor
+            // .NET-specific: queued tasks cannot be aborted, but the flag indicates
+            // the shutdown and the result will be set to failed
 
             // the channel creator doesn't change anymore from here on // TODO correct?
             int size = _channelCreators.Count;
@@ -317,6 +318,7 @@ namespace TomP2P.Connection
                             _tcsReservationDone.SetResult(null);
                         }
                     });
+                    channelCreator.ShutdownAsync();
                 }
             }
             return _tcsReservationDone.Task;

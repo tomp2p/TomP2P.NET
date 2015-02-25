@@ -168,10 +168,12 @@ namespace TomP2P.P2P
             PeerCreator peerCreator;
             if (MasterPeer != null)
             {
+                // create slave peer
                 peerCreator = new PeerCreator(MasterPeer.PeerCreator, PeerId, KeyPair);
             }
             else
             {
+                // create master peer
                 peerCreator = new PeerCreator(P2PId, PeerId, KeyPair, ChannelServerConfiguration, ChannelClientConfiguration, Timer);
             }
 
