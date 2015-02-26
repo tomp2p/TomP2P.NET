@@ -223,7 +223,7 @@ namespace TomP2P.P2P.Builder
 
             int conn = RoutingConfiguration.Parallel;
             var taskCc = _peer.ConnectionBean.Reservation.CreateAsync(conn, 0);
-            Utils.Utils.AddReleaseListener(taskCc, tcsBootstrap.Task); // TODO correct?
+            Utils.Utils.AddReleaseListener(taskCc, tcsBootstrap.Task);
             taskCc.ContinueWith(tcc =>
             {
                 if (!tcc.IsFaulted)
