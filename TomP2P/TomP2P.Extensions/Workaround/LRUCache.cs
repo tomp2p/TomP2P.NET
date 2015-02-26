@@ -161,32 +161,38 @@ namespace TomP2P.Extensions.Workaround
 
         void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
         {
+            // synchronized
             Add(key, value);
         }
 
         public ICollection<TKey> Keys
         {
+            // synchronized
             get { return KeySet(); }
         }
 
         bool IDictionary<TKey, TValue>.Remove(TKey key)
         {
+            // synchronized
             var res = Remove(key);
             return res != default(TValue);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public bool TryGetValue(TKey key, out TValue value)
         {
-            throw new System.NotImplementedException();
+            return _cacheMap.TryGetValue(key, out value);
         }
 
         ICollection<TValue> IDictionary<TKey, TValue>.Values
         {
+            // synchronized
             get { return Values(); }
         }
 
         public TValue this[TKey key]
         {
+            // both synchronized
             get { return Get(key); }
             set { Add(key, value); }
         }
@@ -208,6 +214,7 @@ namespace TomP2P.Extensions.Workaround
 
         int ICollection<KeyValuePair<TKey, TValue>>.Count
         {
+            // synchronized
             get { return Count(); }
         }
 
@@ -221,6 +228,7 @@ namespace TomP2P.Extensions.Workaround
             throw new System.NotImplementedException();
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
         {
             return _cacheMap.GetEnumerator();
