@@ -18,10 +18,12 @@ namespace TomP2P.Connection
 
         public long TimeToHeartBeatMillis { get; private set; }
 
-        private VolatileLong _lastReadTime = new VolatileLong(0);
-        private VolatileLong _lastWriteTime = new VolatileLong(0);
+        private readonly VolatileLong _lastReadTime = new VolatileLong(0);
+        private readonly VolatileLong _lastWriteTime = new VolatileLong(0);
 
-        private volatile Timer _loop;
+        // .NET-specific
+        private ExecutorService _executor;
+        private volatile Timer _timer;
 
         private volatile int _state; // 0 - none, 1 - initialized, 2- destroyed
 
@@ -53,10 +55,7 @@ namespace TomP2P.Connection
 
         public override void Write(ChannelHandlerContext ctx, object msg)
         {
-            ctx.Channel.WriteCompleted += (channel) =>
-            {
-                _lastWriteTime.Set(Convenient.CurrentTimeMillis());
-            };
+            ctx.Channel.WriteCompleted += channel => _lastWriteTime.Set(Convenient.CurrentTimeMillis());
             //ctx.FireWrite(msg); // TODO needed?
         }
 
@@ -71,7 +70,6 @@ namespace TomP2P.Connection
             return this;
         }
 
-        // TODO works?
         public override void HandlerAdded(ChannelHandlerContext ctx)
         {
             if (ctx.Channel.IsActive)
@@ -80,20 +78,17 @@ namespace TomP2P.Connection
             }
         }
 
-        // TODO works?
         public override void ChannelActive(ChannelHandlerContext ctx)
         {
             // invoked when a pipeline is attached to a channel
             Initialize(ctx);
         }
 
-        // TODO works?
         public override void HandlerRemoved(ChannelHandlerContext ctx)
         {
             Destroy();
         }
 
-        // TODO works?
         public override void ChannelInactive(ChannelHandlerContext ctx)
         {
             // invoked when a socket/channel is closed
@@ -112,21 +107,30 @@ namespace TomP2P.Connection
             _state = 1;
 
             // .NET-specific:
+            if (_executor == null)
+            {
+                _executor = new ExecutorService();
+            }
             var currentMillis = Convenient.CurrentTimeMillis();
             _lastReadTime.Set(currentMillis);
             _lastWriteTime.Set(currentMillis);
 
-            _loop = new Timer(Heartbeating, ctx, TimeToHeartBeatMillis, TimeToHeartBeatMillis);
+            _timer = _executor.ScheduleAtFixedRate(Heartbeating, ctx, TimeToHeartBeatMillis, TimeToHeartBeatMillis);
         }
 
         private void Destroy()
         {
             _state = 2;
 
-            if (_loop != null)
+            // .NET-specific:
+            if (_timer != null)
             {
-                _loop.Dispose();
-                _loop = null;
+                ExecutorService.Cancel(_timer);
+                _timer = null;
+            }
+            if (_executor != null)
+            {
+                _executor.Shutdown();
             }
         }
 

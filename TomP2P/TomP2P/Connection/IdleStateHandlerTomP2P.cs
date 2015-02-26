@@ -94,11 +94,11 @@ namespace TomP2P.Connection
 
             if (AllIdleTimeMillis > 0)
             {
-                _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
+                _cts = _executor.Schedule(AllIdleTimeoutTask, ctx, AllIdleTimeMillis);
             }
         }
 
-        private void Callback(object state)
+        private void AllIdleTimeoutTask(object state)
         {
             var ctx = state as ChannelHandlerContext;
 
@@ -114,7 +114,7 @@ namespace TomP2P.Connection
                 // both reader and writer are idle
                 // --> set a new timeout and notify the callback
                 //Logger.Debug("Both reader and writer are idle...");
-                _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
+                _cts = _executor.Schedule(AllIdleTimeoutTask, ctx, AllIdleTimeMillis);
                 try
                 {
                     ctx.FireUserEventTriggered(this);
@@ -128,7 +128,7 @@ namespace TomP2P.Connection
             {
                 // either read or write occurred before the timeout
                 // --> set a new timeout with shorter delayMillis
-                _cts = _executor.Schedule(Callback, ctx, nextDelay);
+                _cts = _executor.Schedule(AllIdleTimeoutTask, ctx, nextDelay);
             }
         }
 
