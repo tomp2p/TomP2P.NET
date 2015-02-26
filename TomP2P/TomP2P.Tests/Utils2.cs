@@ -76,12 +76,13 @@ namespace TomP2P.Tests
         /// Creates and returns a ChannelServerConfiguration that has infinite values for all timeouts.
         /// </summary>
         /// <returns></returns>
-        public static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration()
+        public static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration(int portUdp, int portTcp)
         {
             return PeerBuilder.CreateDefaultChannelServerConfiguration()
                 .SetIdleTcpSeconds(Int32.MaxValue)
                 .SetIdleUdpSeconds(Int32.MaxValue)
-                .SetConnectionTimeoutTcpMillis(Int32.MaxValue);
+                .SetConnectionTimeoutTcpMillis(Int32.MaxValue)
+                .SetPorts(new Ports(portTcp, portUdp));
         }
 
         /// <summary>
