@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
 
@@ -1090,6 +1091,16 @@ namespace TomP2P.Storage
         public static AlternativeCompositeByteBuf CompBuffer(params ByteBuf[] buffers)
         {
             return CompBuffer(ALLOC, false, buffers);
+        }
+
+        public override string ToString()
+        {
+            // .NET-specific:
+            var sb = new StringBuilder("[")
+                .Append("Readable: ").Append(ReadableBytes)
+                .Append(" | Writeable: ").Append(WriteableBytes)
+                .Append("]");
+            return sb.ToString();
         }
 
         public override bool Equals(object obj)

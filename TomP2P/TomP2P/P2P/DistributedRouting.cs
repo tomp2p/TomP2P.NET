@@ -209,13 +209,6 @@ namespace TomP2P.P2P
             return tcsRouting;
         }
 
-        /// <summary>
-        /// Looks for a route to the 
-        /// </summary>
-        /// <param name="routingBuilder"></param>
-        /// <param name="routingMechanism"></param>
-        /// <param name="type"></param>
-        /// <param name="channelCreator"></param>
         private void RoutingRec(RoutingBuilder routingBuilder, RoutingMechanism routingMechanism,
             Message.Message.MessageType type, ChannelCreator channelCreator)
         {
