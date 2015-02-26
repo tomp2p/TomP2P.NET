@@ -4,7 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using TomP2P.Connection;
 using TomP2P.Message;
+using TomP2P.P2P;
 using TomP2P.Peers;
 
 namespace TomP2P.Tests
@@ -68,6 +70,28 @@ namespace TomP2P.Tests
             PeerSocketAddress peerSocketAddress = new PeerSocketAddress(inetSend, tcpPortSender, udpPortSender);
             PeerAddress n1 = new PeerAddress(idSender, peerSocketAddress, firewallTcp, firewallUdp, false, PeerAddress.EmptyPeerSocketAddresses);
             return n1;
+        }
+
+        /// <summary>
+        /// Creates and returns a ChannelServerConfiguration that has infinite values for all timeouts.
+        /// </summary>
+        /// <returns></returns>
+        public static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration()
+        {
+            return PeerBuilder.CreateDefaultChannelServerConfiguration()
+                .SetIdleTcpSeconds(Int32.MaxValue)
+                .SetIdleUdpSeconds(Int32.MaxValue)
+                .SetConnectionTimeoutTcpMillis(Int32.MaxValue);
+        }
+
+        /// <summary>
+        /// Creates and returns a MaintenanceTask that has an infinite interval.
+        /// </summary>
+        /// <returns></returns>
+        public static MaintenanceTask CreateInfiniteIntervalMaintenanceTask()
+        {
+            return new MaintenanceTask()
+                .SetIntervalMillis(Int32.MaxValue);
         }
     }
 }

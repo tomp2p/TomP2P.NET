@@ -177,7 +177,7 @@ namespace TomP2P.Peers
             }
             int time = intervalSeconds[index];
             long lastTimeWhenChecked = Convenient.CurrentTimeMillis() - peerStatistic.LastSeenOnline;
-            return lastTimeWhenChecked > TimeSpan.FromSeconds(time).TotalSeconds; // TODO correct?
+            return lastTimeWhenChecked > TimeSpan.FromSeconds(time).TotalSeconds;
         }
     }
 }

@@ -20,13 +20,19 @@ namespace TomP2P.Tests.Rpc
             Peer sender = null;
             Peer recv1 = null;
             ChannelCreator cc = null;
+            var infiniteTimeoutConfig = Utils2.CreateInfiniteTimeoutChannelServerConfiguration());
+            var infiniteMaintenanceTask = Utils2.CreateInfiniteIntervalMaintenanceTask();
             try
             {
                 sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetChannelServerConfiguration(infiniteTimeoutConfig)
+                    .SetMaintenanceTask(infiniteMaintenanceTask)
                     .SetP2PId(55)
                     .SetPorts(2424)
                     .Start();
                 recv1 = new PeerBuilder(new Number160("0x1234"))
+                    .SetChannelServerConfiguration(infiniteTimeoutConfig)
+                    .SetMaintenanceTask(infiniteMaintenanceTask)
                     .SetP2PId(55)
                     .SetPorts(7777)
                     .Start();

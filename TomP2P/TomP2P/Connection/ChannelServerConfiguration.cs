@@ -1,7 +1,4 @@
-﻿
-using TomP2P.P2P;
-
-namespace TomP2P.Connection
+﻿namespace TomP2P.Connection
 {
     /// <summary>
     /// The configuration for the server.
@@ -13,7 +10,7 @@ namespace TomP2P.Connection
         /// </summary>
         public bool IsBehindFirewall { get; private set; }
         /// <summary>
-        /// True, if the bind to poerts should be omitted.
+        /// True, if the bind to ports should be omitted.
         /// </summary>
         public bool IsDisableBind { get; private set; }
         

@@ -516,7 +516,6 @@ namespace TomP2P.Utils
             {
                 get
                 {
-                    // TODO correct?
                     return Convenient.CurrentTimeMillis() >= _lastAccessTimeMillis + TimeSpan.FromSeconds(_timeToLiveSeconds).TotalMilliseconds;
                 }
             }

@@ -106,7 +106,7 @@ namespace TomP2P.P2P
             _maintainables.Add(maintainable);
         }
 
-        private MaintenanceTask SetIntervalMillis(int intervalMillis)
+        public MaintenanceTask SetIntervalMillis(int intervalMillis)
         {
             IntervalMillis = intervalMillis;
             return this;
