@@ -317,8 +317,8 @@ namespace TomP2P.Peers
             var mapOverflow2 = PeerMapOverflow[classMember];
             lock (mapOverflow2)
             {
-                var peerStatistic = mapOverflow2[remotePeer.PeerId];
-                if (peerStatistic == null)
+                PeerStatistic peerStatistic;
+                if (!mapOverflow2.TryGetValue(remotePeer.PeerId, out peerStatistic))
                 {
                     peerStatistic = new PeerStatistic(remotePeer);
                 }
@@ -691,8 +691,8 @@ namespace TomP2P.Peers
             {
                 lock (tmp)
                 {
-                    var peerStatistic = tmp[remotePeer.PeerId];
-                    if (peerStatistic != null)
+                    PeerStatistic peerStatistic;
+                    if (tmp.TryGetValue(remotePeer.PeerId, out peerStatistic))
                     {
                         if (peerStatistic.Failed() >= maxFail)
                         {
@@ -717,8 +717,8 @@ namespace TomP2P.Peers
         {
             lock (tmp)
             {
-                var old = tmp[peerAddress.PeerId];
-                if (old != null)
+                PeerStatistic old;
+                if (tmp.TryGetValue(peerAddress.PeerId, out old))
                 {
                     // TODO from Java: this should only be from firsthand
                     old.SetPeerAddress(peerAddress);

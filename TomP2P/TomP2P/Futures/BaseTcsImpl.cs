@@ -18,7 +18,7 @@ namespace TomP2P.Futures
         /// </summary>
         protected BaseTcsImpl()
         {
-            Lock = this;
+            Lock = this; // TODO lock on an object
         }
 
         protected bool CompletedAndNotify()
