@@ -119,7 +119,7 @@ namespace TomP2P.Connection
             {
                 // both reader and writer are idle
                 // --> set a new timeout and notify the callback
-                Logger.Debug("Both reader and writer are idle...");
+                //Logger.Debug("Both reader and writer are idle...");
                 _cts = _executor.Schedule(Callback, ctx, AllIdleTimeMillis);
                 try
                 {

@@ -6,13 +6,11 @@ namespace TomP2P.Connection.Windows.Netty
 {
     public sealed class AttributeKey<T> : AttributeKey, IComparable<AttributeKey<T>>
     {
-// ReSharper disable once StaticFieldInGenericType
+
+        // ReSharper disable once StaticFieldInGenericType
         private static readonly ConcurrentDictionary<string, bool> Names = new ConcurrentDictionary<string, bool>();
-
-// ReSharper disable once StaticFieldInGenericType
-        private static VolatileInteger _nextId = new VolatileInteger(0);
-
-
+        // ReSharper disable once StaticFieldInGenericType
+        private static readonly VolatileInteger NextId = new VolatileInteger(0);
 
         public static AttributeKey<T> ValueOf(string name)
         {
@@ -30,11 +28,12 @@ namespace TomP2P.Connection.Windows.Netty
                 throw new NullReferenceException("name");
             }
 
-            Names.AddOrUpdate(name, true, delegate {
+            Names.AddOrUpdate(name, true, delegate
+            {
                 throw new ArgumentException(String.Format("'{0}' is already in use.", name));
             });
 
-            Id = _nextId.IncrementAndGet();
+            Id = NextId.IncrementAndGet();
             Name = name;
         }
 

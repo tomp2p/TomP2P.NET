@@ -2,8 +2,6 @@
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Workaround;
 using TomP2P.Storage;
 
 namespace TomP2P.Message
@@ -106,7 +104,7 @@ namespace TomP2P.Message
                         foreach (var psa in list)
                         {
                             // write IP version flag
-                            buffer.WriteByte(psa.IsIPv4 ? (sbyte)0 : (sbyte)1);
+                            buffer.WriteByte(psa.IsIPv4 ? 0 : 1);
                             buffer.WriteBytes(psa.ToByteArray());
                         }
                         Message.ContentReferences.Dequeue();
@@ -184,7 +182,7 @@ namespace TomP2P.Message
                             buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
 
                             // write number of based-on keys
-                            buffer.WriteByte((sbyte) data.Value.Count); // TODO check if conversion is valid
+                            buffer.WriteByte((sbyte) data.Value.Count);
 
                             // write based-on keys
                             foreach (var key in data.Value)
@@ -206,7 +204,7 @@ namespace TomP2P.Message
                             buffer.WriteBytes(data.Key.VersionKey.ToByteArray());
                             
                             // write byte
-                            buffer.WriteByte((sbyte)data.Value);
+                            buffer.WriteByte(data.Value);
                         }
                         Message.ContentReferences.Dequeue();
                         break;
@@ -256,7 +254,7 @@ namespace TomP2P.Message
                         goto case Message.Content.PublicKey; // TODO check, else duplicate code
                     case Message.Content.PublicKey:
                         var pk = Message.PublicKey(next.Index);
-                        _signatureFactory.EncodePublicKey(pk, buffer); // TODO check reference passing
+                        _signatureFactory.EncodePublicKey(pk, buffer);
                         Message.ContentReferences.Dequeue();
                         break;
                     default:

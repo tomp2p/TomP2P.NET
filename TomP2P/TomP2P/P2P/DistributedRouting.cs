@@ -223,7 +223,7 @@ namespace TomP2P.P2P
             int active = 0;
             for (int i = 0; i < routingMechanism.Parallel; i++)
             {
-                if (routingMechanism.TcsResponse(i) == null
+                if (routingMechanism.GetTcsResponse(i) == null
                     && !routingMechanism.IsStopCreatingNewFutures)
                 {
                     PeerAddress next;
@@ -249,13 +249,13 @@ namespace TomP2P.P2P
                         // routing is per default UDP, don't show warning if the other TCP/UDP is used
                         // TODO find .NET-specific way to show sanity check warning
 
-                        routingMechanism.TcsResponse(i,
+                        routingMechanism.SetTcsResponse(i,
                             _neighbors.CloseNeighborsTcs(next, routingBuilder.SearchValues(), type, channelCreator,
                                 routingBuilder));
                         Logger.Debug("Get close neighbours: {0} on {1}.", next, i);
                     }
                 }
-                else if (routingMechanism.TcsResponse(i) != null)
+                else if (routingMechanism.GetTcsResponse(i) != null)
                 {
                     Logger.Debug("Activity on {0}.", i);
                     active++;
@@ -274,11 +274,10 @@ namespace TomP2P.P2P
             var extractedTasks = new Task<Message.Message>[routingMechanism.TcsResponses.Length];
             for (int i = 0; i < routingMechanism.TcsResponses.Length; i++)
             {
-                extractedTasks[i] = routingMechanism.TcsResponse(i).Task;
+                extractedTasks[i] = routingMechanism.GetTcsResponse(i) != null ? routingMechanism.GetTcsResponse(i).Task : null;
             }
             var volatileArray = new VolatileReferenceArray<Task<Message.Message>>(extractedTasks);
 
-            // TODO works?
             bool last = active == 1;
             var tcsForkJoin = new TcsForkJoin<Task<Message.Message>>(1, false, volatileArray);
             tcsForkJoin.Task.ContinueWith(tfj =>

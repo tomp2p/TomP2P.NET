@@ -75,7 +75,6 @@ namespace TomP2P.Connection
                 _name = name;
             }
 
-            // TODO when and where shall this get called?
             public void UserEventTriggered(ChannelHandlerContext ctx, object evt)
             {
                 if (evt is IdleStateHandlerTomP2P)

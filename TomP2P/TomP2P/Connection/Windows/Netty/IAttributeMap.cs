@@ -1,5 +1,4 @@
-﻿
-namespace TomP2P.Connection.Windows.Netty
+﻿namespace TomP2P.Connection.Windows.Netty
 {
     public interface IAttributeMap
     {

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TomP2P.Connection.Windows.Netty
+﻿namespace TomP2P.Connection.Windows.Netty
 {
-    public interface IAttribute<T>
+    public interface IAttribute<T> : IAttribute
     {
         AttributeKey<T> Key { get; }
 
@@ -14,4 +8,7 @@ namespace TomP2P.Connection.Windows.Netty
 
         void Set(T value);
     }
+
+    public interface IAttribute
+    { }
 }

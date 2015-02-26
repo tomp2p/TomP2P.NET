@@ -13,8 +13,6 @@ namespace TomP2P.P2P
 
         private const int MaxPing = 5;
         private static readonly VolatileInteger Counter = new VolatileInteger(0);
-        // .NET-specific: thread-naming
-        private static readonly VolatileInteger ThreadCounter = new VolatileInteger(0);
 
         private Peer _peer;
         public int IntervalMillis { get; private set; }
@@ -42,8 +40,7 @@ namespace TomP2P.P2P
 
         private void Run(object state)
         {
-            Thread.CurrentThread.Name = ThreadCounter.IncrementAndGet().ToString();
-            Logger.Debug("Maintenance Thread {0}: Maintenance triggered...", Thread.CurrentThread.Name);
+            //Logger.Debug("Maintenance Thread {0}: Maintenance triggered...", Thread.CurrentThread.ManagedThreadId);
             lock (_lock)
             {
                 // make sure we only have 5 pings in parallel

@@ -72,7 +72,7 @@ namespace TomP2P.P2P
         /// </summary>
         /// <param name="i"></param>
         /// <returns></returns>
-        public TaskCompletionSource<Message.Message> TcsResponse(int i)
+        public TaskCompletionSource<Message.Message> GetTcsResponse(int i)
         {
             return TcsResponses.Get(i);
         }
@@ -83,7 +83,7 @@ namespace TomP2P.P2P
         /// <param name="i"></param>
         /// <param name="tcsResponse"></param>
         /// <returns></returns>
-        public TaskCompletionSource<Message.Message> TcsResponse(int i,
+        public TaskCompletionSource<Message.Message> SetTcsResponse(int i,
             TaskCompletionSource<Message.Message> tcsResponse)
         {
             return TcsResponses.GetAndSet(i, tcsResponse);
