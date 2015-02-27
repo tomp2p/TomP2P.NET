@@ -51,6 +51,9 @@ namespace TomP2P.Connection
         /// </summary>
         public int ConnectionTimeoutTcpMillis { get; private set; }
 
+        // .NET-specific: to be able to clone this instace
+        private readonly IConnectionConfiguration _configuration;
+
         /// <summary>
         /// Creates a request handler that can send TCP and UDP messages.
         /// </summary>
@@ -65,6 +68,7 @@ namespace TomP2P.Connection
             ConnectionBean = connectionBean;
             _message = tcsResponse.Task.AsyncState as Message.Message;
             _sendMessageId = new MessageId(_message);
+            _configuration = configuration;
             IdleTcpSeconds = configuration.IdleTcpSeconds;
             IdleUdpSeconds = configuration.IdleUdpSeconds;
             ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis;
@@ -312,6 +316,14 @@ namespace TomP2P.Connection
             _tcsResponse.SetException(cause);
             // TODO channel not already closed in Sender?
             ctx.Close(); // TODO used?
+        }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            // TODO correct? message reference is shared...
+            var tcsResponse = new TaskCompletionSource<Message.Message>(_tcsResponse.Task.AsyncState);
+
+            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, _configuration);
         }
     }
 }

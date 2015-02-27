@@ -5,7 +5,7 @@ using TomP2P.Connection.Windows.Netty;
 
 namespace TomP2P.Message
 {
-    public class TomP2PSinglePacketUdp : BaseInboundHandler
+    public class TomP2PSinglePacketUdp : BaseInboundHandler, ISharable
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -51,6 +51,13 @@ namespace TomP2P.Message
                 Logger.Error("Error in UDP decoding.", ex);
                 throw;
             }
+        }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            // does not have to be implemeted, this class is ISharable
+            throw new NotImplementedException();
+            return new TomP2PSinglePacketUdp(_signatureFactory);
         }
     }
 }

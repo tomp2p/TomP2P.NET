@@ -5,7 +5,6 @@ using NUnit.Framework;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -778,7 +777,7 @@ namespace TomP2P.Tests.Interop.Protocol
 
             // mock a non-working ChannelHandlerContext
             var channel = new MyTcpClient(new IPEndPoint(IPAddress.Any, 0));
-            var session = new Pipeline.PipelineSession(new Pipeline(channel));
+            var session = new Pipeline.PipelineSession(new Pipeline(channel), new List<IInboundHandler>(), new List<IOutboundHandler>());
             var ctx = new ChannelHandlerContext(session);
 
             // create dummy sender for decoding

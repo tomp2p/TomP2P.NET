@@ -159,5 +159,10 @@ namespace TomP2P.Connection
                 Logger.Debug("Not sending heart beat to {0}. Channel: {1}.", _peerConnection.RemotePeer, _peerConnection.Channel);
             }
         }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            return new HeartBeat(TimeToHeartBeatMillis, _pingBuilderFactory);
+        }
     }
 }

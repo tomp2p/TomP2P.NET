@@ -4,7 +4,7 @@ using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection
 {
-    public class DropConnectionInboundHandler : BaseInboundHandler
+    public class DropConnectionInboundHandler : BaseInboundHandler, ISharable
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -31,6 +31,13 @@ namespace TomP2P.Connection
         {
             _counter.Decrement();
             // fireChannelInactive // TODO needed?
+        }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            // does not have to be implemeted, this class is ISharable
+            throw new System.NotImplementedException();
+            //public DropConnectionInboundHandler(int _limit);
         }
     }
 }

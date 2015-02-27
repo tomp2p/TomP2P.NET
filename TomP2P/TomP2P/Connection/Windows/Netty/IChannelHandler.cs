@@ -25,6 +25,14 @@ namespace TomP2P.Connection.Windows.Netty
         //void HandlerAdded(ChannelHandlerContext ctx);
 
         //void HandlerRemoved(ChannelHandlerContext ctx);
+
+        /// <summary>
+        /// Creates a new instance of this type. This is used for each
+        /// new connection in the pipeline such that state is not shared
+        /// among different connections.
+        /// </summary>
+        /// <returns></returns>
+        IChannelHandler CreateNewInstance();
     }
 
     /// <summary>

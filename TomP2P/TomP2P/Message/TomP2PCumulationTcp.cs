@@ -5,7 +5,6 @@ using TomP2P.Connection;
 using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Storage;
 
 namespace TomP2P.Message
@@ -19,8 +18,12 @@ namespace TomP2P.Message
 
         private int _lastId = 0;
 
+        // .NET-specific: to be able to clone this instace
+        private readonly ISignatureFactory _signatureFactory;
+
         public TomP2PCumulationTcp(ISignatureFactory signatureFactory)
         {
+            _signatureFactory = signatureFactory;
             _decoder = new Decoder(signatureFactory);
         }
 
@@ -141,6 +144,11 @@ namespace TomP2P.Message
                 _cumulation = null;
                 // TODO ctx.FireInactive needed?
             }
+        }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            return new TomP2PCumulationTcp(_signatureFactory);
         }
     }
 }

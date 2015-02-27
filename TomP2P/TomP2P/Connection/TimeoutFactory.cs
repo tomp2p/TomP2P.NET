@@ -148,6 +148,12 @@ namespace TomP2P.Connection
             {
                 // nothing to write here
             }
+
+            public override IChannelHandler CreateNewInstance()
+            {
+                // TODO correct??
+                return new TimeHandler(new TaskCompletionSource<Message.Message>(), _peerStatusListeners, _name);
+            }
         }
     }
 }

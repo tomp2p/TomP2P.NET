@@ -19,7 +19,7 @@ namespace TomP2P.Connection
     /// This class is able to cover several channels but only one P2P network!)
     /// </para>
     /// </summary>
-    public class Dispatcher : BaseInboundHandler
+    public class Dispatcher : BaseInboundHandler, ISharable
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
@@ -316,6 +316,13 @@ namespace TomP2P.Connection
                 }
             }
             return result;
+        }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            // does not have to be implemeted, this class is ISharable
+            throw new NotImplementedException();
+            //return new Dispatcher(_p2PId, _peerBeanMaster, _heartBeatMillis);
         }
     }
 }

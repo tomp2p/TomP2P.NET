@@ -32,5 +32,7 @@ namespace TomP2P.Connection.Windows.Netty
             // do nothing by default
             // can be overridden
         }
+
+        public abstract IChannelHandler CreateNewInstance();
     }
 }

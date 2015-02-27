@@ -151,5 +151,10 @@ namespace TomP2P.Connection
         {
             // nothing to do here
         }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            return new IdleStateHandlerTomP2P(AllIdleTimeMillis);
+        }
     }
 }

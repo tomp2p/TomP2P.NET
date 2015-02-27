@@ -46,5 +46,13 @@ namespace TomP2P.Connection.Windows
                 _tcsResponse.SetException(ex);
             }
         }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            // TODO correct? shares references...
+            var tcsRconResponse = new TaskCompletionSource<Message.Message>(_tcsRconResponse.Task.AsyncState);
+            var tcsResponse = new TaskCompletionSource<Message.Message>(_tcsResponse.Task.AsyncState);
+            return new RconInboundHandler(tcsRconResponse, tcsResponse);
+        }
     }
 }

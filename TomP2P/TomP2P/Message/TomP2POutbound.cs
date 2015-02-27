@@ -15,6 +15,9 @@ namespace TomP2P.Message
         private readonly Encoder _encoder;
         private readonly CompByteBufAllocator _alloc;
 
+        // .NET-specific: to be able to clone this instace
+        private readonly ISignatureFactory _signatureFactory;
+
         public TomP2POutbound(bool preferDirect, ISignatureFactory signatureFactory)
             : this(preferDirect, signatureFactory, new CompByteBufAllocator())
         { }
@@ -22,6 +25,7 @@ namespace TomP2P.Message
         public TomP2POutbound(bool preferDirect, ISignatureFactory signatureFactory, CompByteBufAllocator alloc)
         {
             _preferDirect = preferDirect;
+            _signatureFactory = signatureFactory;
             _encoder = new Encoder(signatureFactory);
             _alloc = alloc;
         }
@@ -83,6 +87,11 @@ namespace TomP2P.Message
                 Logger.Error("Exception in encoding when started.", cause);
                 Console.WriteLine(cause.StackTrace);
             }
+        }
+
+        public override IChannelHandler CreateNewInstance()
+        {
+            return new TomP2POutbound(_preferDirect, _signatureFactory);
         }
     }
 }
