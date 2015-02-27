@@ -37,18 +37,18 @@ namespace TomP2P.Connection
             }
         }
 
-        public override void HandlerAdded(ChannelHandlerContext ctx)
+        /*public override void HandlerAdded(ChannelHandlerContext ctx)
         {
             if (ctx.Channel.IsActive)
             {
                 Initialize(ctx);
             }
-        }
+        }*/
 
-        public override void HandlerRemoved(ChannelHandlerContext ctx)
+        /*public override void HandlerRemoved(ChannelHandlerContext ctx)
         {
             Destroy();
-        }
+        }*/
 
         public override void ChannelActive(ChannelHandlerContext ctx)
         {

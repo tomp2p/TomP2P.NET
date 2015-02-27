@@ -36,6 +36,8 @@ namespace TomP2P.Connection.Windows
         {
             while (!ct.IsCancellationRequested)
             {
+                var session = Pipeline.GetNewSession();
+
                 // receive request from client
                 UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
 
@@ -50,17 +52,17 @@ namespace TomP2P.Connection.Windows
                 var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
                 Logger.Debug("Received {0}.", dgram);
 
-                var readRes = Pipeline.Read(dgram);
-                Pipeline.ResetRead();
+                var readRes = session.Read(dgram);
                 
                 // server-side outbound pipeline
-                var writeRes = Pipeline.Write(readRes);
-                Pipeline.ResetWrite();
+                var writeRes = session.Write(readRes);
                 var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
                 // return / send back
                 await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
                 NotifyWriteCompleted();
+
+                Pipeline.ReleaseSession(session);
             }
         }
 

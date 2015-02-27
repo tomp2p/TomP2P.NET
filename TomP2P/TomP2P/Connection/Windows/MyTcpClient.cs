@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Storage;
 
 namespace TomP2P.Connection.Windows
@@ -31,9 +30,10 @@ namespace TomP2P.Connection.Windows
 
         public async Task SendMessageAsync(Message.Message message)
         {
+            var session = Pipeline.GetNewSession();
+
             // execute outbound pipeline
-            var writeRes = Pipeline.Write(message);
-            Pipeline.ResetWrite();
+            var writeRes = session.Write(message);
             var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
             // finally, send bytes over the wire
@@ -43,10 +43,14 @@ namespace TomP2P.Connection.Windows
 
             await _tcpClient.GetStream().WriteAsync(bytes, 0, bytes.Length);
             NotifyWriteCompleted();
+
+            Pipeline.ReleaseSession(session);
         }
 
         public async Task ReceiveMessageAsync()
         {
+            var session = Pipeline.GetNewSession();
+
             // receive bytes
             var bytesRecv = new byte[256];
 
@@ -66,9 +70,10 @@ namespace TomP2P.Connection.Windows
                 Logger.Debug("Received {0}.", piece);
                 
                 // execute inbound pipeline
-                Pipeline.Read(piece);
-                Pipeline.ResetRead();
-            } while (!IsClosed && stream.DataAvailable); // attention: socket might have been already closed
+                session.Read(piece);
+            } while (!IsClosed && stream.DataAvailable);
+
+            Pipeline.ReleaseSession(session);
         }
 
         protected override void DoClose()

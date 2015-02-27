@@ -77,8 +77,8 @@ namespace TomP2P.P2P.Builder
         public RoutingMechanism CreateRoutingMechanism(TcsRouting tcsRouting)
         {
             var tcsResponses = new TaskCompletionSource<Message.Message>[Parallel];
-            var tcsResponses2 = new VolatileReferenceArray<TaskCompletionSource<Message.Message>>(tcsResponses);
-            var routingMechanism = new RoutingMechanism(tcsResponses2, tcsRouting, PeerFilters)
+            var tcsResponseArray = new VolatileReferenceArray<TaskCompletionSource<Message.Message>>(tcsResponses);
+            var routingMechanism = new RoutingMechanism(tcsResponseArray, tcsRouting, PeerFilters)
             {
                 MaxDirectHits = MaxDirectHits,
                 MaxFailures = MaxFailures,

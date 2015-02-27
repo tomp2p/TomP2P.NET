@@ -6,7 +6,6 @@ using System.Text;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Message;
 using TomP2P.Peers;
 using TomP2P.Rpc;
 

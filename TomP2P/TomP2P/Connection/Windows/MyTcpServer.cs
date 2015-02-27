@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Storage;
 
 namespace TomP2P.Connection.Windows
@@ -38,6 +37,8 @@ namespace TomP2P.Connection.Windows
         {
             while (!ct.IsCancellationRequested)
             {
+                var session = Pipeline.GetNewSession();
+
                 // buffers
                 var recvBuffer = new byte[256];
                 var buf = AlternativeCompositeByteBuf.CompBuffer();
@@ -60,18 +61,18 @@ namespace TomP2P.Connection.Windows
                     Logger.Debug("Received {0}.", piece);
 
                     // execute inbound pipeline
-                    readRes = Pipeline.Read(piece);
-                    Pipeline.ResetRead();
+                    readRes = session.Read(piece);
                 } while (!IsClosed && stream.DataAvailable);
 
                 // server-side outbound pipeline
-                var writeRes = Pipeline.Write(readRes);
-                Pipeline.ResetWrite();
+                var writeRes = session.Write(readRes);
                 var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
                 // send back
                 await stream.WriteAsync(bytes, 0, bytes.Length, ct);
                 NotifyWriteCompleted();
+
+                Pipeline.ReleaseSession(session);
             }
         }
 

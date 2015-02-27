@@ -26,12 +26,6 @@ namespace TomP2P.Message
             _alloc = alloc;
         }
 
-        /// <summary>
-        /// .NET-specific encoding handler for outgoing UDP and TCP messages.
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="msg"></param>
-        /// <returns></returns>
         public void Write(ChannelHandlerContext ctx, object msg)
         {
             try

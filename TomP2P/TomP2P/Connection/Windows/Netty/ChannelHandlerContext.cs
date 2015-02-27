@@ -1,28 +1,26 @@
 ﻿using System;
-using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection.Windows.Netty
 {
     // TODO use exactly same structure as Java Netty --> e.g., "write" instead of "fireWrite"
+    // TODO currently, this class only acts as man-in-the-middle
 
     /// <summary>
-    /// Equivalent to Java Netty's ChannelHandlerContext. In .NET, this context is implemented as a class
-    /// with only the functionality required for this project.
+    /// Equivalent to Java Netty's ChannelHandlerContext.
+    /// In .NET, this context is implemented with only the functionality required for this project.
+    /// One context object is associated per pipeline session.
     /// </summary>
     public class ChannelHandlerContext : DefaultAttributeMap
     {
-        private readonly Pipeline _pipeline;
-        private readonly IChannel _channel;
+        private readonly Pipeline.PipelineSession _session;
 
         /// <summary>
         /// Creates a context object for a specific channel and its pipeline.
         /// </summary>
-        /// <param name="channel">The channel this context is associated with.</param>
-        /// <param name="pipeline">The pipeline this context is associated with.</param>
-        public ChannelHandlerContext(IChannel channel, Pipeline pipeline)
+        /// <param name="session"></param>
+        public ChannelHandlerContext(Pipeline.PipelineSession session)
         {
-            _channel = channel;
-            _pipeline = pipeline;
+            _session = session;
         }
 
         /// <summary>
@@ -32,7 +30,7 @@ namespace TomP2P.Connection.Windows.Netty
         public void FireWrite(object msg)
         {
             // forward to pipeline
-            _pipeline.Write(msg);
+            _session.Write(msg);
         }
 
         /// <summary>
@@ -42,32 +40,35 @@ namespace TomP2P.Connection.Windows.Netty
         public void FireRead(object msg)
         {
             // forward to pipeline
-            _pipeline.Read(msg);
+            _session.Read(msg);
         }
 
+        /// <summary>
+        /// A channel encountered an exception.
+        /// </summary>
+        /// <param name="ex"></param>
         public void FireExceptionCaught(Exception ex)
         {
-            _pipeline.ExceptionCaught(ex);
+            _session.ExceptionCaught(ex);
         }
 
         /// <summary>
         /// A channel received a user-defined event.
-        /// Results in having the next inbound handler called.
         /// </summary>
         /// <param name="evt"></param>
         public void FireUserEventTriggered(object evt)
         {
-            _pipeline.UserEventTriggered(evt);
+            _session.UserEventTriggered(evt);
         }
 
         public void Close()
         {
-            _channel.Close();
+            Channel.Close();
         }
 
         public IChannel Channel
         {
-            get { return _channel; }
+            get { return _session.Pipeline.Channel; }
         }
     }
 }

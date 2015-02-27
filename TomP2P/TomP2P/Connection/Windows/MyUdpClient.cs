@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Storage;
 
 namespace TomP2P.Connection.Windows
@@ -25,9 +24,10 @@ namespace TomP2P.Connection.Windows
 
         public async Task SendMessageAsync(Message.Message message)
         {
+            var session = Pipeline.GetNewSession();
+
             // execute outbound pipeline
-            var writeRes = Pipeline.Write(message);
-            Pipeline.ResetWrite();
+            var writeRes = session.Write(message);
             var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
             // finally, send bytes over the wire
@@ -37,10 +37,14 @@ namespace TomP2P.Connection.Windows
 
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
             NotifyWriteCompleted();
+
+            Pipeline.ReleaseSession(session);
         }
 
         public async Task ReceiveMessageAsync()
         {
+            var session = Pipeline.GetNewSession();
+
             // receive bytes, create a datagram wrapper
             var udpRes = await _udpClient.ReceiveAsync();
 
@@ -54,8 +58,9 @@ namespace TomP2P.Connection.Windows
             Logger.Debug("MyUdpClient received {0}.", dgram);
 
             // execute inbound pipeline
-            Pipeline.Read(dgram);
-            Pipeline.ResetRead();
+            session.Read(dgram);
+
+            Pipeline.ReleaseSession(session);
         }
 
         protected override void DoClose()

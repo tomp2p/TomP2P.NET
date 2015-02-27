@@ -36,7 +36,7 @@ namespace TomP2P.P2P
         }
 
         /// <summary>
-        /// Bootstraps to the given peer addresses. I.e, looking for near nodes.
+        /// Bootstraps to the given peer addresses. I.e., looking for near nodes.
         /// </summary>
         /// <param name="peerAddresses">The node to which bootstrap should be performed to.</param>
         /// <param name="routingBuilder">All relevant information for the routing process.</param>
@@ -55,9 +55,9 @@ namespace TomP2P.P2P
             var tcsRouting0 = Routing(peerAddresses, routingBuilder, Message.Message.MessageType.Request1, cc);
             // we need to know other peers as well
             // this is important if this peer is passive and only replies on requests from other peers
-            tcsRouting0.Task.ContinueWith(taskRouting =>
+            tcsRouting0.Task.ContinueWith(taskRouting0 =>
             {
-                if (!taskRouting.IsFaulted)
+                if (!taskRouting0.IsFaulted)
                 {
                     // setting this to null causes to search for a random number
                     routingBuilder.LocationKey = null;
@@ -70,7 +70,7 @@ namespace TomP2P.P2P
                 }
                 else
                 {
-                    tcsDone.SetException(taskRouting.TryGetException());
+                    tcsDone.SetException(taskRouting0.TryGetException());
                 }
             });
 

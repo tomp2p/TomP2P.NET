@@ -17,22 +17,10 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        private readonly IChannel _channel;
+
         private readonly IDictionary<string, HandlerItem> _name2Item;
         private readonly LinkedList<HandlerItem> _handlers;
-
-        private readonly IChannel _channel;
-        private readonly ChannelHandlerContext _ctx;
-        private IOutboundHandler _currentOutbound = null;
-        private IInboundHandler _currentInbound = null;
-
-        private object _msgW;
-        private object _msgR;
-        private object _writeResult;
-        private object _readResult;
-
-        private Exception _caughtException;
-        private object _evt;
-        public bool IsActive { get; private set; }
 
         public Pipeline(IChannel channel)
             : this(channel, null)
@@ -40,11 +28,9 @@ namespace TomP2P.Connection.Windows.Netty
 
         public Pipeline(IChannel channel, IEnumerable<KeyValuePair<string, IChannelHandler>> handlers)
         {
+            _channel = channel;
             _name2Item = new Dictionary<string, HandlerItem>();
             _handlers = new LinkedList<HandlerItem>();
-
-            _channel = channel;
-            _ctx = new ChannelHandlerContext(channel, this);
 
             if (handlers != null)
             {
@@ -55,163 +41,27 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        public object Write(object msg)
+        internal PipelineSession GetNewSession()
         {
-            if (msg == null)
-            {
-                throw new NullReferenceException("msg");
-            }
-
-            // set msgW to newest provided value
-            _msgW = msg;
-
-            // find next outbound handler
-            while (GetNextOutbound() != null)
-            {
-                Logger.Debug("Channel '{0}': Processing outbound handler '{1}'.", _channel, _currentOutbound);
-                if (_caughtException != null)
-                {
-                    _currentOutbound.ExceptionCaught(_ctx, _caughtException);
-                }
-                else
-                {
-                    _currentOutbound.Write(_ctx, msg);
-                }
-            }
-            if (_writeResult == null)
-            {
-                _writeResult = _msgW;
-            }
-            return _writeResult;
-        }
-
-        public object Read(object msg)
-        {
-            if (msg == null)
-            {
-                throw new NullReferenceException("msg");
-            }
-
-            // set msgR to newest provided value
-            _msgR = msg;
-
-            // find next inbound handler
-            while (GetNextInbound() != null)
-            {
-                Logger.Debug("Channel '{0}': Processing inbound handler '{1}'.", _channel, _currentInbound);
-
-                if (_caughtException != null)
-                {
-                    _currentInbound.ExceptionCaught(_ctx, _caughtException);
-                }
-                else if (_evt != null)
-                {
-                    _currentInbound.UserEventTriggered(_ctx, _evt);
-                }
-                else
-                {
-                    _currentInbound.Read(_ctx, msg);
-                }
-            }
-            if (_readResult == null)
-            {
-                _readResult = _msgR;
-            }
-            return _readResult;
-        }
-
-        public void ExceptionCaught(Exception ex)
-        {
-            _caughtException = ex;
-        }
-
-        public void UserEventTriggered(object evt)
-        {
-            _evt = evt;
-        }
-
-        public void Active()
-        {
-            IsActive = true;
+            // TODO re-usable sessions could be introduced
+            var session = new PipelineSession(this);
+            
+            // activate channel
             foreach (var item in _handlers)
             {
-                item.Handler.ChannelActive(_ctx);
+                item.Handler.ChannelActive(session.ChannelHandlerContext);
             }
+
+            return session;
         }
 
-        public void Inactive()
+        internal void ReleaseSession(PipelineSession session)
         {
-            IsActive = false;
+            // inactivate channel
             foreach (var item in _handlers)
             {
-                item.Handler.ChannelInactive(_ctx);
+                item.Handler.ChannelInactive(session.ChannelHandlerContext);
             }
-        }
-
-        public void ResetWrite()
-        {
-            _currentOutbound = null;
-            _msgW = null;
-            _writeResult = null;
-            _caughtException = null;
-            _evt = null;
-        }
-
-        public void ResetRead()
-        {
-            _currentInbound = null;
-            _msgR = null;
-            _readResult = null;
-            _caughtException = null;
-            _evt = null;
-        }
-
-        private IOutboundHandler GetNextOutbound()
-        {
-            var outbounds = CurrentOutboundHandlers;
-            if (outbounds.Count != 0)
-            {
-                if (_currentOutbound == null)
-                {
-                    _currentOutbound = outbounds.First.Value;
-                }
-                else
-                {
-                    var node = outbounds.Find(_currentOutbound);
-                    if (node != null && node.Next != null)
-                    {
-                        _currentOutbound = node.Next.Value;
-                        return _currentOutbound;
-                    }
-                    return null;
-                }
-                return _currentOutbound;
-            }
-            return null;
-        }
-
-        private IInboundHandler GetNextInbound()
-        {
-            var inbounds = CurrentInboundHandlers;
-            if (inbounds.Count != 0)
-            {
-                if (_currentInbound == null)
-                {
-                    _currentInbound = inbounds.First.Value;
-                }
-                else
-                {
-                    var node = inbounds.Find(_currentInbound);
-                    if (node != null && node.Next != null)
-                    {
-                        _currentInbound = node.Next.Value;
-                        return _currentInbound;
-                    }
-                    return null;
-                }
-                return _currentInbound;
-            }
-            return null;
         }
 
         /// <summary>
@@ -226,7 +76,7 @@ namespace TomP2P.Connection.Windows.Netty
             _name2Item.Add(name, item);
 
             _handlers.AddFirst(item);
-            handler.HandlerAdded(_ctx);
+            //handler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -243,7 +93,7 @@ namespace TomP2P.Connection.Windows.Netty
             _name2Item.Add(name, item);
 
             _handlers.AddLast(item);
-            handler.HandlerAdded(_ctx);
+            //handler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -262,7 +112,7 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 throw new ArgumentException("The requested base item does not exist in this pipeline.");
             }
-            
+
             CheckDuplicateName(name);
             var item = new HandlerItem(name, handler);
             _name2Item.Add(name, item);
@@ -271,7 +121,7 @@ namespace TomP2P.Connection.Windows.Netty
             var nNew = new LinkedListNode<HandlerItem>(item);
 
             _handlers.AddBefore(nBase, nNew);
-            handler.HandlerAdded(_ctx);
+            //handler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -292,10 +142,10 @@ namespace TomP2P.Connection.Windows.Netty
             }
             CheckDuplicateName(newName);
 
-            oldItem.Handler.HandlerRemoved(_ctx);
+            //oldItem.Handler.HandlerRemoved(_ctx);
             oldItem.Name = newName;
             oldItem.Handler = newHandler;
-            newHandler.HandlerAdded(_ctx);
+            //newHandler.HandlerAdded(_ctx);
             return this;
         }
 
@@ -315,7 +165,7 @@ namespace TomP2P.Connection.Windows.Netty
                 if (_handlers.Contains(item))
                 {
                     _handlers.Remove(item);
-                    item.Handler.HandlerRemoved(_ctx);
+                    //item.Handler.HandlerRemoved(_ctx);
                 }
             }
             return this;
@@ -329,7 +179,7 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        private LinkedList<IOutboundHandler> CurrentOutboundHandlers
+        private LinkedList<IOutboundHandler> OutboundHandlers
         {
             get
             {
@@ -341,7 +191,7 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        private LinkedList<IInboundHandler> CurrentInboundHandlers
+        private LinkedList<IInboundHandler> InboundHandlers
         {
             get
             {
@@ -375,6 +225,182 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 Name = name;
                 Handler = handler;
+            }
+        }
+
+        /// <summary>
+        /// Wraps the internal state of a pipeline session. This is necessary because multiple
+        /// pipeline sessions can run in parallel, especially on the server-side.
+        /// </summary>
+        public class PipelineSession
+        {
+            private readonly Pipeline _pipeline;
+            private readonly ChannelHandlerContext _ctx;
+
+            public PipelineSession(Pipeline pipeline)
+            {
+                _pipeline = pipeline;
+                _ctx = new ChannelHandlerContext(this);
+            }
+
+            private IOutboundHandler _currentOutbound;
+            private IInboundHandler _currentInbound;
+            private object _msgW;
+            private object _msgR;
+            private object _writeRes;
+            private object _readRes;
+
+            private Exception _caughtException;
+            private object _event;
+
+            public object Write(object msg)
+            {
+                if (msg == null)
+                {
+                    throw new NullReferenceException("msg");
+                }
+                // set msgW to newest provided value
+                _msgW = msg;
+
+                // find next outbound handler
+                while (GetNextOutbound() != null)
+                {
+                    Logger.Debug("Channel '{0}': Processing outbound handler '{1}'.", _pipeline.Channel, _currentOutbound);
+                    if (_caughtException != null)
+                    {
+                        _currentOutbound.ExceptionCaught(_ctx, _caughtException);
+                    }
+                    else
+                    {
+                        _currentOutbound.Write(_ctx, msg);
+                    }
+                }
+                if (_writeRes == null)
+                {
+                    _writeRes = _msgW;
+                }
+                return _writeRes;
+            }
+
+            public object Read(object msg)
+            {
+                if (msg == null)
+                {
+                    throw new NullReferenceException("msg");
+                }
+
+                // set msgR to newest provided value
+                _msgR = msg;
+
+                // find next inbound handler
+                while (GetNextInbound() != null)
+                {
+                    Logger.Debug("Channel '{0}': Processing inbound handler '{1}'.", _pipeline.Channel, _currentInbound);
+
+                    if (_caughtException != null)
+                    {
+                        _currentInbound.ExceptionCaught(_ctx, _caughtException);
+                    }
+                    else if (_event != null)
+                    {
+                        _currentInbound.UserEventTriggered(_ctx, _event);
+                    }
+                    else
+                    {
+                        _currentInbound.Read(_ctx, msg);
+                    }
+                }
+                if (_readRes == null)
+                {
+                    _readRes = _msgR;
+                }
+                return _readRes;
+            }
+
+            public void ExceptionCaught(Exception ex)
+            {
+               _caughtException = ex;
+            }
+
+            public void UserEventTriggered(object evt)
+            {
+                _event = evt;
+            }
+
+            /*public void ResetWrite()
+            {
+                CurrentOutbound = null;
+                MsgW = null;
+                WriteRes = null;
+                CaughtException = null;
+                Event = null;
+            }
+
+            public void ResetRead()
+            {
+                CurrentInbound = null;
+                MsgR = null;
+                ReadRes = null;
+                CaughtException = null;
+                Event = null;
+            }*/
+
+            private IOutboundHandler GetNextOutbound()
+            {
+                var outbounds = _pipeline.OutboundHandlers;
+                if (outbounds.Count != 0)
+                {
+                    if (_currentOutbound == null)
+                    {
+                        _currentOutbound = outbounds.First.Value;
+                    }
+                    else
+                    {
+                        var node = outbounds.Find(_currentOutbound);
+                        if (node != null && node.Next != null)
+                        {
+                            _currentOutbound = node.Next.Value;
+                            return _currentOutbound;
+                        }
+                        return null;
+                    }
+                    return _currentOutbound;
+                }
+                return null;
+            }
+
+            private IInboundHandler GetNextInbound()
+            {
+                var inbounds = _pipeline.InboundHandlers;
+                if (inbounds.Count != 0)
+                {
+                    if (_currentInbound == null)
+                    {
+                        _currentInbound = inbounds.First.Value;
+                    }
+                    else
+                    {
+                        var node = inbounds.Find(_currentInbound);
+                        if (node != null && node.Next != null)
+                        {
+                            _currentInbound = node.Next.Value;
+                            return _currentInbound;
+                        }
+                        return null;
+                    }
+                    return _currentInbound;
+                }
+                return null;
+            }
+
+            public Pipeline Pipeline
+            {
+                get { return _pipeline; }
+            }
+
+            public ChannelHandlerContext ChannelHandlerContext
+            {
+                get { return _ctx; }
             }
         }
     }

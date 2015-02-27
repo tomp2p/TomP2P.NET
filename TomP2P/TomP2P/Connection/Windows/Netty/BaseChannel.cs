@@ -19,7 +19,7 @@ namespace TomP2P.Connection.Windows.Netty
         public void SetPipeline(Pipeline pipeline)
         {
             _pipeline = pipeline;
-            _pipeline.Active(); // active means getting open
+            //_pipeline.Active(); // active means getting open
         }
 
         public Pipeline Pipeline
@@ -34,7 +34,7 @@ namespace TomP2P.Connection.Windows.Netty
         {
             if (!IsClosed)
             {
-                _pipeline.Inactive(); // inactive means getting closed
+                //_pipeline.Inactive(); // inactive means getting closed
                 IsClosed = true;
                 DoClose();
                 NotifyClosed();
@@ -79,14 +79,7 @@ namespace TomP2P.Connection.Windows.Netty
 
         public bool IsActive
         {
-            get // TODO ok?
-            {
-                if (Pipeline == null)
-                {
-                    return false;
-                }
-                return Pipeline.IsActive;
-            }
+            get { return !IsClosed; } // TODO ok?
         }
     }
 }
