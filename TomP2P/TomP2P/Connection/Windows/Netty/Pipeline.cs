@@ -8,6 +8,7 @@ namespace TomP2P.Connection.Windows.Netty
     // TODO this pipeline can be optimized
     // - read/write do query the next handlers multiple times
     // - queries should be optimized
+    // - use re-usable sessions
 
     /// <summary>
     /// Equivalent to Java Netty's ChannelPipeline. Represents a chain of inbound and outbound handlers.
@@ -43,18 +44,17 @@ namespace TomP2P.Connection.Windows.Netty
 
         internal PipelineSession GetNewSession()
         {
-            // TODO re-usable sessions could be introduced
-
             // for each non-sharable handler, a new instance has to be created
-            var newInbounds = CreateNewInstances(InboundHandlers).Cast<IInboundHandler>();
-            var newOutbounds = CreateNewInstances(OutboundHandlers).Cast<IOutboundHandler>();
+            var newInbounds = CreateNewInstances(InboundHandlers);
+            var newOutbounds = CreateNewInstances(OutboundHandlers);
 
-            var session = new PipelineSession(this, newInbounds, newOutbounds);
+            var session = new PipelineSession(this, newInbounds.Cast<IInboundHandler>(), newOutbounds.Cast<IOutboundHandler>());
             
             // activate channel
-            foreach (var item in _handlers)
+            var handlers = newInbounds.Union(newOutbounds);
+            foreach (var item in handlers)
             {
-                item.Handler.ChannelActive(session.ChannelHandlerContext);
+                item.ChannelActive(session.ChannelHandlerContext);
             }
 
             return session;
@@ -63,9 +63,11 @@ namespace TomP2P.Connection.Windows.Netty
         internal void ReleaseSession(PipelineSession session)
         {
             // inactivate channel
-            foreach (var item in _handlers)
+            var handlers = session.InboundHandlers.Cast<IChannelHandler>()
+                .Union(session.OutboundHandlers);
+            foreach (var item in handlers)
             {
-                item.Handler.ChannelInactive(session.ChannelHandlerContext);
+                item.ChannelInactive(session.ChannelHandlerContext);
             }
         }
 
@@ -259,8 +261,8 @@ namespace TomP2P.Connection.Windows.Netty
         public class PipelineSession
         {
             private readonly Pipeline _pipeline;
-            private readonly LinkedList<IInboundHandler> _inboundHandlers;
-            private readonly LinkedList<IOutboundHandler> _outboundHandlers;
+            public LinkedList<IInboundHandler> InboundHandlers { get; private set; }
+            public LinkedList<IOutboundHandler> OutboundHandlers { get; private set; }
             private readonly ChannelHandlerContext _ctx;
 
             private IOutboundHandler _currentOutbound;
@@ -277,8 +279,8 @@ namespace TomP2P.Connection.Windows.Netty
                 IEnumerable<IOutboundHandler> outboundHandlers)
             {
                 _pipeline = pipeline;
-                _inboundHandlers = new LinkedList<IInboundHandler>(inboundHandlers);
-                _outboundHandlers = new LinkedList<IOutboundHandler>(outboundHandlers);
+                InboundHandlers = new LinkedList<IInboundHandler>(inboundHandlers);
+                OutboundHandlers = new LinkedList<IOutboundHandler>(outboundHandlers);
                 _ctx = new ChannelHandlerContext(this);
             }
 
@@ -376,15 +378,15 @@ namespace TomP2P.Connection.Windows.Netty
 
             private IOutboundHandler GetNextOutbound()
             {
-                if (_outboundHandlers.Count != 0)
+                if (OutboundHandlers.Count != 0)
                 {
                     if (_currentOutbound == null)
                     {
-                        _currentOutbound = _outboundHandlers.First.Value;
+                        _currentOutbound = OutboundHandlers.First.Value;
                     }
                     else
                     {
-                        var node = _outboundHandlers.Find(_currentOutbound);
+                        var node = OutboundHandlers.Find(_currentOutbound);
                         if (node != null && node.Next != null)
                         {
                             _currentOutbound = node.Next.Value;
@@ -399,15 +401,15 @@ namespace TomP2P.Connection.Windows.Netty
 
             private IInboundHandler GetNextInbound()
             {
-                if (_inboundHandlers.Count != 0)
+                if (InboundHandlers.Count != 0)
                 {
                     if (_currentInbound == null)
                     {
-                        _currentInbound = _inboundHandlers.First.Value;
+                        _currentInbound = InboundHandlers.First.Value;
                     }
                     else
                     {
-                        var node = _inboundHandlers.Find(_currentInbound);
+                        var node = InboundHandlers.Find(_currentInbound);
                         if (node != null && node.Next != null)
                         {
                             _currentInbound = node.Next.Value;
