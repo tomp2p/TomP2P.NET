@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,16 @@ namespace TomP2P.Extensions
         public static long CurrentTimeMillis()
         {
             return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
+        }
+
+        /// <summary>
+        /// Equivalent for Java's Array.toString(Object[]).
+        /// </summary>
+        /// <param name="enumerable"></param>
+        /// <returns></returns>
+        public static string ToString<T>(IEnumerable<T> enumerable)
+        {
+            return string.Join(",", enumerable.Select(i => i.ToString()));
         }
 
         /// <summary>

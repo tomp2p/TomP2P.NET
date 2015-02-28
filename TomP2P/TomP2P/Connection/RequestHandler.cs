@@ -255,7 +255,7 @@ namespace TomP2P.Connection
 
             if (!_message.IsKeepAlive())
             {
-                Logger.Debug("Good message {0}. CloseAsync channel {1}.", responseMessage, ctx.Channel);
+                Logger.Debug("Good message {0}. Close channel {1}.", responseMessage, ctx.Channel);
                 // channel has already been closed in Sender, set result now
                 _tcsResponse.SetResult(responseMessage);
                 // in Java, the channel creator adds a listener that sets the 
