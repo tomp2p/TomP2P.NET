@@ -190,13 +190,13 @@ namespace TomP2P.Connection
             if (_udpServer != null)
             {
                 Logger.Debug("Shutting down UDP server...");
-                var t1 = _udpServer.StopAsync().ContinueWith(task => Logger.Debug("UDP server shut down."));
+                var t1 = _udpServer.StopAsync().ContinueWith(t => Logger.Debug("UDP server shut down."));
                 tasks.Add(t1);
             }
             if (_tcpServer != null)
             {
                 Logger.Debug("Shutting down TCP server...");
-                var t2 = _tcpServer.StopAsync().ContinueWith(task => Logger.Debug("TCP server shut down."));
+                var t2 = _tcpServer.StopAsync().ContinueWith(t => Logger.Debug("TCP server shut down."));
                 tasks.Add(t2);
             }
             await Task.WhenAll(tasks);

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,44 +36,51 @@ namespace TomP2P.Connection.Windows
 
         public override async Task ServiceLoopAsync(CancellationToken ct)
         {
-            while (!ct.IsCancellationRequested)
+            try
             {
-                var session = Pipeline.GetNewSession();
-
-                // buffers
-                var recvBuffer = new byte[256];
-                var buf = AlternativeCompositeByteBuf.CompBuffer();
-                object readRes;
-
-                // accept a client connection
-                var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
-                var stream = client.GetStream();
-                do
+                while (!ct.IsCancellationRequested)
                 {
-                    // TODO find zero-copy way
-                    var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length, ct);
-                    buf.Deallocate();
-                    buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
+                    var session = Pipeline.GetNewSession();
 
-                    LocalEndPoint = (IPEndPoint) client.Client.LocalEndPoint;
-                    RemoteEndPoint = (IPEndPoint) client.Client.RemoteEndPoint;
-                    
-                    var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
-                    Logger.Debug("Received {0}.", piece);
+                    // buffers
+                    var recvBuffer = new byte[256];
+                    var buf = AlternativeCompositeByteBuf.CompBuffer();
+                    object readRes;
 
-                    // execute inbound pipeline
-                    readRes = session.Read(piece);
-                } while (!IsClosed && stream.DataAvailable);
+                    // accept a client connection
+                    var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
+                    var stream = client.GetStream();
+                    do
+                    {
+                        // TODO find zero-copy way
+                        var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length, ct);
+                        buf.Deallocate();
+                        buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
 
-                // server-side outbound pipeline
-                var writeRes = session.Write(readRes);
-                var bytes = ConnectionHelper.ExtractBytes(writeRes);
+                        LocalEndPoint = (IPEndPoint)client.Client.LocalEndPoint;
+                        RemoteEndPoint = (IPEndPoint)client.Client.RemoteEndPoint;
 
-                // send back
-                await stream.WriteAsync(bytes, 0, bytes.Length, ct);
-                NotifyWriteCompleted();
+                        var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
+                        Logger.Debug("Received {0}.", piece);
 
-                Pipeline.ReleaseSession(session);
+                        // execute inbound pipeline
+                        readRes = session.Read(piece);
+                    } while (!IsClosed && stream.DataAvailable);
+
+                    // server-side outbound pipeline
+                    var writeRes = session.Write(readRes);
+                    var bytes = ConnectionHelper.ExtractBytes(writeRes);
+
+                    // send back
+                    await stream.WriteAsync(bytes, 0, bytes.Length, ct);
+                    NotifyWriteCompleted();
+
+                    Pipeline.ReleaseSession(session);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // the server has been stopped -> stop service loop
             }
         }
 

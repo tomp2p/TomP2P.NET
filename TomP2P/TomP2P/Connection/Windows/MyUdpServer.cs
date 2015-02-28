@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,35 +35,42 @@ namespace TomP2P.Connection.Windows
 
         public override async Task ServiceLoopAsync(CancellationToken ct)
         {
-            while (!ct.IsCancellationRequested)
+            try
             {
-                var session = Pipeline.GetNewSession();
+                while (!ct.IsCancellationRequested)
+                {
+                    var session = Pipeline.GetNewSession();
 
-                // receive request from client
-                UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
+                    // receive request from client
+                    UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
 
-                // process content
-                // server-side inbound pipeline
-                var buf = AlternativeCompositeByteBuf.CompBuffer();
-                buf.WriteBytes(udpRes.Buffer.ToSByteArray());
+                    // process content
+                    // server-side inbound pipeline
+                    var buf = AlternativeCompositeByteBuf.CompBuffer();
+                    buf.WriteBytes(udpRes.Buffer.ToSByteArray());
 
-                LocalEndPoint = (IPEndPoint) Socket.LocalEndPoint;
-                RemoteEndPoint = udpRes.RemoteEndPoint;
+                    LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
+                    RemoteEndPoint = udpRes.RemoteEndPoint;
 
-                var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-                Logger.Debug("Received {0}.", dgram);
+                    var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
+                    Logger.Debug("Received {0}.", dgram);
 
-                var readRes = session.Read(dgram);
-                
-                // server-side outbound pipeline
-                var writeRes = session.Write(readRes);
-                var bytes = ConnectionHelper.ExtractBytes(writeRes);
+                    var readRes = session.Read(dgram);
 
-                // return / send back
-                await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
-                NotifyWriteCompleted();
+                    // server-side outbound pipeline
+                    var writeRes = session.Write(readRes);
+                    var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
-                Pipeline.ReleaseSession(session);
+                    // return / send back
+                    await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
+                    NotifyWriteCompleted();
+
+                    Pipeline.ReleaseSession(session);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // the server has been stopped -> stop service loop
             }
         }
 
