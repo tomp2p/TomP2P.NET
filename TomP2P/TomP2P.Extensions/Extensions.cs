@@ -41,6 +41,30 @@ namespace TomP2P.Extensions
             return (x & 0x0000003f);
         }
 
+        /// <summary>
+        /// Equivalent to Java's InetAddress.getBroadcast().
+        /// Returns an IPAddress for the brodcast address for this IPAddress.
+        /// Only IPv4 networks have a broadcast address, therefore in the case of an IPv6 network, null will be returned.
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="ipv4Mask"></param>
+        /// <returns>The IPAddress representing the broadcast address or null if there is no broadcast address.</returns>
+        public static IPAddress GetBroadcastAddress(this IPAddress ip, IPAddress ipv4Mask)
+        {
+            if (ip.IsIPv4())
+            {
+                var complementMaskBytes = new byte[4];
+                var broadcastIpBytes = new byte[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    complementMaskBytes[i] = (byte)~ipv4Mask.GetAddressBytes()[i];
+                    broadcastIpBytes[i] = (byte)(ip.GetAddressBytes()[i] | complementMaskBytes[i]);
+                }
+                return new IPAddress(broadcastIpBytes);
+            }
+            return null;
+        }
+
         public static sbyte[] ComputeHash(this string x)
         {
             HashAlgorithm algorithm = SHA1.Create();

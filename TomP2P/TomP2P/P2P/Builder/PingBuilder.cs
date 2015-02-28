@@ -114,7 +114,7 @@ namespace TomP2P.P2P.Builder
                 {
                     if (!taskCc.IsFaulted)
                     {
-                        AddPingListener(tcsPing, taskLateJoin); // TODO works?
+                        AddPingListener(tcsPing, taskLateJoin);
                         for (int i = 0; i < size; i++)
                         {
                             var broadcastAddress = bindings.BroadcastAddresses[i];

@@ -73,7 +73,15 @@ namespace TomP2P.Connection
                     continue;
                 }
                 IPAddress inet = addressInfo.Address;
-                // TODO how to get the broadcast address?
+
+                // getting the broadcast address
+                var ipv4Mask = addressInfo.IPv4Mask;
+                var broadcastAddress = inet.GetBroadcastAddress(ipv4Mask);
+                if (broadcastAddress != null && !bindings.BroadcastAddresses.Contains(broadcastAddress))
+                {
+                    bindings.BroadcastAddresses.Add(broadcastAddress);
+                }
+
                 if (bindings.ContainsAddress(inet))
                 {
                     continue;
