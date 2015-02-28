@@ -128,7 +128,6 @@ namespace TomP2P.Connection
                 });
             });
 
-            // this is blocking
             return _tcsShutdown.Task;
         }
 

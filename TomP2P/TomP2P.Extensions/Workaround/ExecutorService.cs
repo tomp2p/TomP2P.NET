@@ -89,7 +89,7 @@ namespace TomP2P.Extensions.Workaround
             // is not disposed until all currently queued callbacks have completed.
             var waitHandle = new AutoResetEvent(false);
             timer.Dispose(waitHandle);
-            waitHandle.WaitOne();
+            waitHandle.WaitOne(); // a timeout could be added here
         }
     }
 }

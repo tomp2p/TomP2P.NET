@@ -20,26 +20,26 @@ namespace TomP2P.Tests.Rpc
             Peer sender = null;
             Peer recv1 = null;
             ChannelCreator cc = null;
-            var infiniteMaintenanceTask = Utils2.CreateInfiniteIntervalMaintenanceTask();
             try
             {
                 sender = new PeerBuilder(new Number160("0x9876"))
                     .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(2424, 2424))
-                    .SetMaintenanceTask(infiniteMaintenanceTask)
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
                     .SetP2PId(55)
                     .SetPorts(2424)
                     .Start();
                 recv1 = new PeerBuilder(new Number160("0x1234"))
                     .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(7777, 7777))
-                    .SetMaintenanceTask(infiniteMaintenanceTask)
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
                     .SetP2PId(55)
                     .SetPorts(7777)
                     .Start();
 
+                // bootstrap first
                 await sender.Bootstrap().SetPeerAddress(recv1.PeerAddress).StartAsync();
 
                 Assert.IsTrue(sender.PeerBean.PeerMap.All.Count == 1);
-                Assert.IsTrue(sender.PeerBean.PeerMap.AllOverflow.Count == 1);
+                Assert.IsTrue(recv1.PeerBean.PeerMap.AllOverflow.Count == 1);
 
                 // graceful shutdown
                 cc = await recv1.ConnectionBean.Reservation.CreateAsync(1, 0);
@@ -48,6 +48,7 @@ namespace TomP2P.Tests.Rpc
 
                 await sender.QuitRpc.QuitAsync(recv1.PeerAddress, shutdownBuilder, cc);
                 await sender.ShutdownAsync();
+                sender = null; // ignore finally-block shutdown
 
                 Assert.IsTrue(recv1.PeerBean.PeerMap.All.Count == 0);
             }
