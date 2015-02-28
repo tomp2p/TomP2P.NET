@@ -80,7 +80,6 @@ namespace TomP2P.Futures
                 {
                     var task = _forks.Get(index);
                     task.ContinueWith(t => Evaluate(task, index));
-                    // TODO wrong index used in lambda?
                 }
                 else
                 {

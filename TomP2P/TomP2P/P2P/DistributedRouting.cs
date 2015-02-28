@@ -287,7 +287,7 @@ namespace TomP2P.P2P
                     var keyDigest = lastResponse.Key(0);
                     var contentDigest = lastResponse.Key(1);
                     var digestBean = new DigestInfo(keyDigest, contentDigest, resultSize);
-                    Logger.Debug("Peer ({0}) {1} reported {2} in message {3}.", (digestBean.Size > 0 ? "direct" : "none"), remotePeer, newNeighbors, lastResponse);
+                    Logger.Debug("Peer ({0}) {1} reported {2} in message {3}.", (digestBean.Size > 0 ? "direct" : "none"), remotePeer, newNeighbors.Count, lastResponse);
                     finished = routingMechanism.EvaluateSuccess(remotePeer, digestBean, newNeighbors, last,
                         routingBuilder.LocationKey);
                     Logger.Debug("Routing finished {0} / {1}.", finished, routingMechanism.IsStopCreatingNewFutures);
@@ -303,7 +303,7 @@ namespace TomP2P.P2P
 
                 if (finished)
                 {
-                    Logger.Debug("Routing finished. Direct hits: {0}. Potential hits: {1}.", routingMechanism.DirectHits, routingMechanism.PotentialHits);
+                    Logger.Debug("Routing finished. Direct hits: {0}. Potential hits: {1}.", routingMechanism.DirectHits.Count, routingMechanism.PotentialHits.Count);
                     routingMechanism.SetNeighbors(routingBuilder);
                     routingMechanism.Cancel();
                     // stop all operations, as we are finished, no need to go further

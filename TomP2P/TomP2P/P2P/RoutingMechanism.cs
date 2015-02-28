@@ -207,7 +207,6 @@ namespace TomP2P.P2P
         {
             lock (this)
             {
-                // TODO doesn't this create a deadlock due to property-locks?
                 TcsRoutingResponse.SetNeighbors(DirectHits, PotentialHits, AlreadyAsked, routingBuilder.IsBootstrap, routingBuilder.IsRoutingToOthers);
             }
         }
@@ -223,7 +222,7 @@ namespace TomP2P.P2P
                 var tcsResponse = TcsResponses.Get(i);
                 if (tcsResponse != null)
                 {
-                    tcsResponse.SetCanceled(); // TODO works?
+                    tcsResponse.TrySetCanceled();
                 }
             }
         }
@@ -264,8 +263,8 @@ namespace TomP2P.P2P
                 }
                 else if (EvaluateInformation(newNeighbors, _queueToAsk, _alreadyAsked, MaxNoNewInfo))
                 {
-                    // wait untul pending tasks are finished
-                    Logger.Debug("No new information for the {0} time.");
+                    // wait until pending tasks are finished
+                    Logger.Debug("No new information for the {0} time.", MaxNoNewInfo);
                     finished = last;
                     IsStopCreatingNewFutures = true;
                 }

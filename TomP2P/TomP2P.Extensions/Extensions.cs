@@ -554,7 +554,6 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static T PollFirst<T>(this SortedSet<T> ss)
         {
-            // TODO works?
             var first = ss.Min;
             ss.Remove(first);
             return first;
