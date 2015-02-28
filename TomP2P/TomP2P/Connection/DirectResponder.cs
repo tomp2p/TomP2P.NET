@@ -1,7 +1,6 @@
 ﻿using System;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
-using TomP2P.Message;
 using TomP2P.Rpc;
 
 namespace TomP2P.Connection
@@ -52,10 +51,7 @@ namespace TomP2P.Connection
                 Logger.Warn(msg + _requestMessage);
                 throw new SystemException(msg);
             }
-            else
-            {
-                TimeoutFactory.RemoveTimeout(_ctx);
-            }
+            TimeoutFactory.RemoveTimeout(_ctx);
         }
     }
 }

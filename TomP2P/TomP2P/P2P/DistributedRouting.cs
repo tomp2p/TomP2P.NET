@@ -46,7 +46,7 @@ namespace TomP2P.P2P
             RoutingBuilder routingBuilder, ChannelCreator cc)
         {
             // search close peers
-            Logger.Debug("Broadcast to {0}.", peerAddresses);
+            Logger.Debug("Broadcast to {0}.", Convenient.ToString(peerAddresses));
             var tcsDone = new TaskCompletionSource<Pair<TcsRouting, TcsRouting>>();
 
             // first, we find close peers to us

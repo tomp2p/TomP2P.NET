@@ -38,7 +38,7 @@ namespace TomP2P.Storage
 
         private readonly IList<Component> _components = new List<Component>();
         private readonly Component EmptyComponent = new Component(Unpooled.EmptyBuffer);
-        private readonly IByteBufAllocator _alloc; // TODO initialize
+        private readonly IByteBufAllocator _alloc;
         private readonly bool _direct;
 
         public AlternativeCompositeByteBuf(IByteBufAllocator alloc, bool direct, params ByteBuf[] buffers)
@@ -57,10 +57,6 @@ namespace TomP2P.Storage
             }
             _freed = true;
             // TODO release needed?
-            /*foreach (var c in _components)
-            {
-                c.Buf.Release();
-            }*/
             _components.Clear();
 
             // TODO leak close needed?
@@ -1096,9 +1092,9 @@ namespace TomP2P.Storage
         public override string ToString()
         {
             // .NET-specific:
-            var sb = new StringBuilder("[")
-                .Append("Readable: ").Append(ReadableBytes)
+            var sb = new StringBuilder("[Readable: ").Append(ReadableBytes)
                 .Append(" | Writeable: ").Append(WriteableBytes)
+                .Append(" , Capacity: ").Append(Capacity)
                 .Append("]");
             return sb.ToString();
         }
