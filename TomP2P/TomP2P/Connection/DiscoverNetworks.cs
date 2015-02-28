@@ -75,7 +75,7 @@ namespace TomP2P.Connection
                 IPAddress inet = addressInfo.Address;
 
                 // getting the broadcast address
-                var ipv4Mask = addressInfo.IPv4Mask;
+                var ipv4Mask = addressInfo.IPv4Mask; // 0.0.0.0 in case of IPv6
                 var broadcastAddress = inet.GetBroadcastAddress(ipv4Mask);
                 if (broadcastAddress != null && !bindings.BroadcastAddresses.Contains(broadcastAddress))
                 {

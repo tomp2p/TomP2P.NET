@@ -31,6 +31,10 @@ namespace TomP2P.Connection
             {
                 AllIdleTimeMillis = 0;
             }
+            else if (allIdleTimeSeconds >= Int32.MaxValue)
+            {
+                AllIdleTimeMillis = Int32.MaxValue;
+            }
             else
             {
                 AllIdleTimeMillis = (int) TimeSpan.FromSeconds(allIdleTimeSeconds).TotalMilliseconds;

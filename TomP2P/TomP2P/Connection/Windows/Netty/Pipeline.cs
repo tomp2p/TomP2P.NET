@@ -44,6 +44,7 @@ namespace TomP2P.Connection.Windows.Netty
 
         internal PipelineSession GetNewSession()
         {
+            Logger.Debug("Creating session for channel {0}.", Channel);
             // for each non-sharable handler, a new instance has to be created
             var newInbounds = CreateNewInstances(InboundHandlers);
             var newOutbounds = CreateNewInstances(OutboundHandlers);

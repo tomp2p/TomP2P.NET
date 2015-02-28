@@ -583,7 +583,7 @@ namespace TomP2P.Peers
 
         public bool Equals(PeerAddress other)
         {
-            return PeerId.Equals(other.PeerId);
+            return other != null && PeerId.Equals(other.PeerId);
         }
 
         public override int GetHashCode()

@@ -16,22 +16,22 @@ namespace TomP2P.Tests
         public static readonly long TheAnswer = 42L;
         public static readonly long TheAnsert2 = 43L;
 
-        public static TomP2P.Message.Message CreateDummyMessage()
+        public static Message.Message CreateDummyMessage()
         {
             return CreateDummyMessage(false, false);
         }
 
-        public static TomP2P.Message.Message CreateDummyMessage(bool firewallUdp, bool firewallTcp)
+        public static Message.Message CreateDummyMessage(bool firewallUdp, bool firewallTcp)
         {
             return CreateDummyMessage(new Number160("0x4321"), "127.0.0.1", 8001, 8002, new Number160("0x1234"),
                 "127.0.0.1", 8003, 8004, (sbyte)0, TomP2P.Message.Message.MessageType.Request1, firewallUdp, firewallTcp);
         }
 
-        public static TomP2P.Message.Message CreateDummyMessage(Number160 idSender, String inetSender, int tcpPortSendor,
+        public static Message.Message CreateDummyMessage(Number160 idSender, String inetSender, int tcpPortSendor,
             int udpPortSender, Number160 idRecipient, String inetRecipient, int tcpPortRecipient,
-            int udpPortRecipient, sbyte command, TomP2P.Message.Message.MessageType type, bool firewallUdp, bool firewallTcp)
+            int udpPortRecipient, sbyte command, Message.Message.MessageType type, bool firewallUdp, bool firewallTcp)
         {
-            var message = new TomP2P.Message.Message();
+            var message = new Message.Message();
 
             PeerAddress n1 = CreateAddress(idSender, inetSender, tcpPortSendor, udpPortSender, firewallUdp, firewallTcp);
             message.SetSender(n1);
@@ -67,8 +67,8 @@ namespace TomP2P.Tests
             int udpPortSender, bool firewallUdp, bool firewallTcp)
         {
             IPAddress inetSend = IPAddress.Parse(inetSender); // TODO correct port
-            PeerSocketAddress peerSocketAddress = new PeerSocketAddress(inetSend, tcpPortSender, udpPortSender);
-            PeerAddress n1 = new PeerAddress(idSender, peerSocketAddress, firewallTcp, firewallUdp, false, PeerAddress.EmptyPeerSocketAddresses);
+            var peerSocketAddress = new PeerSocketAddress(inetSend, tcpPortSender, udpPortSender);
+            var n1 = new PeerAddress(idSender, peerSocketAddress, firewallTcp, firewallUdp, false, PeerAddress.EmptyPeerSocketAddresses);
             return n1;
         }
 
@@ -79,9 +79,9 @@ namespace TomP2P.Tests
         public static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration(int portUdp, int portTcp)
         {
             return PeerBuilder.CreateDefaultChannelServerConfiguration()
-                .SetIdleTcpSeconds(Int32.MaxValue)
-                .SetIdleUdpSeconds(Int32.MaxValue)
-                .SetConnectionTimeoutTcpMillis(Int32.MaxValue)
+                .SetIdleTcpSeconds(0)
+                .SetIdleUdpSeconds(0)
+                .SetConnectionTimeoutTcpMillis(0)
                 .SetPorts(new Ports(portTcp, portUdp));
         }
 

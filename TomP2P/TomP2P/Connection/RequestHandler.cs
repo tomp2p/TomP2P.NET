@@ -321,9 +321,7 @@ namespace TomP2P.Connection
         public override IChannelHandler CreateNewInstance()
         {
             // TODO correct? message reference is shared...
-            var tcsResponse = new TaskCompletionSource<Message.Message>(_tcsResponse.Task.AsyncState);
-
-            return new RequestHandler(tcsResponse, PeerBean, ConnectionBean, _configuration);
+            return new RequestHandler(_tcsResponse, PeerBean, ConnectionBean, _configuration);
         }
     }
 }
