@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using NLog;
@@ -19,12 +20,11 @@ namespace TomP2P.Connection.Windows
             : base(localEndPoint)
         {
             // bind
-            _tcpClient = new TcpClient(localEndPoint);    
+            _tcpClient = new TcpClient(localEndPoint);
         }
 
         public Task ConnectAsync(IPEndPoint remoteEndPoint)
         {
-            // just forward
             return _tcpClient.ConnectAsync(remoteEndPoint.Address, remoteEndPoint.Port);
         }
 
@@ -63,12 +63,12 @@ namespace TomP2P.Connection.Windows
                 buf.Deallocate();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
-                LocalEndPoint = (IPEndPoint) Socket.LocalEndPoint;
-                RemoteEndPoint = (IPEndPoint) Socket.RemoteEndPoint;
-                
+                LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
+                RemoteEndPoint = (IPEndPoint)Socket.RemoteEndPoint;
+
                 var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
                 Logger.Debug("Received {0}.", piece);
-                
+
                 // execute inbound pipeline
                 session.Read(piece);
             } while (!IsClosed && stream.DataAvailable);

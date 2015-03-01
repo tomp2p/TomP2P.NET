@@ -87,10 +87,18 @@ namespace TomP2P.Connection
         public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
             // TODO find more efficient way instead of 1 thread per message
+            // TODO remove code-duplicates -> extract method
             // so far, everything is sync -> invoke async / new thread
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+                try
+                {
+                    await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+                }
+                catch (Exception ex)
+                {
+                    _tcsResponse.SetException(ex);
+                }
             });
 
             return _tcsResponse.Task;
@@ -105,7 +113,14 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
+                try
+                {
+                    await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
+                }
+                catch (Exception ex)
+                {
+                    _tcsResponse.SetException(ex);
+                }
             });
             return _tcsResponse.Task;
         }
@@ -119,7 +134,14 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
+                try
+                {
+                    await ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
+                }
+                catch (Exception ex)
+                {
+                    _tcsResponse.SetException(ex);
+                }
             });
             return _tcsResponse.Task;
         }
@@ -133,8 +155,15 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
-                    ConnectionTimeoutTcpMillis, null);
+                try
+                {
+                    await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                        ConnectionTimeoutTcpMillis, null);
+                }
+                catch (Exception ex)
+                {
+                    _tcsResponse.SetException(ex);
+                }
             });
             return _tcsResponse.Task;
         }
@@ -143,8 +172,15 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds,
-                    ConnectionTimeoutTcpMillis, peerConnection);
+                try
+                {
+                    await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds, 
+                        ConnectionTimeoutTcpMillis, peerConnection);
+                }
+                catch (Exception ex)
+                {
+                    _tcsResponse.SetException(ex);
+                }
             });
             return _tcsResponse.Task;
         }
@@ -159,8 +195,15 @@ namespace TomP2P.Connection
         {
             ThreadPool.QueueUserWorkItem(async delegate
             {
-                await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
-                    ConnectionTimeoutTcpMillis, peerConnection);
+                try
+                {
+                    await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                        ConnectionTimeoutTcpMillis, peerConnection);
+                }
+                catch (Exception ex)
+                {
+                    _tcsResponse.SetException(ex);
+                }
             });
             return _tcsResponse.Task;
         }

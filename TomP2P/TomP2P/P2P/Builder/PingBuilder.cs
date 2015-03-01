@@ -243,7 +243,6 @@ namespace TomP2P.P2P.Builder
         private static void AddPingListener(TaskCompletionSource<PeerAddress> tcsPing,
             Task<Message.Message> taskResponse)
         {
-            // TODO works?
             taskResponse.ContinueWith(tr =>
             {
                 if (!tr.IsFaulted)
