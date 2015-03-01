@@ -42,13 +42,13 @@ namespace TomP2P.Connection.Windows.Netty
                 {
                     DoClose();
                     Logger.Debug("Closed {0}.", this);
+                    NotifyClosed();
                 }
                 catch (ObjectDisposedException)
                 {
                     // the socket seems to be disposed already
                     Logger.Warn("{0} was already closed/disposed.", this);
                 }
-                NotifyClosed();
             }
         }
 
