@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework.Constraints;
 using TomP2P.Connection;
 using TomP2P.Message;
 using TomP2P.P2P;
@@ -70,6 +71,82 @@ namespace TomP2P.Tests
             var peerSocketAddress = new PeerSocketAddress(inetSend, tcpPortSender, udpPortSender);
             var n1 = new PeerAddress(idSender, peerSocketAddress, firewallTcp, firewallUdp, false, PeerAddress.EmptyPeerSocketAddresses);
             return n1;
+        }
+
+        public static Peer[] CreateNodes(int nrOfPeers, Random rnd, int port)
+        {
+            return CreateNodes(nrOfPeers, rnd, port, null);
+        }
+
+        public static Peer[] CreateNodes(int nrOfPeers, Random rnd, int port, IAutomaticTask automaticTask)
+        {
+            return CreateNodes(nrOfPeers, rnd, port, automaticTask, false);
+        }
+
+        /// <summary>
+        /// Creates peers for testing. The first peer will be used as the master.
+        /// This means that shutting down the master will shut down all other peers as well.
+        /// </summary>
+        /// <param name="nrOfPeers"></param>
+        /// <param name="rnd"></param>
+        /// <param name="port"></param>
+        /// <param name="automaticTask"></param>
+        /// <param name="maintenance"></param>
+        /// <returns></returns>
+        public static Peer[] CreateNodes(int nrOfPeers, Random rnd, int port, IAutomaticTask automaticTask, bool maintenance)
+        {
+            var bindings = new Bindings();
+            var peers = new Peer[nrOfPeers];
+            if (automaticTask != null)
+            {
+                var peerId = new Number160(rnd);
+                var peerMap = new PeerMap(new PeerMapConfiguration(peerId));
+                peers[0] = new PeerBuilder(peerId)
+                    .SetPorts(port)
+                    .SetEnableMaintenanceRpc(maintenance)
+                    .SetExternalBindings(bindings)
+                    .SetPeerMap(peerMap)
+                    .Start()
+                    .AddAutomaticTask(automaticTask);
+            }
+            else
+            {
+                var peerId = new Number160(rnd);
+                var peerMap = new PeerMap(new PeerMapConfiguration(peerId));
+                peers[0] = new PeerBuilder(peerId)
+                    .SetPorts(port)
+                    .SetEnableMaintenanceRpc(maintenance)
+                    .SetExternalBindings(bindings)
+                    .SetPeerMap(peerMap)
+                    .Start();
+            }
+            for (int i = 1; i < nrOfPeers; i++)
+            {
+                if (automaticTask != null)
+                {
+                    var peerId = new Number160(rnd);
+                    var peerMap = new PeerMap(new PeerMapConfiguration(peerId));
+                    peers[i] = new PeerBuilder(peerId)
+                        .SetMasterPeer(peers[0])
+                        .SetEnableMaintenanceRpc(maintenance)
+                        .SetExternalBindings(bindings)
+                        .SetPeerMap(peerMap)
+                        .Start()
+                        .AddAutomaticTask(automaticTask);
+                }
+                else
+                {
+                    var peerId = new Number160(rnd);
+                    var peerMap = new PeerMap(new PeerMapConfiguration(peerId).SetPeerNoVerification());
+                    peers[i] = new PeerBuilder(peerId)
+                        .SetMasterPeer(peers[0])
+                        .SetEnableMaintenanceRpc(maintenance)
+                        .SetExternalBindings(bindings)
+                        .SetPeerMap(peerMap)
+                        .Start();
+                }
+            }
+            return peers;
         }
 
         /// <summary>

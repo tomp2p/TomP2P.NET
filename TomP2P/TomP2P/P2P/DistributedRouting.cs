@@ -64,8 +64,16 @@ namespace TomP2P.P2P
                     var tcsRouting1 = Routing(peerAddresses, routingBuilder, Message.Message.MessageType.Request1, cc);
                     tcsRouting1.Task.ContinueWith(taskRouting1 =>
                     {
-                        var pair = new Pair<TcsRouting, TcsRouting>(tcsRouting0, tcsRouting1);
-                        tcsDone.SetResult(pair);
+                        // .NET-specific: check 2nd routing for success // TODO not needed?
+                        if (!taskRouting1.IsFaulted)
+                        {
+                            var pair = new Pair<TcsRouting, TcsRouting>(tcsRouting0, tcsRouting1);
+                            tcsDone.SetResult(pair);
+                        }
+                        else
+                        {
+                            tcsDone.SetException(taskRouting1.TryGetException());
+                        }
                     });
                 }
                 else
@@ -110,103 +118,110 @@ namespace TomP2P.P2P
         private TcsRouting Routing(ICollection<PeerAddress> peerAddresses, RoutingBuilder routingBuilder,
             Message.Message.MessageType type, ChannelCreator cc)
         {
-            if (peerAddresses == null)
+            try
             {
-                throw new ArgumentException("Some nodes/addresses need to be specified.");
-            }
-            bool randomSearch = routingBuilder.LocationKey == null;
-            IComparer<PeerAddress> comparer;
-            if (randomSearch)
-            {
-                comparer = _peerBean.PeerMap.CreateComparer();
-            }
-            else
-            {
-                comparer = PeerMap.CreateComparer(routingBuilder.LocationKey);
-            }
-            var queueToAsk = new SortedSet<PeerAddress>(comparer);
-            var alreadyAsked = new SortedSet<PeerAddress>(comparer);
-
-            // As presented by Kazuyuki Shudo at AIMS 2009, it is better to ask random
-            // peers with the data than ask peers that are ordered by distance.
-            // -> this balances load
-            var directHits = new SortedDictionary<PeerAddress, DigestInfo>(comparer);
-            var potentialHits = new SortedSet<PeerAddress>(comparer);
-
-            // fill initially
-            queueToAsk.AddAll(peerAddresses);
-            alreadyAsked.Add(_peerBean.ServerPeerAddress);
-            potentialHits.Add(_peerBean.ServerPeerAddress);
-
-            // domain key can be null if we bootstrap
-            if (type == Message.Message.MessageType.Request2
-                && routingBuilder.DomainKey != null
-                && !randomSearch
-                && _peerBean.DigestStorage != null)
-            {
-                Number640 from;
-                Number640 to;
-                if (routingBuilder.From != null && routingBuilder.To != null)
+                if (peerAddresses == null)
                 {
-                    from = routingBuilder.From;
-                    to = routingBuilder.To;
+                    throw new ArgumentException("Some nodes/addresses need to be specified.");
                 }
-                else if (routingBuilder.ContentKey == null)
+                bool randomSearch = routingBuilder.LocationKey == null;
+                IComparer<PeerAddress> comparer;
+                if (randomSearch)
                 {
-                    from = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, Number160.Zero, Number160.Zero);
-                    to = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, Number160.MaxValue, Number160.MaxValue);
+                    comparer = _peerBean.PeerMap.CreateComparer();
                 }
                 else
                 {
-                    from = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, routingBuilder.ContentKey, Number160.Zero);
-                    to = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, routingBuilder.ContentKey, Number160.MaxValue);
+                    comparer = PeerMap.CreateComparer(routingBuilder.LocationKey);
                 }
+                var queueToAsk = new SortedSet<PeerAddress>(comparer);
+                var alreadyAsked = new SortedSet<PeerAddress>(comparer);
 
-                var digestBean = _peerBean.DigestStorage.Digest(from, to, -1, true);
-                if (digestBean.Size > 0)
+                // As presented by Kazuyuki Shudo at AIMS 2009, it is better to ask random
+                // peers with the data than ask peers that are ordered by distance.
+                // -> this balances load
+                var directHits = new SortedDictionary<PeerAddress, DigestInfo>(comparer);
+                var potentialHits = new SortedSet<PeerAddress>(comparer);
+
+                // fill initially
+                queueToAsk.AddAll(peerAddresses);
+                alreadyAsked.Add(_peerBean.ServerPeerAddress);
+                potentialHits.Add(_peerBean.ServerPeerAddress);
+
+                // domain key can be null if we bootstrap
+                if (type == Message.Message.MessageType.Request2
+                    && routingBuilder.DomainKey != null
+                    && !randomSearch
+                    && _peerBean.DigestStorage != null)
                 {
-                    directHits.Add(_peerBean.ServerPeerAddress, digestBean);
+                    Number640 from;
+                    Number640 to;
+                    if (routingBuilder.From != null && routingBuilder.To != null)
+                    {
+                        from = routingBuilder.From;
+                        to = routingBuilder.To;
+                    }
+                    else if (routingBuilder.ContentKey == null)
+                    {
+                        from = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, Number160.Zero, Number160.Zero);
+                        to = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, Number160.MaxValue, Number160.MaxValue);
+                    }
+                    else
+                    {
+                        from = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, routingBuilder.ContentKey, Number160.Zero);
+                        to = new Number640(routingBuilder.LocationKey, routingBuilder.DomainKey, routingBuilder.ContentKey, Number160.MaxValue);
+                    }
+
+                    var digestBean = _peerBean.DigestStorage.Digest(from, to, -1, true);
+                    if (digestBean.Size > 0)
+                    {
+                        directHits.Add(_peerBean.ServerPeerAddress, digestBean);
+                    }
                 }
-            }
-            else if (type == Message.Message.MessageType.Request3
-                     && !randomSearch
-                     && _peerBean.DigestTracker != null)
-            {
-                var digestInfo = _peerBean.DigestTracker.Digest(routingBuilder.LocationKey, routingBuilder.DomainKey,
-                    routingBuilder.ContentKey);
-                // we always put ourselfs to the tracker list, so we need to check
-                // if we know also other peers on our trackers
-                if (digestInfo.Size > 0)
+                else if (type == Message.Message.MessageType.Request3
+                         && !randomSearch
+                         && _peerBean.DigestTracker != null)
                 {
-                    directHits.Add(_peerBean.ServerPeerAddress, digestInfo);
+                    var digestInfo = _peerBean.DigestTracker.Digest(routingBuilder.LocationKey, routingBuilder.DomainKey,
+                        routingBuilder.ContentKey);
+                    // we always put ourselfs to the tracker list, so we need to check
+                    // if we know also other peers on our trackers
+                    if (digestInfo.Size > 0)
+                    {
+                        directHits.Add(_peerBean.ServerPeerAddress, digestInfo);
+                    }
                 }
-            }
 
-            var tcsRouting = new TcsRouting();
-            if (peerAddresses.Count == 0)
+                var tcsRouting = new TcsRouting();
+                if (peerAddresses.Count == 0)
+                {
+                    tcsRouting.SetNeighbors(directHits, potentialHits, alreadyAsked, routingBuilder.IsBootstrap, false);
+                }
+                else
+                {
+                    // If a peer bootstraps to itself, then the size of peer addresses is 1
+                    // and it contains itself. Check for that because we need to know if we
+                    // are routing, bootstrapping and bootstrapping to ourselfs, to return
+                    // the correct status for the task.
+                    bool isRoutingOnlyToSelf = peerAddresses.Count == 1 &&
+                                               peerAddresses.First().Equals(_peerBean.ServerPeerAddress);
+
+                    var routingMechanism = routingBuilder.CreateRoutingMechanism(tcsRouting);
+                    routingMechanism.SetQueueToAsk(queueToAsk);
+                    routingMechanism.SetPotentialHits(potentialHits);
+                    routingMechanism.SetDirectHits(directHits);
+                    routingMechanism.SetAlreadyAsked(alreadyAsked);
+
+                    routingBuilder.SetIsRoutingOnlyToSelf(isRoutingOnlyToSelf);
+                    RoutingRec(routingBuilder, routingMechanism, type, cc);
+                }
+                return tcsRouting;
+            }
+            catch (Exception ex)
             {
-                tcsRouting.SetNeighbors(directHits, potentialHits, alreadyAsked, routingBuilder.IsBootstrap, false);
+                Logger.Error("An exception occurred during routing.", ex);
+                throw;
             }
-            else
-            {
-                // If a peer bootstraps to itself, then the size of peer addresses is 1
-                // and it contains itself. Check for that because we need to know if we
-                // are routing, bootstrapping and bootstrapping to ourselfs, to return
-                // the correct status for the task.
-                bool isRoutingOnlyToSelf = peerAddresses.Count == 1 &&
-                                           peerAddresses.First().Equals(_peerBean.ServerPeerAddress);
-
-                var routingMechanism = routingBuilder.CreateRoutingMechanism(tcsRouting);
-                routingMechanism.SetQueueToAsk(queueToAsk);
-                routingMechanism.SetPotentialHits(potentialHits);
-                routingMechanism.SetDirectHits(directHits);
-                routingMechanism.SetAlreadyAsked(alreadyAsked);
-
-                routingBuilder.SetIsRoutingOnlyToSelf(isRoutingOnlyToSelf);
-                RoutingRec(routingBuilder, routingMechanism, type, cc);
-            }
-
-            return tcsRouting;
         }
 
         private void RoutingRec(RoutingBuilder routingBuilder, RoutingMechanism routingMechanism,

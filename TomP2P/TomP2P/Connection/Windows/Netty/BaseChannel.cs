@@ -85,12 +85,12 @@ namespace TomP2P.Connection.Windows.Netty
 
         public bool IsOpen
         {
-            get { return !IsClosed; } // TODO ok?
+            get { return !IsClosed; } // TODO ok? what about if channel creation failed?
         }
 
         public bool IsActive
         {
-            get { return !IsClosed; } // TODO ok?
+            get { return !IsClosed; } // TODO ok? what about if channel creation failed?
         }
     }
 }

@@ -496,14 +496,7 @@ namespace TomP2P.Connection
                 string msg = String.Format("Failed to write channel the request {0} {1}.", tcsResponse.Task.AsyncState,
                     sendTask.Exception);
                 Logger.Warn(msg);
-                if (sendTask.Exception != null)
-                {
-                    tcsResponse.SetException(sendTask.Exception);
-                }
-                else
-                {
-                    tcsResponse.SetException(new TaskFailedException(msg));
-                }
+                tcsResponse.SetException(sendTask.TryGetException());
             }
             if (isFireAndForget)
             {
@@ -528,9 +521,8 @@ namespace TomP2P.Connection
             var handlers = new Dictionary<string, IChannelHandler>();
             if (timeoutHandler != null)
             {
-                // TODO add timeout handlers
-                //handlers.Add("timeout0", timeoutHandler.CreateIdleStateHandlerTomP2P());
-                //handlers.Add("timeout1", timeoutHandler.CreateTimeHandler());
+                handlers.Add("timeout0", timeoutHandler.CreateIdleStateHandlerTomP2P());
+                handlers.Add("timeout1", timeoutHandler.CreateTimeHandler());
             }
             handlers.Add("decoder", new TomP2PCumulationTcp(ChannelClientConfiguration.SignatureFactory));
             handlers.Add("encoder", new TomP2POutbound(false, ChannelClientConfiguration.SignatureFactory));

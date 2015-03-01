@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using TomP2P.Extensions;
 using TomP2P.P2P;
 using TomP2P.Peers;
 
@@ -93,6 +94,53 @@ namespace TomP2P.Tests.P2P
                 if (slave != null)
                 {
                     slave.ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        [Test]
+        public async void TestBootstrap()
+        {
+            var rnd = new Random(42);
+            Peer master = null;
+            try
+            {
+                // setup
+                var peers = Utils2.CreateNodes(3, rnd, 4001);
+                master = peers[0];
+
+                // do testing
+                var list = new List<Task>();
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    if (peers[i] != master)
+                    {
+                        Console.WriteLine("Bootstrapping peer {0}.", i);
+                        var taskBootstrap = peers[i].Bootstrap().SetPeerAddress(master.PeerAddress).StartAsync();
+                        list.Add(taskBootstrap);
+                    }
+                }
+                foreach (var bootstrapTask in list)
+                {
+                    try
+                    {
+                        await bootstrapTask;
+                    }
+                    catch (Exception)
+                    {
+                        Console.Error.WriteLine(bootstrapTask.TryGetException());
+                    }
+                    finally
+                    {
+                        Assert.IsTrue(!bootstrapTask.IsFaulted);
+                    }
+                }
+            }
+            finally
+            {
+                if (master != null)
+                {
+                    master.ShutdownAsync().Wait();
                 }
             }
         }

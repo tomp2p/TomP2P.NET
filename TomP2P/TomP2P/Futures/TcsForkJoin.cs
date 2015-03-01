@@ -52,7 +52,7 @@ namespace TomP2P.Futures
             if (_nrTasks <= 0)
             {
                 // "failed"
-                this.SetException(new TaskFailedException("We have no tasks: " + _nrTasks));
+                SetException(new TaskFailedException("We have no tasks: " + _nrTasks));
             }
             else
             {
