@@ -74,9 +74,15 @@ namespace TomP2P.Tests.P2P
                     .SetInetAddress(IPAddress.Loopback)
                     .SetPorts(3000)
                     .StartAsync();
-                await taskBootstrap;
-
-                Assert.IsTrue(taskBootstrap.IsFaulted); // TODO correct?
+                try
+                {
+                    await taskBootstrap;
+                    Assert.Fail("The bootstrapping task should fail.");
+                }
+                catch (Exception)
+                {
+                    Assert.IsTrue(taskBootstrap.IsFaulted);
+                }
             }
             finally
             {
