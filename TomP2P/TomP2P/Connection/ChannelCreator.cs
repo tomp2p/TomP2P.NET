@@ -95,7 +95,9 @@ namespace TomP2P.Connection
 
                 // create and bind
                 var udpClient = new MyUdpClient(_externalBindings.WildcardSocket());
-                
+                _recipients.Add(udpClient);
+                SetupCloseListener(udpClient, _semaphoreUdp);
+
                 // attach filtered pipeline
                 var pipeline = new Pipeline(udpClient, handlers);
                 var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, false, true);
@@ -106,8 +108,6 @@ namespace TomP2P.Connection
                     udpClient.Socket.EnableBroadcast = true;
                 }
 
-                _recipients.Add(udpClient);
-                SetupCloseListener(udpClient, _semaphoreUdp);
                 return udpClient;
             }
             finally
@@ -139,15 +139,17 @@ namespace TomP2P.Connection
                     Logger.Error(errorMsg);
                     throw new SystemException(errorMsg);
                 }
-                
+
                 // create
                 var tcpClient = new MyTcpClient(_externalBindings.WildcardSocket());
-                
+                _recipients.Add(tcpClient);
+                SetupCloseListener(tcpClient, _semaphoreTcp);
+
                 // attach filtered pipeline
                 var pipeline = new Pipeline(tcpClient, handlers);
                 var filteredPipeline = _channelClientConfiguration.PipelineFilter.Filter(pipeline, true, true);
                 tcpClient.SetPipeline(filteredPipeline);
-                
+
                 // TODO how to set CONNECT_TIMEOUT_MILLIS option?
                 tcpClient.Socket.NoDelay = true;
                 tcpClient.Socket.LingerState = new LingerOption(false, 0);
@@ -164,8 +166,6 @@ namespace TomP2P.Connection
                     throw;
                 }
 
-                _recipients.Add(tcpClient);
-                SetupCloseListener(tcpClient, _semaphoreTcp);
                 return tcpClient;
             }
             finally
@@ -184,7 +184,7 @@ namespace TomP2P.Connection
         private static void SetupCloseListener(IChannel channel, Semaphore semaphore)
         {
             // tcsResponse seems not to be needed here
-            channel.Closed += sender => semaphore.Release();
+            channel.Closed += ch => semaphore.Release();
             // TODO in Java, the FutureResponse is responded now after channel closing
         }
 
