@@ -214,7 +214,7 @@ namespace TomP2P.Connection
             {
                 if (IsShutdown)
                 {
-                    _tcsChannelShutdownDone.SetException(new TaskFailedException("Already shutting down."));
+                    _tcsChannelShutdownDone.TrySetException(new TaskFailedException("Already shutting down."));
                     return _tcsChannelShutdownDone.Task;
                 }
                 _shutdownUdp = true;
@@ -229,7 +229,7 @@ namespace TomP2P.Connection
             // make async
             ThreadPool.QueueUserWorkItem(delegate
             {
-                // .NET-specific to close all channels (Java has ChannelGroup.close())
+                // .NET-specific: close all channels
                 foreach (var client in _recipients)
                 {
                     client.Close();
@@ -243,7 +243,7 @@ namespace TomP2P.Connection
                 {
                     _semaphoreTcp.Acquire(_maxPermitsTcp);
                 }
-                _tcsChannelShutdownDone.SetResult(null); // completes the Task
+                _tcsChannelShutdownDone.TrySetResult(null); // complete
             });
 
             return _tcsChannelShutdownDone.Task;
