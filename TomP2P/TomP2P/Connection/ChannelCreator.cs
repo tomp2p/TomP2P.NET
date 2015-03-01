@@ -160,7 +160,7 @@ namespace TomP2P.Connection
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error(ex);
+                    Logger.Warn(ex);
                     throw;
                 }
 
