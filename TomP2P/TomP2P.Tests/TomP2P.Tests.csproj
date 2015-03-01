@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Extensions\InteropRandomTest.cs" />
     <Compile Include="LoggerTest.cs" />
+    <Compile Include="P2P\BootstrapTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rpc\PingTest.cs" />
     <Compile Include="Rpc\QuitTest.cs" />

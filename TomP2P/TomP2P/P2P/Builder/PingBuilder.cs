@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using TomP2P.Connection;
-using TomP2P.Connection.Windows;
+using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Futures;
 using TomP2P.Peers;
@@ -129,14 +129,7 @@ namespace TomP2P.P2P.Builder
                     }
                     else
                     {
-                        if (taskCc.Exception != null)
-                        {
-                            tcsPing.SetException(taskCc.Exception);
-                        }
-                        else
-                        {
-                            tcsPing.SetException(new TaskFailedException("TODO"));
-                        }
+                        tcsPing.SetException(taskCc.TryGetException());
                     }
                 });
             }
@@ -183,14 +176,7 @@ namespace TomP2P.P2P.Builder
                     }
                     else
                     {
-                        if (tcc.Exception != null)
-                        {
-                            tcsPing.SetException(tcc.Exception);
-                        }
-                        else
-                        {
-                            tcsPing.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
-                        }
+                        tcsPing.SetException(tcc.TryGetException());
                     }
                 });
             }
@@ -208,14 +194,7 @@ namespace TomP2P.P2P.Builder
                     }
                     else
                     {
-                        if (tcc.Exception != null)
-                        {
-                            tcsPing.SetException(tcc.Exception);
-                        }
-                        else
-                        {
-                            tcsPing.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
-                        }
+                        tcsPing.SetException(tcc.TryGetException());
                     }
                 });
             }
@@ -237,14 +216,7 @@ namespace TomP2P.P2P.Builder
                 }
                 else
                 {
-                    if (tcc.Exception != null)
-                    {
-                        tcsPing.SetException(tcc.Exception);
-                    }
-                    else
-                    {
-                        tcsPing.SetException(new TaskFailedException("Task<ChannelCreator> failed."));
-                    }
+                    tcsPing.SetException(tcc.TryGetException());
                 }
             });
             return tcsPing.Task;
@@ -263,14 +235,7 @@ namespace TomP2P.P2P.Builder
                 }
                 else
                 {
-                    if (tlj.Exception != null)
-                    {
-                        tcsPing.SetException(tlj.Exception);
-                    }
-                    else
-                    {
-                        tcsPing.SetException(new TaskFailedException("No successful ping reply received."));
-                    }
+                    tcsPing.SetException(tlj.TryGetException());
                 }
             });
         }
@@ -279,22 +244,15 @@ namespace TomP2P.P2P.Builder
             Task<Message.Message> taskResponse)
         {
             // TODO works?
-            taskResponse.ContinueWith(taskResponse2 =>
+            taskResponse.ContinueWith(tr =>
             {
-                if (!taskResponse2.IsFaulted)
+                if (!tr.IsFaulted)
                 {
-                    tcsPing.SetResult(taskResponse2.Result.Sender);
+                    tcsPing.SetResult(tr.Result.Sender);
                 }
                 else
                 {
-                    if (taskResponse2.Exception != null)
-                    {
-                        tcsPing.SetException(taskResponse2.Exception);
-                    }
-                    else
-                    {
-                        tcsPing.SetException(new TaskFailedException("No successful ping reply received."));
-                    }
+                    tcsPing.SetException(tr.TryGetException());
                 }
             });
         }

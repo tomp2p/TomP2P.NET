@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using NLog;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Peers;
@@ -12,6 +13,8 @@ namespace TomP2P.Futures
     /// </summary>
     public class TcsDiscover : BaseTcsImpl
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         // result
         private PeerAddress _ourPeerAddress;
         private PeerAddress _reporter;
@@ -21,6 +24,9 @@ namespace TomP2P.Futures
         private IPAddress _internalAddress;
         private IPAddress _externalAddress;
 
+        // .NET-specific:
+        private long _start;
+
         /// <summary>
         /// Creates a new future object and creates a timer that fires failed after a timeout.
         /// </summary>
@@ -29,6 +35,7 @@ namespace TomP2P.Futures
         /// <param name="delaySec">The delay in seconds.</param>
         public void Timeout(PeerAddress serverPeerAddress, ExecutorService timer, int delaySec)
         {
+            _start = Convenient.CurrentTimeMillis();
             var cts = timer.Schedule(DiscoverTimeoutTask, serverPeerAddress, TimeSpan.FromSeconds(delaySec).TotalMilliseconds);
 
 // ReSharper disable once MethodSupportsCancellation
@@ -38,11 +45,10 @@ namespace TomP2P.Futures
 
         private void DiscoverTimeoutTask(object state)
         {
-            long start = Convenient.CurrentTimeMillis();
             var serverPeerAddress = state as PeerAddress;
 
             string msg = String.Format("Timeout in discover: {0}ms. However, I think my peer address is {1}.",
-                Convenient.CurrentTimeMillis() - start, serverPeerAddress);
+                Convenient.CurrentTimeMillis() - _start, serverPeerAddress);
             Failed(serverPeerAddress, msg);
         }
 
@@ -55,6 +61,7 @@ namespace TomP2P.Futures
                     return;
                 }
                 // TODO reason and type needed?
+                Logger.Debug(failed);
                 _ourPeerAddress = serverPeerAddress;
             }
             NotifyListeners();

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Extensions;
@@ -227,21 +224,32 @@ namespace TomP2P.P2P.Builder
                         }
                         // else -> we announce exactly how the other peer sees us
                         var taskResponse1 = _peer.PingRpc.PingTcpProbeAsync(peerAddress, cc, configuration);
-                        var taskResponse2 = _peer.PingRpc.PingUdpProbeAsync(peerAddress, cc, configuration);
+                        taskResponse1.ContinueWith(tr1 =>
+                        {
+                            if (tr1.IsFaulted)
+                            {
+                                tcsDiscover.SetException(new TaskFailedException("TcsDiscover (2): We need at least the TCP connection.", tr1));
+                            }
+                        });
                         
+                        var taskResponse2 = _peer.PingRpc.PingUdpProbeAsync(peerAddress, cc, configuration);
+                        taskResponse2.ContinueWith(tr2 =>
+                        {
+                            if (tr2.IsFaulted)
+                            {
+                                Logger.Warn("TcsDiscover (2): UDP failed connection.");
+                            }
+                        });
+
                         // from here we probe, set the timeout here
                         tcsDiscover.Timeout(serverAddress, _peer.ConnectionBean.Timer, DiscoverTimeoutSec);
                         return;
                     }
-                    else
-                    {
-                        tcsDiscover.SetException(new TaskFailedException(String.Format("Peer {0} did not report our IP address.", peerAddress)));
-                    }
+                    tcsDiscover.SetException(new TaskFailedException(String.Format("Peer {0} did not report our IP address.", peerAddress)));
                 }
                 else
                 {
-                    tcsDiscover.SetException(new TaskFailedException("For discovery, we need at least the TCP connection.", taskResponse));
-                    return;
+                    tcsDiscover.SetException(new TaskFailedException("TcsDiscover (1): We need at least the TCP connection.", taskResponse));
                 }
             });
         }
