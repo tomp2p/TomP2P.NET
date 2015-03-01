@@ -20,8 +20,16 @@ namespace TomP2P.Tests.P2P
             Peer slave = null;
             try
             {
-                master = new PeerBuilder(new Number160(rnd)).SetPorts(4001).Start();
-                slave = new PeerBuilder(new Number160(rnd)).SetPorts(4002).Start();
+                master = new PeerBuilder(new Number160(rnd))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(4001, 4001))
+                    .SetPorts(4001)
+                    .Start();
+                slave = new PeerBuilder(new Number160(rnd))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(4002, 4002))
+                    .SetPorts(4002)
+                    .Start();
 
                 var tcsDiscover = master.Discover().SetPeerAddress(slave.PeerAddress).Start();
                 await tcsDiscover.Task;

@@ -1,10 +1,14 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
+using NLog;
 
 namespace TomP2P.Connection.Windows.Netty
 {
     public abstract class BaseChannel : IChannel
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public event ChannelEventHandler Closed;
         public event ChannelEventHandler WriteCompleted;
 
@@ -19,7 +23,6 @@ namespace TomP2P.Connection.Windows.Netty
         public void SetPipeline(Pipeline pipeline)
         {
             _pipeline = pipeline;
-            //_pipeline.Active(); // active means getting open
         }
 
         public Pipeline Pipeline
@@ -34,9 +37,17 @@ namespace TomP2P.Connection.Windows.Netty
         {
             if (!IsClosed)
             {
-                //_pipeline.Inactive(); // inactive means getting closed
                 IsClosed = true;
-                DoClose();
+                try
+                {
+                    DoClose();
+                    Logger.Debug("Closed {0}.", this);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // the socket seems to be disposed already
+                    Logger.Warn("{0} was already closed/disposed.", this);
+                }
                 NotifyClosed();
             }
         }

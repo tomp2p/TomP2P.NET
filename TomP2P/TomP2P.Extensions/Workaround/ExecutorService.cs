@@ -70,11 +70,17 @@ namespace TomP2P.Extensions.Workaround
         public void Shutdown()
         {
             _cts.Cancel();
-            
-            foreach (var scheduledTask in _scheduledTasks)
+            try
             {
-                // non-blocking disposure
-                scheduledTask.Dispose();
+                foreach (var scheduledTask in _scheduledTasks)
+                {
+                    // non-blocking disposure
+                    scheduledTask.Dispose();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // one of the timers seems to be disposed already
             }
         }
 
@@ -84,12 +90,19 @@ namespace TomP2P.Extensions.Workaround
         /// <param name="timer">The timer to stop.</param>
         public static void Cancel(Timer timer)
         {
-            // MSDN: Use this overload of the Dispose method if you want to be able to 
-            // block until you are certain that the timer has been disposed. The timer
-            // is not disposed until all currently queued callbacks have completed.
-            var waitHandle = new AutoResetEvent(false);
-            timer.Dispose(waitHandle);
-            waitHandle.WaitOne(); // a timeout could be added here
+            try
+            {
+                // MSDN: Use this overload of the Dispose method if you want to be able to 
+                // block until you are certain that the timer has been disposed. The timer
+                // is not disposed until all currently queued callbacks have completed.
+                var waitHandle = new AutoResetEvent(false);
+                timer.Dispose(waitHandle);
+                waitHandle.WaitOne(); // a timeout could be added here
+            }
+            catch (ObjectDisposedException)
+            {
+                // the timer seems to be disposed already
+            }
         }
     }
 }

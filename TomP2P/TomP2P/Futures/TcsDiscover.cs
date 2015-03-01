@@ -40,7 +40,7 @@ namespace TomP2P.Futures
 
 // ReSharper disable once MethodSupportsCancellation
             // cancel timeout if we are done
-            this.Task.ContinueWith(td => cts.Cancel());
+            Task.ContinueWith(tDelay => cts.Cancel());
         }
 
         private void DiscoverTimeoutTask(object state)
