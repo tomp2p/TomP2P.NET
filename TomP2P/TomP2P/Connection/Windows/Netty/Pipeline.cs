@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using NLog;
 
 namespace TomP2P.Connection.Windows.Netty
@@ -40,6 +41,7 @@ namespace TomP2P.Connection.Windows.Netty
                     AddLast(handler.Key, handler.Value);
                 }
             }
+            Logger.Info("Instantiated with object identity: {0}. For channel {1}({2}).", RuntimeHelpers.GetHashCode(this), channel, RuntimeHelpers.GetHashCode(channel));
         }
 
         internal PipelineSession GetNewSession()
@@ -196,11 +198,14 @@ namespace TomP2P.Connection.Windows.Netty
                 {
                     // add same handler (shared reference)
                     newHandlers.AddLast(handler);
+                    Logger.Info("Pipeline ({0}): Sharing handler {1}({2}) for {3}{4}.", RuntimeHelpers.GetHashCode(this), handler, RuntimeHelpers.GetHashCode(handler), Channel, RuntimeHelpers.GetHashCode(Channel));
                 }
                 else
                 {
                     // add new, cloned handler (not same reference)
-                    newHandlers.AddLast(handler.CreateNewInstance());
+                    var newHandler = handler.CreateNewInstance();
+                    newHandlers.AddLast(newHandler);
+                    Logger.Info("Pipeline ({0}): Created new handler {1}({2}) for {3}{4}.", RuntimeHelpers.GetHashCode(this), newHandler, RuntimeHelpers.GetHashCode(newHandler), Channel, RuntimeHelpers.GetHashCode(Channel));
                 }
             }
             return newHandlers;

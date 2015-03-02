@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -72,6 +73,8 @@ namespace TomP2P.Connection
             IdleTcpSeconds = configuration.IdleTcpSeconds;
             IdleUdpSeconds = configuration.IdleUdpSeconds;
             ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis;
+
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public TaskCompletionSource<Message.Message> TcsResponse
@@ -364,7 +367,10 @@ namespace TomP2P.Connection
         public override IChannelHandler CreateNewInstance()
         {
             // TODO correct? message reference is shared...
-            return new RequestHandler(_tcsResponse, PeerBean, ConnectionBean, _configuration);
+            //return new RequestHandler(_tcsResponse, PeerBean, ConnectionBean, _configuration);
+        
+            // the same instance can be returned, as there is one RequestHandler per client socket and message
+            return this;
         }
     }
 }

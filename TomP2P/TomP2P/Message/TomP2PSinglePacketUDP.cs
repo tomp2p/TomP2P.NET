@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
@@ -14,6 +15,7 @@ namespace TomP2P.Message
         public TomP2PSinglePacketUdp(ISignatureFactory signatureFactory)
         {
             _signatureFactory = signatureFactory;
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         /// <summary>

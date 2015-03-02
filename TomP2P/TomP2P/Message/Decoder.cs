@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
@@ -58,6 +59,7 @@ namespace TomP2P.Message
         public Decoder(ISignatureFactory signatureFactory)
         {
             _signatureFactory = signatureFactory;
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public bool Decode(ChannelHandlerContext ctx, AlternativeCompositeByteBuf buffer, IPEndPoint recipient, IPEndPoint sender)

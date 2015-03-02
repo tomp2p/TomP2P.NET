@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
@@ -28,6 +29,7 @@ namespace TomP2P.Message
             _signatureFactory = signatureFactory;
             _encoder = new Encoder(signatureFactory);
             _alloc = alloc;
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public void Write(ChannelHandlerContext ctx, object msg)

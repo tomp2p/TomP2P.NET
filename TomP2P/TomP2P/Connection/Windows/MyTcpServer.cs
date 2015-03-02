@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -22,6 +23,8 @@ namespace TomP2P.Connection.Windows
         {
             // local endpoint
             _tcpServer = new TcpListener(localEndPoint);
+
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public override void DoStart()

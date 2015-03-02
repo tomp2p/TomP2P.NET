@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -21,6 +22,8 @@ namespace TomP2P.Connection.Windows
         {
             // bind
             _tcpClient = new TcpClient(localEndPoint);
+
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public Task ConnectAsync(IPEndPoint remoteEndPoint)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -21,6 +22,8 @@ namespace TomP2P.Connection.Windows
             : base(localEndPoint)
         {
             _udpServer = new UdpClient(localEndPoint);
+
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public override void DoStart()
@@ -52,6 +55,7 @@ namespace TomP2P.Connection.Windows
 
                     var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
                     Logger.Debug("Received {0}.", dgram);
+                    Logger.Debug("Dgram bytes: {0}.", Convenient.PrintByteArray(udpRes.Buffer));
 
                     var session = Pipeline.GetNewSession();
                     var readRes = session.Read(dgram);

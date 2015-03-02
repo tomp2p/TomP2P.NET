@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Extensions;
@@ -19,6 +20,7 @@ namespace TomP2P.Message
         public Encoder(ISignatureFactory signatureFactory)
         {
             _signatureFactory = signatureFactory;
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public bool Write(AlternativeCompositeByteBuf buffer, Message message, ISignatureCodec signatureCodec)

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -20,6 +21,7 @@ namespace TomP2P.Connection.Windows
         {
             // bind
             _udpClient = new UdpClient(localEndPoint);
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public async Task SendMessageAsync(Message.Message message)
@@ -35,6 +37,7 @@ namespace TomP2P.Connection.Windows
             var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
             Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
+            Logger.Debug("Sending bytes {0}.", Convenient.PrintByteArray(bytes));
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
             NotifyWriteCompleted();
 
@@ -43,6 +46,7 @@ namespace TomP2P.Connection.Windows
 
         public async Task ReceiveMessageAsync()
         {
+            // TODO check necessity of new session (handlers set in sender) (2x)
             var session = Pipeline.GetNewSession();
 
             // receive bytes, create a datagram wrapper

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace TomP2P.Extensions
 {
@@ -28,6 +29,17 @@ namespace TomP2P.Extensions
         public static string ToString<T>(IEnumerable<T> enumerable)
         {
             return string.Join(",", enumerable.Select(i => i.ToString()));
+        }
+
+        public static string PrintByteArray(byte[] bytes)
+        {
+            var sb = new StringBuilder("new byte[] { ");
+            foreach (var b in bytes)
+            {
+                sb.Append(b + ", ");
+            }
+            sb.Append("}");
+            return sb.ToString();
         }
 
         /// <summary>

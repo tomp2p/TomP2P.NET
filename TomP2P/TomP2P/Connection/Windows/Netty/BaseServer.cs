@@ -18,7 +18,8 @@ namespace TomP2P.Connection.Windows.Netty
             DoStart();
 
             // accept MaxNrOfClients simultaneous connections
-            var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
+            var maxNrOfClients = 1; // TODO Utils.Utils.GetMaxNrOfClients();
+            // TODO find better way of initiating service loops (thread pool)
             _tasks = new Task[maxNrOfClients];
             _cts = new CancellationTokenSource();
             for (int i = 0; i < maxNrOfClients; i++)

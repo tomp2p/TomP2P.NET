@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -45,6 +46,7 @@ namespace TomP2P.Connection
             _p2PId = p2PId;
             _peerBeanMaster = peerBeanMaster;
             _heartBeatMillis = heartBeatMillis;
+            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         /// <summary>
