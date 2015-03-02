@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions;
@@ -159,6 +160,11 @@ namespace TomP2P.Connection
         public override IChannelHandler CreateNewInstance()
         {
             return new IdleStateHandlerTomP2P(AllIdleTimeMillis);
+        }
+
+        public override string ToString()
+        {
+            return String.Format("IdleStateHandlerTomP2P ({0})", RuntimeHelpers.GetHashCode(this));
         }
     }
 }

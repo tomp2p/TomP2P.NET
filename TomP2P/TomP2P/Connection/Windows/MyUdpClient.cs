@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -70,6 +72,11 @@ namespace TomP2P.Connection.Windows
         protected override void DoClose()
         {
             _udpClient.Close();
+        }
+
+        public override string ToString()
+        {
+            return String.Format("MyUdpClient ({0})", RuntimeHelpers.GetHashCode(this));
         }
 
         public override Socket Socket

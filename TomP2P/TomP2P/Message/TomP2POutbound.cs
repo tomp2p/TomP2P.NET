@@ -95,5 +95,10 @@ namespace TomP2P.Message
         {
             return new TomP2POutbound(_preferDirect, _signatureFactory);
         }
+
+        public override string ToString()
+        {
+            return String.Format("TomP2POutbound ({0})", RuntimeHelpers.GetHashCode(this));
+        }
     }
 }

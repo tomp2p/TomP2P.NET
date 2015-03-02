@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Runtime.CompilerServices;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows;
@@ -149,6 +150,11 @@ namespace TomP2P.Message
         public override IChannelHandler CreateNewInstance()
         {
             return new TomP2PCumulationTcp(_signatureFactory);
+        }
+
+        public override string ToString()
+        {
+            return String.Format("TomP2PCumulationTcp ({0})", RuntimeHelpers.GetHashCode(this));
         }
     }
 }

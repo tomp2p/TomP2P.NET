@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using System;
+using System.Runtime.CompilerServices;
+using NLog;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions.Workaround;
 
@@ -38,6 +40,11 @@ namespace TomP2P.Connection
             // does not have to be implemeted, this class is ISharable
             throw new System.NotImplementedException();
             //public DropConnectionInboundHandler(int _limit);
+        }
+
+        public override string ToString()
+        {
+            return String.Format("DropConnectionInboundHandler ({0})", RuntimeHelpers.GetHashCode(this));
         }
     }
 }

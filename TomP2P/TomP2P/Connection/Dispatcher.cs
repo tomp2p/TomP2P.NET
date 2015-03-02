@@ -326,5 +326,10 @@ namespace TomP2P.Connection
             throw new NotImplementedException();
             //return new Dispatcher(_p2PId, _peerBeanMaster, _heartBeatMillis);
         }
+
+        public override string ToString()
+        {
+            return String.Format("Dispatcher ({0})", RuntimeHelpers.GetHashCode(this));
+        }
     }
 }

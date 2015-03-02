@@ -372,5 +372,10 @@ namespace TomP2P.Connection
             // the same instance can be returned, as there is one RequestHandler per client socket and message
             return this;
         }
+
+        public override string ToString()
+        {
+            return String.Format("RequestHandler ({0})", RuntimeHelpers.GetHashCode(this));
+        }
     }
 }

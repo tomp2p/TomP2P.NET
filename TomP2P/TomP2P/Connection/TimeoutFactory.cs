@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -155,6 +157,11 @@ namespace TomP2P.Connection
                 // server-side: _tcsResponse = null
                 // client-side: _tcsResponse is set
                 return new TimeHandler(_tcsResponse, _peerStatusListeners, _name);
+            }
+
+            public override string ToString()
+            {
+                return String.Format("TimeHandler ({0})", RuntimeHelpers.GetHashCode(this));
             }
         }
     }

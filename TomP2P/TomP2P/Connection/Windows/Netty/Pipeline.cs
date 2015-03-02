@@ -198,14 +198,14 @@ namespace TomP2P.Connection.Windows.Netty
                 {
                     // add same handler (shared reference)
                     newHandlers.AddLast(handler);
-                    Logger.Info("Pipeline ({0}): Sharing handler {1}({2}) for {3}{4}.", RuntimeHelpers.GetHashCode(this), handler, RuntimeHelpers.GetHashCode(handler), Channel, RuntimeHelpers.GetHashCode(Channel));
+                    Logger.Info("{0}: Sharing handler {1} for {2}.", this, handler, Channel);
                 }
                 else
                 {
                     // add new, cloned handler (not same reference)
                     var newHandler = handler.CreateNewInstance();
                     newHandlers.AddLast(newHandler);
-                    Logger.Info("Pipeline ({0}): Created new handler {1}({2}) for {3}{4}.", RuntimeHelpers.GetHashCode(this), newHandler, RuntimeHelpers.GetHashCode(newHandler), Channel, RuntimeHelpers.GetHashCode(Channel));
+                    Logger.Info("{0}: Created new handler {1} for {2}.", this, newHandler, Channel);
                 }
             }
             return newHandlers;
@@ -246,6 +246,11 @@ namespace TomP2P.Connection.Windows.Netty
         public IList<string> Names
         {
             get { return _handlers.Select(hi => hi.Name).ToList(); }
+        }
+
+        public override string ToString()
+        {
+            return String.Format("Pipeline ({0}) for channel {1}", RuntimeHelpers.GetHashCode(this), Channel);
         }
 
         private struct HandlerItem
@@ -302,7 +307,7 @@ namespace TomP2P.Connection.Windows.Netty
                 // find next outbound handler
                 while (GetNextOutbound() != null)
                 {
-                    Logger.Debug("Channel '{0}': Processing outbound handler '{1}'.", _pipeline.Channel, _currentOutbound);
+                    Logger.Debug("{0}: Processing outbound handler {1}.", _pipeline, _currentOutbound);
                     if (_caughtException != null)
                     {
                         _currentOutbound.ExceptionCaught(_ctx, _caughtException);
@@ -332,7 +337,7 @@ namespace TomP2P.Connection.Windows.Netty
                 // find next inbound handler
                 while (GetNextInbound() != null)
                 {
-                    Logger.Debug("Channel '{0}': Processing inbound handler '{1}'.", _pipeline.Channel, _currentInbound);
+                    Logger.Debug("{0}: Processing inbound handler {1}.", _pipeline, _currentInbound);
 
                     if (_caughtException != null)
                     {
@@ -363,24 +368,6 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 _event = evt;
             }
-
-            /*public void ResetWrite()
-            {
-                CurrentOutbound = null;
-                MsgW = null;
-                WriteRes = null;
-                CaughtException = null;
-                Event = null;
-            }
-
-            public void ResetRead()
-            {
-                CurrentInbound = null;
-                MsgR = null;
-                ReadRes = null;
-                CaughtException = null;
-                Event = null;
-            }*/
 
             private IOutboundHandler GetNextOutbound()
             {

@@ -61,5 +61,10 @@ namespace TomP2P.Message
             throw new NotImplementedException();
             return new TomP2PSinglePacketUdp(_signatureFactory);
         }
+
+        public override string ToString()
+        {
+            return String.Format("TomP2PSinglePacketUdp ({0})", RuntimeHelpers.GetHashCode(this));
+        }
     }
 }

@@ -77,6 +77,11 @@ namespace TomP2P.Connection.Windows
             }
         }
 
+        public override string ToString()
+        {
+            return String.Format("MyUdpServer ({0})", RuntimeHelpers.GetHashCode(this));
+        }
+
         public override Socket Socket
         {
             get { return _udpServer.Client; }

@@ -86,6 +86,11 @@ namespace TomP2P.Connection.Windows
             }
         }
 
+        public override string ToString()
+        {
+            return String.Format("MyTcpServer ({0})", RuntimeHelpers.GetHashCode(this));
+        }
+
         public override Socket Socket
         {
             get { return _tcpServer.Server; }
