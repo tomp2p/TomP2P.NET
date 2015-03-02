@@ -39,8 +39,6 @@ namespace TomP2P.Connection.Windows
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    var session = Pipeline.GetNewSession();
-
                     // receive request from client
                     UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
 
@@ -55,6 +53,7 @@ namespace TomP2P.Connection.Windows
                     var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
                     Logger.Debug("Received {0}.", dgram);
 
+                    var session = Pipeline.GetNewSession();
                     var readRes = session.Read(dgram);
 
                     // server-side outbound pipeline

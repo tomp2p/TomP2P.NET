@@ -107,23 +107,32 @@ namespace TomP2P.Rpc
             {
                 if (!taskResponse.IsFaulted)
                 {
-                    var response = taskResponse.Result;
-                    if (response != null)
+                    // TODO remove try/catch
+                    try
                     {
-                        var neighborSet = response.NeighborsSet(0);
-                        if (neighborSet != null)
+                        var response = taskResponse.Result;
+                        if (response != null)
                         {
-                            foreach (var neighbor in neighborSet.Neighbors)
+                            var neighborSet = response.NeighborsSet(0);
+                            if (neighborSet != null)
                             {
-                                lock (PeerBean.PeerStatusListeners)
+                                foreach (var neighbor in neighborSet.Neighbors)
                                 {
-                                    foreach (var listener in PeerBean.PeerStatusListeners)
+                                    lock (PeerBean.PeerStatusListeners)
                                     {
-                                        listener.PeerFound(neighbor, response.Sender, null);
+                                        foreach (var listener in PeerBean.PeerStatusListeners)
+                                        {
+                                            listener.PeerFound(neighbor, response.Sender, null);
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex);
+                        throw;
                     }
                 }
             });

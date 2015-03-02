@@ -120,6 +120,7 @@ namespace TomP2P.Tests
                     .SetPeerMap(peerMap)
                     .Start();
             }
+            Console.WriteLine("Created master peer: {0}.", peers[0].PeerId);
             for (int i = 1; i < nrOfPeers; i++)
             {
                 if (automaticTask != null)
@@ -145,6 +146,7 @@ namespace TomP2P.Tests
                         .SetPeerMap(peerMap)
                         .Start();
                 }
+                Console.WriteLine("Created slave peer {0}: {1}.", i, peers[i].PeerId);
             }
             return peers;
         }

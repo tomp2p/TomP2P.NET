@@ -55,7 +55,7 @@ namespace TomP2P.Connection.Windows
             RemoteEndPoint = udpRes.RemoteEndPoint;
 
             var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-            Logger.Debug("MyUdpClient received {0}.", dgram);
+            Logger.Debug("Received {0}.", dgram);
 
             // execute inbound pipeline
             session.Read(dgram);

@@ -40,8 +40,6 @@ namespace TomP2P.Connection.Windows
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    var session = Pipeline.GetNewSession();
-
                     // buffers
                     var recvBuffer = new byte[256];
                     var buf = AlternativeCompositeByteBuf.CompBuffer();
@@ -50,6 +48,7 @@ namespace TomP2P.Connection.Windows
                     // accept a client connection
                     var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
                     var stream = client.GetStream();
+                    var session = Pipeline.GetNewSession();
                     do
                     {
                         // TODO find zero-copy way

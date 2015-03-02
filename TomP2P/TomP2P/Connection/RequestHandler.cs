@@ -322,7 +322,7 @@ namespace TomP2P.Connection
             }
             else
             {
-                Logger.Debug("Exception caught, but handled properly: {0}", cause);
+                Logger.Debug("Exception caught, but handled properly: {0}.", cause.Message);
                 var pe = cause as PeerException;
                 if (pe != null)
                 {
