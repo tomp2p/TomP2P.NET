@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using TomP2P.Extensions;
@@ -106,7 +104,8 @@ namespace TomP2P.Tests.P2P
             try
             {
                 // setup
-                var peers = Utils2.CreateNodes(3, rnd, 4001);
+                // TODO test with >100 nodes
+                var peers = Utils2.CreateNodes(2, rnd, 4001);
                 master = peers[0];
 
                 // do testing

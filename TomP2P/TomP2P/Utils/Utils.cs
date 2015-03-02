@@ -220,9 +220,17 @@ namespace TomP2P.Utils
             return res;
         }
 
+        /// <summary>
+        /// Stores the differences of two collections in a result collection.
+        /// The result will contain items from collection1 without those from collection2.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="coll1"></param>
+        /// <param name="result"></param>
+        /// <param name="coll2"></param>
+        /// <returns></returns>
         public static ICollection<T> Difference<T>(ICollection<T> coll1, ICollection<T> result, ICollection<T> coll2)
         {
-            // TODO check if works
             // .NET-specific
             var diff = coll1.Except(coll2);
             result.ToList().AddRange(diff);

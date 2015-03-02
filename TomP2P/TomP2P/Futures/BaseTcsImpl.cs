@@ -18,7 +18,7 @@ namespace TomP2P.Futures
         /// </summary>
         protected BaseTcsImpl()
         {
-            Lock = this; // TODO lock on an object
+            Lock = new object();
         }
 
         protected bool CompletedAndNotify()
@@ -29,16 +29,13 @@ namespace TomP2P.Futures
                 // lock.notifyAll()
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         protected void NotifyListeners()
         {
             // in .NET, this just means to set the result
-            this.SetResult(null);
+            SetResult(null);
         }
     }
 }

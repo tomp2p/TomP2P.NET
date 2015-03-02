@@ -40,7 +40,7 @@ namespace TomP2P.P2P
 
         private void Run(object state)
         {
-            //Logger.Debug("Maintenance Thread {0}: Maintenance triggered...", Thread.CurrentThread.ManagedThreadId);
+            Logger.Debug("Maintenance Thread {0}: Maintenance triggered...", Thread.CurrentThread.ManagedThreadId);
             lock (_lock)
             {
                 // make sure we only have 5 pings in parallel
