@@ -205,23 +205,6 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
-        /// Equivalent to Java's Collection.iterator().next().
-        /// Returns the next element in the iteration.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public static T Next<T>(this IEnumerable<T> e)
-        {
-            var enumerable = e as IList<T> ?? e.ToList();
-            if (enumerable.GetEnumerator().MoveNext())
-            {
-                return enumerable.GetEnumerator().Current;
-            }
-            throw new InvalidOperationException("No such element.");
-        }
-
-        /// <summary>
         /// Extension to add multiple elements to a collection.
         /// </summary>
         /// <typeparam name="T"></typeparam>

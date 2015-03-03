@@ -529,8 +529,7 @@ namespace TomP2P.Peers
 
         public override string ToString()
         {
-            var sb = new StringBuilder("I'm node ");
-            sb.Append(Self).Append("\n");
+            var sb = new StringBuilder("I'm node ").Append(Self).Append("\n");
             for (int i = 0; i < Number160.Bits; i++)
             {
                 var tmp = PeerMapVerified[i];
@@ -538,11 +537,12 @@ namespace TomP2P.Peers
                 {
                     if (tmp.Count > 0)
                     {
-                        sb.Append("class:").Append(i).Append("->\n");
+                        sb.Append("class: ").Append(i).Append(" -> ");
                         foreach (var node in tmp.Values)
                         {
-                            sb.Append("node:").Append(node.PeerAddress).Append(",");
+                            sb.Append("node: ").Append(node.PeerAddress).Append(",  ");
                         }
+                        sb.Append("\n");
                     }
                 }
             }

@@ -41,7 +41,7 @@ namespace TomP2P.Connection.Windows.Netty
                     AddLast(handler.Key, handler.Value);
                 }
             }
-            Logger.Info("Instantiated with object identity: {0}. For channel {1}({2}).", RuntimeHelpers.GetHashCode(this), channel, RuntimeHelpers.GetHashCode(channel));
+            Logger.Info("Instantiated {0}.", this);
         }
 
         /// <summary>

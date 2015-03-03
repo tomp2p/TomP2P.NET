@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Extensions;
 using TomP2P.Message;
 using TomP2P.Peers;
 
@@ -42,7 +43,7 @@ namespace TomP2P.Rpc
         /// Requests close neighbors from the remote peer. The remote peer may indicate if the
         /// data is present on that peer. This is an RPC.
         /// </summary>
-        /// <param name="remotePeer">The remote peer t send this request to.</param>
+        /// <param name="remotePeer">The remote peer to send this request to.</param>
         /// <param name="searchValues">The values to search for in the storage.</param>
         /// <param name="type">The type of the neighbor request:
         /// - Request1 for Neighbors means check for Put (no digest) for tracker and storage.
@@ -107,38 +108,29 @@ namespace TomP2P.Rpc
             {
                 if (!taskResponse.IsFaulted)
                 {
-                    // TODO remove try/catch
-                    try
+                    var response = taskResponse.Result;
+                    if (response != null)
                     {
-                        var response = taskResponse.Result;
-                        if (response != null)
+                        var neighborSet = response.NeighborsSet(0);
+                        if (neighborSet != null)
                         {
-                            var neighborSet = response.NeighborsSet(0);
-                            if (neighborSet != null)
+                            foreach (var neighbor in neighborSet.Neighbors)
                             {
-                                foreach (var neighbor in neighborSet.Neighbors)
+                                lock (PeerBean.PeerStatusListeners)
                                 {
-                                    lock (PeerBean.PeerStatusListeners)
+                                    foreach (var listener in PeerBean.PeerStatusListeners)
                                     {
-                                        foreach (var listener in PeerBean.PeerStatusListeners)
-                                        {
-                                            listener.PeerFound(neighbor, response.Sender, null);
-                                        }
+                                        listener.PeerFound(neighbor, response.Sender, null);
                                     }
                                 }
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex);
-                        throw;
-                    }
                 }
             });
 
             var requestHandler = new RequestHandler(tcsResponse, PeerBean, ConnectionBean, configuration);
-            
+
             if (!configuration.IsForceTcp)
             {
                 requestHandler.SendUdpAsync(channelCreator);
@@ -183,7 +175,7 @@ namespace TomP2P.Rpc
             // create response message and set neighbors
             var responseMessage = CreateResponseMessage(requestMessage, Message.Message.MessageType.Ok);
 
-            Logger.Debug("Found the following neighbors: {0}.", neighbors);
+            Logger.Debug("Found the following neighbors: {0}.", Convenient.ToString(neighbors));
             var neighborSet = new NeighborSet(NeighborLimit, neighbors);
             responseMessage.SetNeighborSet(neighborSet);
 
@@ -244,18 +236,19 @@ namespace TomP2P.Rpc
                 else if (requestMessage.Type == Message.Message.MessageType.Request3)
                 {
                     DigestInfo digestInfo;
-				    if (PeerBean.DigestTracker == null) {
-					    // no tracker to search
-					    digestInfo = new DigestInfo();
-				    }
+                    if (PeerBean.DigestTracker == null)
+                    {
+                        // no tracker to search
+                        digestInfo = new DigestInfo();
+                    }
                     else
                     {
-					    digestInfo = PeerBean.DigestTracker.Digest(locationKey, domainKey, contentKey);
-					    if (digestInfo.Size == 0)
+                        digestInfo = PeerBean.DigestTracker.Digest(locationKey, domainKey, contentKey);
+                        if (digestInfo.Size == 0)
                         {
-						    Logger.Debug("No entry found on peer {0}.", requestMessage.Recipient);
-					    }
-				    }
+                            Logger.Debug("No entry found on peer {0}.", requestMessage.Recipient);
+                        }
+                    }
                     responseMessage.SetIntValue(digestInfo.Size);
                 }
                 else if (requestMessage.Type == Message.Message.MessageType.Request4)

@@ -28,12 +28,17 @@ namespace TomP2P.Extensions
         /// <returns></returns>
         public static string ToString<T>(IEnumerable<T> enumerable)
         {
-            return string.Join(",", enumerable.Select(i => i.ToString()));
+            return string.Join(", ", enumerable.Select(i => i.ToString()));
         }
 
-        public static string PrintByteArray(byte[] bytes)
+        /// <summary>
+        /// Represents a byte array in a human-readable form.
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string ToString(this byte[] bytes)
         {
-            var sb = new StringBuilder("new byte[] { ");
+            var sb = new StringBuilder("{ ");
             foreach (var b in bytes)
             {
                 sb.Append(b + ", ");

@@ -50,9 +50,8 @@ namespace TomP2P.Tests.Rpc
                     .Start();
                 var neighbors2 = new NeighborRpc(recv1.PeerBean, recv1.ConnectionBean);
 
-                // create channel creator
+                // ask sender for his neighbors
                 var cc = await recv1.ConnectionBean.Reservation.CreateAsync(1, 0);
-
                 var sv = new SearchValues(new Number160("0x1"), null);
                 var infConfig = Utils2.CreateInfiniteConfiguration();
                 var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.Message.MessageType.Request2, cc,
@@ -61,11 +60,13 @@ namespace TomP2P.Tests.Rpc
 
                 Assert.IsTrue(!tr.IsFaulted);
 
+                // check if receiver got the neighbors
                 var neighborSet = tr.Result.NeighborsSet(0);
                 Assert.IsTrue(neighborSet.Size == 33); // TODO why?
-                Assert.AreEqual(new Number160("0x1"), neighborSet.Neighbors.Next().PeerId);
-                Assert.AreEqual(PortTcp, neighborSet.Neighbors.Next().TcpPort);
-                Assert.AreEqual(PortUdp, neighborSet.Neighbors.Next().UdpPort);
+                var neighbors = neighborSet.Neighbors.ToList();
+                Assert.AreEqual(new Number160("0x1"), neighbors[0].PeerId);
+                Assert.AreEqual(PortTcp, neighbors[1].TcpPort);
+                Assert.AreEqual(PortUdp, neighbors[2].UdpPort);
             }
             finally
             {
