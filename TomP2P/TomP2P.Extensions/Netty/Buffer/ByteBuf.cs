@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace TomP2P.Extensions.Netty
+namespace TomP2P.Extensions.Netty.Buffer
 {
     /// <summary>
     /// Equivalent of Java Netty's ByteBuf.

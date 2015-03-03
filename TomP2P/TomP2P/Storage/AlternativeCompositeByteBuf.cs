@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
+using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Storage
 {
@@ -47,19 +48,6 @@ namespace TomP2P.Storage
             _direct = direct;
             AddComponent(buffers);
             // TODO leak needed? leak = leakDetector.open(this);
-        }
-
-        public void Deallocate()
-        {
-            if (_freed)
-            {
-                return;
-            }
-            _freed = true;
-            // TODO release needed?
-            _components.Clear();
-
-            // TODO leak close needed?
         }
 
         private Component Last()

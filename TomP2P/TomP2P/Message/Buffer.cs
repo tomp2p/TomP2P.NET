@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using TomP2P.Extensions.Netty;
+using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Message
 {

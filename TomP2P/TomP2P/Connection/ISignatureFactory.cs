@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
 using TomP2P.Extensions.Netty;
+using TomP2P.Extensions.Netty.Buffer;
 using TomP2P.Extensions.Workaround;
 using TomP2P.Message;
 

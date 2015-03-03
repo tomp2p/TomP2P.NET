@@ -5,6 +5,7 @@ using System.Text;
 using NLog;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
+using TomP2P.Extensions.Netty.Buffer;
 using TomP2P.Peers;
 using TomP2P.Storage;
 

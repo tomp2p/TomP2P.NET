@@ -7,6 +7,7 @@ using NLog;
 using TomP2P.Connection;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Extensions.Netty;
+using TomP2P.Extensions.Netty.Buffer;
 using TomP2P.Extensions.Workaround;
 using TomP2P.P2P;
 using TomP2P.Peers;

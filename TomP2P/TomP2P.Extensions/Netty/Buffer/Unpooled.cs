@@ -1,4 +1,4 @@
-﻿namespace TomP2P.Extensions.Netty
+﻿namespace TomP2P.Extensions.Netty.Buffer
 {
     public sealed class Unpooled
     {

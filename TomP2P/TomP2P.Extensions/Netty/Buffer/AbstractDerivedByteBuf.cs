@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace TomP2P.Extensions.Netty
+namespace TomP2P.Extensions.Netty.Buffer
 {
     public abstract class AbstractDerivedByteBuf : AbstractByteBuf
     {
