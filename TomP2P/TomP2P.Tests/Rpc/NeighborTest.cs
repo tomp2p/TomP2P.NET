@@ -201,5 +201,56 @@ namespace TomP2P.Tests.Rpc
                 }
             }
         }
+
+        [Test]
+        public async void TestNeighborFail()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x50"))
+                .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(2424, 2424))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x20"))
+                .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(8088, 8088))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+
+                var neighbors1 = new NeighborRpc(sender.PeerBean, sender.ConnectionBean);
+                var neighbors2 = new NeighborRpc(recv1.PeerBean, recv1.ConnectionBean);
+                var cc = await recv1.ConnectionBean.Reservation.CreateAsync(1, 0);
+
+                try
+                {
+                    var sv = new SearchValues(new Number160("0x30"), null);
+                    var infConfig = Utils2.CreateInfiniteConfiguration();
+                    await
+                        neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.Message.MessageType.Exception, cc,
+                            infConfig);
+                    Assert.Fail("ArgumentException should have been thrown.");
+                }
+                catch (ArgumentException)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+            }
+            finally
+            {
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
     }
 }
