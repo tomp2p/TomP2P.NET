@@ -52,6 +52,7 @@ namespace TomP2P.Connection.Windows
                     var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
                     var stream = client.GetStream();
                     var session = Pipeline.CreateNewServerSession();
+                    var pieceCount = 0;
                     do
                     {
                         // TODO find zero-copy way
@@ -63,9 +64,9 @@ namespace TomP2P.Connection.Windows
                         RemoteEndPoint = (IPEndPoint)client.Client.RemoteEndPoint;
 
                         var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
-                        Logger.Debug("Received {0}.", piece);
+                        Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece, Convenient.ToHumanReadable(nrBytes), Convenient.ToString(recvBuffer));
 
-                        // execute inbound pipeline
+                        // execute inbound pipeline, per piece
                         readRes = session.Read(piece);
                     } while (!IsClosed && stream.DataAvailable);
 
@@ -75,6 +76,7 @@ namespace TomP2P.Connection.Windows
 
                     // send back
                     await stream.WriteAsync(bytes, 0, bytes.Length, ct);
+                    Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
                     NotifyWriteCompleted();
 
                     Pipeline.ReleaseSession(session);

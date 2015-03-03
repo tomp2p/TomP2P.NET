@@ -181,7 +181,7 @@ namespace TomP2P.Tests
                 .SetPorts(new Ports(portTcp, portUdp));
         }
 
-        public static IConnectionConfiguration CreateInfiniteConfiguration()
+        public static DefaultConnectionConfiguration CreateInfiniteConfiguration()
         {
             return new DefaultConnectionConfiguration()
                 .SetConnectionTimeoutTcpMillis(Int32.MaxValue)

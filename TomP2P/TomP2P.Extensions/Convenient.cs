@@ -32,19 +32,47 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
-        /// Represents a byte array in a human-readable form.
+        /// Returns the content of the byte array as integers.
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
         public static string ToString(this byte[] bytes)
         {
-            var sb = new StringBuilder("{ ");
+            var sb = new StringBuilder("[ ");
             foreach (var b in bytes)
             {
                 sb.Append(b + ", ");
             }
-            sb.Append("}");
+            sb.Append("]");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns a human-readable byte size, e.g. "20 KB".
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string ToHumanReadable(this byte[] bytes)
+        {
+            return ToHumanReadable(bytes.Length);
+        }
+
+        /// <summary>
+        /// Returns a human-readable byte size, e.g. "20 KB".
+        /// </summary>
+        /// <param name="nrOfBytes">The number of bytes to be converted.</param>
+        /// <returns></returns>
+        public static string ToHumanReadable(int nrOfBytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB" };
+            int order = 0;
+            while (nrOfBytes >= 1024 && order + 1 < sizes.Length)
+            {
+                order++;
+                nrOfBytes = nrOfBytes / 1024;
+            }
+
+            return String.Format("{0:0.##} {1}", nrOfBytes, sizes[order]);
         }
 
         /// <summary>

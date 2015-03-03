@@ -39,8 +39,8 @@ namespace TomP2P.Connection.Windows
             var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
             Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
 
-            Logger.Debug("Sending bytes {0}.", Convenient.ToString(bytes));
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
+            Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
             NotifyWriteCompleted();
 
             Pipeline.ReleaseSession(session);
@@ -61,7 +61,7 @@ namespace TomP2P.Connection.Windows
             RemoteEndPoint = udpRes.RemoteEndPoint;
 
             var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-            Logger.Debug("Received {0}.", dgram);
+            Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));      
 
             // execute inbound pipeline
             session.Read(dgram);

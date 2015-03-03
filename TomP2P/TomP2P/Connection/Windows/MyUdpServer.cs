@@ -54,8 +54,7 @@ namespace TomP2P.Connection.Windows
                     RemoteEndPoint = udpRes.RemoteEndPoint;
 
                     var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-                    Logger.Debug("Received {0}.", dgram);
-                    Logger.Debug("Dgram bytes: {0}.", Convenient.ToString(udpRes.Buffer));
+                    Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
 
                     var session = Pipeline.CreateNewServerSession();
                     var readRes = session.Read(dgram);
@@ -66,6 +65,7 @@ namespace TomP2P.Connection.Windows
 
                     // return / send back
                     await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
+                    Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
                     NotifyWriteCompleted();
 
                     Pipeline.ReleaseSession(session);
