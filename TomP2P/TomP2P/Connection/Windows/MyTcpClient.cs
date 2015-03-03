@@ -33,10 +33,11 @@ namespace TomP2P.Connection.Windows
 
         public async Task SendMessageAsync(Message.Message message)
         {
-            var session = Pipeline.CreateNewServerSession();
-
             // execute outbound pipeline
+            var session = Pipeline.CreateNewServerSession();
             var writeRes = session.Write(message);
+            Pipeline.ReleaseSession(session);
+
             var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
             // finally, send bytes over the wire
@@ -48,20 +49,17 @@ namespace TomP2P.Connection.Windows
             Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
 
             NotifyWriteCompleted();
-
-            Pipeline.ReleaseSession(session);
         }
 
         public async Task ReceiveMessageAsync()
         {
-            var session = Pipeline.CreateNewServerSession();
-
             // receive bytes
             var bytesRecv = new byte[256];
 
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             var stream = _tcpClient.GetStream();
             var pieceCount = 0;
+            Pipeline.PipelineSession session = null;
             do
             {
                 // TODO find zero-copy way
@@ -75,7 +73,8 @@ namespace TomP2P.Connection.Windows
                 var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
                 Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece, Convenient.ToHumanReadable(nrBytes), Convenient.ToString(bytesRecv));
 
-                // execute inbound pipeline
+                // execute inbound pipeline, per piece (new session)
+                session = Pipeline.CreateNewServerSession();
                 session.Read(piece);
             } while (!IsClosed && stream.DataAvailable);
 

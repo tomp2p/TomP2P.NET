@@ -28,10 +28,12 @@ namespace TomP2P.Connection.Windows
 
         public async Task SendMessageAsync(Message.Message message)
         {
-            var session = Pipeline.CreateNewServerSession();
-
+            // TODO check necessity of new session (handlers set in sender) (2x)
             // execute outbound pipeline
+            var session = Pipeline.CreateNewServerSession();
             var writeRes = session.Write(message);
+            Pipeline.ReleaseSession(session);
+
             var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
             // finally, send bytes over the wire
@@ -42,15 +44,11 @@ namespace TomP2P.Connection.Windows
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
             Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
             NotifyWriteCompleted();
-
-            Pipeline.ReleaseSession(session);
         }
 
         public async Task ReceiveMessageAsync()
         {
             // TODO check necessity of new session (handlers set in sender) (2x)
-            var session = Pipeline.CreateNewServerSession();
-
             // receive bytes, create a datagram wrapper
             var udpRes = await _udpClient.ReceiveAsync();
 
@@ -64,8 +62,8 @@ namespace TomP2P.Connection.Windows
             Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));      
 
             // execute inbound pipeline
+            var session = Pipeline.CreateNewServerSession();
             session.Read(dgram);
-
             Pipeline.ReleaseSession(session);
         }
 
