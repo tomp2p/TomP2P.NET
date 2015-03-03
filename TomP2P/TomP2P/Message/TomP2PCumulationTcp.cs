@@ -41,7 +41,7 @@ namespace TomP2P.Message
             var buf = piece.Content;
             var sender = piece.Sender;
             var recipient = piece.Recipient;
-
+            Logger.Debug("{0}: Cumulating TCP stream piece.", this);
             try
             {
                 if (_cumulation == null)

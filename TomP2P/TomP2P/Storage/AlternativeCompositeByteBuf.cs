@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using TomP2P.Extensions;
-using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Storage
@@ -20,7 +19,7 @@ namespace TomP2P.Storage
             public readonly ByteBuf Buf;
             public int Offset;
 
-            public Component(ByteBuf buf)
+            internal Component(ByteBuf buf)
             {
                 Buf = buf;
             }
@@ -50,7 +49,7 @@ namespace TomP2P.Storage
             // TODO leak needed? leak = leakDetector.open(this);
         }
 
-        public override void Clear()
+        /*public override void Clear()
         {
             SetReaderIndex(0);
 
@@ -59,7 +58,7 @@ namespace TomP2P.Storage
             {
                 SetComponentWriterIndex(0);
             }
-        }
+        }*/
 
         private Component Last()
         {

@@ -40,7 +40,7 @@ namespace TomP2P.Extensions.Netty.Buffer
         /// <summary>
         /// Sets the ReaderIndex and WriterIndex of this buffer to 0.
         /// </summary>
-        public abstract void Clear();
+        //public abstract void Clear();
 
         /// <summary>
         /// 

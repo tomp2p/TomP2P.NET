@@ -96,6 +96,8 @@ namespace TomP2P.Message
 
                 bool donePayload = DecodePayload(buffer);
                 DecodeSignature(buffer, readerBefore, donePayload);
+
+                // TODO discardSomeReadBytes -> performance improvement
                 return donePayload;
             }
             catch (Exception ex)

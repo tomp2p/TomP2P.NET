@@ -56,15 +56,15 @@ namespace TomP2P.Connection.Windows
             // receive bytes
             var bytesRecv = new byte[256];
 
-            var buf = AlternativeCompositeByteBuf.CompBuffer();
             var stream = _tcpClient.GetStream();
             var pieceCount = 0;
             var session = Pipeline.CreateNewServerSession();
             do
             {
-                // TODO find zero-copy way
+                // TODO find zero-copy way, use same buffer
                 var nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length);
-                buf.Clear();
+                var buf = AlternativeCompositeByteBuf.CompBuffer();
+                //buf.Clear();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
                 LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
