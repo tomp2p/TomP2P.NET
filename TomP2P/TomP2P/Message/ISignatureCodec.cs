@@ -1,5 +1,4 @@
-﻿using TomP2P.Extensions.Netty;
-using TomP2P.Extensions.Netty.Buffer;
+﻿using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Message
 {

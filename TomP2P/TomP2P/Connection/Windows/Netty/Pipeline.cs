@@ -53,6 +53,7 @@ namespace TomP2P.Connection.Windows.Netty
         {
             // TODO don't instantiate a new session, store and return per-channel
             // TODO important: client send/receive should not in-activate channel in between
+            // Note: as soon as an old session is re-used, its internal state must be reset
             return new PipelineSession(this, InboundHandlers, OutboundHandlers);
         }
 
@@ -338,6 +339,11 @@ namespace TomP2P.Connection.Windows.Netty
                 {
                     _writeRes = _msgW;
                 }
+                if (_caughtException != null)
+                {
+                    Logger.Error("Exception in outbound pipeline: {0}", _caughtException.ToString());
+                    throw _caughtException;
+                }
                 return _writeRes;
             }
 
@@ -372,6 +378,11 @@ namespace TomP2P.Connection.Windows.Netty
                 if (_readRes == null)
                 {
                     _readRes = _msgR;
+                }
+                if (_caughtException != null)
+                {
+                    Logger.Error("Exception in inbound pipeline: {0}", _caughtException.ToString());
+                    throw _caughtException;
                 }
                 return _readRes;
             }

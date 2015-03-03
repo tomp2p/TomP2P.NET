@@ -50,6 +50,17 @@ namespace TomP2P.Storage
             // TODO leak needed? leak = leakDetector.open(this);
         }
 
+        public override void Clear()
+        {
+            SetReaderIndex(0);
+
+            // TODO remove quickfix
+            if (_writerIndex > 0)
+            {
+                SetComponentWriterIndex(0);
+            }
+        }
+
         private Component Last()
         {
             if (_components.Count == 0)

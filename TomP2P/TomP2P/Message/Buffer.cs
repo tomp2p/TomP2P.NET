@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using TomP2P.Extensions.Netty;
 using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Message
@@ -96,14 +95,14 @@ namespace TomP2P.Message
             get
             {
                 var remaining = Length - AlreadyRead;
-                var available = (int) BackingBuffer.ReadableBytes;
+                var available = BackingBuffer.ReadableBytes;
                 return Math.Min(remaining, available);
             }
         }
 
         public bool IsComplete
         {
-            get { return Length == (int) BackingBuffer.ReadableBytes; }
+            get { return Length == BackingBuffer.ReadableBytes; }
         }
 
         public bool IsDone

@@ -38,6 +38,11 @@ namespace TomP2P.Extensions.Netty.Buffer
         public abstract int WriterIndex { get; }
 
         /// <summary>
+        /// Sets the ReaderIndex and WriterIndex of this buffer to 0.
+        /// </summary>
+        public abstract void Clear();
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="readerIndex"></param>

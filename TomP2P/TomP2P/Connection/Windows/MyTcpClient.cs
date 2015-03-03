@@ -66,7 +66,7 @@ namespace TomP2P.Connection.Windows
             {
                 // TODO find zero-copy way
                 var nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length);
-                buf.Deallocate();
+                buf.Clear();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
                 LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;

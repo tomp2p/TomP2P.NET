@@ -12,6 +12,11 @@ namespace TomP2P.Extensions.Netty.Buffer
             // alloc not used
         }
 
+        public override void Clear()
+        {
+            // nothing to do
+        }
+
         public override int ReadableBytes
         {
             get { return 0; }
