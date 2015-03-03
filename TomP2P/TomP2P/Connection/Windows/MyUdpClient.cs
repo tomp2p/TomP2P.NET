@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -32,7 +31,6 @@ namespace TomP2P.Connection.Windows
             // execute outbound pipeline
             var session = Pipeline.CreateNewServerSession();
             var writeRes = session.Write(message);
-            Pipeline.ReleaseSession(session);
 
             var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
@@ -44,6 +42,8 @@ namespace TomP2P.Connection.Windows
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
             Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
             NotifyWriteCompleted();
+
+            Pipeline.ReleaseSession(session);
         }
 
         public async Task ReceiveMessageAsync()

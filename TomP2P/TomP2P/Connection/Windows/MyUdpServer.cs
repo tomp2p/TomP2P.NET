@@ -62,12 +62,13 @@ namespace TomP2P.Connection.Windows
                     // server-side outbound pipeline
                     var writeRes = session.Write(readRes);
                     var bytes = ConnectionHelper.ExtractBytes(writeRes);
-                    Pipeline.ReleaseSession(session);
 
                     // return / send back
                     await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
                     Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
                     NotifyWriteCompleted();
+
+                    Pipeline.ReleaseSession(session);
                 }
             }
             catch (OperationCanceledException)

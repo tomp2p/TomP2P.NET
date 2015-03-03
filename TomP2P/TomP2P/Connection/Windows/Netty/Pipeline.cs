@@ -44,7 +44,7 @@ namespace TomP2P.Connection.Windows.Netty
             Logger.Info("Instantiated {0}.", this);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Creates a new <see cref="PipelineSession"/> for the client-side pipeline.
         /// All handlers are re-used.
         /// </summary>
@@ -55,11 +55,12 @@ namespace TomP2P.Connection.Windows.Netty
             // TODO important: client send/receive should not in-activate channel in between
             // Note: as soon as an old session is re-used, its internal state must be reset
             return new PipelineSession(this, InboundHandlers, OutboundHandlers);
-        }
+        }*/
 
         /// <summary>
         /// Creates a new <see cref="PipelineSession"/> for the server-side pipeline.
         /// Sharable handlers are re-used, non-shareable handlers are cloned.
+        /// All handlers are notified about activity.
         /// </summary>
         /// <returns></returns>
         internal PipelineSession CreateNewServerSession()
@@ -77,10 +78,14 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 item.ChannelActive(session.ChannelHandlerContext);
             }
-
             return session;
         }
 
+        /// <summary>
+        /// Releases and resets a session.
+        /// All handlers are notified about inactivity.
+        /// </summary>
+        /// <param name="session"></param>
         internal void ReleaseSession(PipelineSession session)
         {
             // inactivate channel
@@ -90,6 +95,8 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 item.ChannelInactive(session.ChannelHandlerContext);
             }
+            
+            session.Reset();
         }
 
         /// <summary>
@@ -311,6 +318,18 @@ namespace TomP2P.Connection.Windows.Netty
                 InboundHandlers = new LinkedList<IInboundHandler>(inboundHandlers);
                 OutboundHandlers = new LinkedList<IOutboundHandler>(outboundHandlers);
                 _ctx = new ChannelHandlerContext(this);
+            }
+
+            public void Reset()
+            {
+                _currentOutbound = null;
+                _currentInbound = null;
+                _msgW = null;
+                _msgR = null;
+                _writeRes = null;
+                _readRes = null;
+                _caughtException = null;
+                _event = null;
             }
 
             public object Write(object msg)

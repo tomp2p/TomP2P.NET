@@ -36,7 +36,6 @@ namespace TomP2P.Connection.Windows
             // execute outbound pipeline
             var session = Pipeline.CreateNewServerSession();
             var writeRes = session.Write(message);
-            Pipeline.ReleaseSession(session);
 
             var bytes = ConnectionHelper.ExtractBytes(writeRes);
 
@@ -49,6 +48,7 @@ namespace TomP2P.Connection.Windows
             Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
 
             NotifyWriteCompleted();
+            Pipeline.ReleaseSession(session);
         }
 
         public async Task ReceiveMessageAsync()
@@ -59,7 +59,7 @@ namespace TomP2P.Connection.Windows
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             var stream = _tcpClient.GetStream();
             var pieceCount = 0;
-            Pipeline.PipelineSession session = null;
+            var session = Pipeline.CreateNewServerSession();
             do
             {
                 // TODO find zero-copy way
@@ -73,9 +73,9 @@ namespace TomP2P.Connection.Windows
                 var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
                 Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece, Convenient.ToHumanReadable(nrBytes), Convenient.ToString(bytesRecv));
 
-                // execute inbound pipeline, per piece (new session)
-                session = Pipeline.CreateNewServerSession();
+                // execute inbound pipeline, per piece (reset session!)
                 session.Read(piece);
+                session.Reset();
             } while (!IsClosed && stream.DataAvailable);
 
             Pipeline.ReleaseSession(session);
