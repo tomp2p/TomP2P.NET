@@ -33,7 +33,7 @@ namespace TomP2P.Connection.Windows
 
         public async Task SendMessageAsync(Message.Message message)
         {
-            var session = Pipeline.GetNewSession();
+            var session = Pipeline.CreateNewServerSession();
 
             // execute outbound pipeline
             var writeRes = session.Write(message);
@@ -52,7 +52,7 @@ namespace TomP2P.Connection.Windows
 
         public async Task ReceiveMessageAsync()
         {
-            var session = Pipeline.GetNewSession();
+            var session = Pipeline.CreateNewServerSession();
 
             // receive bytes
             var bytesRecv = new byte[256];

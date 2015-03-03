@@ -57,7 +57,7 @@ namespace TomP2P.Connection.Windows
                     Logger.Debug("Received {0}.", dgram);
                     Logger.Debug("Dgram bytes: {0}.", Convenient.PrintByteArray(udpRes.Buffer));
 
-                    var session = Pipeline.GetNewSession();
+                    var session = Pipeline.CreateNewServerSession();
                     var readRes = session.Read(dgram);
 
                     // server-side outbound pipeline

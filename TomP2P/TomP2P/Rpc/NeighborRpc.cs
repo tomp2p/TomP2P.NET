@@ -52,7 +52,7 @@ namespace TomP2P.Rpc
         /// <param name="channelCreator">The channel creator that creates connections.</param>
         /// <param name="configuration">The client-side connection configuration.</param>
         /// <returns>The future response message.</returns>
-        public Task<Message.Message> CloseNeighbors(PeerAddress remotePeer, SearchValues searchValues, Message.Message.MessageType type,
+        public Task<Message.Message> CloseNeighborsAsync(PeerAddress remotePeer, SearchValues searchValues, Message.Message.MessageType type,
             ChannelCreator channelCreator, IConnectionConfiguration configuration)
         {
             var tcsResponse = CloseNeighborsTcs(remotePeer, searchValues, type, channelCreator, configuration);

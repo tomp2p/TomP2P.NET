@@ -51,7 +51,7 @@ namespace TomP2P.Connection.Windows
                     // accept a client connection
                     var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
                     var stream = client.GetStream();
-                    var session = Pipeline.GetNewSession();
+                    var session = Pipeline.CreateNewServerSession();
                     do
                     {
                         // TODO find zero-copy way

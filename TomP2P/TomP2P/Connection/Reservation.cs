@@ -60,7 +60,7 @@ namespace TomP2P.Connection
         /// <param name="requestConfiguration">Contains the number of requests for P2P operations in parallel.</param>
         /// <param name="builder">The builder that tells us if we should TCP or UDP.</param>
         /// <returns>The future channel creator.</returns>
-        public Task<ChannelCreator> CreateAsyc(RoutingConfiguration routingConfiguration,
+        public Task<ChannelCreator> CreateAsync(RoutingConfiguration routingConfiguration,
             IRequestConfiguration requestConfiguration, DefaultConnectionConfiguration builder)
         {
             if (routingConfiguration == null && requestConfiguration == null)

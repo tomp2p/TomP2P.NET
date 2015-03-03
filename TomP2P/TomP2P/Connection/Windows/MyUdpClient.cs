@@ -28,7 +28,7 @@ namespace TomP2P.Connection.Windows
 
         public async Task SendMessageAsync(Message.Message message)
         {
-            var session = Pipeline.GetNewSession();
+            var session = Pipeline.CreateNewServerSession();
 
             // execute outbound pipeline
             var writeRes = session.Write(message);
@@ -49,7 +49,7 @@ namespace TomP2P.Connection.Windows
         public async Task ReceiveMessageAsync()
         {
             // TODO check necessity of new session (handlers set in sender) (2x)
-            var session = Pipeline.GetNewSession();
+            var session = Pipeline.CreateNewServerSession();
 
             // receive bytes, create a datagram wrapper
             var udpRes = await _udpClient.ReceiveAsync();

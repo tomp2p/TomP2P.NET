@@ -44,7 +44,24 @@ namespace TomP2P.Connection.Windows.Netty
             Logger.Info("Instantiated with object identity: {0}. For channel {1}({2}).", RuntimeHelpers.GetHashCode(this), channel, RuntimeHelpers.GetHashCode(channel));
         }
 
-        internal PipelineSession GetNewSession()
+        /// <summary>
+        /// Creates a new <see cref="PipelineSession"/> for the client-side pipeline.
+        /// All handlers are re-used.
+        /// </summary>
+        /// <returns></returns>
+        internal PipelineSession CreateClientSession()
+        {
+            // TODO don't instantiate a new session, store and return per-channel
+            // TODO important: client send/receive should not in-activate channel in between
+            return new PipelineSession(this, InboundHandlers, OutboundHandlers);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="PipelineSession"/> for the server-side pipeline.
+        /// Sharable handlers are re-used, non-shareable handlers are cloned.
+        /// </summary>
+        /// <returns></returns>
+        internal PipelineSession CreateNewServerSession()
         {
             Logger.Debug("Creating session for channel {0}.", Channel);
             // for each non-sharable handler, a new instance has to be created

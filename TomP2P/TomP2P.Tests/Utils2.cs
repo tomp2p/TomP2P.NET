@@ -44,6 +44,23 @@ namespace TomP2P.Tests
             return message;
         }
 
+        public static PeerAddress[] CreateDummyAddresses(int size, int portTcp, int portUdp)
+        {
+            var pa = new PeerAddress[size];
+            for (int i = 0; i < size; i++)
+            {
+                pa[i] = CreateAddress(i + 1, portTcp, portUdp);
+            }
+            return pa;
+        }
+
+        public static PeerAddress CreateAddress(int iid, int portTcp, int portUdp)
+        {
+            var id = new Number160(iid);
+            var address = IPAddress.Parse("127.0.0.1");
+            return new PeerAddress(id, address, portTcp, portUdp);
+        }
+
         public static PeerAddress CreateAddress(Number160 id)
         {
             return CreateAddress(id, "127.0.0.1", 8005, 8006, false, false);
@@ -162,6 +179,14 @@ namespace TomP2P.Tests
                 .SetIdleUdpSeconds(0)
                 .SetConnectionTimeoutTcpMillis(0)
                 .SetPorts(new Ports(portTcp, portUdp));
+        }
+
+        public static IConnectionConfiguration CreateInfiniteConfiguration()
+        {
+            return new DefaultConnectionConfiguration()
+                .SetConnectionTimeoutTcpMillis(Int32.MaxValue)
+                .SetIdleUdpSeconds(Int32.MaxValue)
+                .SetIdleTcpSeconds(Int32.MaxValue);
         }
 
         /// <summary>
