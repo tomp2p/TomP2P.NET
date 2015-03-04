@@ -31,14 +31,9 @@ namespace TomP2P.Connection.Windows.Netty
         bool IsTcp { get; }
 
         /// <summary>
-        /// Returns true, if the channel may get active later.
+        /// Indicates whether this channel is open and may send or receive data.
         /// </summary>
         bool IsOpen { get; }
-        
-        /// <summary>
-        /// Returns true, if the channel is active and so connected.
-        /// </summary>
-        bool IsActive { get; }
     }
 
     /// <summary>

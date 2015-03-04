@@ -3,6 +3,8 @@ namespace TomP2P.Connection.Windows.Netty
 {
     public abstract class BaseChannelHandler : IChannelHandler
     {
+        private volatile bool _isActivated;
+
         public virtual void ExceptionCaught(ChannelHandlerContext ctx, Exception cause)
         {
             // do nothing by default
@@ -11,14 +13,12 @@ namespace TomP2P.Connection.Windows.Netty
 
         public virtual void ChannelActive(ChannelHandlerContext ctx)
         {
-            // do nothing by default
-            // can be overridden
+            _isActivated = true;
         }
 
         public virtual void ChannelInactive(ChannelHandlerContext ctx)
         {
-            // do nothing by default
-            // can be overridden
+            _isActivated = false;
         }
 
         public virtual void HandlerAdded(ChannelHandlerContext ctx)
@@ -34,5 +34,10 @@ namespace TomP2P.Connection.Windows.Netty
         }
 
         public abstract IChannelHandler CreateNewInstance();
+
+        public bool IsActivated
+        {
+            get { return _isActivated; }
+        }
     }
 }

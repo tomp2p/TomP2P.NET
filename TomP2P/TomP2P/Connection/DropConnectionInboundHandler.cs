@@ -20,6 +20,7 @@ namespace TomP2P.Connection
 
         public override void ChannelActive(ChannelHandlerContext ctx)
         {
+            base.ChannelActive(ctx);
             int current;
             if ((current = _counter.IncrementAndGet()) > _limit)
             {

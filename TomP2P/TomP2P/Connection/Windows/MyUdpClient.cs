@@ -68,6 +68,7 @@ namespace TomP2P.Connection.Windows
 
         protected override void DoClose()
         {
+            base.DoClose();
             _udpClient.Close();
         }
 

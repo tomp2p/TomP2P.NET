@@ -7,7 +7,7 @@ using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Connection
 {
-    public class IdleStateHandlerTomP2P : BaseChannelHandler, IDuplexHandler
+    public class IdleStateHandlerTomP2P : BaseDuplexHandler
     {
         public int AllIdleTimeMillis { get; private set; }
 
@@ -50,30 +50,32 @@ namespace TomP2P.Connection
             {
                 Initialize(ctx);
             }
-        }*/
+        }
 
-        /*public override void HandlerRemoved(ChannelHandlerContext ctx)
+        public override void HandlerRemoved(ChannelHandlerContext ctx)
         {
             Destroy();
         }*/
 
         public override void ChannelActive(ChannelHandlerContext ctx)
         {
+            base.ChannelActive(ctx);
             Initialize(ctx);
         }
 
         public override void ChannelInactive(ChannelHandlerContext ctx)
         {
+            base.ChannelInactive(ctx);
             Destroy();
         }
 
-        public void Read(ChannelHandlerContext ctx, object msg)
+        public override void Read(ChannelHandlerContext ctx, object msg)
         {
             _lastReadTime.Set(Convenient.CurrentTimeMillis());
             ctx.FireRead(msg);
         }
 
-        public void Write(ChannelHandlerContext ctx, object msg)
+        public override void Write(ChannelHandlerContext ctx, object msg)
         {
             ctx.Channel.WriteCompleted += channel => _lastWriteTime.Set(Convenient.CurrentTimeMillis());
             //ctx.FireWrite(msg); // TODO needed?
@@ -152,11 +154,6 @@ namespace TomP2P.Connection
             {
                 _executor.Shutdown();
             }
-        }
-
-        public void UserEventTriggered(ChannelHandlerContext ctx, object evt)
-        {
-            // nothing to do here
         }
 
         public override IChannelHandler CreateNewInstance()

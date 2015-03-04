@@ -8,6 +8,8 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public interface IChannelHandler
     {
+        bool IsActivated { get; }
+
         void ExceptionCaught(ChannelHandlerContext ctx, Exception cause);
 
         /// <summary>

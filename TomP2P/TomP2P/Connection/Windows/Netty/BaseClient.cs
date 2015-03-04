@@ -23,7 +23,7 @@ namespace TomP2P.Connection.Windows.Netty
                 Session.Reset();
                 if (Session.IsTimedOut)
                 {
-                    CloseAndInactivate();
+                    Close();
                     return;
                 }
 
@@ -36,7 +36,7 @@ namespace TomP2P.Connection.Windows.Netty
             }
             else
             {
-                CloseAndInactivate();
+                Close();
             }
         }
 
@@ -47,12 +47,11 @@ namespace TomP2P.Connection.Windows.Netty
                 // receive bytes
                 await DoReceiveMessageAsync();
             }
-            CloseAndInactivate();
+            Close();
         }
 
-        private void CloseAndInactivate()
+        protected override void DoClose()
         {
-            Close();
             Session.TriggerInactive();
         }
 

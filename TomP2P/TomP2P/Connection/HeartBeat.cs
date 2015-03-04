@@ -46,19 +46,6 @@ namespace TomP2P.Connection
             _pingBuilderFactory = pingBuilderFactory;
         }
 
-
-        public override void Read(ChannelHandlerContext ctx, object msg)
-        {
-            _lastReadTime.Set(Convenient.CurrentTimeMillis());
-            ctx.FireRead(msg);
-        }
-
-        public override void Write(ChannelHandlerContext ctx, object msg)
-        {
-            ctx.Channel.WriteCompleted += channel => _lastWriteTime.Set(Convenient.CurrentTimeMillis());
-            //ctx.FireWrite(msg); // TODO needed?
-        }
-
         public PeerConnection PeerConnection
         {
             get { return _peerConnection; }
@@ -70,29 +57,41 @@ namespace TomP2P.Connection
             return this;
         }
 
-        public override void HandlerAdded(ChannelHandlerContext ctx)
+        /*public override void HandlerAdded(ChannelHandlerContext ctx)
         {
             if (ctx.Channel.IsActive)
             {
                 Initialize(ctx);
             }
         }
-
-        public override void ChannelActive(ChannelHandlerContext ctx)
-        {
-            // invoked when a pipeline is attached to a channel
-            Initialize(ctx);
-        }
-
+        
         public override void HandlerRemoved(ChannelHandlerContext ctx)
         {
             Destroy();
+        }*/
+        
+        public override void ChannelActive(ChannelHandlerContext ctx)
+        {
+            base.ChannelActive(ctx);
+            Initialize(ctx);
         }
 
         public override void ChannelInactive(ChannelHandlerContext ctx)
         {
-            // invoked when a socket/channel is closed
+            base.ChannelInactive(ctx);
             Destroy();
+        }
+
+        public override void Read(ChannelHandlerContext ctx, object msg)
+        {
+            _lastReadTime.Set(Convenient.CurrentTimeMillis());
+            ctx.FireRead(msg);
+        }
+
+        public override void Write(ChannelHandlerContext ctx, object msg)
+        {
+            ctx.Channel.WriteCompleted += channel => _lastWriteTime.Set(Convenient.CurrentTimeMillis());
+            //ctx.FireWrite(msg); // TODO needed?
         }
 
         private void Initialize(ChannelHandlerContext ctx)

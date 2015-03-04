@@ -206,6 +206,7 @@ namespace TomP2P.Connection
         /// <param name="responseMessage">The response message to send.</param>
         internal void Respond(ChannelHandlerContext ctx, Message.Message responseMessage)
         {
+            // TODO if/else can be tied together
             if (ctx.Channel is IUdpChannel)
             {
                 // Check, if channel is still open. If not, then do not send anything
@@ -223,7 +224,7 @@ namespace TomP2P.Connection
                 // Check, if channel is still open. If not, then do not send anything
                 // because this will cause an exception that will be logged.
                 var channel = ctx.Channel as ITcpChannel;
-                if (!channel.IsActive)
+                if (!channel.IsOpen)
                 {
                     Logger.Debug("Channel TCP is not open. Do not reply {0}.", responseMessage);
                     return;

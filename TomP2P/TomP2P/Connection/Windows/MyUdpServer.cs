@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Eventing.Reader;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -38,24 +39,26 @@ namespace TomP2P.Connection.Windows
 
         public override async Task ServiceLoopAsync(CancellationToken ct)
         {
+            PipelineSession session = null;
             try
             {
                 while (!ct.IsCancellationRequested)
                 {
                     // receive request from client
                     UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
-                    var session = Pipeline.CreateNewServerSession(this);
+                    session = Pipeline.CreateNewServerSession(this);
                     session.TriggerActive();
 
                     // process content
                     var buf = AlternativeCompositeByteBuf.CompBuffer();
                     buf.WriteBytes(udpRes.Buffer.ToSByteArray());
 
-                    LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
+                    LocalEndPoint = (IPEndPoint) Socket.LocalEndPoint;
                     RemoteEndPoint = udpRes.RemoteEndPoint;
 
                     var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-                    Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
+                    Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length),
+                        Convenient.ToString(udpRes.Buffer));
 
                     // execute inbound pipeline
                     var readRes = session.Read(dgram); // resets timeout
@@ -77,7 +80,8 @@ namespace TomP2P.Connection.Windows
                     var bytes = ConnectionHelper.ExtractBytes(writeRes);
                     await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
                     NotifyWriteCompleted(); // resets timeout
-                    Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
+                    Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length),
+                        Convenient.ToString(udpRes.Buffer));
 
                     session.TriggerInactive();
                 }
@@ -85,6 +89,13 @@ namespace TomP2P.Connection.Windows
             catch (OperationCanceledException)
             {
                 // the server has been stopped -> stop service loop
+            }
+            finally
+            {
+                if (session != null)
+                {
+                    session.TriggerInactive();
+                }
             }
         }
 

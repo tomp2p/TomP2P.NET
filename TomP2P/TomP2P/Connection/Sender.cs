@@ -195,7 +195,7 @@ namespace TomP2P.Connection
             {
                 message.SetPeerSocketAddresses(message.Sender.PeerSocketAddresses);
             }
-            if (peerConnection != null && peerConnection.Channel != null && peerConnection.Channel.IsActive)
+            if (peerConnection != null && peerConnection.Channel != null && peerConnection.Channel.IsOpen)
             {
                 var channel = SendTcpPeerConnection(peerConnection, handler, channelCreator, tcsResponse);
                 await AfterConnectAsync(tcsResponse, message, channel, isFireAndForget);
