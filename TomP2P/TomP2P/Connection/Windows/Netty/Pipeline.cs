@@ -49,12 +49,12 @@ namespace TomP2P.Connection.Windows.Netty
         /// All handlers are re-used.
         /// </summary>
         /// <returns></returns>
-        internal PipelineSession CreateClientSession()
+        internal PipelineSession CreateClientSession(IClientChannel clientChannel)
         {
             // TODO don't instantiate a new session, store and return per-channel
             // TODO important: client send/receive should not in-activate channel in between
             // Note: as soon as an old session is re-used, its internal state must be reset
-            return new PipelineSession(this, InboundHandlers, OutboundHandlers);
+            return new PipelineSession(clientChannel, this, InboundHandlers, OutboundHandlers);
         }
 
         /// <summary>
@@ -63,14 +63,14 @@ namespace TomP2P.Connection.Windows.Netty
         /// All handlers are notified about activity.
         /// </summary>
         /// <returns></returns>
-        internal PipelineSession CreateNewServerSession()
+        internal PipelineSession CreateNewServerSession(IServerChannel serverChannel)
         {
             //Logger.Debug("Creating session for channel {0}.", Channel);
             // for each non-sharable handler, a new instance has to be created
             var newInbounds = CreateNewInstances(InboundHandlers);
             var newOutbounds = CreateNewInstances(OutboundHandlers);
 
-            return new PipelineSession(this, newInbounds.Cast<IInboundHandler>(), newOutbounds.Cast<IOutboundHandler>());
+            return new PipelineSession(serverChannel, this, newInbounds.Cast<IInboundHandler>(), newOutbounds.Cast<IOutboundHandler>());
         }
 
         /// <summary>
@@ -274,6 +274,7 @@ namespace TomP2P.Connection.Windows.Netty
             private volatile bool _isTimedOut;
             public bool IsTimedOut { get { return _isTimedOut; } }
 
+            private readonly IChannel _channel;
             private readonly Pipeline _pipeline;
             public LinkedList<IInboundHandler> InboundHandlers { get; private set; }
             public LinkedList<IOutboundHandler> OutboundHandlers { get; private set; }
@@ -289,13 +290,14 @@ namespace TomP2P.Connection.Windows.Netty
             private Exception _caughtException;
             private object _event;
 
-            public PipelineSession(Pipeline pipeline, IEnumerable<IInboundHandler> inboundHandlers,
+            public PipelineSession(IChannel channel, Pipeline pipeline, IEnumerable<IInboundHandler> inboundHandlers,
                 IEnumerable<IOutboundHandler> outboundHandlers)
             {
+                _channel = channel;
                 _pipeline = pipeline;
                 InboundHandlers = new LinkedList<IInboundHandler>(inboundHandlers);
                 OutboundHandlers = new LinkedList<IOutboundHandler>(outboundHandlers);
-                _ctx = new ChannelHandlerContext(this);
+                _ctx = new ChannelHandlerContext(channel, this);
             }
 
             public void Reset()
@@ -470,14 +472,14 @@ namespace TomP2P.Connection.Windows.Netty
                 get { return _pipeline; }
             }
 
+            public IChannel Channel
+            {
+                get { return _channel; }
+            }
+
             public ChannelHandlerContext ChannelHandlerContext
             {
                 get { return _ctx; }
-            }
-
-            internal void SetIsTimedout()
-            {
-                throw new NotImplementedException();
             }
         }
     }

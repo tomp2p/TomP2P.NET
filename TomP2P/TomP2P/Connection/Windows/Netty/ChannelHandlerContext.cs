@@ -12,14 +12,17 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public class ChannelHandlerContext : DefaultAttributeMap
     {
+        private readonly IChannel _channel;
         private readonly Pipeline.PipelineSession _session;
 
         /// <summary>
         /// Creates a context object for a specific channel and its pipeline.
         /// </summary>
+        /// <param name="channel"></param>
         /// <param name="session"></param>
-        public ChannelHandlerContext(Pipeline.PipelineSession session)
+        public ChannelHandlerContext(IChannel channel, Pipeline.PipelineSession session)
         {
+            _channel = channel;
             _session = session;
         }
 
@@ -63,23 +66,24 @@ namespace TomP2P.Connection.Windows.Netty
 
         public void Close()
         {
-            Channel.Close();
+            _channel.Close();
         }
 
         public IChannel Channel
         {
-            get { return _session.Pipeline.Channel; }
+            get { return _channel; }
         }
 
         internal void TriggerTimeout()
         {
+            _session.SetIsTimedout();
+            
             // client sockets must close
             // server sockets must close the service loop session
-            if (Channel is IClientChannel)
+            if (_channel is IClientChannel)
             {
                 Close();
             }
-            _session.SetIsTimedout();
         }
     }
 }
