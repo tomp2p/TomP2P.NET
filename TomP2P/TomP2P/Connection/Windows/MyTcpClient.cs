@@ -10,7 +10,7 @@ using TomP2P.Storage;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyTcpClient : BaseChannel, ITcpClientChannel
+    public class MyTcpClient : BaseClient, ITcpClientChannel
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -31,40 +31,37 @@ namespace TomP2P.Connection.Windows
             return _tcpClient.ConnectAsync(remoteEndPoint.Address, remoteEndPoint.Port);
         }
 
-        public async Task SendMessageAsync(Message.Message message)
+        public override async Task SendBytesAsync(byte[] bytes, IPEndPoint senderEp, IPEndPoint receiverEp = null)
         {
-            // execute outbound pipeline
-            var session = Pipeline.CreateNewServerSession();
-            var writeRes = session.Write(message);
-
-            var bytes = ConnectionHelper.ExtractBytes(writeRes);
-
-            // finally, send bytes over the wire
-            var senderEp = ConnectionHelper.ExtractSenderEp(message);
-            var receiverEp = _tcpClient.Client.RemoteEndPoint;
-            Logger.Debug("Send TCP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
-
+            // send bytes
+            var recvEp = _tcpClient.Client.RemoteEndPoint;
             await _tcpClient.GetStream().WriteAsync(bytes, 0, bytes.Length);
-            Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
-
-            NotifyWriteCompleted();
-            Pipeline.ReleaseSession(session);
+            Logger.Debug("Sent TCP: Sender {0} --> Recipient {1}. {2} : {3}", senderEp, recvEp,
+                Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
         }
 
-        public async Task ReceiveMessageAsync()
+        public override async Task DoReceiveMessageAsync()
         {
+            // TODO find zero-copy way, use same buffer
             // receive bytes
             var bytesRecv = new byte[256];
 
             var stream = _tcpClient.GetStream();
             var pieceCount = 0;
-            var session = Pipeline.CreateNewServerSession();
             do
             {
-                // TODO find zero-copy way, use same buffer
-                var nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length);
+                int nrBytes;
+                try
+                {
+                    nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length).WithCancellation(CloseToken);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    // the socket has been closed
+                    return;
+                }
+
                 var buf = AlternativeCompositeByteBuf.CompBuffer();
-                //buf.Clear();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
                 LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
@@ -74,11 +71,13 @@ namespace TomP2P.Connection.Windows
                 Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece, Convenient.ToHumanReadable(nrBytes), Convenient.ToString(bytesRecv));
 
                 // execute inbound pipeline, per piece (reset session!)
-                session.Read(piece);
-                session.Reset();
-            } while (!IsClosed && stream.DataAvailable);
-
-            Pipeline.ReleaseSession(session);
+                if (Session.IsTimedOut)
+                {
+                    return;
+                }
+                Session.Read(piece);
+                Session.Reset();
+            } while (!IsClosed && stream.DataAvailable && !Session.IsTimedOut);
         }
 
         protected override void DoClose()

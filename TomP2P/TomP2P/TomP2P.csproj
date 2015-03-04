@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Connection\DefaultConnectionConfiguration.cs" />
     <Compile Include="Connection\Windows\NET Helper\TomP2PExtensions.cs" />
+    <Compile Include="Connection\Windows\Netty\BaseClient.cs" />
     <Compile Include="Connection\Windows\Netty\ISharable.cs" />
     <Compile Include="P2P\DefaultPipelineFilter.cs" />
     <Compile Include="Connection\DirectResponder.cs" />

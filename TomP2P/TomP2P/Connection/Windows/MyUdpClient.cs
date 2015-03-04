@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -10,7 +11,7 @@ using TomP2P.Storage;
 
 namespace TomP2P.Connection.Windows
 {
-    public class MyUdpClient : BaseChannel, IUdpClientChannel
+    public class MyUdpClient : BaseClient, IUdpClientChannel
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -25,46 +26,45 @@ namespace TomP2P.Connection.Windows
             Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
-        public async Task SendMessageAsync(Message.Message message)
+        public override async Task SendBytesAsync(byte[] bytes, IPEndPoint senderEp, IPEndPoint receiverEp = null)
         {
-            // TODO check necessity of new session (handlers set in sender) (2x)
-            // execute outbound pipeline
-            var session = Pipeline.CreateNewServerSession();
-            var writeRes = session.Write(message);
-
-            var bytes = ConnectionHelper.ExtractBytes(writeRes);
-
-            // finally, send bytes over the wire
-            var senderEp = ConnectionHelper.ExtractSenderEp(message);
-            var receiverEp = ConnectionHelper.ExtractReceiverEp(message);
-            Logger.Debug("Send UDP message {0}: Sender {1} --> Recipient {2}.", message, senderEp, receiverEp);
-
+            // send bytes
             await _udpClient.SendAsync(bytes, bytes.Length, receiverEp);
-            Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
-            NotifyWriteCompleted();
-
-            Pipeline.ReleaseSession(session);
+            Logger.Debug("Sent UDP: Sender {0} --> Recipient {1}. {2} : {3}", senderEp, receiverEp,
+                Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
         }
 
-        public async Task ReceiveMessageAsync()
+        public override async Task DoReceiveMessageAsync()
         {
-            // TODO check necessity of new session (handlers set in sender) (2x)
-            // receive bytes, create a datagram wrapper
-            var udpRes = await _udpClient.ReceiveAsync();
+            // receive bytes
+            UdpReceiveResult udpRes;
+            try
+            {
+                udpRes = await _udpClient.ReceiveAsync().WithCancellation(CloseToken);
+
+            }
+            catch (OperationCanceledException ex)
+            {
+                // the socket has been closed
+                return;
+            }
 
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(udpRes.Buffer.ToSByteArray());
 
-            LocalEndPoint = (IPEndPoint) Socket.LocalEndPoint;
+            LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
             RemoteEndPoint = udpRes.RemoteEndPoint;
 
             var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-            Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));      
+            Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
 
             // execute inbound pipeline
-            var session = Pipeline.CreateNewServerSession();
-            session.Read(dgram);
-            Pipeline.ReleaseSession(session);
+            if (Session.IsTimedOut)
+            {
+                return;
+            }
+            Session.Read(dgram);
+            Session.Reset();
         }
 
         protected override void DoClose()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using NLog;
 
 namespace TomP2P.Connection.Windows.Netty
@@ -12,7 +13,8 @@ namespace TomP2P.Connection.Windows.Netty
         public event ChannelEventHandler Closed;
         public event ChannelEventHandler WriteCompleted;
 
-        protected bool IsClosed;
+        private volatile bool _isClosed;
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private Pipeline _pipeline;
 
         protected BaseChannel(IPEndPoint localEndPoint)
@@ -35,9 +37,10 @@ namespace TomP2P.Connection.Windows.Netty
         /// </summary>
         public void Close()
         {
-            if (!IsClosed)
+            if (!_isClosed)
             {
-                IsClosed = true;
+                _isClosed = true;
+                _cts.Cancel();
                 try
                 {
                     DoClose();
@@ -54,7 +57,7 @@ namespace TomP2P.Connection.Windows.Netty
 
         protected abstract void DoClose();
 
-        private void NotifyClosed()
+        protected void NotifyClosed()
         {
             if (Closed != null)
             {
@@ -85,12 +88,22 @@ namespace TomP2P.Connection.Windows.Netty
 
         public bool IsOpen
         {
-            get { return !IsClosed; } // TODO ok? what about if channel creation failed?
+            get { return !_isClosed; } // TODO ok? what about if channel creation failed?
         }
 
         public bool IsActive
         {
-            get { return !IsClosed; } // TODO ok? what about if channel creation failed?
+            get { return !_isClosed; } // TODO ok? what about if channel creation failed?
+        }
+
+        protected bool IsClosed
+        {
+            get { return _isClosed; }
+        }
+
+        protected CancellationToken CloseToken
+        {
+            get { return _cts.Token; }
         }
     }
 }

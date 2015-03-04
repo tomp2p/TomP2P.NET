@@ -96,7 +96,11 @@ namespace TomP2P.Connection
                     }
                     else
                     {
-                        ctx.Close();
+                        // .NET-specific: 
+                        // Don't close the channel, as this would close all service loops on a server.
+                        // instead, set the session to be timed out.
+                        ctx.TriggerTimeout();
+
                         // check if we have set an attribute at least
                         // (if we have already decoded the header)
                         var attrPeerAddr = ctx.Attr(Decoder.PeerAddressKey);

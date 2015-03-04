@@ -70,5 +70,16 @@ namespace TomP2P.Connection.Windows.Netty
         {
             get { return _session.Pipeline.Channel; }
         }
+
+        internal void TriggerTimeout()
+        {
+            // client sockets must close
+            // server sockets must close the service loop session
+            if (Channel is IClientChannel)
+            {
+                Close();
+            }
+            _session.SetIsTimedout();
+        }
     }
 }

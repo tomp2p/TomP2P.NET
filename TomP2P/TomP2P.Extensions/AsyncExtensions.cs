@@ -30,6 +30,25 @@ namespace TomP2P.Extensions
             return task.Result;
         }
 
+        /// <summary>
+        /// This extension allows to make tasks cancellable even if the original API has no
+        /// CancellationToken parameter.
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public static async Task WithCancellation(this Task task, CancellationToken ct)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            using (ct.Register(o => ((TaskCompletionSource<bool>)o).TrySetResult(true), tcs))
+            {
+                if (task != await Task.WhenAny(task, tcs.Task))
+                {
+                    throw new OperationCanceledException(ct);
+                }
+            }
+        }
+
         public static Exception TryGetException(this Task task)
         {
             if (task.IsCompleted)

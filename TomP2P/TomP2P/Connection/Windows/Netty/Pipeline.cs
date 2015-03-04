@@ -44,7 +44,7 @@ namespace TomP2P.Connection.Windows.Netty
             Logger.Info("Instantiated {0}.", this);
         }
 
-        /*/// <summary>
+        /// <summary>
         /// Creates a new <see cref="PipelineSession"/> for the client-side pipeline.
         /// All handlers are re-used.
         /// </summary>
@@ -55,7 +55,7 @@ namespace TomP2P.Connection.Windows.Netty
             // TODO important: client send/receive should not in-activate channel in between
             // Note: as soon as an old session is re-used, its internal state must be reset
             return new PipelineSession(this, InboundHandlers, OutboundHandlers);
-        }*/
+        }
 
         /// <summary>
         /// Creates a new <see cref="PipelineSession"/> for the server-side pipeline.
@@ -70,33 +70,7 @@ namespace TomP2P.Connection.Windows.Netty
             var newInbounds = CreateNewInstances(InboundHandlers);
             var newOutbounds = CreateNewInstances(OutboundHandlers);
 
-            var session = new PipelineSession(this, newInbounds.Cast<IInboundHandler>(), newOutbounds.Cast<IOutboundHandler>());
-            
-            // activate channel
-            var handlers = newInbounds.Union(newOutbounds);
-            foreach (var item in handlers)
-            {
-                item.ChannelActive(session.ChannelHandlerContext);
-            }
-            return session;
-        }
-
-        /// <summary>
-        /// Releases and resets a session.
-        /// All handlers are notified about inactivity.
-        /// </summary>
-        /// <param name="session"></param>
-        internal void ReleaseSession(PipelineSession session)
-        {
-            // inactivate channel
-            var handlers = session.InboundHandlers.Cast<IChannelHandler>()
-                .Union(session.OutboundHandlers);
-            foreach (var item in handlers)
-            {
-                item.ChannelInactive(session.ChannelHandlerContext);
-            }
-            
-            session.Reset();
+            return new PipelineSession(this, newInbounds.Cast<IInboundHandler>(), newOutbounds.Cast<IOutboundHandler>());
         }
 
         /// <summary>
@@ -290,12 +264,16 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
+        // TODO move to separate class
         /// <summary>
         /// Wraps the internal state of a pipeline session. This is necessary because multiple
         /// pipeline sessions can run in parallel, especially on the server-side.
         /// </summary>
         public class PipelineSession
         {
+            private volatile bool _isTimedOut;
+            public bool IsTimedOut { get { return _isTimedOut; } }
+
             private readonly Pipeline _pipeline;
             public LinkedList<IInboundHandler> InboundHandlers { get; private set; }
             public LinkedList<IOutboundHandler> OutboundHandlers { get; private set; }
@@ -330,6 +308,31 @@ namespace TomP2P.Connection.Windows.Netty
                 _readRes = null;
                 _caughtException = null;
                 _event = null;
+            }
+
+            public void TriggerActive()
+            {
+                // activate all handlers
+                var handlers = InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers);
+                foreach (var item in handlers)
+                {
+                    item.ChannelActive(_ctx);
+                }
+            }
+
+            public void TriggerInactive()
+            {
+                // inactivate all handlers
+                var handlers = InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers);
+                foreach (var item in handlers)
+                {
+                    item.ChannelInactive(_ctx);
+                }
+            }
+
+            public void TriggerTimeout()
+            {
+                _isTimedOut = true;
             }
 
             public object Write(object msg)
@@ -470,6 +473,11 @@ namespace TomP2P.Connection.Windows.Netty
             public ChannelHandlerContext ChannelHandlerContext
             {
                 get { return _ctx; }
+            }
+
+            internal void SetIsTimedout()
+            {
+                throw new NotImplementedException();
             }
         }
     }
