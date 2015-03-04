@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Connection.Windows;
 using TomP2P.Connection.Windows.Netty;
 using TomP2P.Message;
 using TomP2P.Peers;
@@ -302,8 +303,11 @@ namespace TomP2P.Connection
             if (!_message.IsKeepAlive())
             {
                 Logger.Debug("Good message {0}. Close channel {1}.", responseMessage, ctx.Channel);
-                // channel has already been closed in Sender, set result now
-                _tcsResponse.SetResult(responseMessage);
+                
+                // .NET-specific:
+                // set the result now, but trigger the notify when the channel is closed
+                _tcsResponse.ResponseLater(responseMessage, ctx);
+
                 // in Java, the channel creator adds a listener that sets the 
                 // future response result when the channel is closed
                 ctx.Close(); // TODO needed?

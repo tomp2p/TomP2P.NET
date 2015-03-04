@@ -511,7 +511,7 @@ namespace TomP2P.Connection
                 // processes client-side inbound pipeline
                 await channel.ReceiveMessageAsync();
             }
-            channel.Close();
+            channel.Close(); // TODO needed?
         }
 
         private ITcpClientChannel SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,
