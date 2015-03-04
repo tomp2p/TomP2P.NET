@@ -15,21 +15,11 @@ namespace TomP2P.Connection.Windows.Netty
 
         private volatile bool _isClosed;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        private Pipeline _pipeline;
 
-        protected BaseChannel(IPEndPoint localEndPoint)
+        protected BaseChannel(IPEndPoint localEndPoint, Pipeline pipeline)
         {
             LocalEndPoint = localEndPoint;
-        }
-
-        public void SetPipeline(Pipeline pipeline)
-        {
-            _pipeline = pipeline;
-        }
-
-        public Pipeline Pipeline
-        {
-            get { return _pipeline; }
+            Pipeline = pipeline;
         }
 
         /// <summary>
@@ -81,6 +71,8 @@ namespace TomP2P.Connection.Windows.Netty
         public IPEndPoint LocalEndPoint { get; protected set; }
 
         public IPEndPoint RemoteEndPoint { get; protected set; }
+
+        public Pipeline Pipeline { get; private set; }
 
         public abstract bool IsUdp { get; }
 

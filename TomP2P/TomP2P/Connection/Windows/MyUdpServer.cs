@@ -18,8 +18,8 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly UdpClient _udpServer;
 
-        public MyUdpServer(IPEndPoint localEndPoint)
-            : base(localEndPoint)
+        public MyUdpServer(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base(localEndPoint, pipeline)
         {
             _udpServer = new UdpClient(localEndPoint);
 

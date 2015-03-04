@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection.Windows.Netty;
@@ -18,8 +17,8 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly UdpClient _udpClient;
 
-        public MyUdpClient(IPEndPoint localEndPoint)
-            : base(localEndPoint)
+        public MyUdpClient(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base(localEndPoint, pipeline)
         {
             // bind
             _udpClient = new UdpClient(localEndPoint);
@@ -43,7 +42,7 @@ namespace TomP2P.Connection.Windows
                 udpRes = await _udpClient.ReceiveAsync().WithCancellation(CloseToken);
 
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
                 // the socket has been closed
                 return;

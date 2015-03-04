@@ -8,8 +8,8 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private Task[] _tasks;
 
-        protected BaseServer(IPEndPoint localEndPoint)
-            : base (localEndPoint)
+        protected BaseServer(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base (localEndPoint, pipeline)
         { }
 
         public void Start()

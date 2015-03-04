@@ -17,8 +17,8 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly TcpClient _tcpClient;
 
-        public MyTcpClient(IPEndPoint localEndPoint)
-            : base(localEndPoint)
+        public MyTcpClient(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base(localEndPoint, pipeline)
         {
             // bind
             _tcpClient = new TcpClient(localEndPoint);
@@ -55,7 +55,7 @@ namespace TomP2P.Connection.Windows
                 {
                     nrBytes = await stream.ReadAsync(bytesRecv, 0, bytesRecv.Length).WithCancellation(CloseToken);
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
                     // the socket has been closed
                     return;

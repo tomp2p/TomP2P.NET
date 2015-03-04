@@ -19,18 +19,18 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly IChannel _channel;
+        //private readonly IChannel _channel;
 
         private readonly IDictionary<string, HandlerItem> _name2Item;
         private readonly LinkedList<HandlerItem> _handlers;
 
-        public Pipeline(IChannel channel)
-            : this(channel, null)
+        public Pipeline()
+            : this(null)
         { }
 
-        public Pipeline(IChannel channel, IEnumerable<KeyValuePair<string, IChannelHandler>> handlers)
+        public Pipeline(IEnumerable<KeyValuePair<string, IChannelHandler>> handlers)
         {
-            _channel = channel;
+            //_channel = channel;
             _name2Item = new Dictionary<string, HandlerItem>();
             _handlers = new LinkedList<HandlerItem>();
 
@@ -65,7 +65,7 @@ namespace TomP2P.Connection.Windows.Netty
         /// <returns></returns>
         internal PipelineSession CreateNewServerSession()
         {
-            Logger.Debug("Creating session for channel {0}.", Channel);
+            //Logger.Debug("Creating session for channel {0}.", Channel);
             // for each non-sharable handler, a new instance has to be created
             var newInbounds = CreateNewInstances(InboundHandlers);
             var newOutbounds = CreateNewInstances(OutboundHandlers);
@@ -197,14 +197,14 @@ namespace TomP2P.Connection.Windows.Netty
                 {
                     // add same handler (shared reference)
                     newHandlers.AddLast(handler);
-                    Logger.Info("{0}: Sharing handler {1} for {2}.", this, handler, Channel);
+                    //Logger.Info("{0}: Sharing handler {1} for {2}.", this, handler, Channel);
                 }
                 else
                 {
                     // add new, cloned handler (not same reference)
                     var newHandler = handler.CreateNewInstance();
                     newHandlers.AddLast(newHandler);
-                    Logger.Info("{0}: Created new handler {1} for {2}.", this, newHandler, Channel);
+                    //Logger.Info("{0}: Created new handler {1} for {2}.", this, newHandler, Channel);
                 }
             }
             return newHandlers;
@@ -234,10 +234,10 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        public IChannel Channel
+        /*public IChannel Channel
         {
             get { return _channel; }
-        }
+        }*/
 
         /// <summary>
         /// Returns the list of handler names.
@@ -249,7 +249,7 @@ namespace TomP2P.Connection.Windows.Netty
 
         public override string ToString()
         {
-            return String.Format("Pipeline ({0}) for channel {1}", RuntimeHelpers.GetHashCode(this), Channel);
+            return String.Format("Pipeline ({0})", RuntimeHelpers.GetHashCode(this));
         }
 
         private struct HandlerItem

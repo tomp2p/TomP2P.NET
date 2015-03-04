@@ -18,8 +18,8 @@ namespace TomP2P.Connection.Windows
         // wrapped member
         private readonly TcpListener _tcpServer;
 
-        public MyTcpServer(IPEndPoint localEndPoint)
-            : base(localEndPoint)
+        public MyTcpServer(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base(localEndPoint, pipeline)
         {
             // local endpoint
             _tcpServer = new TcpListener(localEndPoint);

@@ -7,8 +7,8 @@ namespace TomP2P.Connection.Windows.Netty
     {
         protected readonly Pipeline.PipelineSession Session;
 
-        protected BaseClient(IPEndPoint localEndPoint)
-            : base(localEndPoint)
+        protected BaseClient(IPEndPoint localEndPoint, Pipeline pipeline)
+            : base(localEndPoint, pipeline)
         {
             Session = Pipeline.CreateClientSession();
         }
