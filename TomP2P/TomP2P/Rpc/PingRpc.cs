@@ -43,7 +43,7 @@ namespace TomP2P.Rpc
         /// <param name="enable">Used for test cases, set to true in production.</param>
         /// <param name="register">Used for test cases, set to true in production.</param>
         /// <param name="wait">Used for test cases, set to false in production.</param>
-        private PingRpc(PeerBean peerBean, ConnectionBean connectionBean, bool enable, bool register, bool wait)
+        public PingRpc(PeerBean peerBean, ConnectionBean connectionBean, bool enable, bool register, bool wait)
             : base(peerBean, connectionBean)
         {
             _enable = enable;

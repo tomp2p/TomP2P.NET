@@ -199,5 +199,93 @@ namespace TomP2P.Tests.Rpc
                 }
             }
         }
+
+        // TODO in Java: fix
+        [Ignore]
+        [Test]
+        public async void TestPingHandlerError()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            ChannelCreator cc = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x1234"))
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+                var handshake1 = new PingRpc(sender.PeerBean, sender.ConnectionBean, false, true, false);
+                var handshake2 = new PingRpc(recv1.PeerBean, recv1.ConnectionBean, false, true, false);
+
+                cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, 1);
+
+                var tr = handshake1.PingTcpAsync(recv1.PeerAddress, cc, new DefaultConnectionConfiguration());
+                await tr;
+
+                Assert.IsTrue(tr.IsFaulted);
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        [Test]
+        public async void TestPingTimeoutTcp()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            ChannelCreator cc = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x1234"))
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+                var handshake1 = new PingRpc(sender.PeerBean, sender.ConnectionBean, false, true, true);
+                var handshake2 = new PingRpc(recv1.PeerBean, recv1.ConnectionBean, false, true, true);
+
+                cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, 1);
+
+                var tr = handshake1.PingTcpAsync(recv1.PeerAddress, cc, new DefaultConnectionConfiguration());
+                await tr;
+
+                Assert.IsTrue(tr.IsFaulted);
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
     }
 }

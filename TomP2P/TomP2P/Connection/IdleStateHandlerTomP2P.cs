@@ -17,6 +17,7 @@ namespace TomP2P.Connection
         // .NET-specific
         private ExecutorService _executor;
         private volatile CancellationTokenSource _cts;
+        private readonly int _allIdleTimeSeconds; // for instance-cloning
 
         private volatile int _state; // 0 - none, 1 - initialized, 2- destroyed
 
@@ -28,6 +29,7 @@ namespace TomP2P.Connection
         /// Specify 0 to disable.</param>
         public IdleStateHandlerTomP2P(int allIdleTimeSeconds)
         {
+            _allIdleTimeSeconds = allIdleTimeSeconds;
             if (allIdleTimeSeconds <= 0)
             {
                 AllIdleTimeMillis = 0;
@@ -159,7 +161,7 @@ namespace TomP2P.Connection
 
         public override IChannelHandler CreateNewInstance()
         {
-            return new IdleStateHandlerTomP2P(AllIdleTimeMillis);
+            return new IdleStateHandlerTomP2P(_allIdleTimeSeconds);
         }
 
         public override string ToString()
