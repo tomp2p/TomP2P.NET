@@ -776,9 +776,10 @@ namespace TomP2P.Tests.Interop.Protocol
             var decoder = new Decoder(null);
 
             // mock a non-working ChannelHandlerContext
-            var channel = new MyTcpClient(new IPEndPoint(IPAddress.Any, 0));
-            var session = new Pipeline.PipelineSession(new Pipeline(channel), new List<IInboundHandler>(), new List<IOutboundHandler>());
-            var ctx = new ChannelHandlerContext(session);
+            var pipeline = new Pipeline();
+            var channel = new MyTcpClient(new IPEndPoint(IPAddress.Any, 0), pipeline);
+            var session = new PipelineSession(channel, pipeline, null, null);
+            var ctx = new ChannelHandlerContext(channel, session);
 
             // create dummy sender for decoding
             var message = Utils2.CreateDummyMessage();

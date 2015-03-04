@@ -2,7 +2,6 @@
 
 namespace TomP2P.Connection.Windows.Netty
 {
-    // TODO use exactly same structure as Java Netty --> e.g., "write" instead of "fireWrite"
     // TODO currently, this class only acts as man-in-the-middle
 
     /// <summary>
@@ -64,6 +63,11 @@ namespace TomP2P.Connection.Windows.Netty
             _session.UserEventTriggered(evt);
         }
 
+        public void FireTimeout()
+        {
+            _session.TriggerTimeout();
+        }
+
         public void Close()
         {
             _channel.Close();
@@ -72,18 +76,6 @@ namespace TomP2P.Connection.Windows.Netty
         public IChannel Channel
         {
             get { return _channel; }
-        }
-
-        internal void FireTimeout()
-        {
-            _session.TriggerTimeout();
-            
-            // client sockets must close
-            // server sockets must close the service loop session
-            if (_channel is IClientChannel)
-            {
-                Close();
-            }
         }
     }
 }

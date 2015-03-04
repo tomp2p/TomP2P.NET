@@ -44,7 +44,7 @@ namespace TomP2P.Connection.Windows
                 {
                     // receive request from client
                     UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
-                    var session = Pipeline.CreateNewServerSession();
+                    var session = Pipeline.CreateNewServerSession(this);
                     session.TriggerActive();
 
                     // process content

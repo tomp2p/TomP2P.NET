@@ -5,12 +5,12 @@ namespace TomP2P.Connection.Windows.Netty
 {
     public abstract class BaseClient : BaseChannel, IClientChannel
     {
-        protected readonly Pipeline.PipelineSession Session;
+        protected readonly PipelineSession Session;
 
         protected BaseClient(IPEndPoint localEndPoint, Pipeline pipeline)
             : base(localEndPoint, pipeline)
         {
-            Session = Pipeline.CreateClientSession();
+            Session = Pipeline.CreateClientSession(this);
         }
 
         public async Task SendMessageAsync(Message.Message message)
@@ -23,6 +23,7 @@ namespace TomP2P.Connection.Windows.Netty
                 Session.Reset();
                 if (Session.IsTimedOut)
                 {
+                    CloseAndInactivate();
                     return;
                 }
 
@@ -35,8 +36,7 @@ namespace TomP2P.Connection.Windows.Netty
             }
             else
             {
-                Close();
-                Session.TriggerInactive();
+                CloseAndInactivate();
             }
         }
 
@@ -47,10 +47,12 @@ namespace TomP2P.Connection.Windows.Netty
                 // receive bytes
                 await DoReceiveMessageAsync();
             }
-            else
-            {
-                Close();
-            }
+            CloseAndInactivate();
+        }
+
+        private void CloseAndInactivate()
+        {
+            Close();
             Session.TriggerInactive();
         }
 

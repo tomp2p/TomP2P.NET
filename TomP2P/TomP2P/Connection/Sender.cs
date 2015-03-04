@@ -399,14 +399,7 @@ namespace TomP2P.Connection
                 }
                 else
                 {
-                    if (tfj.Exception != null)
-                    {
-                        tcsDone.SetException(tfj.Exception);
-                    }
-                    else
-                    {
-                        tcsDone.SetException(new TaskFailedException("TcsForkJoin<Task<PeerAddress>> failed."));
-                    }
+                    tcsDone.SetException(tfj.TryGetException());
                 }
             });
 
@@ -511,7 +504,7 @@ namespace TomP2P.Connection
                 // processes client-side inbound pipeline
                 await channel.ReceiveMessageAsync();
             }
-            channel.Close(); // TODO needed?
+            channel.Close(); // TODO not needed, receive method closes...
         }
 
         private ITcpClientChannel SendTcpCreateChannel(IPEndPoint recipient, ChannelCreator channelCreator,

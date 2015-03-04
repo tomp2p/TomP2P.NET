@@ -51,7 +51,7 @@ namespace TomP2P.Connection.Windows
                     var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
                     var stream = client.GetStream();
                     var pieceCount = 0;
-                    var session = Pipeline.CreateNewServerSession();
+                    var session = Pipeline.CreateNewServerSession(this);
                     session.TriggerActive();
                     
                     // process content

@@ -19,18 +19,11 @@ namespace TomP2P.Connection.Windows.Netty
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        //private readonly IChannel _channel;
-
         private readonly IDictionary<string, HandlerItem> _name2Item;
         private readonly LinkedList<HandlerItem> _handlers;
 
-        public Pipeline()
-            : this(null)
-        { }
-
-        public Pipeline(IEnumerable<KeyValuePair<string, IChannelHandler>> handlers)
+        public Pipeline(IEnumerable<KeyValuePair<string, IChannelHandler>> handlers = null)
         {
-            //_channel = channel;
             _name2Item = new Dictionary<string, HandlerItem>();
             _handlers = new LinkedList<HandlerItem>();
 
@@ -49,11 +42,9 @@ namespace TomP2P.Connection.Windows.Netty
         /// All handlers are re-used.
         /// </summary>
         /// <returns></returns>
-        internal PipelineSession CreateClientSession(IClientChannel clientChannel)
+        public PipelineSession CreateClientSession(IClientChannel clientChannel)
         {
-            // TODO don't instantiate a new session, store and return per-channel
-            // TODO important: client send/receive should not in-activate channel in between
-            // Note: as soon as an old session is re-used, its internal state must be reset
+            Logger.Debug("Creating session for {0}.", clientChannel);
             return new PipelineSession(clientChannel, this, InboundHandlers, OutboundHandlers);
         }
 
@@ -63,14 +54,14 @@ namespace TomP2P.Connection.Windows.Netty
         /// All handlers are notified about activity.
         /// </summary>
         /// <returns></returns>
-        internal PipelineSession CreateNewServerSession(IServerChannel serverChannel)
+        public PipelineSession CreateNewServerSession(IServerChannel serverChannel)
         {
-            //Logger.Debug("Creating session for channel {0}.", Channel);
+            Logger.Debug("Creating session for {0}.", serverChannel);
             // for each non-sharable handler, a new instance has to be created
-            var newInbounds = CreateNewInstances(InboundHandlers);
-            var newOutbounds = CreateNewInstances(OutboundHandlers);
+            var newInbounds = CreateNewInstances(InboundHandlers, serverChannel).Cast<IInboundHandler>();
+            var newOutbounds = CreateNewInstances(OutboundHandlers, serverChannel).Cast<IOutboundHandler>();
 
-            return new PipelineSession(serverChannel, this, newInbounds.Cast<IInboundHandler>(), newOutbounds.Cast<IOutboundHandler>());
+            return new PipelineSession(serverChannel, this, newInbounds, newOutbounds);
         }
 
         /// <summary>
@@ -188,23 +179,23 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        private LinkedList<IChannelHandler> CreateNewInstances(IEnumerable<IChannelHandler> oldHandlers)
+        private IEnumerable<IChannelHandler> CreateNewInstances(IEnumerable<IChannelHandler> oldHandlers, IChannel channel)
         {
-            var newHandlers = new LinkedList<IChannelHandler>();
+            var newHandlers = new List<IChannelHandler>();
             foreach (var handler in oldHandlers)
             {
                 if (handler is ISharable)
                 {
                     // add same handler (shared reference)
-                    newHandlers.AddLast(handler);
-                    //Logger.Info("{0}: Sharing handler {1} for {2}.", this, handler, Channel);
+                    newHandlers.Add(handler);
+                    Logger.Info("{0}: Sharing handler {1} for {2}.", this, handler, channel);
                 }
                 else
                 {
                     // add new, cloned handler (not same reference)
                     var newHandler = handler.CreateNewInstance();
-                    newHandlers.AddLast(newHandler);
-                    //Logger.Info("{0}: Created new handler {1} for {2}.", this, newHandler, Channel);
+                    newHandlers.Add(newHandler);
+                    Logger.Info("{0}: Created new handler {1} for {2}.", this, newHandler, channel);
                 }
             }
             return newHandlers;
@@ -234,11 +225,6 @@ namespace TomP2P.Connection.Windows.Netty
             }
         }
 
-        /*public IChannel Channel
-        {
-            get { return _channel; }
-        }*/
-
         /// <summary>
         /// Returns the list of handler names.
         /// </summary>
@@ -257,229 +243,11 @@ namespace TomP2P.Connection.Windows.Netty
             public string Name { get; set; }
             public IChannelHandler Handler { get; set; }
 
-            public HandlerItem(string name, IChannelHandler handler) : this()
+            public HandlerItem(string name, IChannelHandler handler)
+                : this()
             {
                 Name = name;
                 Handler = handler;
-            }
-        }
-
-        // TODO move to separate class
-        /// <summary>
-        /// Wraps the internal state of a pipeline session. This is necessary because multiple
-        /// pipeline sessions can run in parallel, especially on the server-side.
-        /// </summary>
-        public class PipelineSession
-        {
-            private volatile bool _isTimedOut;
-            public bool IsTimedOut { get { return _isTimedOut; } }
-
-            private readonly IChannel _channel;
-            private readonly Pipeline _pipeline;
-            public LinkedList<IInboundHandler> InboundHandlers { get; private set; }
-            public LinkedList<IOutboundHandler> OutboundHandlers { get; private set; }
-            private readonly ChannelHandlerContext _ctx;
-
-            private IOutboundHandler _currentOutbound;
-            private IInboundHandler _currentInbound;
-            private object _msgW;
-            private object _msgR;
-            private object _writeRes;
-            private object _readRes;
-
-            private Exception _caughtException;
-            private object _event;
-
-            public PipelineSession(IChannel channel, Pipeline pipeline, IEnumerable<IInboundHandler> inboundHandlers,
-                IEnumerable<IOutboundHandler> outboundHandlers)
-            {
-                _channel = channel;
-                _pipeline = pipeline;
-                InboundHandlers = new LinkedList<IInboundHandler>(inboundHandlers);
-                OutboundHandlers = new LinkedList<IOutboundHandler>(outboundHandlers);
-                _ctx = new ChannelHandlerContext(channel, this);
-            }
-
-            public void Reset()
-            {
-                _currentOutbound = null;
-                _currentInbound = null;
-                _msgW = null;
-                _msgR = null;
-                _writeRes = null;
-                _readRes = null;
-                _caughtException = null;
-                _event = null;
-            }
-
-            public void TriggerActive()
-            {
-                // activate all handlers
-                var handlers = InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers);
-                foreach (var item in handlers)
-                {
-                    item.ChannelActive(_ctx);
-                }
-            }
-
-            public void TriggerInactive()
-            {
-                // inactivate all handlers
-                var handlers = InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers);
-                foreach (var item in handlers)
-                {
-                    item.ChannelInactive(_ctx);
-                }
-            }
-
-            public void TriggerTimeout()
-            {
-                _isTimedOut = true;
-            }
-
-            public object Write(object msg)
-            {
-                if (msg == null)
-                {
-                    throw new NullReferenceException("msg");
-                }
-                // set msgW to newest provided value
-                _msgW = msg;
-
-                // find next outbound handler
-                while (GetNextOutbound() != null)
-                {
-                    Logger.Debug("{0}: Processing outbound handler {1}.", _pipeline, _currentOutbound);
-                    if (_caughtException != null)
-                    {
-                        _currentOutbound.ExceptionCaught(_ctx, _caughtException);
-                    }
-                    else
-                    {
-                        _currentOutbound.Write(_ctx, msg);
-                    }
-                }
-                if (_writeRes == null)
-                {
-                    _writeRes = _msgW;
-                }
-                if (_caughtException != null)
-                {
-                    Logger.Error("Exception in outbound pipeline: {0}", _caughtException.ToString());
-                    throw _caughtException;
-                }
-                return _writeRes;
-            }
-
-            public object Read(object msg)
-            {
-                if (msg == null)
-                {
-                    throw new NullReferenceException("msg");
-                }
-
-                // set msgR to newest provided value
-                _msgR = msg;
-
-                // find next inbound handler
-                while (GetNextInbound() != null)
-                {
-                    Logger.Debug("{0}: Processing inbound handler {1}.", _pipeline, _currentInbound);
-
-                    if (_caughtException != null)
-                    {
-                        _currentInbound.ExceptionCaught(_ctx, _caughtException);
-                    }
-                    else if (_event != null)
-                    {
-                        _currentInbound.UserEventTriggered(_ctx, _event);
-                    }
-                    else
-                    {
-                        _currentInbound.Read(_ctx, msg);
-                    }
-                }
-                if (_readRes == null)
-                {
-                    _readRes = _msgR;
-                }
-                if (_caughtException != null)
-                {
-                    Logger.Error("Exception in inbound pipeline: {0}", _caughtException.ToString());
-                    throw _caughtException;
-                }
-                return _readRes;
-            }
-
-            public void ExceptionCaught(Exception ex)
-            {
-               _caughtException = ex;
-            }
-
-            public void UserEventTriggered(object evt)
-            {
-                _event = evt;
-            }
-
-            private IOutboundHandler GetNextOutbound()
-            {
-                if (OutboundHandlers.Count != 0)
-                {
-                    if (_currentOutbound == null)
-                    {
-                        _currentOutbound = OutboundHandlers.First.Value;
-                    }
-                    else
-                    {
-                        var node = OutboundHandlers.Find(_currentOutbound);
-                        if (node != null && node.Next != null)
-                        {
-                            _currentOutbound = node.Next.Value;
-                            return _currentOutbound;
-                        }
-                        return null;
-                    }
-                    return _currentOutbound;
-                }
-                return null;
-            }
-
-            private IInboundHandler GetNextInbound()
-            {
-                if (InboundHandlers.Count != 0)
-                {
-                    if (_currentInbound == null)
-                    {
-                        _currentInbound = InboundHandlers.First.Value;
-                    }
-                    else
-                    {
-                        var node = InboundHandlers.Find(_currentInbound);
-                        if (node != null && node.Next != null)
-                        {
-                            _currentInbound = node.Next.Value;
-                            return _currentInbound;
-                        }
-                        return null;
-                    }
-                    return _currentInbound;
-                }
-                return null;
-            }
-
-            public Pipeline Pipeline
-            {
-                get { return _pipeline; }
-            }
-
-            public IChannel Channel
-            {
-                get { return _channel; }
-            }
-
-            public ChannelHandlerContext ChannelHandlerContext
-            {
-                get { return _ctx; }
             }
         }
     }
