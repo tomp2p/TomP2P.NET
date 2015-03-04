@@ -56,9 +56,8 @@ namespace TomP2P.Connection.Windows.Netty
 
         public void TriggerActive()
         {
-            // activate all handlers
             var handlers = InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers);
-            foreach (var item in handlers)
+            foreach (var item in handlers.Where(item => !item.IsActivated))
             {
                 item.ChannelActive(_ctx);
             }
@@ -66,9 +65,8 @@ namespace TomP2P.Connection.Windows.Netty
 
         public void TriggerInactive()
         {
-            // inactivate all handlers
             var handlers = InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers);
-            foreach (var item in handlers)
+            foreach (var item in handlers.Where(item => item.IsActivated))
             {
                 item.ChannelInactive(_ctx);
             }
