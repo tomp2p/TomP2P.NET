@@ -99,7 +99,7 @@ namespace TomP2P.Connection
                         // .NET-specific: 
                         // Don't close the channel, as this would close all service loops on a server.
                         // instead, set the session to be timed out.
-                        ctx.TriggerTimeout();
+                        ctx.FireTimeout();
 
                         // check if we have set an attribute at least
                         // (if we have already decoded the header)
