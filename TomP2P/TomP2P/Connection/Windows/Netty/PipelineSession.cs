@@ -132,6 +132,7 @@ namespace TomP2P.Connection.Windows.Netty
                 }
                 else if (_event != null)
                 {
+                    // TODO check if this is correct
                     _currentInbound.UserEventTriggered(_ctx, _event);
                 }
                 else
@@ -158,7 +159,12 @@ namespace TomP2P.Connection.Windows.Netty
 
         public void UserEventTriggered(object evt)
         {
+            // iterate through all inbound handlers
             _event = evt;
+            foreach (var inboundHandler in InboundHandlers)
+            {
+                inboundHandler.UserEventTriggered(_ctx, evt);
+            }
         }
 
         private IOutboundHandler GetNextOutbound()

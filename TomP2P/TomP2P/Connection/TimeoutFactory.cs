@@ -85,17 +85,23 @@ namespace TomP2P.Connection
                     PeerAddress recipient;
                     if (_tcsResponse != null)
                     {
+                        // client-side
                         var requestMessage = (Message.Message)_tcsResponse.Task.AsyncState;
 
                         Logger.Warn("Request status is {0}.", requestMessage);
                         ctx.Channel.Closed +=
-                            channel => _tcsResponse.SetException(new TaskFailedException("Channel is idle " + evt));
+                            channel =>
+                                _tcsResponse.SetException(
+                                    new TaskFailedException(String.Format("{0} is idle: {1}.", ctx.Channel, evt)));
+                        ctx.FireTimeout();
                         ctx.Channel.Close();
 
                         recipient = requestMessage.Recipient;
                     }
                     else
                     {
+                        // server-side
+
                         // .NET-specific: 
                         // Don't close the channel, as this would close all service loops on a server.
                         // instead, set the session to be timed out.
@@ -147,7 +153,6 @@ namespace TomP2P.Connection
 
             public override IChannelHandler CreateNewInstance()
             {
-                // TODO correct??
                 // server-side: _tcsResponse = null
                 // client-side: _tcsResponse is set
                 return new TimeHandler(_tcsResponse, _peerStatusListeners, _name);

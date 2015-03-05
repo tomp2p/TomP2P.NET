@@ -111,7 +111,8 @@ namespace TomP2P.Connection
         {
             var ctx = state as ChannelHandlerContext;
 
-            if (ctx == null || !ctx.Channel.IsOpen)
+            // .NET-specific: don't fire if session is already set to timed out
+            if (ctx == null || !ctx.Channel.IsOpen || ctx.IsTimedOut)
             {
                 return;
             }

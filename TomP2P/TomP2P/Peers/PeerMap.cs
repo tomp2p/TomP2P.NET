@@ -342,81 +342,71 @@ namespace TomP2P.Peers
         /// False, if it has not been removed or is already in the temporarily removed list.</returns>
         public bool PeerFailed(PeerAddress remotePeer, PeerException peerException)
         {
-            // TODO remove try/catch
-            try
-            {
-                Logger.Debug("Peer {0} is offline with reason {1}.", remotePeer, peerException);
+            Logger.Debug("Peer {0} is offline with reason: {1}", remotePeer, peerException);
 
-                // TB: ignore zero peer ID for the moment, but we should filter for the IP address
-                if (remotePeer.PeerId.IsZero || Self.Equals(remotePeer.PeerId))
+            // TB: ignore zero peer ID for the moment, but we should filter for the IP address
+            if (remotePeer.PeerId.IsZero || Self.Equals(remotePeer.PeerId))
+            {
+                return false;
+            }
+            int classMember = ClassMember(remotePeer.PeerId);
+            var reason = peerException.AbortCause;
+            if (reason != PeerException.AbortCauseEnum.Timeout)
+            {
+                if (reason == PeerException.AbortCauseEnum.ProbablyOffline)
                 {
-                    return false;
+                    _offlineMap.Put(remotePeer.PeerId, remotePeer);
                 }
-                int classMember = ClassMember(remotePeer.PeerId);
-                var reason = peerException.AbortCause;
-                if (reason != PeerException.AbortCauseEnum.Timeout)
+                else if (reason == PeerException.AbortCauseEnum.Shutdown)
                 {
-                    if (reason == PeerException.AbortCauseEnum.ProbablyOffline)
+                    _shutdownMap.Put(remotePeer.PeerId, remotePeer);
+                }
+                else
+                {
+                    // reason is exception
+                    _exceptionMap.Put(remotePeer.PeerId, remotePeer);
+                }
+                var tmp = PeerMapOverflow[classMember];
+                if (tmp != null)
+                {
+                    lock (tmp)
                     {
-                        _offlineMap.Put(remotePeer.PeerId, remotePeer);
+                        tmp.Remove(remotePeer.PeerId);
                     }
-                    else if (reason == PeerException.AbortCauseEnum.Shutdown)
+                }
+                tmp = PeerMapVerified[classMember];
+                if (tmp != null)
+                {
+                    bool removed = false;
+                    PeerStatistic peerStatistic;
+                    lock (tmp)
                     {
-                        _shutdownMap.Put(remotePeer.PeerId, remotePeer);
-                    }
-                    else
-                    {
-                        // reason is exception
-                        _exceptionMap.Put(remotePeer.PeerId, remotePeer);
-                    }
-                    var tmp = PeerMapOverflow[classMember];
-                    if (tmp != null)
-                    {
-                        lock (tmp)
+                        peerStatistic = tmp.Remove2(remotePeer.PeerId);
+                        if (peerStatistic != null)
                         {
-                            tmp.Remove(remotePeer.PeerId);
+                            removed = true;
                         }
                     }
-                    tmp = PeerMapVerified[classMember];
-                    if (tmp != null)
+                    if (removed)
                     {
-                        bool removed = false;
-                        PeerStatistic peerStatistic;
-                        lock (tmp)
-                        {
-                            peerStatistic = tmp.Remove2(remotePeer.PeerId);
-                            if (peerStatistic != null)
-                            {
-                                removed = true;
-                            }
-                        }
-                        if (removed)
-                        {
-                            NotifyRemove(remotePeer, peerStatistic);
-                            return true;
-                        }
+                        NotifyRemove(remotePeer, peerStatistic);
+                        return true;
                     }
-                    return false;
-                }
-                // not forced
-                if (UpdatePeerStatistic(remotePeer, PeerMapVerified[classMember], _offlineCount))
-                {
-                    return PeerFailed(remotePeer,
-                        new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in verified map."));
-                }
-                if (UpdatePeerStatistic(remotePeer, PeerMapOverflow[classMember], _offlineCount))
-                {
-                    return PeerFailed(remotePeer,
-                        new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in overflow map."));
                 }
                 return false;
-
             }
-            catch (Exception ex)
+            // not forced
+            if (UpdatePeerStatistic(remotePeer, PeerMapVerified[classMember], _offlineCount))
             {
-                Logger.Error(ex);
-                throw;
+                return PeerFailed(remotePeer,
+                    new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in verified map."));
             }
+            if (UpdatePeerStatistic(remotePeer, PeerMapOverflow[classMember], _offlineCount))
+            {
+                return PeerFailed(remotePeer,
+                    new PeerException(PeerException.AbortCauseEnum.ProbablyOffline, "Peer failed in overflow map."));
+            }
+            return false;
         }
 
         /// <summary>

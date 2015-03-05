@@ -77,5 +77,10 @@ namespace TomP2P.Connection.Windows.Netty
         {
             get { return _channel; }
         }
+
+        public bool IsTimedOut
+        {
+            get { return _session.IsTimedOut; }
+        }
     }
 }

@@ -17,12 +17,12 @@ namespace TomP2P.Rpc
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public static readonly int WaitTime = 10*1000;
 
         private readonly IList<IPeerReachable> _reachableListeners = new List<IPeerReachable>(1);
         private readonly IList<IPeerReceivedBroadcastPing> _receivedBroadcastPingListeners = new List<IPeerReceivedBroadcastPing>(1);
 
         // used for testing and debugging 
+        public static readonly int WaitTime = 10*1000;
         private readonly bool _enable;
         private readonly bool _wait;
 

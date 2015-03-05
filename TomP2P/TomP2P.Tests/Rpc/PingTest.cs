@@ -254,10 +254,12 @@ namespace TomP2P.Tests.Rpc
             try
             {
                 sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
                     .SetP2PId(55)
                     .SetPorts(2424)
                     .Start();
                 recv1 = new PeerBuilder(new Number160("0x1234"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
                     .SetP2PId(55)
                     .SetPorts(8088)
                     .Start();
@@ -273,7 +275,7 @@ namespace TomP2P.Tests.Rpc
                     await tr;
                     Assert.Fail("Timeout should have let task fail.");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     Assert.IsTrue(tr.IsFaulted);
                 }
