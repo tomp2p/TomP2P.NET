@@ -8,8 +8,16 @@
             // can be overridden
         }
 
-        public abstract void Read(ChannelHandlerContext ctx, object msg);
+        public virtual void Read(ChannelHandlerContext ctx, object msg)
+        {
+            // do nothing by default
+            // can be overridden
+        }
 
-        public abstract void Write(ChannelHandlerContext ctx, object msg);
+        public virtual void Write(ChannelHandlerContext ctx, object msg)
+        {
+            // do nothing by default
+            // can be overridden
+        }
     }
 }

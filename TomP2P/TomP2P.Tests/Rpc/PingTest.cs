@@ -267,9 +267,16 @@ namespace TomP2P.Tests.Rpc
                 cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, 1);
 
                 var tr = handshake1.PingTcpAsync(recv1.PeerAddress, cc, new DefaultConnectionConfiguration());
-                await tr;
 
-                Assert.IsTrue(tr.IsFaulted);
+                try
+                {
+                    await tr;
+                    Assert.Fail("Timeout should have let task fail.");
+                }
+                catch (Exception)
+                {
+                    Assert.IsTrue(tr.IsFaulted);
+                }
             }
             finally
             {

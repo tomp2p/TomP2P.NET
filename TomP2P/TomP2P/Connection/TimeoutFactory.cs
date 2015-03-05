@@ -63,7 +63,7 @@ namespace TomP2P.Connection
         /// <summary>
         /// The timeout handler that gets called from the <see cref="IdleStateHandlerTomP2P"/>
         /// </summary>
-        private class TimeHandler : BaseChannelHandler, IDuplexHandler
+        private class TimeHandler : BaseDuplexHandler
         {
             private readonly TaskCompletionSource<Message.Message> _tcsResponse;
             private readonly IList<IPeerStatusListener> _peerStatusListeners;
@@ -77,7 +77,7 @@ namespace TomP2P.Connection
                 _name = name;
             }
 
-            public void UserEventTriggered(ChannelHandlerContext ctx, object evt)
+            public override void UserEventTriggered(ChannelHandlerContext ctx, object evt)
             {
                 if (evt is IdleStateHandlerTomP2P)
                 {
@@ -143,16 +143,6 @@ namespace TomP2P.Connection
                         }
                     }
                 }
-            }
-
-            public void Read(ChannelHandlerContext ctx, object msg)
-            {
-                // nothing to read here
-            }
-
-            public void Write(ChannelHandlerContext ctx, object msg)
-            {
-                // nothing to write here
             }
 
             public override IChannelHandler CreateNewInstance()
