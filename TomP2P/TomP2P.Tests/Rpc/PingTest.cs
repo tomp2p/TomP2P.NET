@@ -275,7 +275,7 @@ namespace TomP2P.Tests.Rpc
                     await tr;
                     Assert.Fail("Timeout should have let task fail.");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Assert.IsTrue(tr.IsFaulted);
                 }
@@ -295,6 +295,69 @@ namespace TomP2P.Tests.Rpc
                     recv1.ShutdownAsync().Wait();
                 }
             }
+        }
+
+        [Test]
+        public async void TestPingTimeoutUdp()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            ChannelCreator cc = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x1234"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+                var handshake1 = new PingRpc(sender.PeerBean, sender.ConnectionBean, false, true, true);
+                var handshake2 = new PingRpc(recv1.PeerBean, recv1.ConnectionBean, false, true, true);
+
+                cc = await recv1.ConnectionBean.Reservation.CreateAsync(1, 0);
+
+                var tr = handshake1.PingUdpAsync(recv1.PeerAddress, cc, new DefaultConnectionConfiguration());
+
+                try
+                {
+                    await tr;
+                    Assert.Fail("Timeout should have let task fail.");
+                }
+                catch (Exception)
+                {
+                    Assert.IsTrue(tr.IsFaulted);
+                }
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        // TODO TestPingHandlerFailure
+
+        [Test]
+        public async void TestPingTcpPool()
+        {
+            Peer sender;
+            Peer recv1;
+            ChannelCreator cc;
+            throw new NotImplementedException();
         }
     }
 }

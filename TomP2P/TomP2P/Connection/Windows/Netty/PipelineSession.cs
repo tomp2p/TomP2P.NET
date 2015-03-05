@@ -30,7 +30,6 @@ namespace TomP2P.Connection.Windows.Netty
         private object _readRes;
 
         private Exception _caughtException;
-        private object _event;
 
         public PipelineSession(IChannel channel, Pipeline pipeline, IEnumerable<IInboundHandler> inboundHandlers,
             IEnumerable<IOutboundHandler> outboundHandlers)
@@ -51,7 +50,6 @@ namespace TomP2P.Connection.Windows.Netty
             _writeRes = null;
             _readRes = null;
             _caughtException = null;
-            _event = null;
         }
 
         public void TriggerActive()
@@ -69,6 +67,15 @@ namespace TomP2P.Connection.Windows.Netty
             foreach (var item in handlers.Where(item => item.IsActivated))
             {
                 item.ChannelInactive(_ctx);
+            }
+        }
+
+        public void TriggerUserEvent(object evt)
+        {
+            // inbound handlers only
+            foreach (var inboundHandler in InboundHandlers)
+            {
+                inboundHandler.UserEventTriggered(_ctx, evt);
             }
         }
 
@@ -130,11 +137,6 @@ namespace TomP2P.Connection.Windows.Netty
                 {
                     _currentInbound.ExceptionCaught(_ctx, _caughtException);
                 }
-                else if (_event != null)
-                {
-                    // TODO check if this is correct
-                    _currentInbound.UserEventTriggered(_ctx, _event);
-                }
                 else
                 {
                     _currentInbound.Read(_ctx, msg);
@@ -157,15 +159,7 @@ namespace TomP2P.Connection.Windows.Netty
             _caughtException = ex;
         }
 
-        public void UserEventTriggered(object evt)
-        {
-            // iterate through all inbound handlers
-            _event = evt;
-            foreach (var inboundHandler in InboundHandlers)
-            {
-                inboundHandler.UserEventTriggered(_ctx, evt);
-            }
-        }
+
 
         private IOutboundHandler GetNextOutbound()
         {

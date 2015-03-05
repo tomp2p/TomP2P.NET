@@ -60,7 +60,7 @@ namespace TomP2P.Connection.Windows.Netty
         /// <param name="evt"></param>
         public void FireUserEventTriggered(object evt)
         {
-            _session.UserEventTriggered(evt);
+            _session.TriggerUserEvent(evt);
         }
 
         public void FireTimeout()

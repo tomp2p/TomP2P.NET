@@ -52,7 +52,7 @@ namespace TomP2P.Connection
         }
 
         public PeerException(Exception cause)
-            : base("inner exception", cause)
+            : base("Inner Exception", cause)
         {
             AbortCause = AbortCauseEnum.PeerError;
         }
