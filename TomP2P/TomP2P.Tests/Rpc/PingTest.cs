@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using TomP2P.Connection;
+using TomP2P.Extensions;
 using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
@@ -528,6 +529,108 @@ namespace TomP2P.Tests.Rpc
                 for (int i = 0; i < peers.Length; i++)
                 {
                     peers[i].ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        [Test]
+        public async void TestPingTimeTcp()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+
+                long start = Convenient.CurrentTimeMillis();
+                var tasks = new List<Task<Message.Message>>(1000);
+                for (int i = 0; i < 20; i++)
+                {
+                    var cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, 50);
+                    for (int j = 0; j < 50; j++)
+                    {
+                        var taskResponse = sender.PingRpc.PingTcpAsync(recv1.PeerAddress, cc,
+                            new DefaultConnectionConfiguration());
+                        tasks.Add(taskResponse);
+                    }
+                    foreach (var task in tasks)
+                    {
+                        await task;
+                        Assert.IsTrue(!task.IsFaulted);
+                    }
+                    tasks.Clear();
+                    await cc.ShutdownAsync();
+                }
+                Console.WriteLine("TCP time: {0}ms.", Convenient.CurrentTimeMillis() - start);
+            }
+            finally
+            {
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        [Test]
+        public async void TestPingTimeUdp()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+
+                long start = Convenient.CurrentTimeMillis();
+                var tasks = new List<Task<Message.Message>>(1000);
+                for (int i = 0; i < 20; i++)
+                {
+                    var cc = await recv1.ConnectionBean.Reservation.CreateAsync(50, 0);
+                    for (int j = 0; j < 50; j++)
+                    {
+                        var taskResponse = sender.PingRpc.PingUdpAsync(recv1.PeerAddress, cc,
+                            new DefaultConnectionConfiguration());
+                        tasks.Add(taskResponse);
+                    }
+                    foreach (var task in tasks)
+                    {
+                        await task;
+                        Assert.IsTrue(!task.IsFaulted);
+                    }
+                    tasks.Clear();
+                    await cc.ShutdownAsync();
+                }
+                Console.WriteLine("UDP time: {0}ms.", Convenient.CurrentTimeMillis() - start);
+            }
+            finally
+            {
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
                 }
             }
         }
