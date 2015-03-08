@@ -403,5 +403,56 @@ namespace TomP2P.Tests.Rpc
                 }
             }
         }
+
+        [Test]
+        public async void TestPingUdpPool()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            ChannelCreator cc = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x1234"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+
+                var tasks = new List<Task<Message.Message>>(50);
+                cc = await recv1.ConnectionBean.Reservation.CreateAsync(tasks.Capacity, 0);
+                for (int i = 0; i < tasks.Capacity; i++)
+                {
+                    var taskResponse = sender.PingRpc.PingUdpAsync(recv1.PeerAddress, cc,
+                        new DefaultConnectionConfiguration());
+                    tasks.Add(taskResponse);
+                }
+                foreach (var task in tasks)
+                {
+                    await task;
+                    Assert.IsTrue(!task.IsFaulted);
+                }
+            }
+            finally
+            {
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
     }
 }
