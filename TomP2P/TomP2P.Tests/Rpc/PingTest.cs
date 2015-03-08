@@ -6,6 +6,7 @@ using TomP2P.Connection;
 using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
+using TomP2P.Utils;
 
 namespace TomP2P.Tests.Rpc
 {
@@ -400,6 +401,44 @@ namespace TomP2P.Tests.Rpc
                 if (recv1 != null)
                 {
                     recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        [Test]
+        public async void TestPingTcpPool2()
+        {
+            var peers = new Peer[50];
+            try
+            {
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    peers[i] = new PeerBuilder(Number160.CreateHash(i))
+                        .SetP2PId(55)
+                        .SetPorts(2424 + i)
+                        .Start();
+                }
+                var tasks = new List<Task<Message.Message>>(50);
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    var cc = await peers[0].ConnectionBean.Reservation.CreateAsync(0, 1);
+
+                    var taskResponse = peers[0].PingRpc.PingTcpAsync(peers[i].PeerAddress, cc,
+                        new DefaultConnectionConfiguration());
+                    TomP2P.Utils.Utils.AddReleaseListener(cc, taskResponse);
+                    tasks.Add(taskResponse);
+                }
+                foreach (var task in tasks)
+                {
+                    await task;
+                    Assert.IsTrue(!task.IsFaulted);
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    peers[i].ShutdownAsync().Wait();
                 }
             }
         }
