@@ -493,5 +493,43 @@ namespace TomP2P.Tests.Rpc
                 }
             }
         }
+
+        [Test]
+        public async void TestPingUdpPool2()
+        {
+            var peers = new Peer[50];
+            try
+            {
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    peers[i] = new PeerBuilder(Number160.CreateHash(i))
+                        .SetP2PId(55)
+                        .SetPorts(2424 + i)
+                        .Start();
+                }
+                var tasks = new List<Task<Message.Message>>(50);
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    var cc = await peers[0].ConnectionBean.Reservation.CreateAsync(1, 0);
+
+                    var taskResponse = peers[0].PingRpc.PingUdpAsync(peers[i].PeerAddress, cc,
+                        new DefaultConnectionConfiguration());
+                    TomP2P.Utils.Utils.AddReleaseListener(cc, taskResponse);
+                    tasks.Add(taskResponse);
+                }
+                foreach (var task in tasks)
+                {
+                    await task;
+                    Assert.IsTrue(!task.IsFaulted);
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < peers.Length; i++)
+                {
+                    peers[i].ShutdownAsync().Wait();
+                }
+            }
+        }
     }
 }
