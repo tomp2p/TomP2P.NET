@@ -203,13 +203,16 @@ namespace TomP2P.Connection
             {
                 return _channel.Equals(other._channel);
             }
-            return false;
+            return RemotePeer.Equals(other.RemotePeer);
         }
 
         public override int GetHashCode()
         {
-            // TODO implemend hashcode, also in Java
-            throw new NotImplementedException();
+            if (_channel != null)
+            {
+                return _channel.GetHashCode();
+            }
+            return RemotePeer.GetHashCode();
         }
     }
 }

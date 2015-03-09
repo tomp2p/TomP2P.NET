@@ -239,7 +239,19 @@ namespace TomP2P.Storage
 
         private void SetComponentWriterIndex(int writerIndex)
         {
+            if (WriterIndex == writerIndex)
+            {
+                // nothing to do
+                return;
+            }
             int index = FindIndex(writerIndex);
+            if (index < 0)
+            {
+                // no component found, make sure we can writer
+                EnsureWriteable(writerIndex);
+                index = FindIndex(writerIndex);
+            }
+            
             int to = FindIndex(_writerIndex);
             var c = _components[index];
             int relWriterIndex = writerIndex - c.Offset;

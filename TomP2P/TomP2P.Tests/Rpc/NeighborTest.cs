@@ -198,7 +198,7 @@ namespace TomP2P.Tests.Rpc
                 if (recv1 != null)
                 {
                     recv1.ShutdownAsync().Wait();
-                }
+                 }
             }
         }
 
