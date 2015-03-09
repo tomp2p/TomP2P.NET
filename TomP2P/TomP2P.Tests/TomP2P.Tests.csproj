@@ -61,6 +61,7 @@
     <Compile Include="Rpc\NeighborTest.cs" />
     <Compile Include="Rpc\PingTest.cs" />
     <Compile Include="Rpc\QuitTest.cs" />
+    <Compile Include="Rpc\ReservationTest.cs" />
     <Compile Include="SocketTest.cs" />
     <Compile Include="Utils2.cs" />
     <Compile Include="Utils\UtilsTest.cs" />

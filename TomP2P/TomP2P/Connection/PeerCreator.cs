@@ -28,8 +28,6 @@ namespace TomP2P.Connection
 
         private readonly IList<PeerCreator> _childConnections = new List<PeerCreator>();
 
-        // TODO the 2 EventLoopGroups from Netty needed?
-
         private readonly bool _master;
 
         private readonly TaskCompletionSource<object> _tcsShutdown = new TaskCompletionSource<object>();
@@ -56,7 +54,6 @@ namespace TomP2P.Connection
             Logger.Info("Visible address to other peers: {0}.", self);
 
             // start server
-            // TODO find EventLoogGroup equivalents
             var dispatcher = new Dispatcher(p2PId, PeerBean, channelServerConfiguration.HearBeatMillis);
             var channelServer = new ChannelServer(channelServerConfiguration, dispatcher, PeerBean.PeerStatusListeners);
             if (!channelServer.Startup())
@@ -81,7 +78,6 @@ namespace TomP2P.Connection
         public PeerCreator(PeerCreator parent, Number160 peerId, KeyPair keyPair)
         {
             parent._childConnections.Add(this);
-            // TODO overtake worker groups
             ConnectionBean = parent.ConnectionBean;
             PeerBean = new PeerBean(keyPair);
             PeerAddress self = parent.PeerBean.ServerPeerAddress.ChangePeerId(peerId);
@@ -122,6 +118,7 @@ namespace TomP2P.Connection
             Logger.Debug("Shutting down client...");
             ConnectionBean.Reservation.ShutdownAsync().ContinueWith(delegate
             {
+                Logger.Debug("Reservation shut down.");
                 ConnectionBean.ChannelServer.ShutdownAsync().ContinueWith(delegate
                 {
                     ShutdownNetty();
