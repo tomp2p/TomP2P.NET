@@ -636,6 +636,15 @@ namespace TomP2P.Tests.Rpc
         }
 
         [Test]
+        public void TestPingReserverLoop()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                TestPingReserve();
+            }
+        }
+
+        [Test]
         public async void TestPingReserve()
         {
             Peer sender = null;
