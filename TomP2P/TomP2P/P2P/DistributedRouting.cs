@@ -64,16 +64,8 @@ namespace TomP2P.P2P
                     var tcsRouting1 = Routing(peerAddresses, routingBuilder, Message.Message.MessageType.Request1, cc);
                     tcsRouting1.Task.ContinueWith(taskRouting1 =>
                     {
-                        // .NET-specific: check 2nd routing for success // TODO not needed?
-                        if (!taskRouting1.IsFaulted)
-                        {
-                            var pair = new Pair<TcsRouting, TcsRouting>(tcsRouting0, tcsRouting1);
-                            tcsDone.SetResult(pair);
-                        }
-                        else
-                        {
-                            tcsDone.SetException(taskRouting1.TryGetException());
-                        }
+                        var pair = new Pair<TcsRouting, TcsRouting>(tcsRouting0, tcsRouting1);
+                        tcsDone.SetResult(pair);
                     });
                 }
                 else
@@ -88,7 +80,7 @@ namespace TomP2P.P2P
         public TcsRouting Quit(RoutingBuilder routingBuilder, ChannelCreator cc)
         {
             ICollection<PeerAddress> startPeers = _peerBean.PeerMap.ClosePeers(routingBuilder.LocationKey,
-                routingBuilder.Parallel*2);
+                routingBuilder.Parallel * 2);
             return Routing(startPeers, routingBuilder, Message.Message.MessageType.Request4, cc);
         }
 
@@ -103,7 +95,7 @@ namespace TomP2P.P2P
         {
             // for bad distribution, use large #noNewInformation
             ICollection<PeerAddress> startPeers = _peerBean.PeerMap.ClosePeers(routingBuilder.LocationKey,
-                routingBuilder.Parallel*2);
+                routingBuilder.Parallel * 2);
             return Routing(startPeers, routingBuilder, type, cc);
         }
 
