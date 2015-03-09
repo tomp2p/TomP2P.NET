@@ -85,8 +85,12 @@ namespace TomP2P.P2P
             {
                 _shutdown = true;
                 int max = _runningTasks.Count;
+                if (max == 0)
+                {
+                    tcsShutdown.SetResult(null);
+                    return tcsShutdown.Task;
+                }
                 var counter = new VolatileInteger(0);
-                // TODO this task never completes if _runningTasks is empty!
                 foreach (var task in _runningTasks.Keys)
                 {
                     task.ContinueWith(t =>
