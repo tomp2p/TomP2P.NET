@@ -7,7 +7,6 @@ using TomP2P.Extensions;
 using TomP2P.P2P;
 using TomP2P.Peers;
 using TomP2P.Rpc;
-using TomP2P.Utils;
 
 namespace TomP2P.Tests.Rpc
 {
@@ -620,6 +619,48 @@ namespace TomP2P.Tests.Rpc
                     await cc.ShutdownAsync();
                 }
                 Console.WriteLine("UDP time: {0}ms.", Convenient.CurrentTimeMillis() - start);
+            }
+            finally
+            {
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
+
+        [Test]
+        public async void TestPingReserve()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(2424)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x9876"))
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+                var cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, 1);
+
+                var taskResponse1 = sender.PingRpc.PingTcpAsync(recv1.PeerAddress, cc,
+                    new DefaultConnectionConfiguration());
+                TomP2P.Utils.Utils.AddReleaseListener(cc, taskResponse1);
+                await taskResponse1;
+                Assert.IsTrue(!taskResponse1.IsFaulted);
+
+                var taskResponse2 = sender.PingRpc.PingTcpAsync(recv1.PeerAddress, cc,
+                    new DefaultConnectionConfiguration());
+                await taskResponse2;
+                Assert.IsTrue(taskResponse2.IsFaulted);
             }
             finally
             {

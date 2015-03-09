@@ -370,9 +370,6 @@ namespace TomP2P.Connection
 
         public override IChannelHandler CreateNewInstance()
         {
-            // TODO correct? message reference is shared...
-            //return new RequestHandler(_tcsResponse, PeerBean, ConnectionBean, _configuration);
-        
             // the same instance can be returned, as there is one RequestHandler per client socket and message
             return this;
         }

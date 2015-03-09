@@ -68,7 +68,7 @@ namespace TomP2P.Tests.P2P
                     .SetPorts(4002)
                     .Start();
 
-                // bootstrap to another address
+                // bootstrap to another address/port
                 var taskBootstrap = master.Bootstrap()
                     .SetInetAddress(IPAddress.Loopback)
                     .SetPorts(3000)
@@ -82,6 +82,13 @@ namespace TomP2P.Tests.P2P
                 {
                     Assert.IsTrue(taskBootstrap.IsFaulted);
                 }
+
+                // bootstrap to correct address
+                taskBootstrap = master.Bootstrap()
+                    .SetPeerAddress(slave.PeerAddress)
+                    .StartAsync();
+                await taskBootstrap;
+                Assert.IsTrue(!taskBootstrap.IsFaulted);
             }
             finally
             {
