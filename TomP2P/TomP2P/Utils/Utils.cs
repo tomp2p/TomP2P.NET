@@ -153,25 +153,28 @@ namespace TomP2P.Utils
         /// <param name="channelCreator">The channel creator that will be shutdown and all connections will be closed.</param>
         /// <param name="tasks">The tasks to listen to. If all the tasks finished, then the channel creator is shut down.
         /// If null is provided, then the channel crator is shut down immediately.</param>
-        public static void AddReleaseListener(ChannelCreator channelCreator, params Task[] tasks)
+        /// <returns>The task that completes when all listeners have completed.</returns>
+        public static Task AddReleaseListener(ChannelCreator channelCreator, params Task[] tasks)
         {
             if (tasks == null)
             {
-                channelCreator.ShutdownAsync();
-                return;
+                return channelCreator.ShutdownAsync();
             }
+            var continuationTasks = new List<Task>(tasks.Length);
             int count = tasks.Count();
             var finished = new VolatileInteger(0);
             foreach (var task in tasks)
             {
-                task.ContinueWith(delegate
+                var contTask = task.ContinueWith(delegate
                 {
                     if (finished.IncrementAndGet() == count)
                     {
                         channelCreator.ShutdownAsync();
                     }
                 });
+                continuationTasks.Add(contTask);
             }
+            return Task.WhenAll(continuationTasks);
         }
 
         public static void AddReleaseListener(Task<ChannelCreator> taskChannelCreator, Task task)
