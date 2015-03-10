@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
+using TomP2P.Connection.Windows;
 using TomP2P.Extensions.Netty.Buffer;
 using TomP2P.Peers;
 
@@ -32,7 +33,7 @@ namespace TomP2P.Rpc
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.DirectData.GetNr(),
                 sendDirectBuilder.IsRaw ? Message.Message.MessageType.Request1 : Message.Message.MessageType.Request2);
 
-            var tcsResponse = new TaskCompletionSource<Message.Message>(message); // TODO progress listener needed?
+            var tcsResponse = new TaskCompletionSource<Message.Message>(message);
 
             if (sendDirectBuilder.IsSign)
             {

@@ -293,7 +293,6 @@ namespace TomP2P.Connection
             }
 
             // call this for streaming support
-            // TODO futureResponse.progress(responseMessage)
             if (!responseMessage.IsDone)
             {
                 Logger.Debug("Good message is streaming. {0}", responseMessage);
@@ -316,7 +315,6 @@ namespace TomP2P.Connection
             {
                 Logger.Debug("Good message {0}. Leave channel {1} open.", responseMessage, ctx.Channel);
                 _tcsResponse.SetResult(responseMessage);
-                // TODO but shouldn't the Sender already have closed the channel?
             }
         }
 

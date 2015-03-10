@@ -1,5 +1,6 @@
 ﻿using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
+using TomP2P.Futures;
 using TomP2P.Message;
 
 namespace TomP2P.Rpc
@@ -7,8 +8,6 @@ namespace TomP2P.Rpc
     public interface ISendDirectBuilder : IConnectionConfiguration
     {
         bool IsRaw { get; }
-
-        // TODO ProgressListener needed?
 
         bool IsSign { get; }
 
