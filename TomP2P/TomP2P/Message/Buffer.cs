@@ -4,8 +4,6 @@ using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Message
 {
-    // TODO Java Buffer uses int for Length, .NET should use long
-
     public class Buffer : IEquatable<Buffer>
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -39,7 +37,7 @@ namespace TomP2P.Message
             else
             {
                 BackingBuffer.WriteBytes(slice);
-                Logger.Debug("Buffer copied. Y<ou can use a CompositeByteBuf.");
+                Logger.Debug("Buffer copied. You can use a CompositeByteBuf.");
             }
             return this;
         }

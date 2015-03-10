@@ -25,16 +25,18 @@ namespace TomP2P.Tests.Rpc
         private static readonly VolatileInteger ProgressComplete = new VolatileInteger(0);
         private static readonly VolatileInteger ProgressNotComplete = new VolatileInteger(0);
         
-        [Test]
+        /*[Test]
         public void TestDirectMessage()
         {
             TestDirectMessage(true);
-            //TestDirectMessage(false);
-        }
+            TestDirectMessage(false);
+        }*/
 
         [Test]
-        public async void TestDirectMessage(bool wait)
+        public async void TestDirectMessage()
         {
+            bool wait = true;
+
             Peer sender = null;
             Peer recv1 = null;
             ChannelCreator cc = null;
@@ -42,11 +44,13 @@ namespace TomP2P.Tests.Rpc
             {
                 sender = new PeerBuilder(new Number160("0x50"))
                     .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(2424, 2424))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
                     .SetP2PId(55)
                     .SetPorts(2424)
                     .Start();
                 recv1 = new PeerBuilder(new Number160("0x20"))
                     .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(8088, 8088))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
                     .SetP2PId(55)
                     .SetPorts(8088)
                     .Start();
@@ -119,7 +123,7 @@ namespace TomP2P.Tests.Rpc
             public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
             {
                 Console.WriteLine("Reply 2 ? " + complete);
-                var replyBuffer = Unpooled.Buffer(0); // TODO works?
+                var replyBuffer = Unpooled.Buffer(50); // TODO works?
                 replyBuffer.SetWriterIndex(50);
                 if (complete)
                 {

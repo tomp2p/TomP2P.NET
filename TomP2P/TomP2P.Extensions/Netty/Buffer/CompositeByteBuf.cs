@@ -157,7 +157,7 @@ namespace TomP2P.Extensions.Netty.Buffer
 
         public override IByteBufAllocator Alloc
         {
-            get { throw new NotImplementedException(); }
+            get { return _alloc; }
         }
 
         public override int Capacity
@@ -199,32 +199,101 @@ namespace TomP2P.Extensions.Netty.Buffer
 
         public override bool HasArray()
         {
-            throw new NotImplementedException();
+            if (_components.Count == 1)
+            {
+                return _components[0]._buf.HasArray();
+            }
+            return false;
         }
 
         public override sbyte[] Array()
         {
-            throw new NotImplementedException();
+            if (_components.Count == 1)
+            {
+                return _components[0]._buf.Array();
+            }
+            throw new NotSupportedException();
         }
 
         public override int ArrayOffset()
         {
-            throw new NotImplementedException();
+            if (_components.Count == 1)
+            {
+                return _components[0]._buf.ArrayOffset();
+            }
+            throw new NotSupportedException();
         }
 
         public override ByteBuf SetBytes(int index, sbyte[] src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckSrcIndex(index, length, srcIndex, src.Length);
+            if (length == 0)
+            {
+                return this;
+            }
+
+            int i = ToComponentIndex(index);
+            while (length > 0)
+            {
+                Component c = _components[i];
+                ByteBuf s = c._buf;
+                int adjustment = c._offset;
+                int localLength = Math.Min(length, s.Capacity - (index - adjustment));
+                s.SetBytes(index - adjustment, src, srcIndex, localLength);
+                index += localLength;
+                srcIndex += localLength;
+                length -= localLength;
+                i++;
+            }
+            return this;
         }
 
         public override ByteBuf SetBytes(int index, ByteBuf src, int srcIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckSrcIndex(index, length, srcIndex, src.Capacity);
+            if (length == 0)
+            {
+                return this;
+            }
+
+            int i = ToComponentIndex(index);
+            while (length > 0)
+            {
+                Component c = _components[i];
+                ByteBuf s = c._buf;
+                int adjustment = c._offset;
+                int localLength = Math.Min(length, s.Capacity - (index - adjustment));
+                s.SetBytes(index - adjustment, src, srcIndex, localLength);
+                index += localLength;
+                srcIndex += localLength;
+                length -= localLength;
+                i++;
+            }
+            return this;
         }
 
         public override ByteBuf GetBytes(int index, sbyte[] dst, int dstIndex, int length)
         {
-            throw new NotImplementedException();
+            CheckDstIndex(index, length, dstIndex, dst.Length);
+            if (length == 0)
+            {
+                return this;
+            }
+
+            int i = ToComponentIndex(index);
+            while (length > 0)
+            {
+                Component c = _components[i];
+                ByteBuf s = c._buf;
+                int adjustment = c._offset;
+                int localLength = Math.Min(length, s.Capacity - (index - adjustment));
+                s.GetBytes(index - adjustment, dst, dstIndex, localLength);
+                index += localLength;
+                dstIndex += localLength;
+                length -= localLength;
+                i++;
+            }
+            return this;
         }
 
         public override MemoryStream NioBuffer(int index, int length)
@@ -254,7 +323,7 @@ namespace TomP2P.Extensions.Netty.Buffer
             CheckIndex(index, length);
             if (length == 0)
             {
-                return new MemoryStream[0]; // EMPTY_BYTE_BUFFERS<
+                return new MemoryStream[0]; // EMPTY_BYTE_BUFFERS
             }
 
             var buffers = new List<MemoryStream>(_components.Count);
@@ -292,7 +361,7 @@ namespace TomP2P.Extensions.Netty.Buffer
             for (int low = 0, high = _components.Count; low <= high; )
             {
                 int mid = low + high >> 1;
-                Component c = _components[mid];
+                var c = _components[mid];
                 if (offset >= c._endOffset)
                 {
                     low = mid + 1;

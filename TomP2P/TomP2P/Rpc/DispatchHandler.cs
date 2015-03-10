@@ -144,7 +144,7 @@ namespace TomP2P.Rpc
                         listener.PeerFailed(requestMessage.Sender, new PeerException(ex));
                     }
                 }
-                Logger.Error("Exception in custom dipatch handler.", ex);
+                Logger.Error("Exception in custom dispatch handler.", ex);
                 responder.Failed(Message.Message.MessageType.Exception);
             }
         }
