@@ -58,6 +58,7 @@
     <Compile Include="LoggerTest.cs" />
     <Compile Include="P2P\BootstrapTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rpc\DirectTest.cs" />
     <Compile Include="Rpc\NeighborTest.cs" />
     <Compile Include="Rpc\PingTest.cs" />
     <Compile Include="Rpc\QuitTest.cs" />

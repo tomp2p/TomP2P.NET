@@ -18,7 +18,7 @@ namespace TomP2P.Extensions.Netty.Buffer
             public int _offset;
             public int _endOffset;
 
-            private Component(ByteBuf buf)
+            internal Component(ByteBuf buf)
             {
                 _buf = buf;
                 _length = buf.ReadableBytes;
@@ -36,6 +36,123 @@ namespace TomP2P.Extensions.Netty.Buffer
             _direct = direct;
             _maxNumComponents = maxNumComponents;
             // TODO leak detector needed?
+        }
+
+        public CompositeByteBuf AddComponent(ByteBuf buffer)
+        {
+            AddComponent0(_components.Count, buffer);
+            ConsolidateIfNeeded();
+            return this;
+        }
+
+        private int AddComponent0(int cIndex, ByteBuf buffer)
+        {
+            CheckComponentIndex(cIndex);
+
+            if (buffer == null)
+            {
+                throw new NullReferenceException("buffer");
+            }
+
+            int readableBytes = buffer.ReadableBytes;
+            if (readableBytes == 0)
+            {
+                return cIndex;
+            }
+
+            // No need to consolidate - just add a component to the list.
+            var c = new Component(buffer.Slice());
+            if (cIndex == _components.Count)
+            {
+                _components.Add(c);
+                if (cIndex == 0)
+                {
+                    c._endOffset = readableBytes;
+                }
+                else
+                {
+                    Component prev = _components[cIndex - 1];
+                    c._offset = prev._endOffset;
+                    c._endOffset = c._offset + readableBytes;
+                }
+            }
+            else
+            {
+                _components.Insert(cIndex, c);
+                UpdateComponentOffsets(cIndex);
+            }
+            return cIndex;
+        }
+
+        private void UpdateComponentOffsets(int cIndex)
+        {
+            int size = _components.Count;
+            if (size <= cIndex)
+            {
+                return;
+            }
+
+            var c = _components[cIndex];
+            if (cIndex == 0)
+            {
+                c._offset = 0;
+                c._endOffset = c._length;
+                cIndex++;
+            }
+
+            for (int i = cIndex; i < size; i++)
+            {
+                var prev = _components[i - 1];
+                var cur = _components[i];
+                cur._offset = prev._endOffset;
+                cur._endOffset = cur._offset + cur._length;
+            }
+        }
+
+        private void ConsolidateIfNeeded()
+        {
+            // Consolidate if the number of components will exceed the allowed maximum by the current
+            // operation.
+            int numComponents = _components.Count;
+            if (numComponents > _maxNumComponents)
+            {
+                int capacity = _components[numComponents - 1]._endOffset;
+
+                ByteBuf consolidated = AllocBuffer(capacity);
+
+                // We're not using foreach to avoid creating an iterator.
+                // noinspection ForLoopReplaceableByForEach
+                for (int i = 0; i < numComponents; i ++)
+                {
+                    Component comp = _components[i];
+                    ByteBuf b = comp._buf;
+                    consolidated.WriteBytes(b);
+                    //comp.FreeIfNecessary();
+                }
+                var c = new Component(consolidated);
+                c._endOffset = c._length;
+                _components.Clear();
+                _components.Add(c);
+            }
+        }
+
+        private ByteBuf AllocBuffer(int capacity)
+        {
+            if (_direct)
+            {
+                return _alloc.DirectBuffer(capacity);
+            }
+            return _alloc.HeapBuffer(capacity);
+        }
+
+        private void CheckComponentIndex(int cIndex)
+        {
+            if (cIndex < 0 || cIndex > _components.Count)
+            {
+                throw new IndexOutOfRangeException(String.Format(
+                        "cIndex: {0} (expected: >= 0 && <= numComponents({1}))",
+                        cIndex, _components.Count));
+            }
         }
 
         public override IByteBufAllocator Alloc
@@ -172,15 +289,20 @@ namespace TomP2P.Extensions.Netty.Buffer
         {
             CheckIndex(offset);
 
-            for (int low = 0, high = _components.Count; low <= high;)
+            for (int low = 0, high = _components.Count; low <= high; )
             {
                 int mid = low + high >> 1;
                 Component c = _components[mid];
-                if (offset >= c._endOffset) {
+                if (offset >= c._endOffset)
+                {
                     low = mid + 1;
-                } else if (offset < c._offset) {
+                }
+                else if (offset < c._offset)
+                {
                     high = mid - 1;
-                } else {
+                }
+                else
+                {
                     return mid;
                 }
             }

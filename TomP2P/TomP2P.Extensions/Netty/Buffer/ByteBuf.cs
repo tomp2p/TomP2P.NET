@@ -178,6 +178,8 @@ namespace TomP2P.Extensions.Netty.Buffer
 
         public abstract ByteBuf WriteBytes(sbyte[] src, int srcIndex, int length);
 
+        public abstract ByteBuf WriteBytes(ByteBuf src);
+
         public abstract ByteBuf WriteBytes(ByteBuf src, int length);
 
         public abstract ByteBuf WriteBytes(ByteBuf src, int srcIndex, int length);

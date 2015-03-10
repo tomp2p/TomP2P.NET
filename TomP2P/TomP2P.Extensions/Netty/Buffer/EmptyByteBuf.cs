@@ -220,6 +220,11 @@ namespace TomP2P.Extensions.Netty.Buffer
             throw new NotImplementedException();
         }
 
+        public override ByteBuf WriteBytes(ByteBuf src)
+        {
+            throw new NotImplementedException();
+        }
+
         public override ByteBuf WriteBytes(ByteBuf src, int length)
         {
             throw new NotImplementedException();

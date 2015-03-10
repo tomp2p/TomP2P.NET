@@ -9,6 +9,27 @@
         /// </summary>
         public static readonly ByteBuf EmptyBuffer = new EmptyByteBuf(); // Alloc.Buffer(0, 0);
 
+        /// <summary>
+        /// Creates a new big-endian Java heap buffer with the specified capacity, which
+        /// expands its capacity boundlessly on demand. The new buffer's ReaderIndex and
+        /// WriterIndex are 0.
+        /// </summary>
+        /// <param name="initialCapacity"></param>
+        /// <returns></returns>
+        public static ByteBuf Buffer(int initialCapacity)
+        {
+            return Alloc.HeapBuffer(initialCapacity);
+        }
+
+        public static CompositeByteBuf CompositeBuffer()
+        {
+            return CompositeBuffer(16);
+        }
+
+        public static CompositeByteBuf CompositeBuffer(int maxNumComponents)
+        {
+            return new CompositeByteBuf(Alloc, false, maxNumComponents);
+        }
 
         /// <summary>
         /// Creates a new big-endian composite buffer which wraps the readable bytes of the 

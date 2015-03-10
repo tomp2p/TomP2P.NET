@@ -592,6 +592,12 @@ namespace TomP2P.Storage
             return this;
         }
 
+        public override ByteBuf WriteBytes(ByteBuf src)
+        {
+            WriteBytes(src, src.ReadableBytes);
+            return this;
+        }
+
         public override ByteBuf WriteBytes(ByteBuf src, int length)
         {
             if (length > src.ReadableBytes)

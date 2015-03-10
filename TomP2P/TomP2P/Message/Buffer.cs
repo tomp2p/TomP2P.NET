@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using NLog;
 using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Message
@@ -8,6 +8,8 @@ namespace TomP2P.Message
 
     public class Buffer : IEquatable<Buffer>
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public ByteBuf BackingBuffer { get; private set; }
         public int Length { get; private set; }
         public int AlreadyRead { get; private set; }
@@ -26,19 +28,23 @@ namespace TomP2P.Message
             Length = buffer.ReadableBytes;
         }
 
-        public Buffer AddComponent(MemoryStream slide)
+        public Buffer AddComponent(ByteBuf slice)
         {
-            // TODO implement .NET equivalent
-            throw new NotImplementedException();
+            if (BackingBuffer is CompositeByteBuf)
+            {
+                var cbb = BackingBuffer as CompositeByteBuf;
+                cbb.AddComponent(slice);
+                cbb.SetWriterIndex(cbb.WriterIndex + slice.ReadableBytes);
+            }
+            else
+            {
+                BackingBuffer.WriteBytes(slice);
+                Logger.Debug("Buffer copied. Y<ou can use a CompositeByteBuf.");
+            }
+            return this;
         }
 
         public Object Object()
-        {
-            // TODO implement .NET equivalent
-            throw new NotImplementedException();
-        }
-
-        ~Buffer()
         {
             // TODO implement .NET equivalent
             throw new NotImplementedException();
