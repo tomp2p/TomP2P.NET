@@ -243,7 +243,7 @@ namespace TomP2P.Storage
             int index = FindIndex(writerIndex);
             if (index < 0)
             {
-                // no component found, make sure we can writer
+                // no component found, make sure we can write, thus adding a component
                 EnsureWriteable(writerIndex);
                 index = FindIndex(writerIndex);
             }

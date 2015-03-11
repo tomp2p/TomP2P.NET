@@ -37,7 +37,7 @@ namespace TomP2P.Tests.Rpc
                     .Start();
                 recv1.RawDataReply(new TestRawDataReply());
 
-                cc = await sender.ConnectionBean.Reservation.CreateAsync(0, 2);
+                cc = await sender.ConnectionBean.Reservation.CreateAsync(0, 1);
 
                 var sendDirectBuilder = new SendDirectBuilder(sender, (PeerAddress) null);
                 sendDirectBuilder.SetIsStreaming();
@@ -69,6 +69,63 @@ namespace TomP2P.Tests.Rpc
             }
         }
 
+        [Test]
+        public async void TestOrder()
+        {
+            Peer sender = null;
+            Peer recv1 = null;
+            ChannelCreator cc = null;
+            try
+            {
+                sender = new PeerBuilder(new Number160("0x50"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(2525, 2525))
+                    .SetP2PId(55)
+                    .SetPorts(2525)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x20"))
+                    .SetMaintenanceTask(Utils2.CreateInfiniteIntervalMaintenanceTask())
+                    .SetChannelServerConfiguration(Utils2.CreateInfiniteTimeoutChannelServerConfiguration(9099, 9099))
+                    .SetP2PId(55)
+                    .SetPorts(8088)
+                    .Start();
+                recv1.RawDataReply(new TestOrderRawDataReply());
+
+                for (int i = 0; i < 500; i++)
+                {
+                    cc = await sender.ConnectionBean.Reservation.CreateAsync(0, 1);
+
+                    var sendDirectBuilder = new SendDirectBuilder(sender, (PeerAddress) null);
+                    var buffer = AlternativeCompositeByteBuf.CompBuffer().WriteInt(i);
+                    sendDirectBuilder.SetBuffer(new Buffer(buffer));
+                    sendDirectBuilder.SetIsStreaming();
+
+                    var tr = sender.DirectDataRpc.SendAsync(recv1.PeerAddress, sendDirectBuilder, cc);
+                    TomP2P.Utils.Utils.AddReleaseListener(cc, tr);
+                    tr.ContinueWith(t =>
+                    {
+                        int j = t.Result.Buffer(0).BackingBuffer.ReadInt();
+                        Console.WriteLine("Received {0}.", j);
+                    });
+                }
+            }
+            finally
+            {
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+                if (cc != null)
+                {
+                    cc.ShutdownAsync().Wait();
+                }
+            }
+        }
+
         private static Buffer CreateTestBuffer()
         {
             var acbb = AlternativeCompositeByteBuf.CompBuffer();
@@ -81,6 +138,17 @@ namespace TomP2P.Tests.Rpc
             public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
             {
                 return CreateTestBuffer();
+            }
+        }
+
+        private class TestOrderRawDataReply : IRawDataReply
+        {
+            public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
+            {
+                int i = requestBuffer.BackingBuffer.ReadInt();
+                Console.WriteLine("Got {0}.", i);
+                var buffer = AlternativeCompositeByteBuf.CompBuffer().WriteInt(i);
+                return new Buffer(buffer);
             }
         }
     }

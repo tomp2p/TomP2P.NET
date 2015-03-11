@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connection\CountConnectionOutboundHandler.cs" />
     <Compile Include="Connection\DefaultConnectionConfiguration.cs" />
     <Compile Include="Connection\Windows\NET Helper\TomP2PExtensions.cs" />
     <Compile Include="Connection\Windows\Netty\BaseClient.cs" />
