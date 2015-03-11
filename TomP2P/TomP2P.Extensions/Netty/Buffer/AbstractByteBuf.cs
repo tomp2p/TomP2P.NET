@@ -524,6 +524,7 @@ namespace TomP2P.Extensions.Netty.Buffer
         public override string ToString()
         {
             var sb = new StringBuilder();
+            sb.Append(GetType().Name);
             sb.Append("[ridx: ").Append(ReaderIndex)
                 .Append(", widx: ").Append(WriterIndex)
                 .Append(", cap: ").Append(Capacity);
