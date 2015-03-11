@@ -46,11 +46,8 @@ namespace TomP2P.Tests.Rpc
                 sendDirectBuilder.SetBuffer(buffer);
 
                 var tr1 = sender.DirectDataRpc.SendAsync(recv1.PeerAddress, sendDirectBuilder, cc);
-                //var tr2 = sender.DirectDataRpc.SendAsync(recv1.PeerAddress, sendDirectBuilder, cc);
                 await tr1;
-                //await tr2;
                 Assert.IsTrue(!tr1.IsFaulted);
-                //Assert.IsTrue(!tr2.IsFaulted);
 
                 var ret = tr1.Result.Buffer(0);
                 Assert.AreEqual(buffer, ret);

@@ -339,7 +339,7 @@ namespace TomP2P.Storage
             var first = firstC.Buf.Duplicate();
             first.SetReaderIndex(offset - firstC.Offset);
 
-            var buf = first;
+            ByteBuf buf = first;
             int bytesToSlice = length;
             do
             {
