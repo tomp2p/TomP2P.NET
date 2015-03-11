@@ -537,7 +537,6 @@ namespace TomP2P.Message
                         }
 
                         ByteBuf buf2 = AlternativeCompositeByteBuf.CompBuffer(_buffer.ToByteBufs());
-
                         Message.SetBuffer(new Buffer(buf2, _bufferSize));
                         LastContent = _contentTypes.Dequeue();
                         _bufferSize = -1;

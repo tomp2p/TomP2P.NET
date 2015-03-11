@@ -1107,10 +1107,11 @@ namespace TomP2P.Storage
 
         public override string ToString()
         {
-            // .NET-specific:
-            var sb = new StringBuilder("[Readable: ").Append(ReadableBytes)
-                .Append(" | Writeable: ").Append(WriteableBytes)
-                .Append(" , Capacity: ").Append(Capacity)
+            var sb = new StringBuilder();
+            sb.Append("[ridx: ").Append(ReaderIndex)
+                .Append(", widx: ").Append(WriterIndex)
+                .Append(", cap: ").Append(Capacity)
+                .Append(", comp: ").Append(_components.Count)
                 .Append("]");
             return sb.ToString();
         }

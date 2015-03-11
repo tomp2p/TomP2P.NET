@@ -37,7 +37,6 @@ namespace TomP2P.Storage
         {
             _buffers = new List<ByteBuf>(1);
             _buffers.Add(buf.Slice());
-            // TODO retain needed?
         }
 
         public DataBuffer(IList<ByteBuf> buffers)
@@ -48,11 +47,6 @@ namespace TomP2P.Storage
                 _buffers.Add(buf.Duplicate());
                 // TODO retain needed?
             }
-        }
-
-        ~DataBuffer()
-        {
-            // TODO release needed?
         }
 
         public DataBuffer Add(DataBuffer dataBuffer)
@@ -102,14 +96,12 @@ namespace TomP2P.Storage
 
         public ByteBuf ToByteBuf()
         {
-            // TODO check if works
             DataBuffer copy = ShallowCopy();
             return Unpooled.WrappedBuffer(copy._buffers.ToArray());
         }
 
         public ByteBuf[] ToByteBufs()
         {
-            // TODO check if works
             DataBuffer copy = ShallowCopy();
             return copy._buffers.ToArray();
         }
@@ -129,9 +121,8 @@ namespace TomP2P.Storage
             }
         }
 
-        public int TransferFrom(AlternativeCompositeByteBuf buf, int remaining)
+        public int TransferFrom(ByteBuf buf, int remaining)
         {
-            // TODO check if works
             int readable = buf.ReadableBytes;
             int index = buf.ReaderIndex;
             int length = Math.Min(remaining, readable);
@@ -141,15 +132,24 @@ namespace TomP2P.Storage
                 return 0;
             }
 
-            IList<ByteBuf> decoms = buf.Decompose(index, length);
-            foreach (var decom in decoms)
+            if (buf is AlternativeCompositeByteBuf)
+            {
+                IList<ByteBuf> decoms =  ((AlternativeCompositeByteBuf) buf).Decompose(index, length);
+                foreach (var decom in decoms)
+                {
+                    lock (_buffers)
+                    {
+                        // this is already a slice
+                        _buffers.Add(decom);
+                    }
+                }
+            }
+            else
             {
                 lock (_buffers)
                 {
-                    // this is already a slice
-                    _buffers.Add(decom);
+                    _buffers.Add(buf.Slice(index, length));
                 }
-                // TODO retain?
             }
 
             AlreadyTransferred += Length;

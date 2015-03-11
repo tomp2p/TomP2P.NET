@@ -110,6 +110,7 @@ namespace TomP2P.Rpc
                     var responseBuffer = rawDataReply2.Reply(requestMessage.Sender, requestBuffer, requestMessage.IsDone);
                     if (responseBuffer == null && requestMessage.IsDone)
                     {
+                        Logger.Warn("Raw reply is null, returning not found.");
                         responseMessage.SetType(Message.Message.MessageType.NotFound);
                     }
 // ReSharper disable once PossibleUnintendedReferenceComparison

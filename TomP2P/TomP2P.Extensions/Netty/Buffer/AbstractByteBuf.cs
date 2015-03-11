@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace TomP2P.Extensions.Netty.Buffer
 {
@@ -518,6 +519,20 @@ namespace TomP2P.Extensions.Netty.Buffer
         public override int GetHashCode()
         {
             return ByteBufUtil.HashCode(this);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append("[ridx: ").Append(ReaderIndex)
+                .Append(", widx: ").Append(WriterIndex)
+                .Append(", cap: ").Append(Capacity);
+            if (MaxCapacity != Int32.MaxValue)
+            {
+                sb.Append("/").Append(MaxCapacity);
+            }
+            sb.Append("]");
+            return sb.ToString();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using TomP2P.Connection;
 using TomP2P.Extensions.Workaround;
-using TomP2P.Futures;
 using TomP2P.Message;
 
 namespace TomP2P.Rpc
