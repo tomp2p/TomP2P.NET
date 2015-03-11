@@ -63,6 +63,12 @@ namespace TomP2P.Extensions.Netty.Buffer
         public abstract int MaxCapacity { get; }
 
         /// <summary>
+        /// Sets the ReaderIndex and WriterIndex of this buffer to 0.
+        /// </summary>
+        /// <returns></returns>
+        public abstract ByteBuf Clear();
+
+        /// <summary>
         /// Returns a slice of this buffer's readable bytes.
         /// </summary>
         /// <returns></returns>

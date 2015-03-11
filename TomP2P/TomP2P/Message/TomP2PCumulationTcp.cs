@@ -30,7 +30,7 @@ namespace TomP2P.Message
 
         public override void Read(ChannelHandlerContext ctx, object msg)
         {
-            // .NET: use a content wrapper for TCP, similar to TomP2PSinglePacketUdp
+            // .NET-specific: use a content wrapper for TCP, similar to TomP2PSinglePacketUdp
             var piece = msg as StreamPiece;
             if (piece == null)
             {
@@ -48,8 +48,8 @@ namespace TomP2P.Message
                 {
                     // TODO CompBuffer(buf) seems not to set ReadableBytes property correctly
                     // TODO optimize and use zero-copy -> use ACBB from MyTcpClient
-                    _cumulation = AlternativeCompositeByteBuf.CompBuffer();
-                    _cumulation.WriteBytes(ConnectionHelper.ExtractBytes(buf).ToSByteArray());
+                    _cumulation = AlternativeCompositeByteBuf.CompBuffer(buf);
+                    //_cumulation.WriteBytes(ConnectionHelper.ExtractBytes(buf).ToSByteArray());
                 }
                 else
                 {

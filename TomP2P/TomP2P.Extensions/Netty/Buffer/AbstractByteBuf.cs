@@ -19,11 +19,12 @@ namespace TomP2P.Extensions.Netty.Buffer
             _maxCapacity = maxCapacity;
         }
 
-        /*public override void Clear()
+        public override ByteBuf Clear()
         {
             SetReaderIndex(0);
             SetWriterIndex(0);
-        }*/
+            return this;
+        }
 
         public override int ReaderIndex
         {
