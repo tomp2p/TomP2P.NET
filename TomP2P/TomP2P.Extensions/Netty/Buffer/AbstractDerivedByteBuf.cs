@@ -6,8 +6,7 @@ namespace TomP2P.Extensions.Netty.Buffer
     {
         protected AbstractDerivedByteBuf(int maxCapacity)
             : base(maxCapacity)
-        {
-        }
+        { }
 
         public override MemoryStream NioBuffer(int index, int length)
         {

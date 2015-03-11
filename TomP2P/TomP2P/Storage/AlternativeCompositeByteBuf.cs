@@ -182,8 +182,8 @@ namespace TomP2P.Storage
                         // the buffer may not get filled
                         c.Offset = prev.EndOffset;
                     }
-                    WriterIndex0(WriterIndex + c.Buf.WriterIndex);
                 }
+                WriterIndex0(WriterIndex + c.Buf.WriterIndex);
             }
             return this;
         }

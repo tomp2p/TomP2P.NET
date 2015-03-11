@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
-using TomP2P.Extensions.Netty;
-using TomP2P.Storage;
+using TomP2P.Extensions.Netty.Buffer;
 
 namespace TomP2P.Connection.Windows.Netty
 {
@@ -12,11 +11,11 @@ namespace TomP2P.Connection.Windows.Netty
     /// </summary>
     public class StreamPiece
     {
-        private readonly AlternativeCompositeByteBuf _content;
+        private readonly ByteBuf _content;
         private readonly IPEndPoint _recipient;
         private readonly IPEndPoint _sender;
 
-        public StreamPiece(AlternativeCompositeByteBuf content, IPEndPoint recipient, IPEndPoint sender)
+        public StreamPiece(ByteBuf content, IPEndPoint recipient, IPEndPoint sender)
         {
             if (content == null)
             {
@@ -28,7 +27,7 @@ namespace TomP2P.Connection.Windows.Netty
             _sender = sender;
         }
 
-        public AlternativeCompositeByteBuf Content
+        public ByteBuf Content
         {
             get { return _content; }
         }
@@ -49,10 +48,7 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 return String.Format("StreamPiece ({0} => {1}, {2})", _sender, _recipient, _content);
             }
-            else
-            {
-                return String.Format("StreamPiece (=> {0}, {1})", _recipient, _content);
-            }
+            return String.Format("StreamPiece (=> {0}, {1})", _recipient, _content);
         }
     }
 }

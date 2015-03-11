@@ -34,7 +34,7 @@ namespace TomP2P.Message
             var piece = msg as StreamPiece;
             if (piece == null)
             {
-                ctx.FireRead(msg);
+                //ctx.FireRead(msg);
                 return;
             }
 
@@ -46,10 +46,7 @@ namespace TomP2P.Message
             {
                 if (_cumulation == null)
                 {
-                    // TODO CompBuffer(buf) seems not to set ReadableBytes property correctly
-                    // TODO optimize and use zero-copy -> use ACBB from MyTcpClient
                     _cumulation = AlternativeCompositeByteBuf.CompBuffer(buf);
-                    //_cumulation.WriteBytes(ConnectionHelper.ExtractBytes(buf).ToSByteArray());
                 }
                 else
                 {

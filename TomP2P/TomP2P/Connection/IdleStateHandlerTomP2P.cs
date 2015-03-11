@@ -72,7 +72,7 @@ namespace TomP2P.Connection
         public override void Read(ChannelHandlerContext ctx, object msg)
         {
             _lastReadTime.Set(Convenient.CurrentTimeMillis());
-            ctx.FireRead(msg);
+            //ctx.FireRead(msg);
         }
 
         public override void Write(ChannelHandlerContext ctx, object msg)
