@@ -45,6 +45,7 @@ namespace TomP2P.Connection.Windows
             // TODO find zero-copy way, use same buffer
             // receive bytes
             var bytesRecv = new byte[256];
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
 
             var stream = _tcpClient.GetStream();
             var pieceCount = 0;
@@ -60,8 +61,7 @@ namespace TomP2P.Connection.Windows
                     // the socket has been closed
                     return;
                 }
-
-                var buf = AlternativeCompositeByteBuf.CompBuffer();
+                buf.Clear();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
                 LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
