@@ -290,7 +290,8 @@ namespace TomP2P.Core.Connection
         /// <returns>The handler for the provided parameters or null, if none has been found.</returns>
         public DispatchHandler SearchHandler(Number160 recipientId, Number160 onBehalfOf, int command)
         {
-            IDictionary<int, DispatchHandler> commands = _ioHandlers[new Number320(recipientId, onBehalfOf)];
+            IDictionary<int, DispatchHandler> commands;
+            _ioHandlers.TryGetValue(new Number320(recipientId, onBehalfOf), out commands);
 
             if (commands != null && commands.ContainsKey(command))
             {
@@ -311,7 +312,8 @@ namespace TomP2P.Core.Connection
             {
                 foreach (var entry2 in entry.Value)
                 {
-                    var handler = entry.Value[command];
+                    DispatchHandler handler;
+                    entry.Value.TryGetValue(command, out handler);
                     if (handler != null && entry2.Key == command)
                     {
                         result.Add(entry.Key, handler);
@@ -325,7 +327,6 @@ namespace TomP2P.Core.Connection
         {
             // does not have to be implemeted, this class is ISharable
             throw new NotImplementedException();
-            //return new Dispatcher(_p2PId, _peerBeanMaster, _heartBeatMillis);
         }
 
         public override string ToString()

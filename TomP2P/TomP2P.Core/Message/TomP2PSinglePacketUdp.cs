@@ -59,7 +59,6 @@ namespace TomP2P.Core.Message
         {
             // does not have to be implemeted, this class is ISharable
             throw new NotImplementedException();
-            return new TomP2PSinglePacketUdp(_signatureFactory);
         }
 
         public override string ToString()

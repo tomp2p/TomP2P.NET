@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Core.P2P;
+using TomP2P.Core.Peers;
 
 namespace TomP2P.Benchmark
 {
@@ -33,11 +36,17 @@ namespace TomP2P.Benchmark
                 Logger.Info("Bootstrap environment set up with {0} peers.", peers.Length);
                 
                 // wait for peers to know each other
-                const int delaySec = 30;
+                const int delaySec = 10;
                 Logger.Info("Waiting {0} seconds...", delaySec);
                 await Task.Delay(delaySec*1000);
 
                 // bootstrap a new peer, measure time
+                var newPeer = BenchmarkUtil.CreateSlave(master, rnd, true);
+
+                BenchmarkUtil.DoBenchmarking(async delegate
+                {
+                    await newPeer.Bootstrap().SetPeerAddress(master.PeerAddress).StartAsync();
+                });
             }
             finally
             {

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using NLog;
 using TomP2P.Core.Connection;
 using TomP2P.Core.P2P;
@@ -21,7 +23,6 @@ namespace TomP2P.Benchmark
         /// <returns></returns>
         public static Peer[] CreateNodes(int nrOfPeers, Random rnd, int port, bool maintenance)
         {
-            var bindings = new Bindings();
             var peers = new Peer[nrOfPeers];
 
             var masterId = new Number160(rnd);
@@ -29,24 +30,48 @@ namespace TomP2P.Benchmark
             peers[0] = new PeerBuilder(masterId)
                 .SetPorts(port)
                 .SetEnableMaintenanceRpc(maintenance)
-                .SetExternalBindings(bindings)
+                .SetExternalBindings(new Bindings())
                 .SetPeerMap(masterMap)
                 .Start();
             Logger.Info("Created master peer: {0}.", peers[0].PeerId);
 
             for (int i = 1; i < nrOfPeers; i++)
             {
-                var slaveId = new Number160(rnd);
-                var slaveMap = new PeerMap(new PeerMapConfiguration(slaveId).SetPeerNoVerification());
-                peers[i] = new PeerBuilder(slaveId)
-                    .SetMasterPeer(peers[0])
-                    .SetEnableMaintenanceRpc(maintenance)
-                    .SetExternalBindings(bindings)
-                    .SetPeerMap(slaveMap)
-                    .Start();
-                Logger.Info("Created slave peer {0}: {1}.", i, peers[i].PeerId);
+                peers[i] = CreateSlave(peers[0], rnd, maintenance);
             }
             return peers;
+        }
+
+        public static Peer CreateSlave(Peer master, Random rnd, bool maintenance)
+        {
+            var slaveId = new Number160(rnd);
+            var slaveMap = new PeerMap(new PeerMapConfiguration(slaveId).SetPeerNoVerification());
+            var slave = new PeerBuilder(slaveId)
+                .SetMasterPeer(master)
+                .SetEnableMaintenanceRpc(maintenance)
+                .SetExternalBindings(new Bindings())
+                .SetPeerMap(slaveMap)
+                .Start();
+            Logger.Info("Created slave peer {0}.", slave.PeerId);
+            return slave;
+        }
+
+        public static void DoBenchmarking(Action func, [CallerMemberName] string caller = "")
+        {
+            Console.WriteLine("Starting Benchmarking...");
+            var watch = Stopwatch.StartNew();
+
+            func();
+
+            watch.Stop();
+            Console.WriteLine("Stopped Benchmarking.");
+            Console.WriteLine("{0}: {1} ns", caller, watch.ElapsedTicks.ToNanos());
+        }
+
+        private static long ToNanos(this long ticks)
+        {
+            var seconds = ticks / Stopwatch.Frequency;
+            return seconds * 1000000000;
         }
     }
 }

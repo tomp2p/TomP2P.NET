@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace TomP2P.Benchmark
@@ -31,12 +32,19 @@ namespace TomP2P.Benchmark
 
         private static async Task ExecuteAsync(string argument)
         {
+            PrintStopwatchProperties();
             switch (argument)
             {
                 case "bb1":
                     await BootstrapBenchmark.Benchmark1Async();
                     break;
             }
+        }
+
+        private static void PrintStopwatchProperties()
+        {
+            Console.WriteLine("Stopwatch.Frequency: {0} ticks/sec", Stopwatch.Frequency);
+            Console.WriteLine("Stopwatch.IsHighResolution: {0}", Stopwatch.IsHighResolution);
         }
     }
 }
