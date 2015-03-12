@@ -44,6 +44,7 @@ namespace TomP2P.Benchmark
         private static void PrintStopwatchProperties()
         {
             Console.WriteLine("Stopwatch.Frequency: {0} ticks/sec", Stopwatch.Frequency);
+            Console.WriteLine("Accurate within {0} nanoseconds.", 1000000000L / Stopwatch.Frequency);
             Console.WriteLine("Stopwatch.IsHighResolution: {0}", Stopwatch.IsHighResolution);
         }
     }

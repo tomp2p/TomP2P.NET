@@ -56,22 +56,27 @@ namespace TomP2P.Benchmark
             return slave;
         }
 
-        public static void DoBenchmarking(Action func, [CallerMemberName] string caller = "")
+        public static Stopwatch StartBenchmark([CallerMemberName] string caller = "")
         {
-            Console.WriteLine("Starting Benchmarking...");
-            var watch = Stopwatch.StartNew();
-
-            func();
-
-            watch.Stop();
-            Console.WriteLine("Stopped Benchmarking.");
-            Console.WriteLine("{0}: {1} ns", caller, watch.ElapsedTicks.ToNanos());
+            Console.WriteLine("{0}: Starting Benchmarking...", caller);
+            return Stopwatch.StartNew();
         }
 
-        private static long ToNanos(this long ticks)
+        public static void StopBenchmark(Stopwatch watch, [CallerMemberName] string caller = "")
         {
-            var seconds = ticks / Stopwatch.Frequency;
-            return seconds * 1000000000;
+            watch.Stop();
+            Console.WriteLine("{0}: Stopped Benchmarking.", caller);
+            Console.WriteLine("{0}: {1:0.000} ns ({2:0.000} s)", caller, watch.ToNanos(), watch.ToSeconds());
+        }
+
+        private static double ToSeconds(this Stopwatch watch)
+        {
+            return watch.ElapsedTicks / (double)Stopwatch.Frequency;
+        }
+
+        private static double ToNanos(this Stopwatch watch)
+        {
+            return watch.ToSeconds() * 1000000000;
         }
     }
 }
