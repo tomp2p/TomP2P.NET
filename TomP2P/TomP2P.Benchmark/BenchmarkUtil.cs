@@ -1,4 +1,5 @@
 ﻿using System;
+using NLog;
 using TomP2P.Connection;
 using TomP2P.P2P;
 using TomP2P.Peers;
@@ -7,7 +8,7 @@ namespace TomP2P.Benchmark
 {
     public static class BenchmarkUtil
     {
-        //private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Creates peers for benchmarking. The first peer will be used as the master.
@@ -31,7 +32,7 @@ namespace TomP2P.Benchmark
                 .SetExternalBindings(bindings)
                 .SetPeerMap(masterMap)
                 .Start();
-            //Logger.Info("Created master peer: {0}.", peers[0].PeerId);
+            Logger.Info("Created master peer: {0}.", peers[0].PeerId);
 
             for (int i = 1; i < nrOfPeers; i++)
             {
@@ -43,7 +44,7 @@ namespace TomP2P.Benchmark
                     .SetExternalBindings(bindings)
                     .SetPeerMap(slaveMap)
                     .Start();
-                //Logger.Info("Created slave peer {0}: {1}.", i, peers[i].PeerId);
+                Logger.Info("Created slave peer {0}: {1}.", i, peers[i].PeerId);
             }
             return peers;
         }

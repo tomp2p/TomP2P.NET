@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace TomP2P.Benchmark
 {
@@ -16,7 +17,7 @@ namespace TomP2P.Benchmark
             try
             {
                 Console.WriteLine("Argument: {0}", argument);
-                Execute(argument);
+                ExecuteAsync(argument).Wait();
             }
             catch (Exception ex)
             {
@@ -28,12 +29,12 @@ namespace TomP2P.Benchmark
             Environment.Exit(0);
         }
 
-        private static void Execute(string argument)
+        private static async Task ExecuteAsync(string argument)
         {
             switch (argument)
             {
                 case "bb1":
-                    BootstrapBenchmark.BootstrapBenchmark1();
+                    await BootstrapBenchmark.Benchmark1Async();
                     break;
             }
         }
