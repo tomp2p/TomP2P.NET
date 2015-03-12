@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomP2P.Tests.Interop", "Tom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomP2P.Extensions", "TomP2P.Extensions\TomP2P.Extensions.csproj", "{B13F4681-AC7D-4D75-AB3F-C079748F8602}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomP2P.Benchmark", "TomP2P.Benchmark\TomP2P.Benchmark.csproj", "{970DFB94-75BA-4AAD-9820-75D9B337DB3F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{B13F4681-AC7D-4D75-AB3F-C079748F8602}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B13F4681-AC7D-4D75-AB3F-C079748F8602}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B13F4681-AC7D-4D75-AB3F-C079748F8602}.Release|Any CPU.Build.0 = Release|Any CPU
+		{970DFB94-75BA-4AAD-9820-75D9B337DB3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{970DFB94-75BA-4AAD-9820-75D9B337DB3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{970DFB94-75BA-4AAD-9820-75D9B337DB3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{970DFB94-75BA-4AAD-9820-75D9B337DB3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
