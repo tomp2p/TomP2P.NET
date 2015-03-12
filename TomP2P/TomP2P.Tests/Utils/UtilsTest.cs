@@ -52,10 +52,10 @@ namespace TomP2P.Tests.Utils
             collection3.Add(set3);
 
             // collection1 == collection2
-            Assert.IsTrue(TomP2P.Utils.Utils.IsSameCollectionSets(collection1, collection2));
+            Assert.IsTrue(Core.Utils.Utils.IsSameCollectionSets(collection1, collection2));
 
             // collection1 != collection3
-            Assert.IsFalse(TomP2P.Utils.Utils.IsSameCollectionSets(collection1, collection3));
+            Assert.IsFalse(Core.Utils.Utils.IsSameCollectionSets(collection1, collection3));
         }
     }
 }

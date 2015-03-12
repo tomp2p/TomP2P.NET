@@ -5,10 +5,10 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework.Constraints;
-using TomP2P.Connection;
-using TomP2P.Message;
-using TomP2P.P2P;
-using TomP2P.Peers;
+using TomP2P.Core.Connection;
+using TomP2P.Core.Message;
+using TomP2P.Core.P2P;
+using TomP2P.Core.Peers;
 
 namespace TomP2P.Tests
 {
@@ -17,22 +17,22 @@ namespace TomP2P.Tests
         public static readonly long TheAnswer = 42L;
         public static readonly long TheAnsert2 = 43L;
 
-        public static Message.Message CreateDummyMessage()
+        public static Message CreateDummyMessage()
         {
             return CreateDummyMessage(false, false);
         }
 
-        public static Message.Message CreateDummyMessage(bool firewallUdp, bool firewallTcp)
+        public static Message CreateDummyMessage(bool firewallUdp, bool firewallTcp)
         {
             return CreateDummyMessage(new Number160("0x4321"), "127.0.0.1", 8001, 8002, new Number160("0x1234"),
-                "127.0.0.1", 8003, 8004, (sbyte)0, TomP2P.Message.Message.MessageType.Request1, firewallUdp, firewallTcp);
+                "127.0.0.1", 8003, 8004, (sbyte)0, Message.MessageType.Request1, firewallUdp, firewallTcp);
         }
 
-        public static Message.Message CreateDummyMessage(Number160 idSender, String inetSender, int tcpPortSendor,
+        public static Message CreateDummyMessage(Number160 idSender, String inetSender, int tcpPortSendor,
             int udpPortSender, Number160 idRecipient, String inetRecipient, int tcpPortRecipient,
-            int udpPortRecipient, sbyte command, Message.Message.MessageType type, bool firewallUdp, bool firewallTcp)
+            int udpPortRecipient, sbyte command, Message.MessageType type, bool firewallUdp, bool firewallTcp)
         {
-            var message = new Message.Message();
+            var message = new Message();
 
             PeerAddress n1 = CreateAddress(idSender, inetSender, tcpPortSendor, udpPortSender, firewallUdp, firewallTcp);
             message.SetSender(n1);

@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
+using TomP2P.Core.Storage;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Netty;
-using TomP2P.Storage;
 
 namespace TomP2P.Tests.Interop.Protocol
 {

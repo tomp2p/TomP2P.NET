@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using TomP2P.Connection;
+using TomP2P.Core.Message;
+using TomP2P.Core.P2P;
+using TomP2P.Core.Peers;
+using TomP2P.Core.Rpc;
 using TomP2P.Extensions;
-using TomP2P.P2P;
-using TomP2P.Peers;
-using TomP2P.Rpc;
 
 namespace TomP2P.Tests.Rpc
 {
@@ -54,7 +54,7 @@ namespace TomP2P.Tests.Rpc
                 var cc = await recv1.ConnectionBean.Reservation.CreateAsync(1, 0);
                 var sv = new SearchValues(new Number160("0x1"), null);
                 var infConfig = Utils2.CreateInfiniteConfiguration();
-                var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.Message.MessageType.Request2, cc,
+                var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.MessageType.Request2, cc,
                     infConfig);
                 await tr;
 
@@ -121,7 +121,7 @@ namespace TomP2P.Tests.Rpc
                 var sv = new SearchValues(new Number160("0x1"), null);
                 var infConfig = Utils2.CreateInfiniteConfiguration()
                     .SetIsForceTcp();
-                var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.Message.MessageType.Request2, cc,
+                var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.MessageType.Request2, cc,
                     infConfig);
                 await tr;
 
@@ -177,7 +177,7 @@ namespace TomP2P.Tests.Rpc
 
                 var sv = new SearchValues(new Number160("0x30"), null);
                 var infConfig = Utils2.CreateInfiniteConfiguration();
-                var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.Message.MessageType.Request2, cc,
+                var tr = neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.MessageType.Request2, cc,
                     infConfig);
                 await tr;
 
@@ -231,7 +231,7 @@ namespace TomP2P.Tests.Rpc
                     var sv = new SearchValues(new Number160("0x30"), null);
                     var infConfig = Utils2.CreateInfiniteConfiguration();
                     await
-                        neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.Message.MessageType.Exception, cc,
+                        neighbors2.CloseNeighborsAsync(sender.PeerAddress, sv, Message.MessageType.Exception, cc,
                             infConfig);
                     Assert.Fail("ArgumentException should have been thrown.");
                 }

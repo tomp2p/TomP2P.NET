@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
-using TomP2P.Connection.Windows;
-using TomP2P.Connection.Windows.Netty;
+using TomP2P.Core.Connection.Windows;
+using TomP2P.Core.Connection.Windows.Netty;
+using TomP2P.Core.Message;
+using TomP2P.Core.Peers;
+using TomP2P.Core.Rpc;
+using TomP2P.Core.Storage;
 using TomP2P.Extensions;
-using TomP2P.Message;
-using TomP2P.Peers;
-using TomP2P.Rpc;
-using TomP2P.Storage;
+using Buffer = TomP2P.Core.Message.Buffer;
 
 namespace TomP2P.Tests.Interop.Protocol
 {
@@ -383,7 +384,7 @@ namespace TomP2P.Tests.Interop.Protocol
 
         #region Sample Message Creation
 
-        private static Message.Message CreateMessageKey()
+        private static Message CreateMessageKey()
         {
             var m = Utils2.CreateDummyMessage();
             m.SetKey(_sample160_1);
@@ -397,7 +398,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageMapKey640Data()
+        private static Message CreateMessageMapKey640Data()
         {
             // TODO create Data objects with BasedOn keys and other properties
 
@@ -438,7 +439,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageMapKey640Keys()
+        private static Message CreateMessageMapKey640Keys()
         {
             var keysMap = new SortedDictionary<Number640, ICollection<Number160>>();
             var set = new HashSet<Number160>();
@@ -470,7 +471,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageSetKey640()
+        private static Message CreateMessageSetKey640()
         {
             ICollection<Number160> sampleCollection1 = new List<Number160>();
             sampleCollection1.Add(_sample160_1);
@@ -499,7 +500,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageSetNeighbors()
+        private static Message CreateMessageSetNeighbors()
         {
             var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
             var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
@@ -534,7 +535,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageByteBuffer()
+        private static Message CreateMessageByteBuffer()
         {
             // write some random bytes
             var buf = AlternativeCompositeByteBuf.CompBuffer();
@@ -559,18 +560,18 @@ namespace TomP2P.Tests.Interop.Protocol
             var decoms = buf.Decompose(0, buf.ReadableBytes);
 
             var m = Utils2.CreateDummyMessage();
-            m.SetBuffer(new Message.Buffer(decoms[0]));
-            m.SetBuffer(new Message.Buffer(decoms[1]));
-            m.SetBuffer(new Message.Buffer(decoms[2]));
-            m.SetBuffer(new Message.Buffer(decoms[3]));
-            m.SetBuffer(new Message.Buffer(decoms[4]));
-            m.SetBuffer(new Message.Buffer(decoms[5]));
-            m.SetBuffer(new Message.Buffer(decoms[6]));
-            m.SetBuffer(new Message.Buffer(decoms[7]));
+            m.SetBuffer(new Buffer(decoms[0]));
+            m.SetBuffer(new Buffer(decoms[1]));
+            m.SetBuffer(new Buffer(decoms[2]));
+            m.SetBuffer(new Buffer(decoms[3]));
+            m.SetBuffer(new Buffer(decoms[4]));
+            m.SetBuffer(new Buffer(decoms[5]));
+            m.SetBuffer(new Buffer(decoms[6]));
+            m.SetBuffer(new Buffer(decoms[7]));
             return m;
         }
 
-        private static Message.Message CreateMessageLong()
+        private static Message CreateMessageLong()
         {
             var m = Utils2.CreateDummyMessage();
             m.SetLongValue(Int64.MinValue);
@@ -584,7 +585,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        public static Message.Message CreateMessageInteger()
+        public static Message CreateMessageInteger()
         {
             var m = Utils2.CreateDummyMessage();
             m.SetIntValue(Int32.MinValue);
@@ -598,7 +599,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageSetTrackerData()
+        private static Message CreateMessageSetTrackerData()
         {
             var sampleAddress1 = new PeerAddress(_sample160_1, IPAddress.Parse("192.168.1.1"));
             var sampleAddress2 = new PeerAddress(_sample160_2, IPAddress.Parse("255.255.255.255"));
@@ -633,7 +634,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageBloomFilter()
+        private static Message CreateMessageBloomFilter()
         {
             var sampleBf1 = new SimpleBloomFilter<Number160>(2, 5);
             sampleBf1.Add(_sample160_1);
@@ -672,7 +673,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageMapKey640Byte()
+        private static Message CreateMessageMapKey640Byte()
         {
             IDictionary<Number640, sbyte> sampleMap1 = new Dictionary<Number640, sbyte>();
             sampleMap1.Add(_sample640_1, _sampleBytes1[0]);
@@ -711,7 +712,7 @@ namespace TomP2P.Tests.Interop.Protocol
             return m;
         }
 
-        private static Message.Message CreateMessageSetPeerSocket()
+        private static Message CreateMessageSetPeerSocket()
         {
             IPAddress sampleAddress1 = IPAddress.Parse("192.168.1.1");
             IPAddress sampleAddress2 = IPAddress.Parse("255.255.255.255");
@@ -757,7 +758,7 @@ namespace TomP2P.Tests.Interop.Protocol
         /// </summary>
         /// <param name="message">The message to be encoded.</param>
         /// <returns>The encoded message as byte array.</returns>
-        public static byte[] EncodeMessage(Message.Message message)
+        public static byte[] EncodeMessage(Message message)
         {
             var encoder = new Encoder(null);
             AlternativeCompositeByteBuf buf = AlternativeCompositeByteBuf.CompBuffer();
@@ -771,7 +772,7 @@ namespace TomP2P.Tests.Interop.Protocol
         /// </summary>
         /// <param name="bytes">The message bytes from Java encoding.</param>
         /// <returns>The .NET message version.</returns>
-        public static Message.Message DecodeMessage(byte[] bytes)
+        public static Message DecodeMessage(byte[] bytes)
         {
             var decoder = new Decoder(null);
 
@@ -795,7 +796,7 @@ namespace TomP2P.Tests.Interop.Protocol
         /// </summary>
         /// <param name="m1">The first message.</param>
         /// <param name="m2">The first message.</param>
-        private static bool CheckSameContentTypes(Message.Message m1, Message.Message m2)
+        private static bool CheckSameContentTypes(Message m1, Message m2)
         {
             for (int i = 0; i < m1.ContentTypes.Length; i++)
             {

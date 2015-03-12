@@ -62,13 +62,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TomP2P.Core\TomP2P.Core.csproj">
+      <Project>{6806294c-0d0e-41e0-80c4-a17d6877f807}</Project>
+      <Name>TomP2P.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TomP2P.Extensions\TomP2P.Extensions.csproj">
       <Project>{b13f4681-ac7d-4d75-ab3f-c079748f8602}</Project>
       <Name>TomP2P.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TomP2P\TomP2P.csproj">
-      <Project>{6806294c-0d0e-41e0-80c4-a17d6877f807}</Project>
-      <Name>TomP2P</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using TomP2P.Core.P2P;
+using TomP2P.Core.Peers;
 using TomP2P.Extensions;
-using TomP2P.P2P;
-using TomP2P.Peers;
 
 namespace TomP2P.Tests.P2P
 {

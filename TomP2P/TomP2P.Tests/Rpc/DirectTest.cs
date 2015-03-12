@@ -1,13 +1,13 @@
 ﻿using System;
 using NUnit.Framework;
-using TomP2P.Connection;
-using TomP2P.Connection.Windows.Netty;
-using TomP2P.P2P;
-using TomP2P.P2P.Builder;
-using TomP2P.Peers;
-using TomP2P.Rpc;
-using TomP2P.Storage;
-using Buffer = TomP2P.Message.Buffer;
+using TomP2P.Core.Connection;
+using TomP2P.Core.Connection.Windows.Netty;
+using TomP2P.Core.P2P;
+using TomP2P.Core.P2P.Builder;
+using TomP2P.Core.Peers;
+using TomP2P.Core.Rpc;
+using TomP2P.Core.Storage;
+using Buffer = TomP2P.Core.Message.Buffer;
 
 namespace TomP2P.Tests.Rpc
 {
@@ -102,7 +102,7 @@ namespace TomP2P.Tests.Rpc
                     sendDirectBuilder.SetIsStreaming();
 
                     var tr = sender.DirectDataRpc.SendAsync(recv1.PeerAddress, sendDirectBuilder, cc);
-                    TomP2P.Utils.Utils.AddReleaseListener(cc, tr);
+                    Core.Utils.Utils.AddReleaseListener(cc, tr);
                     tr.ContinueWith(t =>
                     {
                         int j = t.Result.Buffer(0).BackingBuffer.ReadInt();

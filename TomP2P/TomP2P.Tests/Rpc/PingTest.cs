@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using TomP2P.Connection;
+using TomP2P.Core.Connection;
+using TomP2P.Core.Message;
+using TomP2P.Core.P2P;
+using TomP2P.Core.Peers;
+using TomP2P.Core.Rpc;
 using TomP2P.Extensions;
 using TomP2P.Extensions.Workaround;
-using TomP2P.P2P;
-using TomP2P.Peers;
-using TomP2P.Rpc;
 
 namespace TomP2P.Tests.Rpc
 {
@@ -374,7 +375,7 @@ namespace TomP2P.Tests.Rpc
                     .SetPorts(8088)
                     .Start();
 
-                var tasks = new List<Task<Message.Message>>(50);
+                var tasks = new List<Task<Message>>(50);
                 cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, tasks.Capacity);
                 for (int i = 0; i < tasks.Capacity; i++)
                 {
@@ -419,14 +420,14 @@ namespace TomP2P.Tests.Rpc
                         .SetPorts(2424 + i)
                         .Start();
                 }
-                var tasks = new List<Task<Message.Message>>(50);
+                var tasks = new List<Task<Message>>(50);
                 for (int i = 0; i < peers.Length; i++)
                 {
                     var cc = await peers[0].ConnectionBean.Reservation.CreateAsync(0, 1);
 
                     var taskResponse = peers[0].PingRpc.PingTcpAsync(peers[i].PeerAddress, cc,
                         new DefaultConnectionConfiguration());
-                    TomP2P.Utils.Utils.AddReleaseListener(cc, taskResponse);
+                    Core.Utils.Utils.AddReleaseListener(cc, taskResponse);
                     tasks.Add(taskResponse);
                 }
                 foreach (var task in tasks)
@@ -463,7 +464,7 @@ namespace TomP2P.Tests.Rpc
                     .SetPorts(8088)
                     .Start();
 
-                var tasks = new List<Task<Message.Message>>(50);
+                var tasks = new List<Task<Message>>(50);
                 cc = await recv1.ConnectionBean.Reservation.CreateAsync(tasks.Capacity, 0);
                 for (int i = 0; i < tasks.Capacity; i++)
                 {
@@ -508,14 +509,14 @@ namespace TomP2P.Tests.Rpc
                         .SetPorts(2424 + i)
                         .Start();
                 }
-                var tasks = new List<Task<Message.Message>>(50);
+                var tasks = new List<Task<Message>>(50);
                 for (int i = 0; i < peers.Length; i++)
                 {
                     var cc = await peers[0].ConnectionBean.Reservation.CreateAsync(1, 0);
 
                     var taskResponse = peers[0].PingRpc.PingUdpAsync(peers[i].PeerAddress, cc,
                         new DefaultConnectionConfiguration());
-                    TomP2P.Utils.Utils.AddReleaseListener(cc, taskResponse);
+                    Core.Utils.Utils.AddReleaseListener(cc, taskResponse);
                     tasks.Add(taskResponse);
                 }
                 foreach (var task in tasks)
@@ -550,7 +551,7 @@ namespace TomP2P.Tests.Rpc
                     .Start();
 
                 long start = Convenient.CurrentTimeMillis();
-                var tasks = new List<Task<Message.Message>>(1000);
+                var tasks = new List<Task<Message>>(1000);
                 for (int i = 0; i < 20; i++)
                 {
                     var cc = await recv1.ConnectionBean.Reservation.CreateAsync(0, 50);
@@ -601,7 +602,7 @@ namespace TomP2P.Tests.Rpc
                     .Start();
 
                 long start = Convenient.CurrentTimeMillis();
-                var tasks = new List<Task<Message.Message>>(1000);
+                var tasks = new List<Task<Message>>(1000);
                 for (int i = 0; i < 20; i++)
                 {
                     var cc = await recv1.ConnectionBean.Reservation.CreateAsync(50, 0);
@@ -663,7 +664,7 @@ namespace TomP2P.Tests.Rpc
 
                 var taskResponse1 = sender.PingRpc.PingTcpAsync(recv1.PeerAddress, cc,
                     new DefaultConnectionConfiguration());
-                var listenerCompl = TomP2P.Utils.Utils.AddReleaseListener(cc, taskResponse1);
+                var listenerCompl = Core.Utils.Utils.AddReleaseListener(cc, taskResponse1);
                 await taskResponse1;
                 await listenerCompl; // await release of reservations
                 Assert.IsTrue(!taskResponse1.IsFaulted);

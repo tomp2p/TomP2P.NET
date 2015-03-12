@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using TomP2P.Connection;
-using TomP2P.P2P;
-using TomP2P.P2P.Builder;
-using TomP2P.Peers;
+using TomP2P.Core.Connection;
+using TomP2P.Core.P2P;
+using TomP2P.Core.P2P.Builder;
+using TomP2P.Core.Peers;
 
 namespace TomP2P.Tests.Rpc
 {

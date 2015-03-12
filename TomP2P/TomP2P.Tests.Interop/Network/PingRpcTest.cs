@@ -3,11 +3,12 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using TomP2P.Connection;
+using TomP2P.Core.Connection;
+using TomP2P.Core.Message;
+using TomP2P.Core.P2P;
+using TomP2P.Core.Peers;
+using TomP2P.Core.Rpc;
 using TomP2P.Extensions;
-using TomP2P.P2P;
-using TomP2P.Peers;
-using TomP2P.Rpc;
 
 namespace TomP2P.Tests.Interop.Network
 {
@@ -47,8 +48,8 @@ namespace TomP2P.Tests.Interop.Network
 
                 Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
                 Assert.AreEqual(responseMessage.Sender, server);
-                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
-                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
+                Assert.IsTrue(responseMessage.Type == Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == Core.Rpc.Rpc.Commands.Ping.GetNr());
             }
             finally
             {
@@ -93,8 +94,8 @@ namespace TomP2P.Tests.Interop.Network
 
                 Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
                 Assert.AreEqual(responseMessage.Sender, server);
-                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
-                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
+                Assert.IsTrue(responseMessage.Type == Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == Core.Rpc.Rpc.Commands.Ping.GetNr());
             }
             finally
             {
@@ -184,8 +185,8 @@ namespace TomP2P.Tests.Interop.Network
 
                 Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
                 Assert.AreEqual(responseMessage.Sender, server);
-                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
-                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
+                Assert.IsTrue(responseMessage.Type == Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == Core.Rpc.Rpc.Commands.Ping.GetNr());
             }
             finally
             {
@@ -202,31 +203,31 @@ namespace TomP2P.Tests.Interop.Network
         }
 
         [Test]
-        public async void TestFireTcpToJava()
+        public void TestFireTcpToJava()
         {
             throw new NotImplementedException();
         }
 
         [Test]
-        public async void TestPingUdpDiscoverToJava()
+        public void TestPingUdpDiscoverToJava()
         {
             throw new NotImplementedException();
         }
 
         [Test]
-        public async void TestPingTcpDiscoverToJava()
+        public void TestPingTcpDiscoverToJava()
         {
             throw new NotImplementedException();
         }
 
         [Test]
-        public async void TestPingUdpProbeToJava()
+        public void TestPingUdpProbeToJava()
         {
             throw new NotImplementedException();
         }
 
         [Test]
-        public async void TestPingTcpProbeToJava()
+        public void TestPingTcpProbeToJava()
         {
             throw new NotImplementedException();
         }
@@ -291,8 +292,8 @@ namespace TomP2P.Tests.Interop.Network
 
                 Assert.IsTrue(task.IsCompleted && !task.IsFaulted);
                 Assert.AreEqual(responseMessage.Sender, server);
-                Assert.IsTrue(responseMessage.Type == Message.Message.MessageType.Ok);
-                Assert.IsTrue(responseMessage.Command == TomP2P.Rpc.Rpc.Commands.Ping.GetNr());
+                Assert.IsTrue(responseMessage.Type == Message.MessageType.Ok);
+                Assert.IsTrue(responseMessage.Command == Core.Rpc.Rpc.Commands.Ping.GetNr());
             }
             finally
             {
