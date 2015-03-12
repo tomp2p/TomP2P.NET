@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NLog;
 
@@ -59,6 +60,7 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 item.ChannelActive(_ctx);
             }
+            Logger.Debug("Channel {0} activated.", _channel);
         }
 
         public void TriggerInactive()
@@ -68,6 +70,7 @@ namespace TomP2P.Connection.Windows.Netty
             {
                 item.ChannelInactive(_ctx);
             }
+            Logger.Debug("Channel {0} inactivated.", _channel);
         }
 
         public void TriggerUserEvent(object evt)

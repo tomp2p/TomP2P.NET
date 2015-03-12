@@ -186,8 +186,7 @@ namespace TomP2P.P2P
         public Peer NotifyAutomaticFutures(Task task)
         {
             // TODO find .NET equivalent
-            //throw new NotImplementedException();
-            return null;
+            return this;
         }
 
         #region Basic P2P operations

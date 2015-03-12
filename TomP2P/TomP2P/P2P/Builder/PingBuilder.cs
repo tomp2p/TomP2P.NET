@@ -44,8 +44,8 @@ namespace TomP2P.P2P.Builder
 
         public PingBuilder NotifyAutomaticFutures(Task future)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            _peer.NotifyAutomaticFutures(future);
+            return this;
         }
 
         public Task<PeerAddress> Start()

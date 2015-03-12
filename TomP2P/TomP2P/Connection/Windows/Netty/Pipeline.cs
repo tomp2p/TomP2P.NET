@@ -233,12 +233,25 @@ namespace TomP2P.Connection.Windows.Netty
             get { return _handlers.Select(hi => hi.Name).ToList(); }
         }
 
+        /// <summary>
+        /// Returns the list of handlers.
+        /// </summary>
+        public IList<IChannelHandler> Handlers
+        {
+            get { return _handlers.Select(hi => hi.Handler).ToList(); }
+        }
+
+        public LinkedList<HandlerItem> HandlerItems
+        {
+            get { return _handlers; }
+        }
+
         public override string ToString()
         {
             return String.Format("Pipeline ({0})", RuntimeHelpers.GetHashCode(this));
         }
 
-        private struct HandlerItem
+        public struct HandlerItem
         {
             public string Name { get; set; }
             public IChannelHandler Handler { get; set; }

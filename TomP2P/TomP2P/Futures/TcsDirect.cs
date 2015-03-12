@@ -24,7 +24,7 @@ namespace TomP2P.Futures
         /// Wait for the future, which will cause this future to complete if 
         /// the wrapped future completes.
         /// </summary>
-        public void WaitFor()
+        private void WaitFor()
         {
             if (WrappedTcsResponse == null)
             {

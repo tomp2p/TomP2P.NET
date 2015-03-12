@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using TomP2P.Connection;
+using TomP2P.Connection.Windows.Netty;
 using TomP2P.P2P;
 using TomP2P.P2P.Builder;
 using TomP2P.Peers;
@@ -126,6 +127,77 @@ namespace TomP2P.Tests.Rpc
             }
         }
 
+        [Test]
+        public async void TestDirectReconnect()
+        {
+            // TODO this test must be adapted to newest TomP2P implementation, where ports/configs are treated differently
+            Peer sender = null;
+            Peer recv1 = null;
+            try
+            {
+                var ccohTcp = new CountConnectionOutboundHandler();
+                var ccohUdp = new CountConnectionOutboundHandler();
+                var filter = new TestPipelineFilter(ccohTcp, ccohUdp);
+                var csc1 = PeerBuilder.CreateDefaultChannelServerConfiguration().SetPorts(new Ports(2424, 2424));
+                var csc2 = PeerBuilder.CreateDefaultChannelServerConfiguration().SetPorts(new Ports(8088, 8088));
+                var ccc = PeerBuilder.CreateDefaultChannelClientConfiguration();
+                csc1.SetPipelineFilter(filter);
+                csc2.SetPipelineFilter(filter);
+                ccc.SetPipelineFilter(filter);
+
+                sender = new PeerBuilder(new Number160("0x50"))
+                    .SetP2PId(55)
+                    .SetEnableMaintenanceRpc(false)
+                    .SetChannelClientConfiguration(ccc)
+                    .SetChannelServerConfiguration(csc1)
+                    .Start();
+                recv1 = new PeerBuilder(new Number160("0x20"))
+                    .SetP2PId(55)
+                    .SetEnableMaintenanceRpc(false)
+                    .SetChannelClientConfiguration(ccc)
+                    .SetChannelServerConfiguration(csc2)
+                    .Start();
+
+                recv1.RawDataReply(new TestRawDataReply());
+
+                var peerConnection = sender.CreatePeerConnection(recv1.PeerAddress);
+                ccohTcp.Reset();
+                ccohUdp.Reset();
+
+                var taskDirect1 = sender.SendDirect(peerConnection).SetBuffer(CreateTestBuffer())
+                    .SetConnectionTimeoutTcpMillis(2000).SetIdleTcpSeconds(10*1000).Start().Task;
+                await taskDirect1;
+                // TODO await listeners?
+
+                Assert.IsTrue(!taskDirect1.IsFaulted);
+                Assert.AreEqual(2, ccohTcp.Total); //.NET: there are 2 csc's
+                Assert.AreEqual(0, ccohUdp.Total);
+
+                // TODO thread sleep?
+                // send second with the same connection
+                var taskDirect2 = sender.SendDirect(peerConnection).SetBuffer(CreateTestBuffer())
+                    .Start().Task;
+                await taskDirect2;
+
+                Assert.IsTrue(!taskDirect2.IsFaulted);
+                Assert.AreEqual(4, ccohTcp.Total); //.NET: 2 csc's, 2 server sessions
+                Assert.AreEqual(0, ccohUdp.Total);
+
+                await peerConnection.CloseAsync();
+            }
+            finally
+            {
+                if (sender != null)
+                {
+                    sender.ShutdownAsync().Wait();
+                }
+                if (recv1 != null)
+                {
+                    recv1.ShutdownAsync().Wait();
+                }
+            }
+        }
+
         private static Buffer CreateTestBuffer()
         {
             var acbb = AlternativeCompositeByteBuf.CompBuffer();
@@ -149,6 +221,29 @@ namespace TomP2P.Tests.Rpc
                 Console.WriteLine("Got {0}.", i);
                 var buffer = AlternativeCompositeByteBuf.CompBuffer().WriteInt(i);
                 return new Buffer(buffer);
+            }
+        }
+
+        private class TestPipelineFilter : IPipelineFilter
+        {
+            private readonly CountConnectionOutboundHandler _ccohTcp;
+            private readonly CountConnectionOutboundHandler _ccohUdp;
+
+            public TestPipelineFilter(CountConnectionOutboundHandler ccohTcp, CountConnectionOutboundHandler ccohUdp)
+            {
+                _ccohTcp = ccohTcp;
+                _ccohUdp = ccohUdp;
+            }
+
+            public Pipeline Filter(Pipeline pipeline, bool isTcp, bool isClient)
+            {
+                var filteredPipeline = new Pipeline();
+                filteredPipeline.AddLast("counter", isTcp ? _ccohTcp : _ccohUdp);
+                foreach (var hi in pipeline.HandlerItems)
+                {
+                    filteredPipeline.AddLast(hi.Name, hi.Handler);
+                }
+                return filteredPipeline;
             }
         }
     }

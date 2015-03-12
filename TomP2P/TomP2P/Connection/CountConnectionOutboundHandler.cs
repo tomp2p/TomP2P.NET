@@ -6,6 +6,8 @@ namespace TomP2P.Connection
 {
     /// <summary>
     /// This is a simple counter that counter the current open connections and total connections.
+    /// Note: In .NET, the counting of connections differs from the one in Java because it bases on
+    /// channel activation instead of connection.
     /// </summary>
     public class CountConnectionOutboundHandler : BaseChannelHandler, IOutboundHandler, ISharable
     {

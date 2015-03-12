@@ -11,11 +11,11 @@ namespace TomP2P.Connection.Windows.Netty
             : base(localEndPoint, pipeline)
         {
             Session = Pipeline.CreateClientSession(this);
+            Session.TriggerActive();
         }
 
         public async Task SendMessageAsync(Message.Message message)
         {
-            Session.TriggerActive();
             if (!Session.IsTimedOut)
             {
                 // execute outbound pipeline
