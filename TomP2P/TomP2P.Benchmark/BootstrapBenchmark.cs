@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NLog;
 using TomP2P.P2P;
 
 namespace TomP2P.Benchmark
 {
     public static class BootstrapBenchmark
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public static async void BootstrapBenchmark1()
         {
@@ -30,11 +29,11 @@ namespace TomP2P.Benchmark
                     tasks[i] = peers[i].Bootstrap().SetPeerAddress(master.PeerAddress).StartAsync();
                 }
                 await Task.WhenAll(tasks);
-                Logger.Info("Bootstrap environment set up with {0} peers.", peers.Length);
+                //Logger.Info("Bootstrap environment set up with {0} peers.", peers.Length);
                 
                 // wait for peers to know each other
                 var delaySec = 30;
-                Logger.Info("Waiting {0} seconds...", delaySec);
+                //Logger.Info("Waiting {0} seconds...", delaySec);
                 await Task.Delay(delaySec*1000);
             }
             finally
