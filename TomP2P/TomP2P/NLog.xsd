@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="NLog" targetNamespace="http://www.nlog-project.org/schemas/NLog.xsd" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.nlog-project.org/schemas/NLog.xsd">
   <xs:element name="nlog" type="NLogConfiguration" />
-  <xs:complexDataType name="NLogConfiguration">
+  <xs:complexType name="NLogConfiguration">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="extensions" type="NLogExtensions" />
       <xs:element name="include" type="NLogInclude" />
       <xs:element name="variable" type="NLogVariable" />
       <xs:element name="targets" type="NLogTargets" />
       <xs:element name="rules" type="NLogRules" />
+      <xs:element name="time" type="TimeSource" />
     </xs:choice>
     <xs:attribute name="autoReload" type="xs:boolean">
       <xs:annotation>
@@ -44,8 +45,8 @@
         <xs:documentation>Pass NLog internal exceptions to the application. Default value is: false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogTargets">
+  </xs:complexType>
+  <xs:complexType name="NLogTargets">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="default-wrapper" type="WrapperTargetBase" />
       <xs:element name="default-target-parameters" type="Target" />
@@ -58,18 +59,18 @@
         <xs:documentation>Make all targets within this section asynchronous (creates additional threads but the calling thread isn't blocked by any target writes).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogRules">
+  </xs:complexType>
+  <xs:complexType name="NLogRules">
     <xs:sequence minOccurs="0" maxOccurs="unbounded">
       <xs:element name="logger" type="NLogLoggerRule" />
     </xs:sequence>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogExtensions">
+  </xs:complexType>
+  <xs:complexType name="NLogExtensions">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="add" type="NLogExtensionsAdd" />
     </xs:choice>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogExtensionsAdd">
+  </xs:complexType>
+  <xs:complexType name="NLogExtensionsAdd">
     <xs:attribute name="prefix" type="xs:string">
       <xs:annotation>
         <xs:documentation>Prefix for targets/layout renderers/filters/conditions loaded from this assembly.</xs:documentation>
@@ -85,8 +86,8 @@
         <xs:documentation>Load NLog extensions from the specified assembly. Assembly name should be fully qualified.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogLoggerRule">
+  </xs:complexType>
+  <xs:complexType name="NLogLoggerRule">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="filters" type="NLogFilters" />
     </xs:choice>
@@ -125,8 +126,8 @@
         <xs:documentation>Ignore further rules if this one matches.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogFilters">
+  </xs:complexType>
+  <xs:complexType name="NLogFilters">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="when" type="when" />
       <xs:element name="whenContains" type="whenContains" />
@@ -134,8 +135,8 @@
       <xs:element name="whenNotContains" type="whenNotContains" />
       <xs:element name="whenNotEqual" type="whenNotEqual" />
     </xs:choice>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLogLevel">
+  </xs:complexType>
+  <xs:simpleType name="NLogLevel">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Off" />
       <xs:enumeration value="Trace" />
@@ -145,13 +146,13 @@
       <xs:enumeration value="Error" />
       <xs:enumeration value="Fatal" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLogLevelList">
+  </xs:simpleType>
+  <xs:simpleType name="NLogLevelList">
     <xs:restriction base="xs:string">
       <xs:pattern value="(|Trace|Debug|Info|Warn|Error|Fatal)(,(Trace|Debug|Info|Warn|Error|Fatal))*" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="NLogInclude">
+  </xs:simpleType>
+  <xs:complexType name="NLogInclude">
     <xs:attribute name="file" type="SimpleLayoutAttribute" use="required">
       <xs:annotation>
         <xs:documentation>Name of the file to be included. The name is relative to the name of the current config file.</xs:documentation>
@@ -162,8 +163,8 @@
         <xs:documentation>Ignore any errors in the include file.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogVariable">
+  </xs:complexType>
+  <xs:complexType name="NLogVariable">
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Variable name.</xs:documentation>
@@ -174,17 +175,17 @@
         <xs:documentation>Variable value.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLogTargetIDList">
+  </xs:complexType>
+  <xs:simpleType name="NLogTargetIDList">
     <xs:restriction base="xs:string">
       <xs:pattern value="(|([a-zA-Z][a-zA-Z0-9_\-]*))(,([a-zA-Z][a-zA-Z0-9_\-]*))*" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="Target" abstract="true"></xs:complexDataType>
-  <xs:complexDataType name="TargetRef">
+  </xs:simpleType>
+  <xs:complexType name="Target" abstract="true"></xs:complexType>
+  <xs:complexType name="TargetRef">
     <xs:attribute name="name" type="xs:string" use="required" />
-  </xs:complexDataType>
-  <xs:complexDataType name="WrapperTargetBase" abstract="true">
+  </xs:complexType>
+  <xs:complexType name="WrapperTargetBase" abstract="true">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -197,8 +198,8 @@
         </xs:choice>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="CompoundTargetBase" abstract="true">
+  </xs:complexType>
+  <xs:complexType name="CompoundTargetBase" abstract="true">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -211,20 +212,21 @@
         </xs:choice>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Layout"></xs:complexDataType>
-  <xs:complexDataType name="Filter" abstract="true"></xs:complexDataType>
-  <xs:simpleDataType name="SimpleLayoutAttribute">
+  </xs:complexType>
+  <xs:complexType name="Layout"></xs:complexType>
+  <xs:complexType name="Filter" abstract="true"></xs:complexType>
+  <xs:complexType name="TimeSource" abstract="true"></xs:complexType>
+  <xs:simpleType name="SimpleLayoutAttribute">
     <xs:restriction base="xs:string">
       <xs:pattern value=".*" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="Condition">
+  </xs:simpleType>
+  <xs:simpleType name="Condition">
     <xs:restriction base="xs:string">
       <xs:minLength value="1" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="AspNetBufferingWrapper">
+  </xs:simpleType>
+  <xs:complexType name="AspNetBufferingWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -245,7 +247,7 @@
         </xs:attribute>
         <xs:attribute name="bufferSize" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Index of log events to be buffered.</xs:documentation>
+            <xs:documentation>Number of log events to be buffered.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="growBufferAsNeeded" type="xs:boolean">
@@ -255,8 +257,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="AspNetTrace">
+  </xs:complexType>
+  <xs:complexType name="AspNetTrace">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -275,8 +277,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="AspResponse">
+  </xs:complexType>
+  <xs:complexType name="AspResponse">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -301,8 +303,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="AsyncWrapper">
+  </xs:complexType>
+  <xs:complexType name="AsyncWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -319,7 +321,7 @@
         </xs:attribute>
         <xs:attribute name="batchSize" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Index of log events that should be processed in a batch by the lazy writer thread.</xs:documentation>
+            <xs:documentation>Number of log events that should be processed in a batch by the lazy writer thread.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="overflowAction" type="NLog.Targets.Wrappers.AsyncTargetWrapperOverflowAction">
@@ -339,15 +341,15 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.Wrappers.AsyncTargetWrapperOverflowAction">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.Wrappers.AsyncTargetWrapperOverflowAction">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Grow" />
       <xs:enumeration value="Discard" />
       <xs:enumeration value="Block" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="AutoFlushWrapper">
+  </xs:simpleType>
+  <xs:complexType name="AutoFlushWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -360,8 +362,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="BufferingWrapper">
+  </xs:complexType>
+  <xs:complexType name="BufferingWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -377,7 +379,7 @@
         </xs:attribute>
         <xs:attribute name="bufferSize" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Index of log events to be buffered.</xs:documentation>
+            <xs:documentation>Number of log events to be buffered.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="flushTimeout" type="xs:integer">
@@ -392,8 +394,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Chainsaw">
+  </xs:complexType>
+  <xs:complexType name="Chainsaw">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -503,15 +505,15 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.NetworkTargetOverflowAction">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.NetworkTargetOverflowAction">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Error" />
       <xs:enumeration value="Split" />
       <xs:enumeration value="Discard" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="NLog.Targets.NLogViewerParameterInfo">
+  </xs:simpleType>
+  <xs:complexType name="NLog.Targets.NLogViewerParameterInfo">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="layout" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -526,8 +528,8 @@
         <xs:documentation>Viewer parameter name.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="ColoredConsole">
+  </xs:complexType>
+  <xs:complexType name="ColoredConsole">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -572,8 +574,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.ConsoleOutputColor">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.ConsoleOutputColor">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Black" />
       <xs:enumeration value="DarkBlue" />
@@ -593,8 +595,8 @@
       <xs:enumeration value="White" />
       <xs:enumeration value="NoChange" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="NLog.Targets.ConsoleRowHighlightingRule">
+  </xs:simpleType>
+  <xs:complexType name="NLog.Targets.ConsoleRowHighlightingRule">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="condition" minOccurs="0" maxOccurs="1" type="Condition" />
       <xs:element name="backgroundColor" minOccurs="0" maxOccurs="1" type="NLog.Targets.ConsoleOutputColor" />
@@ -615,8 +617,8 @@
         <xs:documentation>Foreground color.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLog.Targets.ConsoleWordHighlightingRule">
+  </xs:complexType>
+  <xs:complexType name="NLog.Targets.ConsoleWordHighlightingRule">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="ignoreCase" minOccurs="0" maxOccurs="1" type="xs:boolean" />
       <xs:element name="regex" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -655,8 +657,8 @@
         <xs:documentation>Foreground color.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="Console">
+  </xs:complexType>
+  <xs:complexType name="Console">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -693,8 +695,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Database">
+  </xs:complexType>
+  <xs:complexType name="Database">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -712,7 +714,7 @@
           <xs:element name="install-command" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseCommandInfo" />
           <xs:element name="uninstall-command" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseCommandInfo" />
           <xs:element name="commandText" minOccurs="0" maxOccurs="1" type="Layout" />
-          <xs:element name="commandDataType" minOccurs="0" maxOccurs="1" type="System.Data.CommandDataType" />
+          <xs:element name="commandType" minOccurs="0" maxOccurs="1" type="System.Data.CommandType" />
           <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseParameterInfo" />
         </xs:choice>
         <xs:attribute name="name" type="xs:string">
@@ -737,7 +739,7 @@
         </xs:attribute>
         <xs:attribute name="dbHost" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>Database host name. If the ConnectionString is not provided this value will be used to construct the "SyncServer=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database host name. If the ConnectionString is not provided this value will be used to construct the "Server=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbPassword" type="SimpleLayoutAttribute">
@@ -775,32 +777,32 @@
             <xs:documentation>Text of the SQL command to be run on each log level.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="commandDataType" type="System.Data.CommandDataType">
+        <xs:attribute name="commandType" type="System.Data.CommandType">
           <xs:annotation>
-            <xs:documentation>DataType of the SQL command to be run on each log level.</xs:documentation>
+            <xs:documentation>Type of the SQL command to be run on each log level.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="System.Data.CommandDataType">
+  </xs:complexType>
+  <xs:simpleType name="System.Data.CommandType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Text" />
       <xs:enumeration value="StoredProcedure" />
       <xs:enumeration value="TableDirect" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="NLog.Targets.DatabaseCommandInfo">
+  </xs:simpleType>
+  <xs:complexType name="NLog.Targets.DatabaseCommandInfo">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
-      <xs:element name="commandDataType" minOccurs="0" maxOccurs="1" type="System.Data.CommandDataType" />
+      <xs:element name="commandType" minOccurs="0" maxOccurs="1" type="System.Data.CommandType" />
       <xs:element name="connectionString" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="ignoreFailures" minOccurs="0" maxOccurs="1" type="xs:boolean" />
       <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseParameterInfo" />
       <xs:element name="text" minOccurs="0" maxOccurs="1" type="Layout" />
     </xs:choice>
-    <xs:attribute name="commandDataType" type="System.Data.CommandDataType">
+    <xs:attribute name="commandType" type="System.Data.CommandType">
       <xs:annotation>
-        <xs:documentation>DataType of the command.</xs:documentation>
+        <xs:documentation>Type of the command.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="connectionString" type="SimpleLayoutAttribute">
@@ -818,8 +820,8 @@
         <xs:documentation>Command text.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLog.Targets.DatabaseParameterInfo">
+  </xs:complexType>
+  <xs:complexType name="NLog.Targets.DatabaseParameterInfo">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="layout" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -852,8 +854,8 @@
         <xs:documentation>Database parameter size.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="Debugger">
+  </xs:complexType>
+  <xs:complexType name="Debugger">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -884,8 +886,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Debug">
+  </xs:complexType>
+  <xs:complexType name="Debug">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -904,8 +906,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="EventLog">
+  </xs:complexType>
+  <xs:complexType name="EventLog">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -954,8 +956,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="FallbackGroup">
+  </xs:complexType>
+  <xs:complexType name="FallbackGroup">
     <xs:complexContent>
       <xs:extension base="CompoundTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -974,8 +976,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="File">
+  </xs:complexType>
+  <xs:complexType name="File">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -985,27 +987,28 @@
           <xs:element name="footer" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="encoding" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="lineEnding" minOccurs="0" maxOccurs="1" type="NLog.Targets.LineEndingMode" />
-          <xs:element name="archiveIndexing" minOccurs="0" maxOccurs="1" type="NLog.Targets.ArchiveIndexingMode" />
+          <xs:element name="archiveNumbering" minOccurs="0" maxOccurs="1" type="NLog.Targets.ArchiveNumberingMode" />
           <xs:element name="archiveFileName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="archiveEvery" minOccurs="0" maxOccurs="1" type="NLog.Targets.FileArchivePeriod" />
           <xs:element name="archiveAboveSize" minOccurs="0" maxOccurs="1" type="xs:long" />
           <xs:element name="maxArchiveFiles" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="forceManaged" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="replaceFileContentsOnEachWrite" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="enableFileDelete" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="deleteOldFileOnStartAsyncTCPTCPup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="createDirs" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="archiveDateFormat" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="fileName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="fileAttributes" minOccurs="0" maxOccurs="1" type="NLog.Targets.Win32FileAttributes" />
-          <xs:element name="bufferSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteAttemptDelay" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteAttempts" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="keepFileOpen" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="networkWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="openFileCacheSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="replaceFileContentsOnEachWrite" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="deleteOldFileOnStartup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="fileName" minOccurs="0" maxOccurs="1" type="Layout" />
+          <xs:element name="archiveDateFormat" minOccurs="0" maxOccurs="1" type="xs:string" />
+          <xs:element name="archiveOldFileOnStartup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="createDirs" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="enableFileDelete" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="openFileCacheTimeout" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="networkWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="keepFileOpen" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="concurrentWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="concurrentWriteAttempts" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="concurrentWriteAttemptDelay" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="bufferSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="openFileCacheSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="autoFlush" minOccurs="0" maxOccurs="1" type="xs:boolean" />
         </xs:choice>
         <xs:attribute name="name" type="xs:string">
@@ -1038,7 +1041,7 @@
             <xs:documentation>Line ending mode.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="archiveIndexing" type="NLog.Targets.ArchiveIndexingMode">
+        <xs:attribute name="archiveNumbering" type="NLog.Targets.ArchiveNumberingMode">
           <xs:annotation>
             <xs:documentation>Way file archives are numbered.</xs:documentation>
           </xs:annotation>
@@ -1068,29 +1071,19 @@
             <xs:documentation>Gets ors set a value indicating whether a managed file stream is forced, instead of used the native implementation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="fileAttributes" type="NLog.Targets.Win32FileAttributes">
+          <xs:annotation>
+            <xs:documentation>File attributes (Windows only).</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="replaceFileContentsOnEachWrite" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to replace file contents on each write instead of appending log message at the end.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="enableFileDelete" type="xs:boolean">
-          <xs:annotation>
-            <xs:documentation>Indicates whether to enable log file(s) to be deleted.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="deleteOldFileOnStartAsyncTCPTCPup" type="xs:boolean">
+        <xs:attribute name="deleteOldFileOnStartup" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to delete old log file on startup.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="createDirs" type="xs:boolean">
-          <xs:annotation>
-            <xs:documentation>Indicates whether to create directories if they don't exist.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="archiveDateFormat" type="xs:string">
-          <xs:annotation>
-            <xs:documentation>Value specifying the date format to use when archving files.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="fileName" type="SimpleLayoutAttribute">
@@ -1098,34 +1091,29 @@
             <xs:documentation>Name of the file to write to.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="fileAttributes" type="NLog.Targets.Win32FileAttributes">
+        <xs:attribute name="archiveDateFormat" type="xs:string">
           <xs:annotation>
-            <xs:documentation>File attributes (Windows only).</xs:documentation>
+            <xs:documentation>Value specifying the date format to use when archving files.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="bufferSize" type="xs:integer">
+        <xs:attribute name="archiveOldFileOnStartup" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Log file buffer size in bytes.</xs:documentation>
+            <xs:documentation>Indicates whether to archive old log file on startup.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteAttemptDelay" type="xs:integer">
+        <xs:attribute name="createDirs" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Delay in milliseconds to wait before attempting to write to the file again.</xs:documentation>
+            <xs:documentation>Indicates whether to create directories if they don't exist.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteAttempts" type="xs:integer">
+        <xs:attribute name="enableFileDelete" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Index of times the write is appended on the file before NLog discards the log message.</xs:documentation>
+            <xs:documentation>Indicates whether to enable log file(s) to be deleted.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWrites" type="xs:boolean">
+        <xs:attribute name="openFileCacheTimeout" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on the same host.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="keepFileOpen" type="xs:boolean">
-          <xs:annotation>
-            <xs:documentation>Indicates whether to keep log file open instead of opening and closing it on each logging event.</xs:documentation>
+            <xs:documentation>Maximum number of seconds that files are kept open. If this number is negative the files are not automatically closed after a period of inactivity.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="networkWrites" type="xs:boolean">
@@ -1133,14 +1121,34 @@
             <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on different network hosts.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="openFileCacheSize" type="xs:integer">
+        <xs:attribute name="keepFileOpen" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Index of files to be kept open. Setting this to a higher value may improve performance in a situation where a single File target is writing to many files (such as splitting by level or by logger).</xs:documentation>
+            <xs:documentation>Indicates whether to keep log file open instead of opening and closing it on each logging event.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="openFileCacheTimeout" type="xs:integer">
+        <xs:attribute name="concurrentWrites" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Maximum number of seconds that files are kept open. If this number is negative the files are not automatically closed after a period of inactivity.</xs:documentation>
+            <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on the same host.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="concurrentWriteAttempts" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Number of times the write is appended on the file before NLog discards the log message.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="concurrentWriteAttemptDelay" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Delay in milliseconds to wait before attempting to write to the file again.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="bufferSize" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Log file buffer size in bytes.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="openFileCacheSize" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Number of files to be kept open. Setting this to a higher value may improve performance in a situation where a single File target is writing to many files (such as splitting by level or by logger).</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="autoFlush" type="xs:boolean">
@@ -1150,8 +1158,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.LineEndingMode">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.LineEndingMode">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Default" />
       <xs:enumeration value="CRLF" />
@@ -1159,15 +1167,16 @@
       <xs:enumeration value="LF" />
       <xs:enumeration value="None" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLog.Targets.ArchiveIndexingMode">
+  </xs:simpleType>
+  <xs:simpleType name="NLog.Targets.ArchiveNumberingMode">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Sequence" />
       <xs:enumeration value="Rolling" />
       <xs:enumeration value="Date" />
+      <xs:enumeration value="DateAndSequence" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLog.Targets.FileArchivePeriod">
+  </xs:simpleType>
+  <xs:simpleType name="NLog.Targets.FileArchivePeriod">
     <xs:restriction base="xs:string">
       <xs:enumeration value="None" />
       <xs:enumeration value="Year" />
@@ -1176,8 +1185,8 @@
       <xs:enumeration value="Hour" />
       <xs:enumeration value="Minute" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLog.Targets.Win32FileAttributes">
+  </xs:simpleType>
+  <xs:simpleType name="NLog.Targets.Win32FileAttributes">
     <xs:restriction base="xs:string">
       <xs:enumeration value="ReadOnly" />
       <xs:enumeration value="Hidden" />
@@ -1196,8 +1205,8 @@
       <xs:enumeration value="DeleteOnClose" />
       <xs:enumeration value="PosixSemantics" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="FilteringWrapper">
+  </xs:simpleType>
+  <xs:complexType name="FilteringWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1216,8 +1225,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="FormControl">
+  </xs:complexType>
+  <xs:complexType name="FormControl">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1260,16 +1269,16 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="ImpersonatingWrapper">
+  </xs:complexType>
+  <xs:complexType name="ImpersonatingWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="domain" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="impersonationLevel" minOccurs="0" maxOccurs="1" type="NLog.Targets.Wrappers.SecurityImpersonationLevel" />
-          <xs:element name="logOnProvider" minOccurs="0" maxOccurs="1" type="NLog.Targets.Wrappers.LogOnProviderDataType" />
-          <xs:element name="logOnDataType" minOccurs="0" maxOccurs="1" type="NLog.Targets.Wrappers.SecurityLogOnDataType" />
+          <xs:element name="logOnProvider" minOccurs="0" maxOccurs="1" type="NLog.Targets.Wrappers.LogOnProviderType" />
+          <xs:element name="logOnType" minOccurs="0" maxOccurs="1" type="NLog.Targets.Wrappers.SecurityLogOnType" />
           <xs:element name="password" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="revertToSelf" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="userName" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -1289,14 +1298,14 @@
             <xs:documentation>Required impersonation level.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="logOnProvider" type="NLog.Targets.Wrappers.LogOnProviderDataType">
+        <xs:attribute name="logOnProvider" type="NLog.Targets.Wrappers.LogOnProviderType">
           <xs:annotation>
-            <xs:documentation>DataType of the logon provider.</xs:documentation>
+            <xs:documentation>Type of the logon provider.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="logOnDataType" type="NLog.Targets.Wrappers.SecurityLogOnDataType">
+        <xs:attribute name="logOnType" type="NLog.Targets.Wrappers.SecurityLogOnType">
           <xs:annotation>
-            <xs:documentation>Logon DataType.</xs:documentation>
+            <xs:documentation>Logon Type.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="password" type="xs:string">
@@ -1316,21 +1325,21 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.Wrappers.SecurityImpersonationLevel">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.Wrappers.SecurityImpersonationLevel">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Anonymous" />
       <xs:enumeration value="Identification" />
       <xs:enumeration value="Impersonation" />
       <xs:enumeration value="Delegation" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLog.Targets.Wrappers.LogOnProviderDataType">
+  </xs:simpleType>
+  <xs:simpleType name="NLog.Targets.Wrappers.LogOnProviderType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Default" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLog.Targets.Wrappers.SecurityLogOnDataType">
+  </xs:simpleType>
+  <xs:simpleType name="NLog.Targets.Wrappers.SecurityLogOnType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Interactive" />
       <xs:enumeration value="Network" />
@@ -1339,8 +1348,8 @@
       <xs:enumeration value="NetworkClearText" />
       <xs:enumeration value="NewCredentials" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="LogReceiverService">
+  </xs:simpleType>
+  <xs:complexType name="LogReceiverService">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1369,7 +1378,7 @@
         </xs:attribute>
         <xs:attribute name="clientId" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SyncClient ID.</xs:documentation>
+            <xs:documentation>Client ID.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="includeEventProperties" type="xs:boolean">
@@ -1384,8 +1393,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLog.Targets.MethodCallParameter">
+  </xs:complexType>
+  <xs:complexType name="NLog.Targets.MethodCallParameter">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="layout" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -1403,11 +1412,11 @@
     </xs:attribute>
     <xs:attribute name="type" type="xs:string">
       <xs:annotation>
-        <xs:documentation>DataType of the parameter.</xs:documentation>
+        <xs:documentation>Type of the parameter.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="Mail">
+  </xs:complexType>
+  <xs:complexType name="Mail">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1427,7 +1436,7 @@
           <xs:element name="replaceNewlineWithBrTagInHtml" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="priority" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="timeout" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="smtpSyncServer" minOccurs="0" maxOccurs="1" type="Layout" />
+          <xs:element name="smtpServer" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="smtpAuthentication" minOccurs="0" maxOccurs="1" type="NLog.Targets.SmtpAuthenticationMode" />
           <xs:element name="smtpUserName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="smtpPassword" minOccurs="0" maxOccurs="1" type="Layout" />
@@ -1497,7 +1506,7 @@
         </xs:attribute>
         <xs:attribute name="from" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SendAsyncAsyncer's email address (e.g. joe@domain.com).</xs:documentation>
+            <xs:documentation>Sender's email address (e.g. joe@domain.com).</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="replaceNewlineWithBrTagInHtml" type="xs:boolean">
@@ -1515,9 +1524,9 @@
             <xs:documentation>Indicates the SMTP client timeout.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="smtpSyncServer" type="SimpleLayoutAttribute">
+        <xs:attribute name="smtpServer" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SMTP SyncServer to be used for sending.</xs:documentation>
+            <xs:documentation>SMTP Server to be used for sending.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="smtpAuthentication" type="NLog.Targets.SmtpAuthenticationMode">
@@ -1542,7 +1551,7 @@
         </xs:attribute>
         <xs:attribute name="smtpPort" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Port number that SMTP SyncServer is listening on.</xs:documentation>
+            <xs:documentation>Port number that SMTP Server is listening on.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="useSystemNetMailSettings" type="xs:boolean">
@@ -1552,15 +1561,15 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.SmtpAuthenticationMode">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.SmtpAuthenticationMode">
     <xs:restriction base="xs:string">
       <xs:enumeration value="None" />
       <xs:enumeration value="Basic" />
       <xs:enumeration value="Ntlm" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="Memory">
+  </xs:simpleType>
+  <xs:complexType name="Memory">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1579,8 +1588,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="MessageBox">
+  </xs:complexType>
+  <xs:complexType name="MessageBox">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1605,8 +1614,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="MSMQ">
+  </xs:complexType>
+  <xs:complexType name="MSMQ">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1667,8 +1676,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="MethodCall">
+  </xs:complexType>
+  <xs:complexType name="MethodCall">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1694,8 +1703,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Network">
+  </xs:complexType>
+  <xs:complexType name="Network">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1762,8 +1771,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLogViewer">
+  </xs:complexType>
+  <xs:complexType name="NLogViewer">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1873,8 +1882,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Null">
+  </xs:complexType>
+  <xs:complexType name="Null">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1899,8 +1908,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="OutputDebugString">
+  </xs:complexType>
+  <xs:complexType name="OutputDebugString">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1919,8 +1928,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="PerfCounter">
+  </xs:complexType>
+  <xs:complexType name="PerfCounter">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -1929,7 +1938,7 @@
           <xs:element name="categoryName" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="counterHelp" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="counterName" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="counterDataType" minOccurs="0" maxOccurs="1" type="System.Diagnostics.PerformanceCounterDataType" />
+          <xs:element name="counterType" minOccurs="0" maxOccurs="1" type="System.Diagnostics.PerformanceCounterType" />
           <xs:element name="instanceName" minOccurs="0" maxOccurs="1" type="xs:string" />
         </xs:choice>
         <xs:attribute name="name" type="xs:string">
@@ -1957,7 +1966,7 @@
             <xs:documentation>Name of the performance counter.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="counterDataType" type="System.Diagnostics.PerformanceCounterDataType">
+        <xs:attribute name="counterType" type="System.Diagnostics.PerformanceCounterType">
           <xs:annotation>
             <xs:documentation>Performance counter type.</xs:documentation>
           </xs:annotation>
@@ -1969,13 +1978,13 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="System.Diagnostics.PerformanceCounterDataType">
+  </xs:complexType>
+  <xs:simpleType name="System.Diagnostics.PerformanceCounterType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="IndexOfItems32" />
-      <xs:enumeration value="IndexOfItems64" />
-      <xs:enumeration value="IndexOfItemsHEX32" />
-      <xs:enumeration value="IndexOfItemsHEX64" />
+      <xs:enumeration value="NumberOfItems32" />
+      <xs:enumeration value="NumberOfItems64" />
+      <xs:enumeration value="NumberOfItemsHEX32" />
+      <xs:enumeration value="NumberOfItemsHEX64" />
       <xs:enumeration value="RateOfCountsPerSecond32" />
       <xs:enumeration value="RateOfCountsPerSecond64" />
       <xs:enumeration value="CountPerTimeInterval32" />
@@ -2001,8 +2010,8 @@
       <xs:enumeration value="CounterDelta32" />
       <xs:enumeration value="CounterDelta64" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="PostFilteringWrapper">
+  </xs:simpleType>
+  <xs:complexType name="PostFilteringWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2022,8 +2031,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLog.Targets.Wrappers.FilteringRule">
+  </xs:complexType>
+  <xs:complexType name="NLog.Targets.Wrappers.FilteringRule">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="exists" minOccurs="0" maxOccurs="1" type="Condition" />
       <xs:element name="filter" minOccurs="0" maxOccurs="1" type="Condition" />
@@ -2038,8 +2047,8 @@
         <xs:documentation>Resulting filter to be applied when the condition matches.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="RandomizeGroup">
+  </xs:complexType>
+  <xs:complexType name="RandomizeGroup">
     <xs:complexContent>
       <xs:extension base="CompoundTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2052,8 +2061,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="RepeatingWrapper">
+  </xs:complexType>
+  <xs:complexType name="RepeatingWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2067,13 +2076,13 @@
         </xs:attribute>
         <xs:attribute name="repeatCount" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Index of times to repeat each log message.</xs:documentation>
+            <xs:documentation>Number of times to repeat each log message.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="RetryingWrapper">
+  </xs:complexType>
+  <xs:complexType name="RetryingWrapper">
     <xs:complexContent>
       <xs:extension base="WrapperTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2088,7 +2097,7 @@
         </xs:attribute>
         <xs:attribute name="retryCount" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Index of retries that should be attempted on the wrapped target in case of a failure.</xs:documentation>
+            <xs:documentation>Number of retries that should be attempted on the wrapped target in case of a failure.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="retryDelayMilliseconds" type="xs:integer">
@@ -2098,8 +2107,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="RichTextBox">
+  </xs:complexType>
+  <xs:complexType name="RichTextBox">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2174,8 +2183,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="System.Drawing.FontStyle">
+  </xs:complexType>
+  <xs:simpleType name="System.Drawing.FontStyle">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Regular" />
       <xs:enumeration value="Bold" />
@@ -2183,8 +2192,8 @@
       <xs:enumeration value="Underline" />
       <xs:enumeration value="Strikeout" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="NLog.Targets.RichTextBoxRowColoringRule">
+  </xs:simpleType>
+  <xs:complexType name="NLog.Targets.RichTextBoxRowColoringRule">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="condition" minOccurs="0" maxOccurs="1" type="Condition" />
       <xs:element name="backgroundColor" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -2211,8 +2220,8 @@
         <xs:documentation>Font style of matched text.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="NLog.Targets.RichTextBoxWordColoringRule">
+  </xs:complexType>
+  <xs:complexType name="NLog.Targets.RichTextBoxWordColoringRule">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="ignoreCase" minOccurs="0" maxOccurs="1" type="xs:boolean" />
       <xs:element name="regex" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -2257,8 +2266,8 @@
         <xs:documentation>Font style of matched text. Possible values are the same as in FontStyle enum in System.Drawing.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="RoundRobinGroup">
+  </xs:complexType>
+  <xs:complexType name="RoundRobinGroup">
     <xs:complexContent>
       <xs:extension base="CompoundTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2271,8 +2280,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="SplitGroup">
+  </xs:complexType>
+  <xs:complexType name="SplitGroup">
     <xs:complexContent>
       <xs:extension base="CompoundTargetBase">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2285,8 +2294,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Trace">
+  </xs:complexType>
+  <xs:complexType name="Trace">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2305,8 +2314,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="WebService">
+  </xs:complexType>
+  <xs:complexType name="WebService">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2350,16 +2359,16 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Targets.WebServiceProtocol">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Targets.WebServiceProtocol">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Soap11" />
       <xs:enumeration value="Soap12" />
       <xs:enumeration value="HttpPost" />
       <xs:enumeration value="HttpGet" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="CsvLayout">
+  </xs:simpleType>
+  <xs:complexType name="CsvLayout">
     <xs:complexContent>
       <xs:extension base="Layout">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2415,8 +2424,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="NLog.Layouts.CsvColumnDelimiterMode">
+  </xs:complexType>
+  <xs:simpleType name="NLog.Layouts.CsvColumnDelimiterMode">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Auto" />
       <xs:enumeration value="Comma" />
@@ -2426,15 +2435,15 @@
       <xs:enumeration value="Space" />
       <xs:enumeration value="Custom" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:simpleDataType name="NLog.Layouts.CsvQuotingMode">
+  </xs:simpleType>
+  <xs:simpleType name="NLog.Layouts.CsvQuotingMode">
     <xs:restriction base="xs:string">
       <xs:enumeration value="All" />
       <xs:enumeration value="Nothing" />
       <xs:enumeration value="Auto" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="NLog.Layouts.CsvColumn">
+  </xs:simpleType>
+  <xs:complexType name="NLog.Layouts.CsvColumn">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="layout" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -2449,8 +2458,8 @@
         <xs:documentation>Name of the column.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexDataType>
-  <xs:complexDataType name="LayoutWithHeaderAndFooter">
+  </xs:complexType>
+  <xs:complexType name="LayoutWithHeaderAndFooter">
     <xs:complexContent>
       <xs:extension base="Layout">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2475,15 +2484,15 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="Log4JXmlEventLayout">
+  </xs:complexType>
+  <xs:complexType name="Log4JXmlEventLayout">
     <xs:complexContent>
       <xs:extension base="Layout">
         <xs:choice minOccurs="0" maxOccurs="unbounded" />
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="SimpleLayout">
+  </xs:complexType>
+  <xs:complexType name="SimpleLayout">
     <xs:complexContent>
       <xs:extension base="Layout">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2496,8 +2505,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="when">
+  </xs:complexType>
+  <xs:complexType name="when">
     <xs:complexContent>
       <xs:extension base="Filter">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2516,8 +2525,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:simpleDataType name="FilterResult">
+  </xs:complexType>
+  <xs:simpleType name="FilterResult">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Neutral" />
       <xs:enumeration value="Log" />
@@ -2525,8 +2534,8 @@
       <xs:enumeration value="LogFinal" />
       <xs:enumeration value="IgnoreFinal" />
     </xs:restriction>
-  </xs:simpleDataType>
-  <xs:complexDataType name="whenContains">
+  </xs:simpleType>
+  <xs:complexType name="whenContains">
     <xs:complexContent>
       <xs:extension base="Filter">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2557,8 +2566,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="whenEqual">
+  </xs:complexType>
+  <xs:complexType name="whenEqual">
     <xs:complexContent>
       <xs:extension base="Filter">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2589,8 +2598,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="whenNotContains">
+  </xs:complexType>
+  <xs:complexType name="whenNotContains">
     <xs:complexContent>
       <xs:extension base="Filter">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2621,8 +2630,8 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
-  <xs:complexDataType name="whenNotEqual">
+  </xs:complexType>
+  <xs:complexType name="whenNotEqual">
     <xs:complexContent>
       <xs:extension base="Filter">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2653,5 +2662,33 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexDataType>
+  </xs:complexType>
+  <xs:complexType name="AccurateLocal">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AccurateUTC">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FastLocal">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FastUTC">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 </xs:schema>

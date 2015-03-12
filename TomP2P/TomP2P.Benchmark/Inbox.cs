@@ -32,7 +32,8 @@ namespace TomP2P.Benchmark
         {
             switch (argument)
             {
-                case "b1":
+                case "bb1":
+                    BootstrapBenchmark.BootstrapBenchmark1();
                     break;
             }
         }

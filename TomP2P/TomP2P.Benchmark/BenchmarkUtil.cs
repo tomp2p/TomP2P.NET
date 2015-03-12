@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 using TomP2P.Connection;
 using TomP2P.P2P;
@@ -10,7 +6,7 @@ using TomP2P.Peers;
 
 namespace TomP2P.Benchmark
 {
-    public class Util
+    public static class BenchmarkUtil
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

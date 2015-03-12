@@ -8,6 +8,7 @@
       <xs:element name="variable" type="NLogVariable" />
       <xs:element name="targets" type="NLogTargets" />
       <xs:element name="rules" type="NLogRules" />
+      <xs:element name="time" type="TimeSource" />
     </xs:choice>
     <xs:attribute name="autoReload" type="xs:boolean">
       <xs:annotation>
@@ -26,7 +27,7 @@
     </xs:attribute>
     <xs:attribute name="internalLogFile" type="xs:string">
       <xs:annotation>
-        <xs:documentation>WriteToProcess internal NLog messages to the specified file.</xs:documentation>
+        <xs:documentation>Write internal NLog messages to the specified file.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="internalLogLevel" type="NLogLevel">
@@ -214,6 +215,7 @@
   </xs:complexType>
   <xs:complexType name="Layout"></xs:complexType>
   <xs:complexType name="Filter" abstract="true"></xs:complexType>
+  <xs:complexType name="TimeSource" abstract="true"></xs:complexType>
   <xs:simpleType name="SimpleLayoutAttribute">
     <xs:restriction base="xs:string">
       <xs:pattern value=".*" />
@@ -407,7 +409,7 @@
           <xs:element name="address" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="keepConnection" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="maxQueueSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="includeNLogcontent" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="includeNLogData" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="includeSourceInfo" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="ndcItemSeparator" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.NLogViewerParameterInfo" />
@@ -466,7 +468,7 @@
             <xs:documentation>Maximum queue size.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="includeNLogcontent" type="xs:boolean">
+        <xs:attribute name="includeNLogData" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to include NLog-specific extensions to log4j schema.</xs:documentation>
           </xs:annotation>
@@ -694,14 +696,14 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="contentbase">
+  <xs:complexType name="Database">
     <xs:complexContent>
       <xs:extension base="Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="connectionString" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="connectionStringName" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="dbcontentbase" minOccurs="0" maxOccurs="1" type="Layout" />
+          <xs:element name="dbDatabase" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="dbHost" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="dbPassword" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="dbProvider" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -709,11 +711,11 @@
           <xs:element name="keepConnection" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="useTransactions" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="installConnectionString" minOccurs="0" maxOccurs="1" type="Layout" />
-          <xs:element name="install-command" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.contentbaseCommandInfo" />
-          <xs:element name="uninstall-command" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.contentbaseCommandInfo" />
+          <xs:element name="install-command" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseCommandInfo" />
+          <xs:element name="uninstall-command" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseCommandInfo" />
           <xs:element name="commandText" minOccurs="0" maxOccurs="1" type="Layout" />
-          <xs:element name="commandType" minOccurs="0" maxOccurs="1" type="System.content.CommandType" />
-          <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.contentbaseParameterInfo" />
+          <xs:element name="commandType" minOccurs="0" maxOccurs="1" type="System.Data.CommandType" />
+          <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseParameterInfo" />
         </xs:choice>
         <xs:attribute name="name" type="xs:string">
           <xs:annotation>
@@ -722,7 +724,7 @@
         </xs:attribute>
         <xs:attribute name="connectionString" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>Connection string. When provided, it overrides the values specified in DBHost, DBUserName, DBPassword, DBcontentbase.</xs:documentation>
+            <xs:documentation>Connection string. When provided, it overrides the values specified in DBHost, DBUserName, DBPassword, DBDatabase.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="connectionStringName" type="xs:string">
@@ -730,39 +732,39 @@
             <xs:documentation>Name of the connection string (as specified in &lt;connectionStrings&gt; configuration section.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="dbcontentbase" type="SimpleLayoutAttribute">
+        <xs:attribute name="dbDatabase" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>contentbase name. If the ConnectionString is not provided this value will be used to construct the "contentbase=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database name. If the ConnectionString is not provided this value will be used to construct the "Database=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbHost" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>contentbase host name. If the ConnectionString is not provided this value will be used to construct the "SyncServer=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database host name. If the ConnectionString is not provided this value will be used to construct the "Server=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbPassword" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>contentbase password. If the ConnectionString is not provided this value will be used to construct the "Password=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database password. If the ConnectionString is not provided this value will be used to construct the "Password=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbProvider" type="xs:string">
           <xs:annotation>
-            <xs:documentation>Name of the contentbase provider.</xs:documentation>
+            <xs:documentation>Name of the database provider.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbUserName" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>contentbase user name. If the ConnectionString is not provided this value will be used to construct the "User ID=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database user name. If the ConnectionString is not provided this value will be used to construct the "User ID=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="keepConnection" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Indicates whether to keep the contentbase connection open between the log events.</xs:documentation>
+            <xs:documentation>Indicates whether to keep the database connection open between the log events.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="useTransactions" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Indicates whether to use contentbase transactions. Some content providers require this.</xs:documentation>
+            <xs:documentation>Indicates whether to use database transactions. Some data providers require this.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="installConnectionString" type="SimpleLayoutAttribute">
@@ -775,7 +777,7 @@
             <xs:documentation>Text of the SQL command to be run on each log level.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="commandType" type="System.content.CommandType">
+        <xs:attribute name="commandType" type="System.Data.CommandType">
           <xs:annotation>
             <xs:documentation>Type of the SQL command to be run on each log level.</xs:documentation>
           </xs:annotation>
@@ -783,22 +785,22 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="System.content.CommandType">
+  <xs:simpleType name="System.Data.CommandType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Text" />
       <xs:enumeration value="StoredProcedure" />
       <xs:enumeration value="TableDirect" />
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="NLog.Targets.contentbaseCommandInfo">
+  <xs:complexType name="NLog.Targets.DatabaseCommandInfo">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
-      <xs:element name="commandType" minOccurs="0" maxOccurs="1" type="System.content.CommandType" />
+      <xs:element name="commandType" minOccurs="0" maxOccurs="1" type="System.Data.CommandType" />
       <xs:element name="connectionString" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="ignoreFailures" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-      <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.contentbaseParameterInfo" />
+      <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.DatabaseParameterInfo" />
       <xs:element name="text" minOccurs="0" maxOccurs="1" type="Layout" />
     </xs:choice>
-    <xs:attribute name="commandType" type="System.content.CommandType">
+    <xs:attribute name="commandType" type="System.Data.CommandType">
       <xs:annotation>
         <xs:documentation>Type of the command.</xs:documentation>
       </xs:annotation>
@@ -819,7 +821,7 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="NLog.Targets.contentbaseParameterInfo">
+  <xs:complexType name="NLog.Targets.DatabaseParameterInfo">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="layout" minOccurs="0" maxOccurs="1" type="Layout" />
       <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
@@ -834,22 +836,22 @@
     </xs:attribute>
     <xs:attribute name="name" type="xs:string">
       <xs:annotation>
-        <xs:documentation>contentbase parameter name.</xs:documentation>
+        <xs:documentation>Database parameter name.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="precision" type="xs:byte">
       <xs:annotation>
-        <xs:documentation>contentbase parameter precision.</xs:documentation>
+        <xs:documentation>Database parameter precision.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="scale" type="xs:byte">
       <xs:annotation>
-        <xs:documentation>contentbase parameter scale.</xs:documentation>
+        <xs:documentation>Database parameter scale.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="size" type="xs:integer">
       <xs:annotation>
-        <xs:documentation>contentbase parameter size.</xs:documentation>
+        <xs:documentation>Database parameter size.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -991,21 +993,22 @@
           <xs:element name="archiveAboveSize" minOccurs="0" maxOccurs="1" type="xs:long" />
           <xs:element name="maxArchiveFiles" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="forceManaged" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="replaceFileContentsOnEachWriteToProcess" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="enableFileDelete" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="deleteOldFileOnStartAsyncTCPTCPup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="createDirs" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="archiveDateFormat" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="fileName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="fileAttributes" minOccurs="0" maxOccurs="1" type="NLog.Targets.Win32FileAttributes" />
-          <xs:element name="bufferSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteToProcessAttemptDelay" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteToProcessAttempts" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="concurrentWriteToProcesss" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="keepFileOpen" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="networkWriteToProcesss" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="openFileCacheSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="replaceFileContentsOnEachWrite" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="deleteOldFileOnStartup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="fileName" minOccurs="0" maxOccurs="1" type="Layout" />
+          <xs:element name="archiveDateFormat" minOccurs="0" maxOccurs="1" type="xs:string" />
+          <xs:element name="archiveOldFileOnStartup" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="createDirs" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="enableFileDelete" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="openFileCacheTimeout" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="networkWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="keepFileOpen" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="concurrentWrites" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="concurrentWriteAttempts" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="concurrentWriteAttemptDelay" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="bufferSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
+          <xs:element name="openFileCacheSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
           <xs:element name="autoFlush" minOccurs="0" maxOccurs="1" type="xs:boolean" />
         </xs:choice>
         <xs:attribute name="name" type="xs:string">
@@ -1068,29 +1071,19 @@
             <xs:documentation>Gets ors set a value indicating whether a managed file stream is forced, instead of used the native implementation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="replaceFileContentsOnEachWriteToProcess" type="xs:boolean">
+        <xs:attribute name="fileAttributes" type="NLog.Targets.Win32FileAttributes">
+          <xs:annotation>
+            <xs:documentation>File attributes (Windows only).</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="replaceFileContentsOnEachWrite" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to replace file contents on each write instead of appending log message at the end.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="enableFileDelete" type="xs:boolean">
-          <xs:annotation>
-            <xs:documentation>Indicates whether to enable log file(s) to be deleted.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="deleteOldFileOnStartAsyncTCPTCPup" type="xs:boolean">
+        <xs:attribute name="deleteOldFileOnStartup" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to delete old log file on startup.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="createDirs" type="xs:boolean">
-          <xs:annotation>
-            <xs:documentation>Indicates whether to create directories if they don't exist.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="archiveDateFormat" type="xs:string">
-          <xs:annotation>
-            <xs:documentation>Value specifying the date format to use when archving files.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="fileName" type="SimpleLayoutAttribute">
@@ -1098,29 +1091,34 @@
             <xs:documentation>Name of the file to write to.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="fileAttributes" type="NLog.Targets.Win32FileAttributes">
+        <xs:attribute name="archiveDateFormat" type="xs:string">
           <xs:annotation>
-            <xs:documentation>File attributes (Windows only).</xs:documentation>
+            <xs:documentation>Value specifying the date format to use when archving files.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="bufferSize" type="xs:integer">
+        <xs:attribute name="archiveOldFileOnStartup" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Log file buffer size in bytes.</xs:documentation>
+            <xs:documentation>Indicates whether to archive old log file on startup.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteToProcessAttemptDelay" type="xs:integer">
+        <xs:attribute name="createDirs" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Delay in milliseconds to wait before attempting to write to the file again.</xs:documentation>
+            <xs:documentation>Indicates whether to create directories if they don't exist.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteToProcessAttempts" type="xs:integer">
+        <xs:attribute name="enableFileDelete" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Number of times the write is appended on the file before NLog discards the log message.</xs:documentation>
+            <xs:documentation>Indicates whether to enable log file(s) to be deleted.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="concurrentWriteToProcesss" type="xs:boolean">
+        <xs:attribute name="openFileCacheTimeout" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on the same host.</xs:documentation>
+            <xs:documentation>Maximum number of seconds that files are kept open. If this number is negative the files are not automatically closed after a period of inactivity.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="networkWrites" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on different network hosts.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="keepFileOpen" type="xs:boolean">
@@ -1128,19 +1126,29 @@
             <xs:documentation>Indicates whether to keep log file open instead of opening and closing it on each logging event.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="networkWriteToProcesss" type="xs:boolean">
+        <xs:attribute name="concurrentWrites" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on different network hosts.</xs:documentation>
+            <xs:documentation>Indicates whether concurrent writes to the log file by multiple processes on the same host.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="concurrentWriteAttempts" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Number of times the write is appended on the file before NLog discards the log message.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="concurrentWriteAttemptDelay" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Delay in milliseconds to wait before attempting to write to the file again.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="bufferSize" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>Log file buffer size in bytes.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="openFileCacheSize" type="xs:integer">
           <xs:annotation>
             <xs:documentation>Number of files to be kept open. Setting this to a higher value may improve performance in a situation where a single File target is writing to many files (such as splitting by level or by logger).</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="openFileCacheTimeout" type="xs:integer">
-          <xs:annotation>
-            <xs:documentation>Maximum number of seconds that files are kept open. If this number is negative the files are not automatically closed after a period of inactivity.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="autoFlush" type="xs:boolean">
@@ -1165,6 +1173,7 @@
       <xs:enumeration value="Sequence" />
       <xs:enumeration value="Rolling" />
       <xs:enumeration value="Date" />
+      <xs:enumeration value="DateAndSequence" />
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="NLog.Targets.FileArchivePeriod">
@@ -1191,7 +1200,7 @@
       <xs:enumeration value="Compressed" />
       <xs:enumeration value="NotContentIndexed" />
       <xs:enumeration value="Encrypted" />
-      <xs:enumeration value="WriteToProcessThrough" />
+      <xs:enumeration value="WriteThrough" />
       <xs:enumeration value="NoBuffering" />
       <xs:enumeration value="DeleteOnClose" />
       <xs:enumeration value="PosixSemantics" />
@@ -1369,7 +1378,7 @@
         </xs:attribute>
         <xs:attribute name="clientId" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SyncClient ID.</xs:documentation>
+            <xs:documentation>Client ID.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="includeEventProperties" type="xs:boolean">
@@ -1427,7 +1436,7 @@
           <xs:element name="replaceNewlineWithBrTagInHtml" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="priority" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="timeout" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="smtpSyncServer" minOccurs="0" maxOccurs="1" type="Layout" />
+          <xs:element name="smtpServer" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="smtpAuthentication" minOccurs="0" maxOccurs="1" type="NLog.Targets.SmtpAuthenticationMode" />
           <xs:element name="smtpUserName" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="smtpPassword" minOccurs="0" maxOccurs="1" type="Layout" />
@@ -1497,7 +1506,7 @@
         </xs:attribute>
         <xs:attribute name="from" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SendAsyncAsyncer's email address (e.g. joe@domain.com).</xs:documentation>
+            <xs:documentation>Sender's email address (e.g. joe@domain.com).</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="replaceNewlineWithBrTagInHtml" type="xs:boolean">
@@ -1515,9 +1524,9 @@
             <xs:documentation>Indicates the SMTP client timeout.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="smtpSyncServer" type="SimpleLayoutAttribute">
+        <xs:attribute name="smtpServer" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>SMTP SyncServer to be used for sending.</xs:documentation>
+            <xs:documentation>SMTP Server to be used for sending.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="smtpAuthentication" type="NLog.Targets.SmtpAuthenticationMode">
@@ -1542,7 +1551,7 @@
         </xs:attribute>
         <xs:attribute name="smtpPort" type="xs:integer">
           <xs:annotation>
-            <xs:documentation>Port number that SMTP SyncServer is listening on.</xs:documentation>
+            <xs:documentation>Port number that SMTP Server is listening on.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="useSystemNetMailSettings" type="xs:boolean">
@@ -1777,7 +1786,7 @@
           <xs:element name="address" minOccurs="0" maxOccurs="1" type="Layout" />
           <xs:element name="keepConnection" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="maxQueueSize" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="includeNLogcontent" minOccurs="0" maxOccurs="1" type="xs:boolean" />
+          <xs:element name="includeNLogData" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="includeSourceInfo" minOccurs="0" maxOccurs="1" type="xs:boolean" />
           <xs:element name="ndcItemSeparator" minOccurs="0" maxOccurs="1" type="xs:string" />
           <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="NLog.Targets.NLogViewerParameterInfo" />
@@ -1836,7 +1845,7 @@
             <xs:documentation>Maximum queue size.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="includeNLogcontent" type="xs:boolean">
+        <xs:attribute name="includeNLogData" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Indicates whether to include NLog-specific extensions to log4j schema.</xs:documentation>
           </xs:annotation>
@@ -2651,6 +2660,34 @@
             <xs:documentation>Layout to be used to filter log messages.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AccurateLocal">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AccurateUTC">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FastLocal">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="FastUTC">
+    <xs:complexContent>
+      <xs:extension base="TimeSource">
+        <xs:choice minOccurs="0" maxOccurs="unbounded" />
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
