@@ -30,7 +30,11 @@ namespace TomP2P.Benchmark
 
         private static void Execute(string argument)
         {
-            
+            switch (argument)
+            {
+                case "b1":
+                    break;
+            }
         }
     }
 }
