@@ -40,7 +40,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
                 catch (ObjectDisposedException)
                 {
                     // the socket seems to be disposed already
-                    Logger.Warn("{0} was already closed/disposed.", this);
+                    Logger.Error("{0} was already closed/disposed.", this);
                 }
             }
         }

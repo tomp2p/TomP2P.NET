@@ -75,7 +75,7 @@ namespace TomP2P.Core.Connection
             IdleUdpSeconds = configuration.IdleUdpSeconds;
             ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis;
 
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public TaskCompletionSource<Message.Message> TcsResponse
@@ -104,7 +104,6 @@ namespace TomP2P.Core.Connection
                     _tcsResponse.SetException(ex);
                 }
             });
-
             return _tcsResponse.Task;
         }
 

@@ -38,6 +38,7 @@ namespace TomP2P.Benchmark
             PrintStopwatchProperties();
             for (int i = 0; i < repetitions; i++)
             {
+                Console.WriteLine("Executing repetition {0} / {1}:", i+1, repetitions);
                 switch (argument)
                 {
                     case "bb1":

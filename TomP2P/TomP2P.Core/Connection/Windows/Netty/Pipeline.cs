@@ -34,7 +34,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
                     AddLast(handler.Key, handler.Value);
                 }
             }
-            Logger.Info("Instantiated {0}.", this);
+            //Logger.Info("Instantiated {0}.", this);
         }
 
         /// <summary>

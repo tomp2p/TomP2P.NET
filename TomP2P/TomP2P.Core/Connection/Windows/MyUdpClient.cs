@@ -22,7 +22,7 @@ namespace TomP2P.Core.Connection.Windows
         {
             // bind
             _udpClient = new UdpClient(localEndPoint);
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public override async Task SendBytesAsync(byte[] bytes, IPEndPoint senderEp, IPEndPoint receiverEp = null)

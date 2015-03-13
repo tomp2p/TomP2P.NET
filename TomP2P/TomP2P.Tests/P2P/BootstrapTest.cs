@@ -112,7 +112,8 @@ namespace TomP2P.Tests.P2P
             {
                 // setup
                 // TODO test with >100 peers
-                var peers = Utils2.CreateNodes(100, rnd, 4004);
+                // TODO test with timeout
+                var peers = Utils2.CreateNodes(200, rnd, 4004);
                 master = peers[0];
 
                 // do testing

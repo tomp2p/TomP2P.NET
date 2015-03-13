@@ -176,15 +176,17 @@ namespace TomP2P.Extensions
 
         /// <summary>
         /// Equivalent to Java's Queue.peek() that returns null if empty.
+        /// Retrieves, but does not remove, the head of this queue, or returns null if
+        /// this queue is empty.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="q"></param>
-        /// <returns></returns>
+        /// <returns>The head of this queue, or null if this queue is empty.</returns>
         public static T Peek2<T>(this Queue<T> q) where T : class
         {
             try
             {
-                return q.Peek();
+                return q.Count == 0 ? null : q.Peek();
             }
             catch (InvalidOperationException)
             {

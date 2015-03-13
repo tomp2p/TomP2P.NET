@@ -23,7 +23,7 @@ namespace TomP2P.Core.Connection.Windows
             // bind
             _tcpClient = new TcpClient(localEndPoint);
 
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public Task ConnectAsync(IPEndPoint remoteEndPoint)

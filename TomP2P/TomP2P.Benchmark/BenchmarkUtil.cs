@@ -21,40 +21,62 @@ namespace TomP2P.Benchmark
         /// <param name="rnd">The random object used for peer ID creation.</param>
         /// <param name="port">The UDP and TCP port.</param>
         /// <param name="maintenance">Indicates whether maintenance should be enabled.</param>
+        /// <param name="timeout">Indicates whether timeout should be enabled.</param>
         /// <returns></returns>
-        public static Peer[] CreateNodes(int nrOfPeers, InteropRandom rnd, int port, bool maintenance)
+        public static Peer[] CreateNodes(int nrOfPeers, InteropRandom rnd, int port, bool maintenance, bool timeout)
         {
             var peers = new Peer[nrOfPeers];
 
             var masterId = CreateRandomId(rnd);
             var masterMap = new PeerMap(new PeerMapConfiguration(masterId));
-            peers[0] = new PeerBuilder(masterId)
+            var pb = new PeerBuilder(masterId)
                 .SetPorts(port)
                 .SetEnableMaintenance(maintenance)
                 .SetExternalBindings(new Bindings())
-                .SetPeerMap(masterMap)
-                .Start();
+                .SetPeerMap(masterMap);
+            if (!timeout)
+            {
+                pb.SetChannelServerConfiguration(CreateInfiniteTimeoutChannelServerConfiguration(port));
+            }
+            peers[0] = pb.Start();
             Logger.Info("Created master peer: {0}.", peers[0].PeerId);
 
             for (int i = 1; i < nrOfPeers; i++)
             {
-                peers[i] = CreateSlave(peers[0], rnd, maintenance);
+                peers[i] = CreateSlave(peers[0], rnd, maintenance, timeout);
             }
             return peers;
         }
 
-        public static Peer CreateSlave(Peer master, InteropRandom rnd, bool maintenance)
+        public static Peer CreateSlave(Peer master, InteropRandom rnd, bool maintenance, bool timeout)
         {
             var slaveId = CreateRandomId(rnd);
             var slaveMap = new PeerMap(new PeerMapConfiguration(slaveId).SetPeerNoVerification());
-            var slave = new PeerBuilder(slaveId)
+            var pb = new PeerBuilder(slaveId)
                 .SetMasterPeer(master)
                 .SetEnableMaintenance(maintenance)
                 .SetExternalBindings(new Bindings())
-                .SetPeerMap(slaveMap)
-                .Start();
+                .SetPeerMap(slaveMap);
+            if (!timeout)
+            {
+                pb.SetChannelServerConfiguration(CreateInfiniteTimeoutChannelServerConfiguration(Ports.DefaultPort));
+            }
+             var slave = pb.Start();
             Logger.Info("Created slave peer {0}.", slave.PeerId);
             return slave;
+        }
+
+        /// <summary>
+        /// Creates and returns a ChannelServerConfiguration that has infinite values for all timeouts.
+        /// </summary>
+        /// <returns></returns>
+        public static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration(int port)
+        {
+            return PeerBuilder.CreateDefaultChannelServerConfiguration()
+                .SetIdleTcpSeconds(0)
+                .SetIdleUdpSeconds(0)
+                .SetConnectionTimeoutTcpMillis(0)
+                .SetPorts(new Ports(port, port));
         }
 
         public static Stopwatch StartBenchmark([CallerMemberName] string caller = "")

@@ -24,7 +24,7 @@ namespace TomP2P.Core.Connection.Windows
             // local endpoint
             _tcpServer = new TcpListener(localEndPoint);
 
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public override void DoStart()

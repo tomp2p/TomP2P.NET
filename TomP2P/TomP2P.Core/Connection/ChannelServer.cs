@@ -118,7 +118,7 @@ namespace TomP2P.Core.Connection
             }
             catch (Exception ex)
             {
-                Logger.Warn("An exception occured when starting up UDP server.", ex);
+                Logger.Error("An exception occured when starting up UDP server.", ex);
                 return false;
             }
         }
@@ -141,7 +141,7 @@ namespace TomP2P.Core.Connection
             }
             catch (Exception ex)
             {
-                Logger.Warn("An exception occured when starting up TCP server.", ex);
+                Logger.Error("An exception occured when starting up TCP server.", ex);
                 return false;
             }
         }
