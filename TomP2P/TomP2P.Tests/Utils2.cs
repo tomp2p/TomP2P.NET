@@ -120,7 +120,7 @@ namespace TomP2P.Tests
                 var peerMap = new PeerMap(new PeerMapConfiguration(peerId));
                 peers[0] = new PeerBuilder(peerId)
                     .SetPorts(port)
-                    .SetEnableMaintenanceRpc(maintenance)
+                    .SetEnableMaintenance(maintenance)
                     .SetExternalBindings(bindings)
                     .SetPeerMap(peerMap)
                     .Start()
@@ -132,7 +132,7 @@ namespace TomP2P.Tests
                 var peerMap = new PeerMap(new PeerMapConfiguration(peerId));
                 peers[0] = new PeerBuilder(peerId)
                     .SetPorts(port)
-                    .SetEnableMaintenanceRpc(maintenance)
+                    .SetEnableMaintenance(maintenance)
                     .SetExternalBindings(bindings)
                     .SetPeerMap(peerMap)
                     .Start();
@@ -146,7 +146,7 @@ namespace TomP2P.Tests
                     var peerMap = new PeerMap(new PeerMapConfiguration(peerId));
                     peers[i] = new PeerBuilder(peerId)
                         .SetMasterPeer(peers[0])
-                        .SetEnableMaintenanceRpc(maintenance)
+                        .SetEnableMaintenance(maintenance)
                         .SetExternalBindings(bindings)
                         .SetPeerMap(peerMap)
                         .Start()
@@ -158,7 +158,7 @@ namespace TomP2P.Tests
                     var peerMap = new PeerMap(new PeerMapConfiguration(peerId).SetPeerNoVerification());
                     peers[i] = new PeerBuilder(peerId)
                         .SetMasterPeer(peers[0])
-                        .SetEnableMaintenanceRpc(maintenance)
+                        .SetEnableMaintenance(maintenance)
                         .SetExternalBindings(bindings)
                         .SetPeerMap(peerMap)
                         .Start();

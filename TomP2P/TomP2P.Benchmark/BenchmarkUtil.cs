@@ -5,6 +5,7 @@ using NLog;
 using TomP2P.Core.Connection;
 using TomP2P.Core.P2P;
 using TomP2P.Core.Peers;
+using TomP2P.Extensions;
 
 namespace TomP2P.Benchmark
 {
@@ -21,15 +22,15 @@ namespace TomP2P.Benchmark
         /// <param name="port">The UDP and TCP port.</param>
         /// <param name="maintenance">Indicates whether maintenance should be enabled.</param>
         /// <returns></returns>
-        public static Peer[] CreateNodes(int nrOfPeers, Random rnd, int port, bool maintenance)
+        public static Peer[] CreateNodes(int nrOfPeers, InteropRandom rnd, int port, bool maintenance)
         {
             var peers = new Peer[nrOfPeers];
 
-            var masterId = new Number160(rnd);
+            var masterId = CreateRandomId(rnd);
             var masterMap = new PeerMap(new PeerMapConfiguration(masterId));
             peers[0] = new PeerBuilder(masterId)
                 .SetPorts(port)
-                .SetEnableMaintenanceRpc(maintenance)
+                .SetEnableMaintenance(maintenance)
                 .SetExternalBindings(new Bindings())
                 .SetPeerMap(masterMap)
                 .Start();
@@ -42,13 +43,13 @@ namespace TomP2P.Benchmark
             return peers;
         }
 
-        public static Peer CreateSlave(Peer master, Random rnd, bool maintenance)
+        public static Peer CreateSlave(Peer master, InteropRandom rnd, bool maintenance)
         {
-            var slaveId = new Number160(rnd);
+            var slaveId = CreateRandomId(rnd);
             var slaveMap = new PeerMap(new PeerMapConfiguration(slaveId).SetPeerNoVerification());
             var slave = new PeerBuilder(slaveId)
                 .SetMasterPeer(master)
-                .SetEnableMaintenanceRpc(maintenance)
+                .SetEnableMaintenance(maintenance)
                 .SetExternalBindings(new Bindings())
                 .SetPeerMap(slaveMap)
                 .Start();
@@ -66,7 +67,7 @@ namespace TomP2P.Benchmark
         {
             watch.Stop();
             Console.WriteLine("{0}: Stopped Benchmarking.", caller);
-            Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s)", caller, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
+            Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s", caller, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
         }
 
         private static double ToSeconds(this Stopwatch watch)
@@ -82,6 +83,16 @@ namespace TomP2P.Benchmark
         private static double ToNanos(this Stopwatch watch)
         {
             return watch.ToSeconds() * 1000000000;
+        }
+
+        private static Number160 CreateRandomId(InteropRandom rnd)
+        {
+            var vals = new int[Number160.IntArraySize];
+            for (int i = 0; i < vals.Length; i++)
+            {
+                vals[i] = rnd.NextInt(Int32.MaxValue);
+            }
+            return new Number160(vals);
         }
     }
 }

@@ -14,11 +14,13 @@ namespace TomP2P.Benchmark
                 Environment.Exit(-1);
             }
             var argument = args[0];
+            var repetitions = args.Length >= 2 ? Convert.ToInt32(args[1]) : 1;
 
             try
             {
                 Console.WriteLine("Argument: {0}", argument);
-                ExecuteAsync(argument).Wait();
+                Console.WriteLine("Repetitions: {0}", repetitions);
+                ExecuteAsync(argument, repetitions).Wait();
             }
             catch (Exception ex)
             {
@@ -27,17 +29,21 @@ namespace TomP2P.Benchmark
                 Environment.Exit(-2);
             }
             Console.WriteLine("Exiting with success.");
+            Console.ReadLine();
             Environment.Exit(0);
         }
 
-        private static async Task ExecuteAsync(string argument)
+        private static async Task ExecuteAsync(string argument, int repetitions)
         {
             PrintStopwatchProperties();
-            switch (argument)
+            for (int i = 0; i < repetitions; i++)
             {
-                case "bb1":
-                    await BootstrapBenchmark.Benchmark1Async();
-                    break;
+                switch (argument)
+                {
+                    case "bb1":
+                        await BootstrapBenchmark.Benchmark1Async(i);
+                        break;
+                }
             }
         }
 

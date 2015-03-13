@@ -52,7 +52,7 @@ namespace TomP2P.Core.P2P
         public bool IsEnabledDirectDataRpc { get; private set; }
         public bool IsEnabledBroadcastRpc { get; private set; }
         public bool IsEnabledRoutingRpc { get; private set; }
-        public bool IsEnabledMaintenanceRpc { get; private set; }
+        public bool IsEnabledMaintenance { get; private set; }
         public bool IsEnabledQuitRpc { get; private set; }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace TomP2P.Core.P2P
             IsEnabledDirectDataRpc = true;
             IsEnabledBroadcastRpc = true;
             IsEnabledRoutingRpc = true;
-            IsEnabledMaintenanceRpc = true;
+            IsEnabledMaintenance = true;
             IsEnabledQuitRpc = true;
         }
 
@@ -230,7 +230,7 @@ namespace TomP2P.Core.P2P
                 peer.SetDistributedRouting(routing);
             }
 
-            if (MaintenanceTask == null && IsEnabledMaintenanceRpc)
+            if (MaintenanceTask == null && IsEnabledMaintenance)
             {
                 MaintenanceTask = new MaintenanceTask();
             }
@@ -457,9 +457,9 @@ namespace TomP2P.Core.P2P
             return this;
         }
 
-        public PeerBuilder SetEnableMaintenanceRpc(bool enableMaintenanceRpc)
+        public PeerBuilder SetEnableMaintenance(bool enableMaintenance)
         {
-            IsEnabledMaintenanceRpc = enableMaintenanceRpc;
+            IsEnabledMaintenance = enableMaintenance;
             return this;
         }
 

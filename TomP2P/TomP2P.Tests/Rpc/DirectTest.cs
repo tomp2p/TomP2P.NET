@@ -147,13 +147,13 @@ namespace TomP2P.Tests.Rpc
 
                 sender = new PeerBuilder(new Number160("0x50"))
                     .SetP2PId(55)
-                    .SetEnableMaintenanceRpc(false)
+                    .SetEnableMaintenance(false)
                     .SetChannelClientConfiguration(ccc)
                     .SetChannelServerConfiguration(csc1)
                     .Start();
                 recv1 = new PeerBuilder(new Number160("0x20"))
                     .SetP2PId(55)
-                    .SetEnableMaintenanceRpc(false)
+                    .SetEnableMaintenance(false)
                     .SetChannelClientConfiguration(ccc)
                     .SetChannelServerConfiguration(csc2)
                     .Start();

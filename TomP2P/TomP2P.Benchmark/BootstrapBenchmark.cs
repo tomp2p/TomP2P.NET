@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NLog;
 using TomP2P.Core.P2P;
+using TomP2P.Extensions;
 
 namespace TomP2P.Benchmark
 {
@@ -9,9 +9,10 @@ namespace TomP2P.Benchmark
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public static async Task Benchmark1Async()
+        public static async Task Benchmark1Async(int repetitionNr)
         {
-            var rnd = new Random(42);
+            // each run should create same IDs
+            var rnd = new InteropRandom(42);
             Peer master = null;
 
             try
