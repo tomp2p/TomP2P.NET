@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,9 +53,6 @@ namespace TomP2P.Core.Connection
         /// </summary>
         public int ConnectionTimeoutTcpMillis { get; private set; }
 
-        // .NET-specific: to be able to clone this instace
-        private readonly IConnectionConfiguration _configuration;
-
         /// <summary>
         /// Creates a request handler that can send TCP and UDP messages.
         /// </summary>
@@ -71,7 +67,6 @@ namespace TomP2P.Core.Connection
             ConnectionBean = connectionBean;
             _message = tcsResponse.Task.AsyncState as Message.Message;
             _sendMessageId = new MessageId(_message);
-            _configuration = configuration;
             IdleTcpSeconds = configuration.IdleTcpSeconds;
             IdleUdpSeconds = configuration.IdleUdpSeconds;
             ConnectionTimeoutTcpMillis = configuration.ConnectionTimeoutTcpMillis;
