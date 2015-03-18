@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using NLog;
 using TomP2P.Core.P2P;
 using TomP2P.Extensions;
@@ -22,7 +23,6 @@ namespace TomP2P.Benchmark
             // each run should create same IDs
             var rnd = new InteropRandom(42);
             Peer master = null;
-
             try
             {
                 // setup

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using NLog;
+using NLog.Targets;
 using TomP2P.Core.Connection;
 using TomP2P.Core.P2P;
 using TomP2P.Core.Peers;
@@ -81,6 +82,8 @@ namespace TomP2P.Benchmark
 
         public static Stopwatch StartBenchmark([CallerMemberName] string caller = "")
         {
+            WarmupTimer();
+            ReclaimResources();
             Console.WriteLine("{0}: Starting Benchmarking...", caller);
             return Stopwatch.StartNew();
         }
@@ -90,6 +93,29 @@ namespace TomP2P.Benchmark
             watch.Stop();
             Console.WriteLine("{0}: Stopped Benchmarking.", caller);
             Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s", caller, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
+            // TODO include 2nd GC/OF
+        }
+
+        private static long WarmupTimer()
+        {
+            // force JIT of stopwatch and "use" result
+            // otherwise compiler might comment un-used code
+            long ticks = 0;
+            for (int i = 0; i < 100; i++)
+            {
+                var watch = Stopwatch.StartNew();
+                ticks += watch.ElapsedTicks;
+                watch.Stop();
+            }
+            return ticks;
+        }
+
+        private static void ReclaimResources()
+        {
+            Console.WriteLine("Garbage Collection forced...");
+            GC.Collect();
+            Console.WriteLine("Object Finalization forced...");
+            GC.WaitForPendingFinalizers();
         }
 
         private static double ToSeconds(this Stopwatch watch)
