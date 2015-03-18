@@ -31,7 +31,6 @@ namespace TomP2P.Benchmark
             double stdDev = 0;
             if (values.Any())
             {
-                double mean = CalculateMean(values);
                 double variance = CalculateVariance(values);
                 
                 stdDev = Math.Sqrt(variance);

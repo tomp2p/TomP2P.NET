@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using NLog;
-using NLog.Targets;
 using TomP2P.Core.Connection;
 using TomP2P.Core.P2P;
 using TomP2P.Core.Peers;
@@ -12,8 +11,6 @@ namespace TomP2P.Benchmark
 {
     public static class BenchmarkUtil
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
         /// <summary>
         /// Creates peers for benchmarking. The first peer will be used as the master.
         /// This means that shutting down the master will shut down all other peers as well.

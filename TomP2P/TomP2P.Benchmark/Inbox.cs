@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -12,6 +11,7 @@ namespace TomP2P.Benchmark
             if (args.Length < 1)
             {
                 Console.Error.WriteLine("Argument missing.");
+                Console.ReadLine();
                 Environment.Exit(-1);
             }
             var argument = args[0];
@@ -49,7 +49,7 @@ namespace TomP2P.Benchmark
                 switch (argument)
                 {
                     case "bb1":
-                        repetitionResult = await BootstrapBenchmark.Benchmark1Async(i);
+                        repetitionResult = await BootstrapBenchmark.Benchmark1Async();
                         break;
                     default:
                         throw new ArgumentException("No valid benchmark argument.");
@@ -76,8 +76,6 @@ namespace TomP2P.Benchmark
             {
                 Console.WriteLine(res);
             }
-            Statistics.CalculateStdDev(results);
-
             Console.WriteLine("Mean: {0} ms.", Statistics.CalculateMean(results));
             Console.WriteLine("Variance: {0} ms.", Statistics.CalculateVariance(results));
             Console.WriteLine("Standard Deviation: {0} ms.", Statistics.CalculateStdDev(results));
