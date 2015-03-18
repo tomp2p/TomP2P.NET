@@ -40,7 +40,7 @@ namespace TomP2P.Benchmark
                 pb.SetChannelServerConfiguration(CreateInfiniteTimeoutChannelServerConfiguration(port));
             }
             peers[0] = pb.Start();
-            Logger.Info("Created master peer: {0}.", peers[0].PeerId);
+            //Logger.Info("Created master peer: {0}.", peers[0].PeerId);
 
             for (int i = 1; i < nrOfPeers; i++)
             {
@@ -63,7 +63,7 @@ namespace TomP2P.Benchmark
                 pb.SetChannelServerConfiguration(CreateInfiniteTimeoutChannelServerConfiguration(Ports.DefaultPort));
             }
              var slave = pb.Start();
-            Logger.Info("Created slave peer {0}.", slave.PeerId);
+            //Logger.Info("Created slave peer {0}.", slave.PeerId);
             return slave;
         }
 
@@ -82,18 +82,20 @@ namespace TomP2P.Benchmark
 
         public static Stopwatch StartBenchmark([CallerMemberName] string caller = "")
         {
+            // TODO ensure wamup of measured code already took place
             WarmupTimer();
             ReclaimResources();
             Console.WriteLine("{0}: Starting Benchmarking...", caller);
             return Stopwatch.StartNew();
         }
 
-        public static void StopBenchmark(Stopwatch watch, [CallerMemberName] string caller = "")
+        public static double StopBenchmark(Stopwatch watch, [CallerMemberName] string caller = "")
         {
             watch.Stop();
             Console.WriteLine("{0}: Stopped Benchmarking.", caller);
             Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s", caller, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
             // TODO include 2nd GC/OF
+            return watch.ToMillis();
         }
 
         private static long WarmupTimer()

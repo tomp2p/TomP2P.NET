@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Core.Connection.Windows;
@@ -87,7 +86,6 @@ namespace TomP2P.Core.Connection
         public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
             // so far, everything is sync -> invoke async / new thread
-            Console.WriteLine("[{0}] Sending UDP message.", Thread.CurrentThread.ManagedThreadId);
             var sendTask = ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
             return ExecuteAsync(sendTask);
         }
