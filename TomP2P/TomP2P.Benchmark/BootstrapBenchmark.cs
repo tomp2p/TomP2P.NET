@@ -26,7 +26,7 @@ namespace TomP2P.Benchmark
             try
             {
                 // setup
-                var peers = BenchmarkUtil.CreateNodes(200, rnd, 7077, false, false);
+                var peers = BenchmarkUtil.CreateNodes(500, rnd, 7077, false, false);
                 master = peers[0];
 
                 // bootstrap all slaves to the master

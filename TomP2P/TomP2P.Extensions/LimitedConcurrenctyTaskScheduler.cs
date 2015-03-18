@@ -7,6 +7,7 @@ namespace TomP2P.Extensions
 {
     /// <summary>
     /// Custom task scheduler that limites the number of threads used by the application.
+    /// Inspired by https://msdn.microsoft.com/en-us/library/ee789351%28v=vs.110%29.aspx
     /// </summary>
     public sealed class LimitedConcurrenctyTaskScheduler : TaskScheduler
     {
@@ -27,7 +28,7 @@ namespace TomP2P.Extensions
             _concurrency = concurrency;
         }
 
-        protected sealed override void QueueTask(Task task)
+        protected override void QueueTask(Task task)
         {
             lock (_tasks)
             {
@@ -64,7 +65,7 @@ namespace TomP2P.Extensions
                         }
 
                         // execute task
-                        base.TryExecuteTask(task);
+                        TryExecuteTask(task);
                     }
                 }
                 finally
@@ -88,17 +89,11 @@ namespace TomP2P.Extensions
                 // try to run the task
                 if (TryDequeue(task))
                 {
-                    return base.TryExecuteTask(task);
+                    return TryExecuteTask(task);
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
-            else
-            {
-                return base.TryExecuteTask(task);
-            }
+            return TryExecuteTask(task);
         }
 
         protected override bool TryDequeue(Task task)

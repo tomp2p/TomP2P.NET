@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TomP2P.Core.P2P;
@@ -24,7 +23,7 @@ namespace TomP2P.Core.Connection
 
         private readonly ChannelClientConfiguration _channelClientConfiguration;
 
-        // .NET-specific: special task scheduler
+        // .NET-specific: special task scheduler, single-threaded
         private readonly TaskFactory _singleThreadTaskFactory;
 
         // we should be fair, otherwise, we see connection timeouts
@@ -134,7 +133,7 @@ namespace TomP2P.Core.Connection
                 {
                     // release the permits in all cases
                     // otherwise, we may see inconsistencies
-                    Console.WriteLine("Reservation ({0}): A CC shut down. Releasing {1} UDP, {2} TCP permits.", RuntimeHelpers.GetHashCode(this), permitsUdp, permitsTcp);
+                    //Console.WriteLine("Reservation ({0}): A CC shut down. Releasing {1} UDP, {2} TCP permits.", RuntimeHelpers.GetHashCode(this), permitsUdp, permitsTcp);
                     _semaphoreUdp.Release2(permitsUdp);
                     _semaphoreTcp.Release2(permitsTcp);
                 });
@@ -142,7 +141,7 @@ namespace TomP2P.Core.Connection
                 // instead of Executor.execute(new WaitReservation())
                 _singleThreadTaskFactory.StartNew(delegate
                 {
-                    Console.WriteLine("Reservation ({0}): Executing async reservation...", RuntimeHelpers.GetHashCode(this));
+                    //Console.WriteLine("Reservation ({0}): Executing async reservation...", RuntimeHelpers.GetHashCode(this));
                     // Creates a reservation that returns a channel creator in a
                     // task, once we have the semaphore.
                     // Tries to reserve a channel creator. If too many channels are already
@@ -159,9 +158,9 @@ namespace TomP2P.Core.Connection
                         }
                         try
                         {
-                            Console.Write("[{0}] Reservation ({1}): Acquiring {2} UDP permits.", Thread.CurrentThread.ManagedThreadId, RuntimeHelpers.GetHashCode(this), permitsUdp);
+                            //Console.Write("[{0}] Reservation ({1}): Acquiring {2} UDP permits.", Thread.CurrentThread.ManagedThreadId, RuntimeHelpers.GetHashCode(this), permitsUdp);
                             _semaphoreUdp.Acquire(permitsUdp);
-                            Console.Write("({0}) --> granted\n", RuntimeHelpers.GetHashCode(this));
+                            //Console.Write("({0}) --> granted\n", RuntimeHelpers.GetHashCode(this));
                         }
                         catch (Exception ex)
                         {
@@ -228,7 +227,7 @@ namespace TomP2P.Core.Connection
                 });
 
                 // instead of Executor.execute(new WaitReservationPermanent())
-                ThreadPool.QueueUserWorkItem(delegate
+                _singleThreadTaskFactory.StartNew(delegate
                 {
                     // Creates a reservation that returns a channel creator in a
                     // task, once we have the semaphore.

@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using NLog.Targets;
 using TomP2P.Core.Connection.Windows.Netty;
 using TomP2P.Core.Storage;
 using TomP2P.Extensions;
@@ -46,7 +45,6 @@ namespace TomP2P.Core.Connection.Windows
                 {
                     // receive request from client
                     UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
-                    Console.WriteLine("MyUdpServer: Received request.");
                     session = Pipeline.CreateNewServerSession(this);
                     session.TriggerActive();
 

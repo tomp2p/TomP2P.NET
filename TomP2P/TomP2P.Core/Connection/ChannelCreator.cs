@@ -206,7 +206,6 @@ namespace TomP2P.Core.Connection
         /// </summary>
         public Task ShutdownAsync()
         {
-            Console.WriteLine("ChannelCreator shutdown.");
             // set shutdown flag for UDP and TCP
             // if we acquire a write lock, all read locks are blocked as well
             _readWriteLockUdp.EnterWriteLock();
