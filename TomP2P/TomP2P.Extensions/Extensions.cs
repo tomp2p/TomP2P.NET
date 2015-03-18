@@ -83,7 +83,7 @@ namespace TomP2P.Extensions
             // see http://stackoverflow.com/questions/20401046/why-there-is-no-javalike-semaphore-acquiring-multiple-permits-in-c
             lock (s)
             {
-                Console.WriteLine("Extension: Semaphore ({0}) waiting for {1} permits.", RuntimeHelpers.GetHashCode(s), permits);
+                //Console.WriteLine("Extension: Semaphore ({0}) waiting for {1} permits.", RuntimeHelpers.GetHashCode(s), permits);
                 for (int i = 0; i < permits; i++)
                 {
                     s.WaitOne();
