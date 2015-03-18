@@ -46,7 +46,7 @@ namespace TomP2P.Core.Connection
             _p2PId = p2PId;
             _peerBeanMaster = peerBeanMaster;
             _heartBeatMillis = heartBeatMillis;
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         /// <summary>

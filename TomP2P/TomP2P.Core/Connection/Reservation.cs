@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using TomP2P.Core.P2P;
@@ -23,6 +24,7 @@ namespace TomP2P.Core.Connection
 
         private readonly ChannelClientConfiguration _channelClientConfiguration;
 
+        // TODO use single-threaded mechanism
         // .NET-specific: tasks are just submitted to the thread pool, no queue is used
         // to enqueue pending tasks, no shutdown on running tasks is done explicitly
 
@@ -129,13 +131,16 @@ namespace TomP2P.Core.Connection
                 {
                     // release the permits in all cases
                     // otherwise, we may see inconsistencies
+                    Console.WriteLine("Reservation ({0}): A CC shut down. Releasing {1} UDP, {2} TCP permits.", RuntimeHelpers.GetHashCode(this), permitsUdp, permitsTcp);
                     _semaphoreUdp.Release2(permitsUdp);
                     _semaphoreTcp.Release2(permitsTcp);
                 });
 
                 // instead of Executor.execute(new WaitReservation())
-                ThreadPool.QueueUserWorkItem(delegate
+                Console.WriteLine("Reservation ({0}): Shoving new task to threadpool...", RuntimeHelpers.GetHashCode(this));
+                Task.Factory.StartNew(delegate
                 {
+                    Console.WriteLine("Reservation ({0}): Executing async reservation...");
                     // Creates a reservation that returns a channel creator in a
                     // task, once we have the semaphore.
                     // Tries to reserve a channel creator. If too many channels are already
@@ -152,7 +157,9 @@ namespace TomP2P.Core.Connection
                         }
                         try
                         {
+                            Console.WriteLine("[{0}] Reservation ({1}): acquiring {2} UDP permits.", Thread.CurrentThread.ManagedThreadId, RuntimeHelpers.GetHashCode(this), permitsUdp);
                             _semaphoreUdp.Acquire(permitsUdp);
+                            Console.WriteLine("[{0}] Reservation ({1}): UDP permits granted.", Thread.CurrentThread.ManagedThreadId, RuntimeHelpers.GetHashCode(this));
                         }
                         catch (Exception ex)
                         {
@@ -161,7 +168,9 @@ namespace TomP2P.Core.Connection
                         }
                         try
                         {
+                            Console.WriteLine("[{0}] Reservation ({1}): acquiring {2} TCP permits.", Thread.CurrentThread.ManagedThreadId, RuntimeHelpers.GetHashCode(this), permitsTcp);
                             _semaphoreTcp.Acquire(permitsTcp);
+                            Console.WriteLine("[{0}] Reservation ({1}): TCP permits granted.", Thread.CurrentThread.ManagedThreadId, RuntimeHelpers.GetHashCode(this));
                         }
                         catch (Exception ex)
                         {
@@ -304,6 +313,7 @@ namespace TomP2P.Core.Connection
                     // It's important to set the listener before calling shutdown.
                     channelCreator.ShutdownTask.ContinueWith(delegate
                     {
+                        Console.WriteLine("CC shutdown -> now we block Reservation.");
                         if (completeCounter.IncrementAndGet() == size)
                         {
                             // we can block here
@@ -311,6 +321,7 @@ namespace TomP2P.Core.Connection
                             _semaphoreTcp.Acquire(_maxPermitsTcp);
                             _semaphorePermanentTcp.Acquire(_maxPermitsPermanentTcp);
                             _tcsReservationDone.SetResult(null);
+                            Console.WriteLine("Reservation block finished.");
                         }
                     });
                     channelCreator.ShutdownAsync();
@@ -334,6 +345,7 @@ namespace TomP2P.Core.Connection
                     {
                         return;
                     }
+                    //Console.WriteLine("Removing channel creator from set.");
                     _channelCreators.Remove(channelCreator);
                 }
                 finally
@@ -343,13 +355,5 @@ namespace TomP2P.Core.Connection
             });
             _channelCreators.Add(channelCreator);
         }
-
-        /*/// <summary>
-        /// Gets the pending number of requests that are scheduled but not executed yet.
-        /// </summary>
-        public int PendingRequests
-        {
-            get { return _queue.Count; }
-        }*/
     }
 }

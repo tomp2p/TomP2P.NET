@@ -29,7 +29,7 @@ namespace TomP2P.Core.Message
             _signatureFactory = signatureFactory;
             _encoder = new Encoder(signatureFactory);
             _alloc = alloc;
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public void Write(ChannelHandlerContext ctx, object msg)

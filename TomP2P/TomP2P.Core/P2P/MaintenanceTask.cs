@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using NLog.Targets;
 using TomP2P.Core.Peers;
 using TomP2P.Extensions.Workaround;
 
@@ -40,7 +42,7 @@ namespace TomP2P.Core.P2P
 
         private void Run(object state)
         {
-            Logger.Debug("Maintenance Thread {0}: Maintenance triggered on peer {1}.", Thread.CurrentThread.ManagedThreadId, _peer.PeerId);
+            Console.WriteLine("Maintenance Thread {0}: Maintenance triggered on peer {1}.", Thread.CurrentThread.ManagedThreadId, _peer.PeerId);
             lock (_lock)
             {
                 // make sure we only have 5 pings in parallel

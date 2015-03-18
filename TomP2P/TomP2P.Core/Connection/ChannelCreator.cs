@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using NLog.Targets;
 using TomP2P.Core.Connection.Windows;
 using TomP2P.Core.Connection.Windows.Netty;
 using TomP2P.Extensions;
@@ -180,7 +183,8 @@ namespace TomP2P.Core.Connection
         private static void SetupCloseListener(IChannel channel, Semaphore semaphore)
         {
             // tcsResponse seems not to be needed here
-            channel.Closed += ch => semaphore.Release();
+            //Console.WriteLine("ChannelCreator: releasing semaphore for {0}.", channel);
+            channel.Closed += ch => semaphore.Release(1);
             // TODO in Java, the FutureResponse is responded now after channel closing
         }
 
@@ -202,6 +206,7 @@ namespace TomP2P.Core.Connection
         /// </summary>
         public Task ShutdownAsync()
         {
+            Console.WriteLine("ChannelCreator shutdown.");
             // set shutdown flag for UDP and TCP
             // if we acquire a write lock, all read locks are blocked as well
             _readWriteLockUdp.EnterWriteLock();
@@ -222,10 +227,10 @@ namespace TomP2P.Core.Connection
                 _readWriteLockTcp.ExitWriteLock();
             }
 
+            // .NET-specific: close all channels
             // make async
             ThreadPool.QueueUserWorkItem(delegate
             {
-                // .NET-specific: close all channels
                 foreach (var client in _recipients)
                 {
                     client.Close();
@@ -233,13 +238,15 @@ namespace TomP2P.Core.Connection
                 // we can block here
                 if (_semaphoreUdp != null)
                 {
+                    //Console.WriteLine("ChannelCreator({0}): acquiring {1} UDP permits...", RuntimeHelpers.GetHashCode(this), _maxPermitsUdp);
                     _semaphoreUdp.Acquire(_maxPermitsUdp);
                 }
                 if (_semaphoreTcp != null)
                 {
+                    //Console.WriteLine("ChannelCreator: acquiring {0} TCP permits...", _maxPermitsTcp);
                     _semaphoreTcp.Acquire(_maxPermitsTcp);
                 }
-                _tcsChannelShutdownDone.TrySetResult(null); // complete
+                _tcsChannelShutdownDone.SetResult(null); // complete
             });
 
             return _tcsChannelShutdownDone.Task;

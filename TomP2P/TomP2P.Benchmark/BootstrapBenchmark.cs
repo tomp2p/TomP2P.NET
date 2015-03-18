@@ -26,7 +26,7 @@ namespace TomP2P.Benchmark
             try
             {
                 // setup
-                var peers = BenchmarkUtil.CreateNodes(20, rnd, 7077, true, false);
+                var peers = BenchmarkUtil.CreateNodes(3, rnd, 7077, false, false);
                 master = peers[0];
 
                 // bootstrap all slaves to the master
@@ -36,10 +36,11 @@ namespace TomP2P.Benchmark
                     //Logger.Info("Bootstraping slave {0} {1}.", i, peers[i]);
                     tasks[i - 1] = peers[i].Bootstrap().SetPeerAddress(master.PeerAddress).StartAsync();
                 }
+                Logger.Info("Waiting for all peers to finish bootstrap...");
                 await Task.WhenAll(tasks);
                 Logger.Info("Bootstrap environment set up with {0} peers.", peers.Length);
 
-                // wait for peers to know each other
+                /*// wait for peers to know each other
                 const int delaySec = 30;
                 Logger.Info("Waiting {0} seconds...", delaySec);
                 await Task.Delay(delaySec * 1000);
@@ -49,7 +50,7 @@ namespace TomP2P.Benchmark
 
                 var watch = BenchmarkUtil.StartBenchmark();
                 await newPeer.Bootstrap().SetPeerAddress(master.PeerAddress).StartAsync();
-                BenchmarkUtil.StopBenchmark(watch);
+                BenchmarkUtil.StopBenchmark(watch);*/
             }
             finally
             {

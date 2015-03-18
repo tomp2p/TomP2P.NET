@@ -15,7 +15,7 @@ namespace TomP2P.Core.Message
         public TomP2PSinglePacketUdp(ISignatureFactory signatureFactory)
         {
             _signatureFactory = signatureFactory;
-            Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         /// <summary>

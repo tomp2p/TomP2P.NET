@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -90,21 +91,10 @@ namespace TomP2P.Core.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendUdpAsync(ChannelCreator channelCreator)
         {
-            // TODO find more efficient way instead of 1 thread per message
-            // TODO remove code-duplicates -> extract method
             // so far, everything is sync -> invoke async / new thread
-            ThreadPool.QueueUserWorkItem(async delegate
-            {
-                try
-                {
-                    await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
-                }
-                catch (Exception ex)
-                {
-                    _tcsResponse.SetException(ex);
-                }
-            });
-            return _tcsResponse.Task;
+            Console.WriteLine("[{0}] Sending UDP message.", Thread.CurrentThread.ManagedThreadId);
+            var sendTask = ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, false);
+            return ExecuteAsync(sendTask);
         }
 
         /// <summary>
@@ -114,18 +104,8 @@ namespace TomP2P.Core.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendBroadcastUdpAsync(ChannelCreator channelCreator)
         {
-            ThreadPool.QueueUserWorkItem(async delegate
-            {
-                try
-                {
-                    await ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
-                }
-                catch (Exception ex)
-                {
-                    _tcsResponse.SetException(ex);
-                }
-            });
-            return _tcsResponse.Task;
+            var sendTask = ConnectionBean.Sender.SendUdpAsync(this, _tcsResponse, _message, channelCreator, IdleUdpSeconds, true);
+            return ExecuteAsync(sendTask);
         }
 
         /// <summary>
@@ -135,18 +115,8 @@ namespace TomP2P.Core.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> FireAndForgetUdpAsync(ChannelCreator channelCreator)
         {
-            ThreadPool.QueueUserWorkItem(async delegate
-            {
-                try
-                {
-                    await ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
-                }
-                catch (Exception ex)
-                {
-                    _tcsResponse.SetException(ex);
-                }
-            });
-            return _tcsResponse.Task;
+            var sendTask = ConnectionBean.Sender.SendUdpAsync(null, _tcsResponse, _message, channelCreator, 0, false);
+            return ExecuteAsync(sendTask);
         }
 
         /// <summary>
@@ -156,36 +126,16 @@ namespace TomP2P.Core.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendTcpAsync(ChannelCreator channelCreator)
         {
-            ThreadPool.QueueUserWorkItem(async delegate
-            {
-                try
-                {
-                    await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
-                        ConnectionTimeoutTcpMillis, null);
-                }
-                catch (Exception ex)
-                {
-                    _tcsResponse.SetException(ex);
-                }
-            });
-            return _tcsResponse.Task;
+            var sendTask = ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                ConnectionTimeoutTcpMillis, null);
+            return ExecuteAsync(sendTask);
         }
 
         public Task<Message.Message> SendTcpAsync(PeerConnection peerConnection)
         {
-            ThreadPool.QueueUserWorkItem(async delegate
-            {
-                try
-                {
-                    await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds, 
-                        ConnectionTimeoutTcpMillis, peerConnection);
-                }
-                catch (Exception ex)
-                {
-                    _tcsResponse.SetException(ex);
-                }
-            });
-            return _tcsResponse.Task;
+            var sendTask = ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, null, IdleTcpSeconds,
+                ConnectionTimeoutTcpMillis, peerConnection);
+            return ExecuteAsync(sendTask);
         }
 
         /// <summary>
@@ -196,12 +146,18 @@ namespace TomP2P.Core.Connection
         /// <returns>The future task that was added in the constructor.</returns>
         public Task<Message.Message> SendTcpAsync(ChannelCreator channelCreator, PeerConnection peerConnection)
         {
-            ThreadPool.QueueUserWorkItem(async delegate
+            var sendTask = ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
+                ConnectionTimeoutTcpMillis, peerConnection);
+            return ExecuteAsync(sendTask);
+        }
+
+        private Task<Message.Message> ExecuteAsync(Task sendTask)
+        {
+            Task.Factory.StartNew(async delegate
             {
                 try
                 {
-                    await ConnectionBean.Sender.SendTcpAsync(this, _tcsResponse, _message, channelCreator, IdleTcpSeconds,
-                        ConnectionTimeoutTcpMillis, peerConnection);
+                    await sendTask;
                 }
                 catch (Exception ex)
                 {
@@ -301,7 +257,7 @@ namespace TomP2P.Core.Connection
             if (!_message.IsKeepAlive())
             {
                 Logger.Debug("Good message {0}. Close channel {1}.", responseMessage, ctx.Channel);
-                
+
                 // .NET-specific:
                 // set the result now, but trigger the notify when the channel is closed
                 _tcsResponse.ResponseLater(responseMessage, ctx);
