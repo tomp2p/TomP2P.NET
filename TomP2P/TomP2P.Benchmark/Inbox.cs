@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Threading.Tasks;
+using NLog.Targets;
 
 namespace TomP2P.Benchmark
 {
@@ -60,6 +63,7 @@ namespace TomP2P.Benchmark
             }
 
             PrintResults(results);
+            WriteFile(results);
         }
 
         private static void PrintStopwatchProperties()
@@ -80,6 +84,23 @@ namespace TomP2P.Benchmark
             Console.WriteLine("Variance: {0} ms.", Statistics.CalculateVariance(results));
             Console.WriteLine("Standard Deviation: {0} ms.", Statistics.CalculateStdDev(results));
             Console.WriteLine("-------------------------------");
+        }
+
+        private static void WriteFile(double[] results)
+        {
+            var customCulture = (CultureInfo) System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+
+            var location = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/benchmarking/NET/runtimesNET.txt";
+            using (var file = new StreamWriter(location))
+            {
+                file.WriteLine("{0}, {1}", "Repetition", "RuntimeNET");
+                for (int i = 0; i < results.Length; i++)
+                {
+                    file.WriteLine("{0}, {1}", i, results[i].ToString(customCulture));
+                }
+            }
+            Console.WriteLine("Results written to {0}.", location);
         }
     }
 }
