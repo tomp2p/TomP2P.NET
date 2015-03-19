@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using NLog.Targets;
 
 namespace TomP2P.Benchmark
 {
@@ -48,7 +47,7 @@ namespace TomP2P.Benchmark
             for (int i = 0; i < repetitions; i++)
             {
                 Console.WriteLine("Executing repetition {0} / {1}:", i+1, repetitions);
-                double repetitionResult = 0;
+                double repetitionResult;
                 switch (argument)
                 {
                     case "bb1":
