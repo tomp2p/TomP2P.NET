@@ -132,7 +132,7 @@ namespace TomP2P.Benchmark
             return watch.ToSeconds() * 1000000000;
         }
 
-        private static Number160 CreateRandomId(InteropRandom rnd)
+        public static Number160 CreateRandomId(InteropRandom rnd)
         {
             var vals = new int[Number160.IntArraySize];
             for (int i = 0; i < vals.Length; i++)
@@ -140,6 +140,16 @@ namespace TomP2P.Benchmark
                 vals[i] = rnd.NextInt(Int32.MaxValue);
             }
             return new Number160(vals);
+        }
+
+        /// <summary>
+        /// This helper method receives an "anker object" just to "throw it away".
+        /// This allows such an object to be "used".
+        /// </summary>
+        /// <param name="anker"></param>
+        public static object AnkerTrash(object anker)
+        {
+            return anker;
         }
     }
 }

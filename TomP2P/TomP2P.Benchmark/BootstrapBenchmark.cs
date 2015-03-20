@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TomP2P.Core.P2P;
 using TomP2P.Extensions;
 
 namespace TomP2P.Benchmark
 {
-    public static class BootstrapBenchmark
+    public class BootstrapBenchmark : BaseBenchmark
     {
         public static async Task<double> Benchmark1Async(Arguments args)
         {
@@ -14,7 +13,10 @@ namespace TomP2P.Benchmark
             Peer master = null;
             try
             {
-                var peers = await SetupNetwork(args, rnd);
+                // setup
+                var peers = SetupNetwork(rnd);
+                await BootstrapAllAsync(args, peers);
+                await NetworkWarmup(args);
                 master = peers[0];
 
                 // benchmark: bootstrap
@@ -40,7 +42,10 @@ namespace TomP2P.Benchmark
             Peer master = null;
             try
             {
-                var peers = await SetupNetwork(args, rnd);
+                // setup
+                var peers = SetupNetwork(rnd);
+                await BootstrapAllAsync(args, peers);
+                await NetworkWarmup(args);
                 master = peers[0];
 
                 // benchmark: peer creation, bootstrap
@@ -65,7 +70,10 @@ namespace TomP2P.Benchmark
             Peer master = null;
             try
             {
-                var peers = await SetupNetwork(args, rnd);
+                // setup
+                var peers = SetupNetwork(rnd);
+                await BootstrapAllAsync(args, peers);
+                await NetworkWarmup(args);
                 master = peers[0];
 
                 // benchmark: 20x peer creation, bootstrap
@@ -88,28 +96,6 @@ namespace TomP2P.Benchmark
                     master.ShutdownAsync().Wait();
                 }
             }
-        }
-
-        private static async Task<Peer[]> SetupNetwork(Arguments args, InteropRandom rnd)
-        {
-            // setup peers
-            var peers = BenchmarkUtil.CreateNodes(500, rnd, 7077, true, false);
-            
-            // bootstrap all slaves to the master
-            var tasks = new Task[peers.Length - 1];
-            for (int i = 1; i < peers.Length; i++)
-            {
-                //Logger.Info("Bootstraping slave {0} {1}.", i, peers[i]);
-                tasks[i - 1] = peers[i].Bootstrap().SetPeerAddress(peers[0].PeerAddress).StartAsync();
-            }
-            Console.WriteLine("Waiting for all peers to finish bootstrap...");
-            await Task.WhenAll(tasks);
-            Console.WriteLine("Bootstrap environment set up with {0} peers.", peers.Length);
-
-            // wait for peers to know each other
-            Console.WriteLine("Waiting {0} seconds...", args.WarmupSec);
-            await Task.Delay(args.WarmupSec * 1000);
-            return peers;
         }
     }
 }

@@ -111,7 +111,7 @@ namespace TomP2P.Core.Connection
             {
                 var pipeline = GetPipeline(false);
                 _udpServer = new MyUdpServer(listenAddress, pipeline);
-                // resto of config done in service loop
+                // rest of config done in service loop
                 _udpServer.Start();
                 return true;
             }
