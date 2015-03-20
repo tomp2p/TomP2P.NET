@@ -312,7 +312,6 @@ namespace TomP2P.Core.Connection
                     // It's important to set the listener before calling shutdown.
                     channelCreator.ShutdownTask.ContinueWith(delegate
                     {
-                        Console.WriteLine("CC shutdown -> now we block Reservation.");
                         if (completeCounter.IncrementAndGet() == size)
                         {
                             // we can block here
@@ -320,7 +319,6 @@ namespace TomP2P.Core.Connection
                             _semaphoreTcp.Acquire(_maxPermitsTcp);
                             _semaphorePermanentTcp.Acquire(_maxPermitsPermanentTcp);
                             _tcsReservationDone.SetResult(null);
-                            Console.WriteLine("Reservation block finished.");
                         }
                     });
                     channelCreator.ShutdownAsync();

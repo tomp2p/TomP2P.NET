@@ -77,20 +77,20 @@ namespace TomP2P.Benchmark
                 .SetPorts(new Ports(port, port));
         }
 
-        public static Stopwatch StartBenchmark([CallerMemberName] string caller = "")
+        public static Stopwatch StartBenchmark(string argument)
         {
             // TODO ensure wamup of measured code already took place
             WarmupTimer();
             ReclaimResources();
-            Console.WriteLine("{0}: Starting Benchmarking...", caller);
+            Console.WriteLine("{0}: Starting Benchmarking...", argument);
             return Stopwatch.StartNew();
         }
 
-        public static double StopBenchmark(Stopwatch watch, [CallerMemberName] string caller = "")
+        public static double StopBenchmark(Stopwatch watch, string argument)
         {
             watch.Stop();
-            Console.WriteLine("{0}: Stopped Benchmarking.", caller);
-            Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s", caller, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
+            Console.WriteLine("{0}: Stopped Benchmarking.", argument);
+            Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s", argument, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
             // TODO include 2nd GC/OF
             return watch.ToMillis();
         }

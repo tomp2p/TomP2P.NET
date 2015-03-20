@@ -15,7 +15,7 @@ namespace TomP2P.Benchmark
          * - JIT warmup
          * */
 
-        public static async Task<double> Benchmark1Async()
+        public static async Task<double> Benchmark1Async(Arguments args)
         {
             // each run should create same IDs
             var rnd = new InteropRandom(42);
@@ -38,16 +38,15 @@ namespace TomP2P.Benchmark
                 Console.WriteLine("Bootstrap environment set up with {0} peers.", peers.Length);
 
                 // wait for peers to know each other
-                const int delaySec = 10;
-                Console.WriteLine("Waiting {0} seconds...", delaySec);
-                await Task.Delay(delaySec * 1000);
+                Console.WriteLine("Waiting {0} seconds...", args.WarmupSec);
+                await Task.Delay(args.WarmupSec * 1000);
 
                 // bootstrap a new peer, measure time
                 var newPeer = BenchmarkUtil.CreateSlave(master, rnd, true, false);
 
-                var watch = BenchmarkUtil.StartBenchmark();
+                var watch = BenchmarkUtil.StartBenchmark(args.BmArg);
                 await newPeer.Bootstrap().SetPeerAddress(master.PeerAddress).StartAsync();
-                return BenchmarkUtil.StopBenchmark(watch);
+                return BenchmarkUtil.StopBenchmark(watch, args.BmArg);
             }
             finally
             {

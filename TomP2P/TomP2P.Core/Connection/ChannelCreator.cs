@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
-using NLog.Targets;
 using TomP2P.Core.Connection.Windows;
 using TomP2P.Core.Connection.Windows.Netty;
 using TomP2P.Extensions;
@@ -228,7 +225,7 @@ namespace TomP2P.Core.Connection
 
             // .NET-specific: close all channels
             // make async
-            ThreadPool.QueueUserWorkItem(delegate
+            Task.Factory.StartNew(delegate
             {
                 foreach (var client in _recipients)
                 {
@@ -245,7 +242,7 @@ namespace TomP2P.Core.Connection
                     //Console.WriteLine("ChannelCreator: acquiring {0} TCP permits...", _maxPermitsTcp);
                     _semaphoreTcp.Acquire(_maxPermitsTcp);
                 }
-                _tcsChannelShutdownDone.SetResult(null); // complete
+                _tcsChannelShutdownDone.TrySetResult(null); // complete
             });
 
             return _tcsChannelShutdownDone.Task;

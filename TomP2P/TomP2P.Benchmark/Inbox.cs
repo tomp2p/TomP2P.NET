@@ -8,16 +8,20 @@ namespace TomP2P.Benchmark
 {
     public class Inbox
     {
+        // [bmArg] [repetitions] [resultsDir] [warmupSec] ([suffix])
         public static void Main(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 4)
             {
-                Console.Error.WriteLine("Argument missing.");
-                Console.ReadLine();
+                Console.Error.WriteLine("Argument(s) missing.");
                 Environment.Exit(-1);
             }
-            var argument = args[0];
-            var repetitions = args.Length >= 2 ? Convert.ToInt32(args[1]) : 1;
+            var bmArg = args[0];
+            var repetitions = Convert.ToInt32(args[1]);
+            var resultsDir = args[2];
+            var warmupSec = Convert.ToInt32(args[3]);
+            var suffix = args.Length >= 5 ? args[4] : "";
+            var arguments = new Arguments(bmArg, repetitions, resultsDir, warmupSec, suffix);
 
             try
             {
@@ -25,9 +29,7 @@ namespace TomP2P.Benchmark
                 {
                     throw new ArgumentException("Repetitions must be >= 1.");
                 }
-                Console.WriteLine("Argument: {0}", argument);
-                Console.WriteLine("Repetitions: {0}", repetitions);
-                ExecuteAsync(argument, repetitions).Wait();
+                ExecuteAsync(arguments).Wait();
             }
             catch (Exception ex)
             {
@@ -36,22 +38,25 @@ namespace TomP2P.Benchmark
                 Environment.Exit(-2);
             }
             Console.WriteLine("Exiting with success.");
-            Console.ReadLine();
             Environment.Exit(0);
         }
 
-        private static async Task ExecuteAsync(string argument, int repetitions)
+        private static async Task ExecuteAsync(Arguments args)
         {
+            Console.WriteLine("Argument: {0}", args.BmArg);
+            Console.WriteLine("Repetitions: {0}", args.Repetitions);
+
             PrintStopwatchProperties();
-            var results = new double[repetitions];
-            for (int i = 0; i < repetitions; i++)
+
+            var results = new double[args.Repetitions];
+            for (int i = 0; i < args.Repetitions; i++)
             {
-                Console.WriteLine("Executing repetition {0} / {1}:", i+1, repetitions);
+                Console.WriteLine("Executing repetition {0} / {1}:", i + 1, args.Repetitions);
                 double repetitionResult;
-                switch (argument)
+                switch (args.BmArg)
                 {
                     case "bb1":
-                        repetitionResult = await BootstrapBenchmark.Benchmark1Async();
+                        repetitionResult = await BootstrapBenchmark.Benchmark1Async(args);
                         break;
                     default:
                         throw new ArgumentException("No valid benchmark argument.");
@@ -62,7 +67,7 @@ namespace TomP2P.Benchmark
             }
 
             PrintResults(results);
-            WriteFile(results);
+            WriteFile(args, results);
         }
 
         private static void PrintStopwatchProperties()
@@ -85,21 +90,23 @@ namespace TomP2P.Benchmark
             Console.WriteLine("-------------------------------");
         }
 
-        private static void WriteFile(double[] results)
+        private static void WriteFile(Arguments args, double[] results)
         {
-            var customCulture = (CultureInfo) System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            var customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
 
-            var location = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/benchmarking/NET/runtimesNET.txt";
-            using (var file = new StreamWriter(location))
+            //var location = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/benchmarking/NET/runtimesNET.txt";
+            var path = args.ResultsDir + "\\" + args.BmArg + "_net" + args.Suffix + ".txt";
+            
+            using (var file = new StreamWriter(path))
             {
-                file.WriteLine("{0}, {1}", "Repetition", "RuntimeNET");
+                file.WriteLine("{0}, {1}", "Repetition", "NET" + args.Suffix);
                 for (int i = 0; i < results.Length; i++)
                 {
                     file.WriteLine("{0}, {1}", i, results[i].ToString(customCulture));
                 }
             }
-            Console.WriteLine("Results written to {0}.", location);
+            Console.WriteLine("Results written to {0}.", path);
         }
     }
 }
