@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Sockets;
 
 namespace TomP2P.Core.Connection.Windows.Netty
 {
@@ -14,11 +13,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         event ChannelEventHandler WriteCompleted;
 
         void Close();
-
-        /// <summary>
-        /// The underlying socket that is used.
-        /// </summary>
-        Socket Socket { get; }
 
         IPEndPoint LocalEndPoint { get; }
 

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace TomP2P.Core.Connection.Windows.Netty
@@ -58,5 +59,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
         public abstract Task SendBytesAsync(byte[] bytes, IPEndPoint senderEp, IPEndPoint receiverEp = null);
 
         public abstract Task DoReceiveMessageAsync();
+
+        public abstract Socket Socket { get; }
     }
 }

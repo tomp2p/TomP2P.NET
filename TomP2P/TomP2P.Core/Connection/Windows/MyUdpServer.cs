@@ -16,35 +16,25 @@ namespace TomP2P.Core.Connection.Windows
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // wrapped member
-        private readonly UdpClient _udpServer;
+        //private readonly UdpClient _udpServer;
 
         public MyUdpServer(IPEndPoint localEndPoint, Pipeline pipeline)
             : base(localEndPoint, pipeline)
         {
-            _udpServer = new UdpClient(localEndPoint);
-
             //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
-        }
-
-        public override void DoStart()
-        {
-            // nothing to start here
-        }
-
-        protected override void DoClose()
-        {
-            _udpServer.Close();
         }
 
         public override async Task ServiceLoopAsync(CancellationToken ct)
         {
+            var udpClient = new UdpClient(LocalEndPoint);
+            udpClient.Client.EnableBroadcast = true;
             PipelineSession session = null;
             try
             {
                 while (!ct.IsCancellationRequested)
                 {
                     // receive request from client
-                    UdpReceiveResult udpRes = await _udpServer.ReceiveAsync().WithCancellation(ct);
+                    UdpReceiveResult udpRes = await udpClient.ReceiveAsync().WithCancellation(ct);
                     session = Pipeline.CreateNewServerSession(this);
                     session.TriggerActive();
 
@@ -52,7 +42,7 @@ namespace TomP2P.Core.Connection.Windows
                     var buf = AlternativeCompositeByteBuf.CompBuffer();
                     buf.WriteBytes(udpRes.Buffer.ToSByteArray());
 
-                    LocalEndPoint = (IPEndPoint) Socket.LocalEndPoint;
+                    LocalEndPoint = (IPEndPoint)udpClient.Client.LocalEndPoint;
                     RemoteEndPoint = udpRes.RemoteEndPoint;
 
                     var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
@@ -77,7 +67,7 @@ namespace TomP2P.Core.Connection.Windows
 
                     // send back
                     var bytes = ConnectionHelper.ExtractBytes(writeRes);
-                    await _udpServer.SendAsync(bytes, bytes.Length, RemoteEndPoint);
+                    await udpClient.SendAsync(bytes, bytes.Length, RemoteEndPoint);
                     NotifyWriteCompleted(); // resets timeout
                     Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length),
                         Convenient.ToString(udpRes.Buffer));
@@ -91,6 +81,7 @@ namespace TomP2P.Core.Connection.Windows
             }
             finally
             {
+                udpClient.Close();
                 if (session != null)
                 {
                     session.TriggerInactive();
@@ -101,11 +92,6 @@ namespace TomP2P.Core.Connection.Windows
         public override string ToString()
         {
             return String.Format("MyUdpServer ({0})", RuntimeHelpers.GetHashCode(this));
-        }
-
-        public override Socket Socket
-        {
-            get { return _udpServer.Client; }
         }
 
         public override bool IsUdp

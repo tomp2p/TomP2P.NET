@@ -68,10 +68,10 @@ namespace TomP2P.Benchmark
                 var peers = await SetupNetwork(args, rnd);
                 master = peers[0];
 
-                // benchmark: 10x peer creation, bootstrap
+                // benchmark: 20x peer creation, bootstrap
                 var watch = BenchmarkUtil.StartBenchmark(args.BmArg);
 
-                var tasks = new Task[10];
+                var tasks = new Task[20];
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     var newPeer = BenchmarkUtil.CreateSlave(master, rnd, true, false);

@@ -15,30 +15,18 @@ namespace TomP2P.Core.Connection.Windows
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        // wrapped member
-        private readonly TcpListener _tcpServer;
-
         public MyTcpServer(IPEndPoint localEndPoint, Pipeline pipeline)
             : base(localEndPoint, pipeline)
         {
-            // local endpoint
-            _tcpServer = new TcpListener(localEndPoint);
-
             //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
-        }
-
-        public override void DoStart()
-        {
-            _tcpServer.Start();
-        }
-
-        protected override void DoClose()
-        {
-            _tcpServer.Stop();
         }
 
         public override async Task ServiceLoopAsync(CancellationToken ct)
         {
+            var tcpListener = new TcpListener(LocalEndPoint);
+            tcpListener.Server.LingerState = new LingerOption(false, 0); // TODO correct?
+            tcpListener.Server.NoDelay = true; // TODO correct?
+            tcpListener.Start();
             try
             {
                 while (!ct.IsCancellationRequested)
@@ -49,12 +37,12 @@ namespace TomP2P.Core.Connection.Windows
                     object readRes;
 
                     // accept a client connection
-                    var client = await _tcpServer.AcceptTcpClientAsync().WithCancellation(ct);
+                    var client = await tcpListener.AcceptTcpClientAsync().WithCancellation(ct);
                     var stream = client.GetStream();
                     var pieceCount = 0;
                     var session = Pipeline.CreateNewServerSession(this);
                     session.TriggerActive();
-                    
+
                     // process content
                     do
                     {
@@ -63,11 +51,12 @@ namespace TomP2P.Core.Connection.Windows
                         buf.Clear();
                         buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
 
-                        LocalEndPoint = (IPEndPoint)client.Client.LocalEndPoint;
-                        RemoteEndPoint = (IPEndPoint)client.Client.RemoteEndPoint;
+                        LocalEndPoint = (IPEndPoint) client.Client.LocalEndPoint;
+                        RemoteEndPoint = (IPEndPoint) client.Client.RemoteEndPoint;
 
                         var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
-                        Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece, Convenient.ToHumanReadable(nrBytes), Convenient.ToString(recvBuffer));
+                        Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece,
+                            Convenient.ToHumanReadable(nrBytes), Convenient.ToString(recvBuffer));
 
                         // execute inbound pipeline, per piece
                         readRes = session.Read(piece); // resets timeout
@@ -101,16 +90,15 @@ namespace TomP2P.Core.Connection.Windows
             {
                 // the server has been stopped -> stop service loop
             }
+            finally
+            {
+                tcpListener.Stop();
+            }
         }
 
         public override string ToString()
         {
             return String.Format("MyTcpServer ({0})", RuntimeHelpers.GetHashCode(this));
-        }
-
-        public override Socket Socket
-        {
-            get { return _tcpServer.Server; }
         }
 
         public override bool IsUdp

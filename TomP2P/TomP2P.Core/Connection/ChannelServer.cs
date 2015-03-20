@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using NLog;
 using TomP2P.Core.Connection.Windows;
@@ -112,7 +111,7 @@ namespace TomP2P.Core.Connection
             {
                 var pipeline = GetPipeline(false);
                 _udpServer = new MyUdpServer(listenAddress, pipeline);
-                _udpServer.Socket.EnableBroadcast = true;
+                // resto of config done in service loop
                 _udpServer.Start();
                 return true;
             }
@@ -134,8 +133,7 @@ namespace TomP2P.Core.Connection
             {
                 var pipeline = GetPipeline(true);
                 _tcpServer = new MyTcpServer(listenAddress, pipeline);
-                _tcpServer.Socket.LingerState = new LingerOption(false, 0); // TODO correct?
-                _tcpServer.Socket.NoDelay = true; // TODO correct?
+                // rest of config done in service loop
                 _tcpServer.Start();
                 return true;
             }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace TomP2P.Core.Connection.Windows.Netty
 {
@@ -19,6 +20,11 @@ namespace TomP2P.Core.Connection.Windows.Netty
         /// </summary>
         /// <returns></returns>
         Task ReceiveMessageAsync();
+
+        /// <summary>
+        /// The underlying socket that is used.
+        /// </summary>
+        Socket Socket { get; }
     }
 
     /// <summary>

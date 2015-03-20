@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using NLog;
 
@@ -65,8 +64,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
                 WriteCompleted(this);
             }
         }
-
-        public abstract Socket Socket { get; }
 
         public IPEndPoint LocalEndPoint { get; protected set; }
 
