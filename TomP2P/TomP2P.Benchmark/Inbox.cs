@@ -64,6 +64,9 @@ namespace TomP2P.Benchmark
                     case "bb2":
                         repetitionResult = await BootstrapBenchmark.Benchmark2Async(args);
                         break;
+                    case "bb3":
+                        repetitionResult = await BootstrapBenchmark.Benchmark3Async(args);
+                        break;
                     default:
                         throw new ArgumentException("No valid benchmark argument.");
                 }
