@@ -38,6 +38,9 @@ namespace TomP2P.Benchmark
                 Environment.Exit(-2);
             }
             Console.WriteLine("Exiting with success.");
+#if DEBUG
+            Console.ReadLine();
+#endif
             Environment.Exit(0);
         }
 
@@ -57,6 +60,9 @@ namespace TomP2P.Benchmark
                 {
                     case "bb1":
                         repetitionResult = await BootstrapBenchmark.Benchmark1Async(args);
+                        break;
+                    case "bb2":
+                        repetitionResult = await BootstrapBenchmark.Benchmark2Async(args);
                         break;
                     default:
                         throw new ArgumentException("No valid benchmark argument.");
