@@ -3,17 +3,17 @@
     public sealed class Arguments
     {
         private readonly string _bmArg;
-        private readonly int _repetitions;
+        private readonly int _nrRepetitions;
         private readonly string _resultsDir;
-        private readonly int _warmupSec;
+        private readonly int _nrWarmups;
         private readonly string _suffix;
 
-        public Arguments(string bmArg, int repetitions, string resultsDir, int warmupSec, string suffix)
+        public Arguments(string bmArg, int nrWarmups, int nrRepetitions, string resultsDir, string suffix)
         {
             _bmArg = bmArg;
-            _repetitions = repetitions;
+            _nrWarmups = nrWarmups;
+            _nrRepetitions = nrRepetitions;
             _resultsDir = resultsDir;
-            _warmupSec = warmupSec;
             _suffix = suffix;
         }
 
@@ -22,19 +22,19 @@
             get { return _bmArg; }
         }
 
-        public int Repetitions
+        public int NrWarmups
         {
-            get { return _repetitions; }
+            get { return _nrWarmups; }
+        }
+
+        public int NrRepetitions
+        {
+            get { return _nrRepetitions; }
         }
 
         public string ResultsDir
         {
             get { return _resultsDir; }
-        }
-
-        public int WarmupSec
-        {
-            get { return _warmupSec; }
         }
 
         public string Suffix

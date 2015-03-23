@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using NLog;
 using TomP2P.Core.Connection;
 using TomP2P.Core.P2P;
 using TomP2P.Core.Peers;
@@ -77,39 +75,37 @@ namespace TomP2P.Benchmark
                 .SetPorts(new Ports(port, port));
         }
 
-        public static Stopwatch StartBenchmark(string argument)
+        /*public static Stopwatch StartBenchmark()
         {
-            // TODO ensure wamup of measured code already took place
             WarmupTimer();
             ReclaimResources();
-            Console.WriteLine("{0}: Starting Benchmarking...", argument);
+            Console.WriteLine("Starting Benchmarking...");
             return Stopwatch.StartNew();
         }
 
-        public static double StopBenchmark(Stopwatch watch, string argument)
+        public static double StopBenchmark(Stopwatch watch)
         {
             watch.Stop();
-            Console.WriteLine("{0}: Stopped Benchmarking.", argument);
-            Console.WriteLine("{0}: {1:0.000} ns | {2:0.000} ms | {3:0.000} s", argument, watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
-            // TODO include 2nd GC/OF
+            Console.WriteLine("Stopped Benchmarking.");
+            Console.WriteLine("{0:0.000} ns | {1:0.000} ms | {2:0.000} s", watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
             return watch.ToMillis();
-        }
+        }*/
 
-        private static long WarmupTimer()
+        public static void WarmupTimer()
         {
-            // force JIT of stopwatch and "use" result
-            // otherwise compiler might comment un-used code
-            long ticks = 0;
+            Console.WriteLine("Timer warmup...");
+            long anker = 0;
             for (int i = 0; i < 100; i++)
             {
                 var watch = Stopwatch.StartNew();
-                ticks += watch.ElapsedTicks;
+                anker |= watch.ElapsedTicks;
+                watch.Reset();
                 watch.Stop();
             }
-            return ticks;
+            AnkerTrash(anker);
         }
 
-        private static void ReclaimResources()
+        public static void ReclaimResources()
         {
             Console.WriteLine("Garbage Collection forced...");
             GC.Collect();
@@ -117,17 +113,17 @@ namespace TomP2P.Benchmark
             GC.WaitForPendingFinalizers();
         }
 
-        private static double ToSeconds(this Stopwatch watch)
+        public static double ToSeconds(this Stopwatch watch)
         {
             return watch.ElapsedTicks / (double)Stopwatch.Frequency;
         }
 
-        private static double ToMillis(this Stopwatch watch)
+        public static double ToMillis(this Stopwatch watch)
         {
             return watch.ToSeconds() * 1000;
         }
 
-        private static double ToNanos(this Stopwatch watch)
+        public static double ToNanos(this Stopwatch watch)
         {
             return watch.ToSeconds() * 1000000000;
         }

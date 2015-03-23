@@ -8,7 +8,7 @@ namespace TomP2P.Benchmark
 {
     public class Inbox
     {
-        // [bmArg] [repetitions] [resultsDir] [warmupSec] ([suffix])
+        // [bmArg] [nrWarmups] [nrRepetitions] [resultsDir] ([suffix])
         public static void Main(string[] args)
         {
             if (args.Length < 4)
@@ -17,17 +17,17 @@ namespace TomP2P.Benchmark
                 Environment.Exit(-1);
             }
             var bmArg = args[0];
-            var repetitions = Convert.ToInt32(args[1]);
-            var resultsDir = args[2];
-            var warmupSec = Convert.ToInt32(args[3]);
+            var nrWarmups = Convert.ToInt32(args[1]);
+            var nrRepetitions = Convert.ToInt32(args[2]);
+            var resultsDir = args[3];
             var suffix = args.Length >= 5 ? args[4] : "";
-            var arguments = new Arguments(bmArg, repetitions, resultsDir, warmupSec, suffix);
+            var arguments = new Arguments(bmArg, nrWarmups, nrRepetitions, resultsDir, suffix);
 
             try
             {
-                if (repetitions < 1)
+                if (nrRepetitions < 1)
                 {
-                    throw new ArgumentException("Repetitions must be >= 1.");
+                    throw new ArgumentException("NrRepetitions must be >= 1.");
                 }
                 ExecuteAsync(arguments).Wait();
             }
@@ -47,32 +47,16 @@ namespace TomP2P.Benchmark
         private static async Task ExecuteAsync(Arguments args)
         {
             Console.WriteLine("Argument: {0}", args.BmArg);
-            Console.WriteLine("Repetitions: {0}", args.Repetitions);
-
             PrintStopwatchProperties();
 
-            var results = new double[args.Repetitions];
-            for (int i = 0; i < args.Repetitions; i++)
+            double[] results;
+            switch (args.BmArg)
             {
-                Console.WriteLine("Executing repetition {0} / {1}:", i + 1, args.Repetitions);
-                double repetitionResult;
-                switch (args.BmArg)
-                {
-                    case "bb1":
-                        repetitionResult = await BootstrapBenchmark.Benchmark1Async(args);
-                        break;
-                    case "bb2":
-                        repetitionResult = await BootstrapBenchmark.Benchmark2Async(args);
-                        break;
-                    case "bb3":
-                        repetitionResult = await BootstrapBenchmark.Benchmark3Async(args);
-                        break;
-                    default:
-                        throw new ArgumentException("No valid benchmark argument.");
-                }
-
-                // store repetition result
-                results[i] = repetitionResult;
+                case "bootstrap":
+                    results = await new BootstrapBenchmark().BenchmarkAsync(args);
+                    break;
+                default:
+                    throw new ArgumentException("No valid benchmark argument.");
             }
 
             PrintResults(results);
@@ -88,7 +72,7 @@ namespace TomP2P.Benchmark
 
         private static void PrintResults(double[] results)
         {
-            Console.WriteLine("----------- RESULTS -----------");
+            Console.WriteLine("-------------------- RESULTS --------------------");
             foreach (var res in results)
             {
                 Console.WriteLine(res);
@@ -96,7 +80,7 @@ namespace TomP2P.Benchmark
             Console.WriteLine("Mean: {0} ms.", Statistics.CalculateMean(results));
             Console.WriteLine("Variance: {0} ms.", Statistics.CalculateVariance(results));
             Console.WriteLine("Standard Deviation: {0} ms.", Statistics.CalculateStdDev(results));
-            Console.WriteLine("-------------------------------");
+            Console.WriteLine("-------------------------------------------------");
         }
 
         private static void WriteFile(Arguments args, double[] results)
@@ -104,12 +88,11 @@ namespace TomP2P.Benchmark
             var customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
 
-            //var location = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/benchmarking/NET/runtimesNET.txt";
             var path = args.ResultsDir + "\\" + args.BmArg + "_net" + args.Suffix + ".txt";
-            
+
             using (var file = new StreamWriter(path))
             {
-                file.WriteLine("{0}, {1}", "Repetition", "NET" + args.Suffix);
+                file.WriteLine("{0}, {1}", "Iteration", "NET" + args.Suffix);
                 for (int i = 0; i < results.Length; i++)
                 {
                     file.WriteLine("{0}, {1}", i, results[i].ToString(customCulture));
