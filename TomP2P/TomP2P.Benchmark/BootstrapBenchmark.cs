@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TomP2P.Core.P2P;
 using TomP2P.Extensions;
 
@@ -21,6 +22,7 @@ namespace TomP2P.Benchmark
                 for (int j = 0; j < _network.Length; j++)
                 {
                     // TODO better if not awaited?
+                    //Console.WriteLine("Bootstrapping {0} to {1}.", i, j);
                     await _network[i].Bootstrap().SetPeerAddress(_network[j].PeerAddress).StartAsync();
                 }
             }
