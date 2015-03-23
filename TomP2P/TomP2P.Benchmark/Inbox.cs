@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
+using NLog.Targets;
 
 namespace TomP2P.Benchmark
 {
@@ -29,6 +30,7 @@ namespace TomP2P.Benchmark
                 {
                     throw new ArgumentException("NrRepetitions must be >= 1.");
                 }
+                Console.WriteLine(arguments);
                 ExecuteAsync(arguments).Wait();
             }
             catch (Exception ex)

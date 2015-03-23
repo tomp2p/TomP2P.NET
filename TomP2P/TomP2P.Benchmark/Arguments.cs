@@ -1,4 +1,6 @@
-﻿namespace TomP2P.Benchmark
+﻿using System.Text;
+
+namespace TomP2P.Benchmark
 {
     public sealed class Arguments
     {
@@ -40,6 +42,17 @@
         public string Suffix
         {
             get { return _suffix; }
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder("Arguments [bmArg = ")
+                .Append(BmArg)
+                .Append(", nrWarmups = ").Append(NrWarmups)
+                .Append(", nrRepetitions = ").Append(NrRepetitions)
+                .Append(", resultsDir = ").Append(ResultsDir)
+                .Append(", suffix = ").Append(Suffix);
+            return sb.ToString();
         }
     }
 }
