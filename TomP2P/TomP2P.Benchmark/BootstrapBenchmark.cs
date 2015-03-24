@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TomP2P.Core.P2P;
 using TomP2P.Extensions;
@@ -9,6 +9,7 @@ namespace TomP2P.Benchmark
     {
         private static readonly InteropRandom Rnd = new InteropRandom(42);
         private Peer[] _network;
+        private IList<Task> _tasks = new List<Task>(NetworkSize * NetworkSize);
 
         protected override void Setup()
         {
@@ -21,11 +22,10 @@ namespace TomP2P.Benchmark
             {
                 for (int j = 0; j < _network.Length; j++)
                 {
-                    // TODO better if not awaited?
-                    //Console.WriteLine("Bootstrapping {0} to {1}.", i, j);
-                    await _network[i].Bootstrap().SetPeerAddress(_network[j].PeerAddress).StartAsync();
+                    _tasks.Add(_network[i].Bootstrap().SetPeerAddress(_network[j].PeerAddress).StartAsync());
                 }
             }
+            await Task.WhenAll(_tasks);
         }
     }
 }

@@ -99,7 +99,7 @@ namespace TomP2P.Benchmark
             {
                 var watch = Stopwatch.StartNew();
                 anker |= watch.ElapsedTicks;
-                watch.Reset();
+                watch.Restart();
                 watch.Stop();
             }
             AnkerTrash(anker);

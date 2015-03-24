@@ -8,6 +8,8 @@ namespace TomP2P.Benchmark
 {
     public abstract class BaseBenchmark
     {
+        public const int NetworkSize = 10;
+
         public async Task<double[]> BenchmarkAsync(Arguments args)
         {
             Console.WriteLine("Setting up...");
@@ -24,19 +26,19 @@ namespace TomP2P.Benchmark
             // warmups
             for (int i = 0; i < warmups.Length; i++)
             {
-                Console.WriteLine("Warmup {0}...", i);
+                Console.WriteLine("Warmup A {0}...", i);
+                watch.Restart();
                 await ExecuteAsync();
                 warmups[i] = watch.ElapsedTicks;
-                watch.Restart();
             }
             
             // repetitions
             for (int i = 0; i < repetitions.Length; i++)
             {
                 Console.WriteLine("Repetition {0}...", i);
+                watch.Restart();
                 await ExecuteAsync();
                 repetitions[i] = watch.ElapsedTicks;
-                watch.Restart();
             }
 
             watch.Stop();
@@ -62,7 +64,7 @@ namespace TomP2P.Benchmark
 
         protected static Peer[] SetupNetwork(InteropRandom rnd)
         {
-            return BenchmarkUtil.CreateNodes(10, rnd, 7077, false, false);
+            return BenchmarkUtil.CreateNodes(NetworkSize, rnd, 7077, false, false);
         }
     }
 }
