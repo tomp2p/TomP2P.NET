@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
@@ -48,13 +47,15 @@ namespace TomP2P.Benchmark
         private static async Task ExecuteAsync(Arguments args)
         {
             Console.WriteLine("Argument: {0}", args.BmArg);
-            PrintStopwatchProperties();
 
             double[] results;
             switch (args.BmArg)
             {
-                case "bootstrap":
+                case "bootstrap-cpu":
                     results = await new BootstrapBenchmark().BenchmarkAsync(args);
+                    break;
+                case "bootstrap-memory":
+                    results = await new BootstrapBenchmark().ProfileMemoryAsync(args);
                     break;
                 default:
                     throw new ArgumentException("No valid benchmark argument.");
@@ -64,13 +65,6 @@ namespace TomP2P.Benchmark
             WriteFile(args, results);
         }
 
-        private static void PrintStopwatchProperties()
-        {
-            Console.WriteLine("Stopwatch.Frequency: {0} ticks/sec", Stopwatch.Frequency);
-            Console.WriteLine("Accurate within {0} nanoseconds.", 1000000000L / Stopwatch.Frequency);
-            Console.WriteLine("Stopwatch.IsHighResolution: {0}", Stopwatch.IsHighResolution);
-        }
-
         private static void PrintResults(double[] results)
         {
             Console.WriteLine("-------------------- RESULTS --------------------");
@@ -78,9 +72,9 @@ namespace TomP2P.Benchmark
             {
                 Console.WriteLine(res);
             }
-            Console.WriteLine("Mean: {0} ms.", Statistics.CalculateMean(results));
-            Console.WriteLine("Variance: {0} ms.", Statistics.CalculateVariance(results));
-            Console.WriteLine("Standard Deviation: {0} ms.", Statistics.CalculateStdDev(results));
+            Console.WriteLine("Mean: {0}", Statistics.CalculateMean(results));
+            Console.WriteLine("Variance: {0}", Statistics.CalculateVariance(results));
+            Console.WriteLine("Standard Deviation: {0}", Statistics.CalculateStdDev(results));
             Console.WriteLine("-------------------------------------------------");
         }
 

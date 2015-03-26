@@ -44,7 +44,7 @@ namespace TomP2P.Benchmark
             return peers;
         }
 
-        public static Peer CreateSlave(Peer master, InteropRandom rnd, bool maintenance, bool timeout)
+        private static Peer CreateSlave(Peer master, InteropRandom rnd, bool maintenance, bool timeout)
         {
             var slaveId = CreateRandomId(rnd);
             var slaveMap = new PeerMap(new PeerMapConfiguration(slaveId).SetPeerNoVerification());
@@ -66,7 +66,7 @@ namespace TomP2P.Benchmark
         /// Creates and returns a ChannelServerConfiguration that has infinite values for all timeouts.
         /// </summary>
         /// <returns></returns>
-        public static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration(int port)
+        private static ChannelServerConfiguration CreateInfiniteTimeoutChannelServerConfiguration(int port)
         {
             return PeerBuilder.CreateDefaultChannelServerConfiguration()
                 .SetIdleTcpSeconds(0)
@@ -113,22 +113,7 @@ namespace TomP2P.Benchmark
             GC.WaitForPendingFinalizers();
         }
 
-        public static double ToSeconds(this Stopwatch watch)
-        {
-            return watch.ElapsedTicks / (double)Stopwatch.Frequency;
-        }
-
-        public static double ToMillis(this Stopwatch watch)
-        {
-            return watch.ToSeconds() * 1000;
-        }
-
-        public static double ToNanos(this Stopwatch watch)
-        {
-            return watch.ToSeconds() * 1000000000;
-        }
-
-        public static Number160 CreateRandomId(InteropRandom rnd)
+        private static Number160 CreateRandomId(InteropRandom rnd)
         {
             var vals = new int[Number160.IntArraySize];
             for (int i = 0; i < vals.Length; i++)
@@ -146,6 +131,13 @@ namespace TomP2P.Benchmark
         public static object AnkerTrash(object anker)
         {
             return anker;
+        }
+
+        public static void PrintStopwatchProperties()
+        {
+            Console.WriteLine("Stopwatch.Frequency: {0} ticks/sec", Stopwatch.Frequency);
+            Console.WriteLine("Accurate within {0} nanoseconds.", 1000000000L / Stopwatch.Frequency);
+            Console.WriteLine("Stopwatch.IsHighResolution: {0}", Stopwatch.IsHighResolution);
         }
     }
 }

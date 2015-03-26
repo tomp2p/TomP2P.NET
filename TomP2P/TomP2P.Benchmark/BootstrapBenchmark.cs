@@ -8,8 +8,8 @@ namespace TomP2P.Benchmark
     public class BootstrapBenchmark : BaseBenchmark
     {
         private static readonly InteropRandom Rnd = new InteropRandom(42);
+        private readonly IList<Task> _tasks = new List<Task>(NetworkSize * NetworkSize);
         private Peer[] _network;
-        private IList<Task> _tasks = new List<Task>(NetworkSize * NetworkSize);
 
         protected override void Setup()
         {
