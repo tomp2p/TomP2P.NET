@@ -21,6 +21,8 @@ namespace TomP2P.Benchmark
         /// <returns></returns>
         public static Peer[] CreateNodes(int nrOfPeers, InteropRandom rnd, int port, bool maintenance, bool timeout)
         {
+            Console.WriteLine("Creating network with {0} peers...", nrOfPeers);
+
             var peers = new Peer[nrOfPeers];
 
             var masterId = CreateRandomId(rnd);
@@ -74,22 +76,6 @@ namespace TomP2P.Benchmark
                 .SetConnectionTimeoutTcpMillis(0)
                 .SetPorts(new Ports(port, port));
         }
-
-        /*public static Stopwatch StartBenchmark()
-        {
-            WarmupTimer();
-            ReclaimResources();
-            Console.WriteLine("Starting Benchmarking...");
-            return Stopwatch.StartNew();
-        }
-
-        public static double StopBenchmark(Stopwatch watch)
-        {
-            watch.Stop();
-            Console.WriteLine("Stopped Benchmarking.");
-            Console.WriteLine("{0:0.000} ns | {1:0.000} ms | {2:0.000} s", watch.ToNanos(), watch.ToMillis(), watch.ToSeconds());
-            return watch.ToMillis();
-        }*/
 
         public static void WarmupTimer()
         {

@@ -5,14 +5,16 @@ namespace TomP2P.Benchmark
     public sealed class Arguments
     {
         private readonly string _bmArg;
+        private readonly string _type;
+        private readonly int _nrWarmups;
         private readonly int _nrRepetitions;
         private readonly string _resultsDir;
-        private readonly int _nrWarmups;
         private readonly string _suffix;
 
-        public Arguments(string bmArg, int nrWarmups, int nrRepetitions, string resultsDir, string suffix)
+        public Arguments(string bmArg, string type, int nrWarmups, int nrRepetitions, string resultsDir, string suffix)
         {
             _bmArg = bmArg;
+            _type = type;
             _nrWarmups = nrWarmups;
             _nrRepetitions = nrRepetitions;
             _resultsDir = resultsDir;
@@ -22,6 +24,11 @@ namespace TomP2P.Benchmark
         public string BmArg
         {
             get { return _bmArg; }
+        }
+
+        public string Type
+        {
+            get { return _type; }
         }
 
         public int NrWarmups
@@ -48,6 +55,7 @@ namespace TomP2P.Benchmark
         {
             var sb = new StringBuilder("Arguments [bmArg = ")
                 .Append(BmArg)
+                .Append(", type = ").Append(Type)
                 .Append(", nrWarmups = ").Append(NrWarmups)
                 .Append(", nrRepetitions = ").Append(NrRepetitions)
                 .Append(", resultsDir = ").Append(ResultsDir)

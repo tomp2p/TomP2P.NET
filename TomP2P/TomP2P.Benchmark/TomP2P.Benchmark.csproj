@@ -48,11 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Arguments.cs" />
-    <Compile Include="BaseBenchmark.cs" />
-    <Compile Include="BootstrapBenchmark.cs" />
+    <Compile Include="Profiler.cs" />
+    <Compile Include="BootstrapProfiler.cs" />
     <Compile Include="Inbox.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BenchmarkUtil.cs" />
+    <Compile Include="SendDirectLocalProfiler.cs" />
     <Compile Include="Statistics.cs" />
   </ItemGroup>
   <ItemGroup>
