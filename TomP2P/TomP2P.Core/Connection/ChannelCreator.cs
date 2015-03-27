@@ -86,7 +86,7 @@ namespace TomP2P.Core.Connection
                     return null;
                 }
                 // try to aquire resources for the channel
-                if (_semaphoreUdp != null && !_semaphoreUdp.TryAcquire())
+                if (_semaphoreUdp == null || !_semaphoreUdp.TryAcquire())
                 {
                     const string errorMsg = "Tried to acquire more resources (UDP) than announced.";
                     Logger.Error(errorMsg);
@@ -131,7 +131,7 @@ namespace TomP2P.Core.Connection
                     return null;
                 }
                 // try to acquire resources for the channel
-                if (_semaphoreTcp != null && !_semaphoreTcp.TryAcquire())
+                if (_semaphoreTcp == null || !_semaphoreTcp.TryAcquire())
                 {
                     const string errorMsg = "Tried to acquire more resources (TCP) than announced.";
                     Logger.Error(errorMsg);

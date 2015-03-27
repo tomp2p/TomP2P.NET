@@ -30,7 +30,7 @@ namespace TomP2P.Benchmark
             _sender = Network[0];
             _receiver = Network[1];
             _receiver.RawDataReply(new SampleRawDataReply());
-            _cc = await _sender.ConnectionBean.Reservation.CreateAsync(0, 1);
+            _cc = await _sender.ConnectionBean.Reservation.CreateAsync(_isForceUdp ? 1 : 0, _isForceUdp ? 0 : 1);
 
             _sendDirectBuilder = new SendDirectBuilder(_sender, (PeerAddress) null)
                 .SetIsStreaming()
