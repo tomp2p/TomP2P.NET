@@ -13,6 +13,9 @@ namespace TomP2P.Benchmark
             if (args.Length < 5)
             {
                 Console.Error.WriteLine("Argument(s) missing.");
+#if DEBUG
+                Console.ReadLine();
+#endif
                 Environment.Exit(-1);
             }
             var bmArg = args[0];
@@ -36,6 +39,9 @@ namespace TomP2P.Benchmark
             {
                 Console.Error.WriteLine("Exception occurred:\n{0}.", ex);
                 Console.WriteLine("Exiting due to error.");
+#if DEBUG
+                Console.ReadLine();
+#endif
                 Environment.Exit(-2);
             }
             Console.WriteLine("Exiting with success.");

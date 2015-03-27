@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework.Constraints;
 using TomP2P.Core.Connection;
 using TomP2P.Core.Message;
 using TomP2P.Core.P2P;

@@ -34,7 +34,8 @@ namespace TomP2P.Benchmark
 
             _sendDirectBuilder = new SendDirectBuilder(_sender, (PeerAddress) null)
                 .SetIsStreaming()
-                .SetIdleTcpSeconds(Int32.MaxValue)
+                .SetIdleUdpSeconds(0)
+                .SetIdleTcpSeconds(0)
                 .SetBuffer(CreateSampleBuffer())
                 .SetIsForceUdp(_isForceUdp); // TODO check if works
         }
@@ -71,7 +72,7 @@ namespace TomP2P.Benchmark
         {
             public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
             {
-                throw new NotImplementedException();
+                return requestBuffer;
             }
         }
     }
