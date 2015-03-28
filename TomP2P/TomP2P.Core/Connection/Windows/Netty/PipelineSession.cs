@@ -29,8 +29,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         private object _writeRes;
         private object _readRes;
 
-        private Exception _caughtException;
-
         public PipelineSession(IChannel channel, Pipeline pipeline, IEnumerable<IInboundHandler> inboundHandlers,
             IEnumerable<IOutboundHandler> outboundHandlers)
         {
@@ -49,7 +47,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
             _msgR = null;
             _writeRes = null;
             _readRes = null;
-            _caughtException = null;
         }
 
         public void TriggerActive()
@@ -81,6 +78,18 @@ namespace TomP2P.Core.Connection.Windows.Netty
             }
         }
 
+        public void TriggerException(Exception cause)
+        {
+            Logger.Error("Exception occurred in pipeline: {0}", cause.ToString());
+            // first, notify all handlers
+            foreach (var handler in InboundHandlers.Cast<IChannelHandler>().Union(OutboundHandlers))
+            {
+                handler.ExceptionCaught(_ctx, cause);
+            }
+            // then, throw exception
+            throw cause;
+        }
+
         public void TriggerTimeout()
         {
             _isTimedOut = true;
@@ -99,23 +108,11 @@ namespace TomP2P.Core.Connection.Windows.Netty
             while (GetNextOutbound() != null)
             {
                 Logger.Debug("{0}: Processing outbound handler {1}.", _pipeline, _currentOutbound);
-                if (_caughtException != null)
-                {
-                    _currentOutbound.ExceptionCaught(_ctx, _caughtException);
-                }
-                else
-                {
-                    _currentOutbound.Write(_ctx, msg);
-                }
+                _currentOutbound.Write(_ctx, msg);
             }
             if (_writeRes == null)
             {
                 _writeRes = _msgW;
-            }
-            if (_caughtException != null)
-            {
-                Logger.Error("Exception in outbound pipeline: {0}", _caughtException.ToString());
-                throw _caughtException;
             }
             return _writeRes;
         }
@@ -126,7 +123,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
             {
                 throw new NullReferenceException("msg");
             }
-
             // set msgR to newest provided value
             _msgR = msg;
 
@@ -134,34 +130,14 @@ namespace TomP2P.Core.Connection.Windows.Netty
             while (GetNextInbound() != null)
             {
                 Logger.Debug("{0}: Processing inbound handler {1}.", _pipeline, _currentInbound);
-
-                if (_caughtException != null)
-                {
-                    _currentInbound.ExceptionCaught(_ctx, _caughtException);
-                }
-                else
-                {
-                    _currentInbound.Read(_ctx, msg);
-                }
+                _currentInbound.Read(_ctx, msg);
             }
             if (_readRes == null)
             {
                 _readRes = _msgR;
             }
-            if (_caughtException != null)
-            {
-                Logger.Error("Exception in inbound pipeline: {0}", _caughtException.ToString());
-                throw _caughtException;
-            }
             return _readRes;
         }
-
-        public void ExceptionCaught(Exception ex)
-        {
-            _caughtException = ex;
-        }
-
-
 
         private IOutboundHandler GetNextOutbound()
         {

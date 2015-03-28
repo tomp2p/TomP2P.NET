@@ -51,7 +51,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
         /// <param name="ex"></param>
         public void FireExceptionCaught(Exception ex)
         {
-            _session.ExceptionCaught(ex);
+            _session.TriggerException(ex);
         }
 
         /// <summary>
