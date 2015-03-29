@@ -16,14 +16,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
 
         public void Start()
         {
-            /*// accept MaxNrOfClients simultaneous connections
-            // var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
-            //_tasks = new Task[maxNrOfClients];
-            for (int i = 0; i < maxNrOfClients; i++)
-            {
-                //_tasks[i] = ServiceLoopAsync(CloseToken);
-                ThreadPool.QueueUserWorkItem(ServiceLoop, CloseToken);
-            }*/
             ThreadPool.QueueUserWorkItem(async delegate
             {
                 try
@@ -41,11 +33,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         public void Stop()
         {
             Close();
-
-            /*if (_tasks != null)
-            {
-                await Task.WhenAll(_tasks);
-            }*/
         }
 
         protected override void DoClose()

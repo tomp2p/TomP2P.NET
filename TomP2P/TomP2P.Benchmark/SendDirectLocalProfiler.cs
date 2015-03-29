@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TomP2P.Core.Connection;
 using TomP2P.Core.P2P;
 using TomP2P.Core.P2P.Builder;
@@ -13,6 +12,7 @@ namespace TomP2P.Benchmark
     public class SendDirectLocalProfiler : Profiler
     {
         private const int NetworkSize = 2;
+        private const int BufferSizeBytes = 64000;
         private readonly bool _isForceUdp;
         private Peer _sender;
         private Peer _receiver;
@@ -68,7 +68,10 @@ namespace TomP2P.Benchmark
         private static Buffer CreateSampleBuffer()
         {
             var acbb = AlternativeCompositeByteBuf.CompBuffer();
-            acbb.WriteBytes(new sbyte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+            for (int i = 0; i < BufferSizeBytes; i++)
+            {
+                acbb.WriteByte(i%256);
+            }
             return new Buffer(acbb);
         }
 
