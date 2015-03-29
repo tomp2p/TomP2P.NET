@@ -59,7 +59,10 @@ namespace TomP2P.Benchmark
         protected override async Task ExecuteAsync()
         {
             await _sender.DirectDataRpc.SendAsync(_receiver.PeerAddress, _sendDirectBuilder, _cc);
+            
+            // make buffer reusable
             _sendDirectBuilder.Buffer.Reset();
+            _sendDirectBuilder.Buffer.BackingBuffer.SetReaderIndex(0);
         }
 
         private static Buffer CreateSampleBuffer()
