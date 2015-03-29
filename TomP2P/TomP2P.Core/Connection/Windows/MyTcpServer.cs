@@ -15,75 +15,39 @@ namespace TomP2P.Core.Connection.Windows
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        // wrapped member
+        private readonly TcpListener _tcpListener;
+
         public MyTcpServer(IPEndPoint localEndPoint, Pipeline pipeline)
             : base(localEndPoint, pipeline)
         {
-            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            _tcpListener = new TcpListener(LocalEndPoint);
+            _tcpListener.Server.LingerState = new LingerOption(false, 0);
+            _tcpListener.Server.NoDelay = true;
         }
 
-        public override async Task ServiceLoopAsync(CancellationToken ct)
+        protected override async Task ServiceLoopAsync(CancellationToken ct)
         {
-            var tcpListener = new TcpListener(LocalEndPoint);
-            tcpListener.Server.LingerState = new LingerOption(false, 0); // TODO correct?
-            tcpListener.Server.NoDelay = true; // TODO correct?
-            tcpListener.Start();
+            _tcpListener.Start();
             try
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    // buffers
-                    var recvBuffer = new byte[256];
-                    var buf = AlternativeCompositeByteBuf.CompBuffer();
-                    object readRes;
-
                     // accept a client connection
-                    var client = await tcpListener.AcceptTcpClientAsync().WithCancellation(ct);
-                    var stream = client.GetStream();
-                    var pieceCount = 0;
-                    var session = Pipeline.CreateNewServerSession(this);
-                    session.TriggerActive();
-
-                    // process content
-                    do
+                    var client = await _tcpListener.AcceptTcpClientAsync().WithCancellation(ct);
+                    RemoteEndPoint = (IPEndPoint) client.Client.RemoteEndPoint;
+                    ThreadPool.QueueUserWorkItem(async delegate
                     {
-                        // TODO find zero-copy way, use same buffer
-                        var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length, ct);
-                        buf.Clear();
-                        buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
-
-                        LocalEndPoint = (IPEndPoint) client.Client.LocalEndPoint;
-                        RemoteEndPoint = (IPEndPoint) client.Client.RemoteEndPoint;
-
-                        var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
-                        Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece,
-                            Convenient.ToHumanReadable(nrBytes), Convenient.ToString(recvBuffer));
-
-                        // execute inbound pipeline, per piece
-                        readRes = session.Read(piece); // resets timeout
-                        session.Reset(); // resets session internals
-                    } while (!IsClosed && stream.DataAvailable && !session.IsTimedOut);
-
-                    if (session.IsTimedOut)
-                    {
-                        // continue in service loop
-                        continue;
-                    }
-
-                    // execute outbound pipeline
-                    var writeRes = session.Write(readRes); // resets timeout
-                    if (session.IsTimedOut)
-                    {
-                        // continue in service loop
-                        continue;
-                    }
-
-                    // send back
-                    var bytes = ConnectionHelper.ExtractBytes(writeRes);
-                    await stream.WriteAsync(bytes, 0, bytes.Length, ct);
-                    NotifyWriteCompleted(); // resets timeout
-                    Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
-
-                    session.TriggerInactive();
+                        try
+                        {
+                            await ProcessRequestAsync(client);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error("An exception occurred during the TCP server's service loop.", ex);
+                            throw;
+                        }
+                    });
                 }
             }
             catch (OperationCanceledException)
@@ -92,8 +56,65 @@ namespace TomP2P.Core.Connection.Windows
             }
             finally
             {
-                tcpListener.Stop();
+                _tcpListener.Stop();
             }
+        }
+
+        protected override async Task ProcessRequestAsync(object state)
+        {
+            var client = (TcpClient) state;
+            var stream = client.GetStream();
+
+            var recvBuffer = new byte[256];
+            object readRes;
+            var pieceCount = 0;
+
+            // prepare new session
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            var session = Pipeline.CreateNewServerSession(this);
+            session.TriggerActive();
+
+            // process content
+            do
+            {
+                // TODO find zero-copy way, use same buffer
+                var nrBytes = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length);
+                buf.Clear();
+                buf.WriteBytes(recvBuffer.ToSByteArray(), 0, nrBytes);
+
+                var localEp = (IPEndPoint) client.Client.LocalEndPoint;
+                var remoteEp = (IPEndPoint) client.Client.RemoteEndPoint;
+
+                var piece = new StreamPiece(buf, localEp, remoteEp);
+                Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece,
+                    Convenient.ToHumanReadable(nrBytes), Convenient.ToString(recvBuffer));
+
+                // execute inbound pipeline, per piece
+                readRes = session.Read(piece); // resets timeout
+                session.Reset(); // resets session internals
+            } while (!IsClosed && stream.DataAvailable && !session.IsTimedOut);
+
+            if (session.IsTimedOut)
+            {
+                session.TriggerInactive();
+                return;
+            }
+
+            // execute outbound pipeline
+            var writeRes = session.Write(readRes); // resets timeout
+            if (session.IsTimedOut)
+            {
+                session.TriggerInactive();
+                return;
+            }
+
+            // send back
+            var bytes = ConnectionHelper.ExtractBytes(writeRes);
+            await stream.WriteAsync(bytes, 0, bytes.Length);
+            NotifyWriteCompleted(); // resets timeout
+            Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(bytes.Length), Convenient.ToString(bytes));
+
+            session.TriggerInactive();
         }
 
         public override string ToString()

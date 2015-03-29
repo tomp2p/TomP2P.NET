@@ -16,63 +16,36 @@ namespace TomP2P.Core.Connection.Windows
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         // wrapped member
-        //private readonly UdpClient _udpServer;
+        private readonly UdpClient _udpClient;
 
         public MyUdpServer(IPEndPoint localEndPoint, Pipeline pipeline)
             : base(localEndPoint, pipeline)
         {
-            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
+            _udpClient = new UdpClient(LocalEndPoint);
+            _udpClient.Client.EnableBroadcast = true;
         }
 
-        public override async Task ServiceLoopAsync(CancellationToken ct)
+        protected override async Task ServiceLoopAsync(CancellationToken ct)
         {
-            var udpClient = new UdpClient(LocalEndPoint);
-            udpClient.Client.EnableBroadcast = true;
-            PipelineSession session = null;
             try
             {
                 while (!ct.IsCancellationRequested)
                 {
                     // receive request from client
-                    UdpReceiveResult udpRes = await udpClient.ReceiveAsync().WithCancellation(ct);
-                    session = Pipeline.CreateNewServerSession(this);
-                    session.TriggerActive();
-
-                    // process content
-                    var buf = AlternativeCompositeByteBuf.CompBuffer();
-                    buf.WriteBytes(udpRes.Buffer.ToSByteArray());
-
-                    LocalEndPoint = (IPEndPoint)udpClient.Client.LocalEndPoint;
+                    var udpRes = await _udpClient.ReceiveAsync().WithCancellation(ct);
                     RemoteEndPoint = udpRes.RemoteEndPoint;
-
-                    var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
-                    Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length),
-                        Convenient.ToString(udpRes.Buffer));
-
-                    // execute inbound pipeline
-                    var readRes = session.Read(dgram); // resets timeout
-                    if (session.IsTimedOut)
+                    ThreadPool.QueueUserWorkItem(async delegate
                     {
-                        // continue in service loop
-                        continue;
-                    }
-
-                    // execute outbound pipeline 
-                    var writeRes = session.Write(readRes); // resets timeout
-                    if (session.IsTimedOut)
-                    {
-                        // continue in service loop
-                        continue;
-                    }
-
-                    // send back
-                    var bytes = ConnectionHelper.ExtractBytes(writeRes);
-                    await udpClient.SendAsync(bytes, bytes.Length, RemoteEndPoint);
-                    NotifyWriteCompleted(); // resets timeout
-                    Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length),
-                        Convenient.ToString(udpRes.Buffer));
-
-                    session.TriggerInactive();
+                        try
+                        {
+                            await ProcessRequestAsync(udpRes);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error("An exception occurred during the UDP server's service loop.", ex);
+                            throw;
+                        }
+                    });
                 }
             }
             catch (OperationCanceledException)
@@ -81,12 +54,53 @@ namespace TomP2P.Core.Connection.Windows
             }
             finally
             {
-                udpClient.Close();
-                if (session != null)
-                {
-                    session.TriggerInactive();
-                }
+                _udpClient.Close();
             }
+        }
+
+        protected override async Task ProcessRequestAsync(object state)
+        {
+            var udpRes = (UdpReceiveResult) state;
+
+            // prepare new session
+            var buf = AlternativeCompositeByteBuf.CompBuffer();
+            var session = Pipeline.CreateNewServerSession(this);
+            session.TriggerActive();
+
+            // process content
+            buf.WriteBytes(udpRes.Buffer.ToSByteArray());
+
+            var localEp = (IPEndPoint)_udpClient.Client.LocalEndPoint;
+            var remoteEp = udpRes.RemoteEndPoint;
+
+            var dgram = new DatagramPacket(buf, localEp, remoteEp);
+            Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length),
+                Convenient.ToString(udpRes.Buffer));
+
+            // execute inbound pipeline
+            var readRes = session.Read(dgram); // resets timeout
+            if (session.IsTimedOut)
+            {
+                session.TriggerInactive();
+                return;
+            }
+
+            // execute outbound pipeline 
+            var writeRes = session.Write(readRes); // resets timeout
+            if (session.IsTimedOut)
+            {
+                session.TriggerInactive();
+                return;
+            }
+
+            // send back
+            var bytes = ConnectionHelper.ExtractBytes(writeRes);
+            await _udpClient.SendAsync(bytes, bytes.Length, remoteEp);
+            NotifyWriteCompleted(); // resets timeout
+            Logger.Debug("Sent {0} : {1}", Convenient.ToHumanReadable(udpRes.Buffer.Length),
+                Convenient.ToString(udpRes.Buffer));
+
+            session.TriggerInactive();
         }
 
         public override string ToString()

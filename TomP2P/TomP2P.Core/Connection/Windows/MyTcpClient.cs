@@ -22,8 +22,6 @@ namespace TomP2P.Core.Connection.Windows
         {
             // bind
             _tcpClient = new TcpClient(localEndPoint);
-
-            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public Task ConnectAsync(IPEndPoint remoteEndPoint)
@@ -64,10 +62,10 @@ namespace TomP2P.Core.Connection.Windows
                 buf.Clear();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
-                LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
+                var localEp = (IPEndPoint)Socket.LocalEndPoint;
                 RemoteEndPoint = (IPEndPoint)Socket.RemoteEndPoint;
 
-                var piece = new StreamPiece(buf, LocalEndPoint, RemoteEndPoint);
+                var piece = new StreamPiece(buf, localEp, RemoteEndPoint);
                 Logger.Debug("[{0}] Received {1}. {2} : {3}", ++pieceCount, piece, Convenient.ToHumanReadable(nrBytes), Convenient.ToString(bytesRecv));
 
                 // execute inbound pipeline, per piece (reset session!)

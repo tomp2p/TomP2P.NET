@@ -111,7 +111,7 @@ namespace TomP2P.Core.Connection
             {
                 var pipeline = GetPipeline(false);
                 _udpServer = new MyUdpServer(listenAddress, pipeline);
-                // rest of config done in service loop
+                // rest of config done in MyUdpServer
                 _udpServer.Start();
                 return true;
             }
@@ -133,7 +133,7 @@ namespace TomP2P.Core.Connection
             {
                 var pipeline = GetPipeline(true);
                 _tcpServer = new MyTcpServer(listenAddress, pipeline);
-                // rest of config done in service loop
+                // rest of config done in MyTcpServer
                 _tcpServer.Start();
                 return true;
             }
@@ -182,21 +182,20 @@ namespace TomP2P.Core.Connection
         /// </summary>
         public async Task ShutdownAsync()
         {
+            // TODO check if server can be shut down async, otherwise remove async
             // shutdown both UDP and TCP server sockets
-            var tasks = new List<Task>();
             if (_udpServer != null)
             {
                 Logger.Debug("Shutting down UDP server...");
-                var t1 = _udpServer.StopAsync().ContinueWith(t => Logger.Debug("UDP server shut down."));
-                tasks.Add(t1);
+                _udpServer.Stop();
+                Logger.Debug("UDP server shut down.");
             }
             if (_tcpServer != null)
             {
                 Logger.Debug("Shutting down TCP server...");
-                var t2 = _tcpServer.StopAsync().ContinueWith(t => Logger.Debug("TCP server shut down."));
-                tasks.Add(t2);
+                _tcpServer.Stop();
+                Logger.Debug("TCP server shut down.");
             }
-            await Task.WhenAll(tasks);
         }
     }
 }

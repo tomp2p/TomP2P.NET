@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace TomP2P.Core.Connection.Windows.Netty
+﻿namespace TomP2P.Core.Connection.Windows.Netty
 {
     /// <summary>
     /// Interface for server-side channels that retrieve messages and trigger 
@@ -15,17 +12,10 @@ namespace TomP2P.Core.Connection.Windows.Netty
         void Start();
 
         /// <summary>
-        /// Stops the server channel in an asynchronous manner.
+        /// Stops the server channel.
         /// </summary>
         /// <returns></returns>
-        Task StopAsync();
-
-        /// <summary>
-        /// Serves the incoming requests in an asynchronous manner.
-        /// </summary>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        Task ServiceLoopAsync(CancellationToken ct);
+        void Stop();
     }
 
     /// <summary>

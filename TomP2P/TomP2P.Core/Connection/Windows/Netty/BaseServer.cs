@@ -1,12 +1,14 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace TomP2P.Core.Connection.Windows.Netty
 {
     public abstract class BaseServer : BaseChannel, IServerChannel
     {
-        private Task[] _tasks;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         protected BaseServer(IPEndPoint localEndPoint, Pipeline pipeline)
             : base (localEndPoint, pipeline)
@@ -14,20 +16,32 @@ namespace TomP2P.Core.Connection.Windows.Netty
 
         public void Start()
         {
-            // accept MaxNrOfClients simultaneous connections
-            var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
-            _tasks = new Task[maxNrOfClients];
+            /*// accept MaxNrOfClients simultaneous connections
+            // var maxNrOfClients = Utils.Utils.GetMaxNrOfClients();
+            //_tasks = new Task[maxNrOfClients];
             for (int i = 0; i < maxNrOfClients; i++)
             {
-                _tasks[i] = ServiceLoopAsync(CloseToken);
-            }
+                //_tasks[i] = ServiceLoopAsync(CloseToken);
+                ThreadPool.QueueUserWorkItem(ServiceLoop, CloseToken);
+            }*/
+            ThreadPool.QueueUserWorkItem(async delegate
+            {
+                try
+                {
+                    await ServiceLoopAsync(CloseToken);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("An exception occurred in the server's service loop.", ex);
+                    throw;
+                }
+            }, CloseToken);
         }
 
-        public async Task StopAsync()
+        public void Stop()
         {
             Close();
 
-            // TODO await closing of all service-loops
             /*if (_tasks != null)
             {
                 await Task.WhenAll(_tasks);
@@ -39,6 +53,8 @@ namespace TomP2P.Core.Connection.Windows.Netty
             // nothing to do
         }
 
-        public abstract Task ServiceLoopAsync(CancellationToken ct);
+        protected abstract Task ServiceLoopAsync(CancellationToken ct);
+
+        protected abstract Task ProcessRequestAsync(object state);
     }
 }

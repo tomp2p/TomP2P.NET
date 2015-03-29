@@ -22,7 +22,6 @@ namespace TomP2P.Core.Connection.Windows
         {
             // bind
             _udpClient = new UdpClient(localEndPoint);
-            //Logger.Info("Instantiated with object identity: {0}.", RuntimeHelpers.GetHashCode(this));
         }
 
         public override async Task SendBytesAsync(byte[] bytes, IPEndPoint senderEp, IPEndPoint receiverEp = null)
@@ -51,10 +50,10 @@ namespace TomP2P.Core.Connection.Windows
             var buf = AlternativeCompositeByteBuf.CompBuffer();
             buf.WriteBytes(udpRes.Buffer.ToSByteArray());
 
-            LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
+            var localEp = (IPEndPoint)Socket.LocalEndPoint;
             RemoteEndPoint = udpRes.RemoteEndPoint;
 
-            var dgram = new DatagramPacket(buf, LocalEndPoint, RemoteEndPoint);
+            var dgram = new DatagramPacket(buf, localEp, RemoteEndPoint);
             Logger.Debug("Received {0}. {1} : {2}", dgram, Convenient.ToHumanReadable(udpRes.Buffer.Length), Convenient.ToString(udpRes.Buffer));
 
             // execute inbound pipeline
