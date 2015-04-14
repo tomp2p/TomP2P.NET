@@ -6,6 +6,10 @@ using NLog;
 
 namespace TomP2P.Core.Connection.Windows.Netty
 {
+    // TODO implement this exactly like in Netty
+    // - "fire" means the current handler has been processed an the next can be processed
+    // - avoiding fire just returns from the handler and doesn't proceed in the pipeline
+
     // TODO this pipeline can be optimized
     // - read/write do query the next handlers multiple times
     // - queries should be optimized

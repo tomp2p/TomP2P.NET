@@ -48,6 +48,7 @@ namespace TomP2P.Core.Message
                 }
                 else
                 {
+                    // add to overhead from last TCP packet
                     _cumulation.AddComponent(buf);
                 }
                 Decoding(ctx, sender, recipient);
@@ -59,6 +60,8 @@ namespace TomP2P.Core.Message
             }
             finally
             {
+                // If the currently read buffer is read, it can be deallocated.
+                // In case another TCP packet follows, a new buffer is created.
                 if (_cumulation != null && !_cumulation.IsReadable)
                 {
                     _cumulation = null;
@@ -102,6 +105,10 @@ namespace TomP2P.Core.Message
                     {
                         ctx.FireRead(_decoder.Message);
                     }
+                    // arriving here, the next handler must not be called since another
+                    // current architecture -> skip rest of handlers
+                    // TCP packet needs to be cumulated
+                    ctx.SkipRestRead();
                 }
             }
         }

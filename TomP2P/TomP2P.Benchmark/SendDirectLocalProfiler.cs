@@ -33,7 +33,7 @@ namespace TomP2P.Benchmark
             _cc = await _sender.ConnectionBean.Reservation.CreateAsync(_isForceUdp ? 1 : 0, _isForceUdp ? 0 : 1);
 
             _sendDirectBuilder = new SendDirectBuilder(_sender, (PeerAddress) null)
-                .SetIsStreaming()
+                //.SetIsStreaming()
                 .SetIdleUdpSeconds(0)
                 .SetIdleTcpSeconds(0)
                 .SetBuffer(CreateSampleBuffer())
@@ -79,6 +79,7 @@ namespace TomP2P.Benchmark
         {
             public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
             {
+                // server returns just OK if same buffer is returned
                 return requestBuffer;
             }
         }

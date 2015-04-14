@@ -2,7 +2,9 @@
 
 namespace TomP2P.Core.Connection.Windows.Netty
 {
-    // TODO currently, this class only acts as man-in-the-middle
+    // TODO implement this exactly like in Netty
+    // - "fire" means the current handler has been processed an the next can be processed
+    // - avoiding fire just returns from the handler and doesn't proceed in the pipeline
 
     /// <summary>
     /// Equivalent to Java Netty's ChannelHandlerContext.
@@ -66,6 +68,11 @@ namespace TomP2P.Core.Connection.Windows.Netty
         public void FireTimeout()
         {
             _session.TriggerTimeout();
+        }
+
+        public void SkipRestRead()
+        {
+            _session.SkipRestRead();
         }
 
         public void Close()

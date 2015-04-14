@@ -28,6 +28,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
         private object _msgR;
         private object _writeRes;
         private object _readRes;
+        private bool _skipRestRead;
 
         public PipelineSession(IChannel channel, Pipeline pipeline, IEnumerable<IInboundHandler> inboundHandlers,
             IEnumerable<IOutboundHandler> outboundHandlers)
@@ -47,6 +48,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
             _msgR = null;
             _writeRes = null;
             _readRes = null;
+            _skipRestRead = false;
         }
 
         public void TriggerActive()
@@ -95,6 +97,11 @@ namespace TomP2P.Core.Connection.Windows.Netty
             _isTimedOut = true;
         }
 
+        public void SkipRestRead()
+        {
+            _skipRestRead = true;
+        }
+
         public object Write(object msg)
         {
             if (msg == null)
@@ -127,7 +134,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
             _msgR = msg;
 
             // find next inbound handler
-            while (GetNextInbound() != null)
+            while (GetNextInbound() != null && !_skipRestRead)
             {
                 Logger.Debug("{0}: Processing inbound handler {1}.", _pipeline, _currentInbound);
                 _currentInbound.Read(_ctx, msg);
