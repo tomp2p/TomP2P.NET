@@ -152,7 +152,7 @@ namespace TomP2P.Core.Storage
                 }
             }
 
-            AlreadyTransferred += Length;
+            AlreadyTransferred += length;
             buf.SetReaderIndex(buf.ReaderIndex + length);
             return length;
         }

@@ -49,6 +49,8 @@ namespace TomP2P.Core.Connection.Windows
             var pieceCount = 0;
             do
             {
+                Array.Clear(bytesRecv, 0, bytesRecv.Length);
+                buf.Clear();
                 int nrBytes;
                 try
                 {
@@ -59,7 +61,6 @@ namespace TomP2P.Core.Connection.Windows
                     // the socket has been closed
                     return;
                 }
-                buf.Clear();
                 buf.WriteBytes(bytesRecv.ToSByteArray(), 0, nrBytes);
 
                 var localEp = (IPEndPoint)Socket.LocalEndPoint;

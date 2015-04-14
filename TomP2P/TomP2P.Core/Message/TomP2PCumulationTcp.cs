@@ -13,9 +13,9 @@ namespace TomP2P.Core.Message
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly Decoder _decoder;
-        private AlternativeCompositeByteBuf _cumulation = null;
+        private AlternativeCompositeByteBuf _cumulation;
 
-        private int _lastId = 0;
+        private int _lastId;
 
         // .NET-specific: to be able to clone this instace
         private readonly ISignatureFactory _signatureFactory;
@@ -62,7 +62,7 @@ namespace TomP2P.Core.Message
                 if (_cumulation != null && !_cumulation.IsReadable)
                 {
                     _cumulation = null;
-                    // no need to discard bytes as this was done in the decoder already
+                    // Java: no need to discard bytes as this was done in the decoder already
                 }
             }
         }

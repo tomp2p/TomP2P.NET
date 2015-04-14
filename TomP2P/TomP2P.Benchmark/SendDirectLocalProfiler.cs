@@ -12,7 +12,7 @@ namespace TomP2P.Benchmark
     public class SendDirectLocalProfiler : Profiler
     {
         private const int NetworkSize = 2;
-        private const int BufferSizeBytes = 64000;
+        private const int BufferSizeBytes = 1000;
         private readonly bool _isForceUdp;
         private Peer _sender;
         private Peer _receiver;

@@ -95,7 +95,7 @@ namespace TomP2P.Core.Message
                 }
 
                 bool donePayload = DecodePayload(buffer);
-                DecodeSignature(buffer, readerBefore, donePayload);
+                //DecodeSignature(buffer, readerBefore, donePayload);
 
                 // TODO discardSomeReadBytes -> performance improvement
                 return donePayload;
