@@ -145,7 +145,10 @@ namespace TomP2P.Benchmark
                 var serverAddress = new PeerAddress(n160, ip, tcpPort, udpPort);
                 args.Param = serverAddress;
             }
-            throw new NullReferenceException("input");
+            else
+            {
+                throw new NullReferenceException("input");
+            }
         }
 
         private static void PrintResults(double[] results)

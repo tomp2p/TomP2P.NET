@@ -49,7 +49,7 @@ namespace TomP2P.Benchmark
             return new Buffer(acbb);
         }
 
-        public class SampleRawDataReply : IRawDataReply
+        protected class SampleRawDataReply : IRawDataReply
         {
             public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
             {
