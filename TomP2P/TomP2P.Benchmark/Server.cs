@@ -37,9 +37,13 @@ namespace TomP2P.Benchmark
 
         private class ServerRawDataReply : IRawDataReply
         {
+            private int _counter;
+
             public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
             {
-                Console.WriteLine("Request received from {0}.", sender);
+                Console.WriteLine("{0}.", ++_counter);
+                Console.WriteLine("Request from {0}.", sender);
+                Console.WriteLine("Buffer Size : {0}", Convenient.ToHumanReadable(requestBuffer.Length));
 
                 // server returns just OK if same buffer is returned
                 return requestBuffer;

@@ -106,6 +106,18 @@ namespace TomP2P.Benchmark
                     switch (args.Type)
                     {
                         case "cpu":
+                            results = await new SendDirectRemoteProfiler(true).ProfileCpuAsync(args);
+                            break;
+                        case "memory":
+                            results = await new SendDirectRemoteProfiler(true).ProfileMemoryAsync(args);
+                            break;
+                    }
+                    break;
+                case "send-remote-tcp":
+                    DetermineServerAddress(args);
+                    switch (args.Type)
+                    {
+                        case "cpu":
                             results = await new SendDirectRemoteProfiler(false).ProfileCpuAsync(args);
                             break;
                         case "memory":
@@ -113,7 +125,6 @@ namespace TomP2P.Benchmark
                             break;
                     }
                     break;
-                // TODO send-remote-tcp
                 default:
                     throw new ArgumentException("No valid benchmark argument.");
             }
