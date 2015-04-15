@@ -8,7 +8,7 @@ namespace TomP2P.Benchmark
         private const int NetworkSize = 5;
         private readonly IList<Task> _tasks = new List<Task>(NetworkSize * NetworkSize);
 
-        protected override async Task SetupAsync()
+        protected override async Task SetupAsync(Arguments args)
         {
             Network = BenchmarkUtil.CreateNodes(NetworkSize, Rnd, 7077, false, false);
         }

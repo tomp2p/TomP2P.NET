@@ -54,6 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BenchmarkUtil.cs" />
     <Compile Include="SendDirectLocalProfiler.cs" />
+    <Compile Include="SendDirectProfiler.cs" />
+    <Compile Include="SendDirectRemoteProfiler.cs" />
+    <Compile Include="Server.cs" />
     <Compile Include="Statistics.cs" />
   </ItemGroup>
   <ItemGroup>

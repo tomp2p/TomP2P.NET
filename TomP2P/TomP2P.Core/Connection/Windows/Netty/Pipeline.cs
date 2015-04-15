@@ -9,6 +9,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
     // TODO implement this exactly like in Netty
     // - "fire" means the current handler has been processed an the next can be processed
     // - avoiding fire just returns from the handler and doesn't proceed in the pipeline
+    // - remove the "skip" functionality
 
     // TODO this pipeline can be optimized
     // - read/write do query the next handlers multiple times
@@ -74,7 +75,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         /// <returns></returns>
         public Pipeline AddFirst(string name, IChannelHandler handler)
         {
-            // TODO check if works correctly!
             CheckDuplicateName(name);
             var item = new HandlerItem(name, handler);
             _name2Item.Add(name, item);
@@ -110,7 +110,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         /// <returns></returns>
         public Pipeline AddBefore(string baseName, string name, IChannelHandler handler)
         {
-            // TODO check if works correctly!
             HandlerItem baseItem;
             if (!_name2Item.TryGetValue(baseName, out baseItem))
             {
@@ -138,7 +137,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         /// <returns></returns>
         public Pipeline Replace(string oldName, string newName, IChannelHandler newHandler)
         {
-            // TODO check if works correctly!
             HandlerItem oldItem;
             if (!_name2Item.TryGetValue(oldName, out oldItem))
             {
@@ -160,7 +158,6 @@ namespace TomP2P.Core.Connection.Windows.Netty
         /// <returns></returns>
         public Pipeline Remove(string name)
         {
-            // TODO works?
             if (_name2Item.ContainsKey(name))
             {
                 var item = _name2Item[name];

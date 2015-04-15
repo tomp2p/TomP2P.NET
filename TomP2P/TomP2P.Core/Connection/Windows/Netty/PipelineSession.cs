@@ -134,7 +134,7 @@ namespace TomP2P.Core.Connection.Windows.Netty
             _msgR = msg;
 
             // find next inbound handler
-            while (GetNextInbound() != null && !_skipRestRead)
+            while (GetNextInbound() != null && !_skipRestRead) // TODO potentially unexpected results returned
             {
                 Logger.Debug("{0}: Processing inbound handler {1}.", _pipeline, _currentInbound);
                 _currentInbound.Read(_ctx, msg);

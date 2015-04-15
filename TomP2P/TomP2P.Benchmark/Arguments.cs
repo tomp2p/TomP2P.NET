@@ -11,7 +11,7 @@ namespace TomP2P.Benchmark
         private readonly string _resultsDir;
         private readonly string _suffix;
 
-        public Arguments(string bmArg, string type, int nrWarmups, int nrRepetitions, string resultsDir, string suffix)
+        public Arguments(string bmArg, string type, int nrWarmups, int nrRepetitions, string resultsDir, string suffix, object param = null)
         {
             _bmArg = bmArg;
             _type = type;
@@ -19,6 +19,7 @@ namespace TomP2P.Benchmark
             _nrRepetitions = nrRepetitions;
             _resultsDir = resultsDir;
             _suffix = suffix;
+            Param = param;
         }
 
         public string BmArg
@@ -50,6 +51,8 @@ namespace TomP2P.Benchmark
         {
             get { return _suffix; }
         }
+
+        public object Param { get; set; }
 
         public override string ToString()
         {

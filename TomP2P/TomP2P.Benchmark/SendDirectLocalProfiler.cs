@@ -1,87 +1,39 @@
 ﻿using System.Threading.Tasks;
-using TomP2P.Core.Connection;
-using TomP2P.Core.P2P;
 using TomP2P.Core.P2P.Builder;
 using TomP2P.Core.Peers;
-using TomP2P.Core.Rpc;
-using TomP2P.Core.Storage;
-using Buffer = TomP2P.Core.Message.Buffer;
 
 namespace TomP2P.Benchmark
 {
-    public class SendDirectLocalProfiler : Profiler
+    public class SendDirectLocalProfiler : SendDirectProfiler
     {
         private const int NetworkSize = 2;
-        private const int BufferSizeBytes = 1000;
-        private readonly bool _isForceUdp;
-        private Peer _sender;
-        private Peer _receiver;
-        private ChannelCreator _cc;
-        private SendDirectBuilder _sendDirectBuilder;
 
         public SendDirectLocalProfiler(bool isForceUdp)
-        {
-            _isForceUdp = isForceUdp;
-        }
+            : base(isForceUdp)
+        { }
 
-        protected override async Task SetupAsync()
+        protected override async Task SetupAsync(Arguments args)
         {
             Network = BenchmarkUtil.CreateNodes(NetworkSize, Rnd, 7077, false, false);
-            _sender = Network[0];
-            _receiver = Network[1];
-            _receiver.RawDataReply(new SampleRawDataReply());
-            _cc = await _sender.ConnectionBean.Reservation.CreateAsync(_isForceUdp ? 1 : 0, _isForceUdp ? 0 : 1);
+            Sender = Network[0];
+            Receiver = Network[1];
+            Receiver.RawDataReply(new SampleRawDataReply());
+            Cc = await Sender.ConnectionBean.Reservation.CreateAsync(IsForceUdp ? 1 : 0, IsForceUdp ? 0 : 1);
 
-            _sendDirectBuilder = new SendDirectBuilder(_sender, (PeerAddress) null)
-                //.SetIsStreaming()
+            SendDirectBuilder = new SendDirectBuilder(Sender, (PeerAddress)null)
                 .SetIdleUdpSeconds(0)
                 .SetIdleTcpSeconds(0)
                 .SetBuffer(CreateSampleBuffer())
-                .SetIsForceUdp(_isForceUdp); // TODO check if works
-        }
-
-        protected override async Task ShutdownAsync()
-        {
-            if (_sender != null)
-            {
-                await _sender.ShutdownAsync();
-            }
-            if (_receiver != null)
-            {
-                await _receiver.ShutdownAsync();
-            }
-            if (_cc != null)
-            {
-                await _cc.ShutdownAsync();
-            }
+                .SetIsForceUdp(IsForceUdp);
         }
 
         protected override async Task ExecuteAsync()
         {
-            await _sender.DirectDataRpc.SendAsync(_receiver.PeerAddress, _sendDirectBuilder, _cc);
-            
+            await Sender.DirectDataRpc.SendAsync(Receiver.PeerAddress, SendDirectBuilder, Cc);
+
             // make buffer reusable
-            _sendDirectBuilder.Buffer.Reset();
-            _sendDirectBuilder.Buffer.BackingBuffer.SetReaderIndex(0);
-        }
-
-        private static Buffer CreateSampleBuffer()
-        {
-            var acbb = AlternativeCompositeByteBuf.CompBuffer();
-            for (int i = 0; i < BufferSizeBytes; i++)
-            {
-                acbb.WriteByte(i%256);
-            }
-            return new Buffer(acbb);
-        }
-
-        private class SampleRawDataReply : IRawDataReply
-        {
-            public Buffer Reply(PeerAddress sender, Buffer requestBuffer, bool complete)
-            {
-                // server returns just OK if same buffer is returned
-                return requestBuffer;
-            }
+            SendDirectBuilder.Buffer.Reset();
+            SendDirectBuilder.Buffer.BackingBuffer.SetReaderIndex(0);
         }
     }
 }

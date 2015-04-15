@@ -18,7 +18,7 @@ namespace TomP2P.Benchmark
                 BenchmarkUtil.PrintStopwatchProperties();
 
                 Console.WriteLine("Setting up...");
-                await SetupAsync();
+                await SetupAsync(args);
 
                 var warmups = new long[args.NrWarmups];
                 var repetitions = new long[args.NrRepetitions];
@@ -73,7 +73,7 @@ namespace TomP2P.Benchmark
             try
             {
                 Console.WriteLine("Setting up...");
-                await SetupAsync();
+                await SetupAsync(args);
 
                 var warmups = new long[args.NrWarmups];
                 var repetitions = new long[args.NrRepetitions];
@@ -128,7 +128,7 @@ namespace TomP2P.Benchmark
             }
         }
 
-        protected abstract Task SetupAsync();
+        protected abstract Task SetupAsync(Arguments args);
 
         protected abstract Task ShutdownAsync();
 

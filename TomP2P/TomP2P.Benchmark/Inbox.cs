@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using TomP2P.Core.Peers;
 
 namespace TomP2P.Benchmark
 {
@@ -10,7 +13,11 @@ namespace TomP2P.Benchmark
         // [bmArg] [type] [nrWarmups] [nrRepetitions] [resultsDir] ([suffix])
         public static void Main(string[] args)
         {
-            if (args.Length < 5)
+            if (args.Length == 1 && args[0] == "server")
+            {
+                Server.Setup();
+            }
+            else if (args.Length < 5)
             {
                 Console.Error.WriteLine("Argument(s) missing.");
 #if DEBUG
@@ -18,31 +25,34 @@ namespace TomP2P.Benchmark
 #endif
                 Environment.Exit(-1);
             }
-            var bmArg = args[0];
-            var type = args[1];
-            var nrWarmups = Convert.ToInt32(args[2]);
-            var nrRepetitions = Convert.ToInt32(args[3]);
-            var resultsDir = args[4];
-            var suffix = args.Length >= 6 ? args[5] : "";
-            var arguments = new Arguments(bmArg, type, nrWarmups, nrRepetitions, resultsDir, suffix);
+            else
+            {
+                var bmArg = args[0];
+                var type = args[1];
+                var nrWarmups = Convert.ToInt32(args[2]);
+                var nrRepetitions = Convert.ToInt32(args[3]);
+                var resultsDir = args[4];
+                var suffix = args.Length >= 6 ? args[5] : "";
+                var arguments = new Arguments(bmArg, type, nrWarmups, nrRepetitions, resultsDir, suffix);
 
-            try
-            {
-                if (nrRepetitions < 1)
+                try
                 {
-                    throw new ArgumentException("NrRepetitions must be >= 1.");
+                    if (nrRepetitions < 1)
+                    {
+                        throw new ArgumentException("NrRepetitions must be >= 1.");
+                    }
+                    Console.WriteLine(arguments);
+                    ExecuteAsync(arguments).Wait();
                 }
-                Console.WriteLine(arguments);
-                ExecuteAsync(arguments).Wait();
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("Exception occurred:\n{0}.", ex);
-                Console.WriteLine("Exiting due to error.");
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine("Exception occurred:\n{0}.", ex);
+                    Console.WriteLine("Exiting due to error.");
 #if DEBUG
                 Console.ReadLine();
 #endif
-                Environment.Exit(-2);
+                    Environment.Exit(-2);
+                }
             }
             Console.WriteLine("Exiting with success.");
 #if DEBUG
@@ -91,12 +101,51 @@ namespace TomP2P.Benchmark
                             break;
                     }
                     break;
+                case "send-remote-udp":
+                    DetermineServerAddress(args);
+                    switch (args.Type)
+                    {
+                        case "cpu":
+                            results = await new SendDirectRemoteProfiler(false).ProfileCpuAsync(args);
+                            break;
+                        case "memory":
+                            results = await new SendDirectRemoteProfiler(false).ProfileMemoryAsync(args);
+                            break;
+                    }
+                    break;
+                // TODO send-remote-tcp
                 default:
                     throw new ArgumentException("No valid benchmark argument.");
             }
 
             PrintResults(results);
             WriteFile(args, results);
+        }
+
+        /// <summary>
+        /// Requests the server address from the user and stores it to the arguments.
+        /// </summary>
+        /// <param name="args"></param>
+        private static void DetermineServerAddress(Arguments args)
+        {
+            // ask user for remote address
+            Console.WriteLine("Please enter server address: [PeerID] [IP address] [TCP port] [UDP port]");
+            var input = Console.ReadLine();
+            if (input != null)
+            {
+                var parts = input.Split(' ');
+                if (parts.Length != 4)
+                {
+                    throw new ArgumentException("PeerID, IP address, TCP and UDP ports required.");
+                }
+                var n160 = new Number160(parts[0]);
+                var ip = IPAddress.Parse(parts[1]);
+                var tcpPort = Int32.Parse(parts[2]);
+                var udpPort = Int32.Parse(parts[3]);
+                var serverAddress = new PeerAddress(n160, ip, tcpPort, udpPort);
+                args.Param = serverAddress;
+            }
+            throw new NullReferenceException("input");
         }
 
         private static void PrintResults(double[] results)
@@ -114,7 +163,7 @@ namespace TomP2P.Benchmark
 
         private static void WriteFile(Arguments args, double[] results)
         {
-            var customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            var customCulture = (CultureInfo)Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
 
             var path = String.Format("{0}\\{1}-{2}_net{3}.txt", args.ResultsDir, args.BmArg, args.Type, args.Suffix);
