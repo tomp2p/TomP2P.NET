@@ -14,7 +14,7 @@ namespace TomP2P.Tests.Interop
         //public const string TmpDir = "D:/Desktop/interop/";
 
         private const string JavaExecutable = "C:/Program Files/Java/jre7/bin/java.exe";
-        private const string JavaArgs = "-jar C:/Users/Christian/Desktop/interop/interop.jar";
+        private const string JavaArgs = "-jar C:/Users/Christian/Desktop/interop/TomP2P.Interop.jar";
         //private const string JavaArgs = "-jar D:/Desktop/interop/interop.jar";
 
         public static bool WriteBytesAndTestInterop(byte[] bytes, [CallerMemberName] string testArgument = "")
@@ -39,7 +39,7 @@ namespace TomP2P.Tests.Interop
         public static byte[] RequestJavaBytes([CallerMemberName] string testArgument = "", DataReceivedEventHandler dataReceived = null)
         {
             Run(testArgument, dataReceived);
-            return ReadJavaResult();
+            return ReadJavaResult(testArgument);
         }
 
         public static byte[] ReadJavaResult([CallerMemberName] string testArgument = "")
