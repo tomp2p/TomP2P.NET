@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomP2P.Benchmark", "TomP2P.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomP2P.Core", "TomP2P.Core\TomP2P.Core.csproj", "{6806294C-0D0E-41E0-80C4-A17D6877F807}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomP2P.Dht", "TomP2P.Dht\TomP2P.Dht.csproj", "{ECF8FEAF-C85D-4993-ADBD-A48A32529C1B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{6806294C-0D0E-41E0-80C4-A17D6877F807}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6806294C-0D0E-41E0-80C4-A17D6877F807}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6806294C-0D0E-41E0-80C4-A17D6877F807}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECF8FEAF-C85D-4993-ADBD-A48A32529C1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECF8FEAF-C85D-4993-ADBD-A48A32529C1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECF8FEAF-C85D-4993-ADBD-A48A32529C1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECF8FEAF-C85D-4993-ADBD-A48A32529C1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
