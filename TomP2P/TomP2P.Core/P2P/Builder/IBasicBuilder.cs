@@ -13,15 +13,15 @@ namespace TomP2P.Core.P2P.Builder
 
         Number160 DomainKey { get; }
 
-        T GetDomainKey(Number160 domainKey);
+        T SetDomainKey(Number160 domainKey);
 
         RoutingConfiguration RoutingConfiguration { get; }
 
-        T GetRoutingConfiguration(RoutingConfiguration routingConfiguration);
+        T SetRoutingConfiguration(RoutingConfiguration routingConfiguration);
 
         RequestP2PConfiguration RequestP2PConfiguration { get; }
 
-        T GetRequestP2PConfiguration(RequestP2PConfiguration requestP2PConfiguration);
+        T SetRequestP2PConfiguration(RequestP2PConfiguration requestP2PConfiguration);
 
         RoutingBuilder CreateBuilder(RequestP2PConfiguration requestP2PConfiguration,
             RoutingConfiguration routingConfiguration);
@@ -29,6 +29,11 @@ namespace TomP2P.Core.P2P.Builder
         /// <summary>
         /// A set of filters or null if not filters are set.
         /// </summary>
-        ICollection<IPeerFilter> PeerFilters { get; } 
+        ICollection<IPeerMapFilter> PeerMapFilters { get; }
+
+        /// <summary>
+        /// A set of filters or null if not filters are set.
+        /// </summary>
+        ICollection<IPostRoutingFilter> PostRoutingFilters { get; } 
     }
 }

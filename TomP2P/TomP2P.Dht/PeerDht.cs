@@ -7,10 +7,10 @@ namespace TomP2P.Dht
 {
     public class PeerDht
     {
-        private Peer Peer { get; private set; }
-        private StorageRpc StorageRpc { get; private set; }
-        private DistributedHashTable Dht { get; private set; }
-        private StorageLayer StorageLayer { get; private set; }
+        public Peer Peer { get; private set; }
+        public StorageRpc StorageRpc { get; private set; }
+        public DistributedHashTable Dht { get; private set; }
+        public StorageLayer StorageLayer { get; private set; }
 
         internal PeerDht(Peer peer, StorageLayer storageLayer, DistributedHashTable dht, StorageRpc storageRpc)
         {
