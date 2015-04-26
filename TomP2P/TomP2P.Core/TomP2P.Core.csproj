@@ -164,6 +164,7 @@
     <Compile Include="Peers\DefaultMaintenance.cs" />
     <Compile Include="Peers\DefaultPeerFilter.cs" />
     <Compile Include="P2P\IAutomaticTask.cs" />
+    <Compile Include="Peers\IPostRoutingFilter.cs" />
     <Compile Include="Peers\PeerIpFilter.cs" />
     <Compile Include="Peers\PeerStatRoutingFilter.cs" />
     <Compile Include="Rpc\BroadcastRpc.cs" />

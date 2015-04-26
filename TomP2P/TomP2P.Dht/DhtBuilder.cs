@@ -30,6 +30,7 @@ namespace TomP2P.Dht
         private KeyPair _keyPair;
         private bool _streaming;
 
-        private IEnumerable<Peermapf> 
+        private IEnumerable<IPeerMapFilter> _peerMapFilters;
+        private IEnumerable<IPostRoutingFilter> _postRoutingFilters;
     }
 }
