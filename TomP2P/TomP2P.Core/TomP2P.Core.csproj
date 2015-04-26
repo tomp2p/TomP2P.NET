@@ -81,6 +81,7 @@
     <Compile Include="P2P\IRequestConfiguration.cs" />
     <Compile Include="P2P\RequestP2PConfiguration.cs" />
     <Compile Include="P2P\Statistics.cs" />
+    <Compile Include="Peers\IPeerMapFilter.cs" />
     <Compile Include="Peers\IPeerStatusListener.cs" />
     <Compile Include="Connection\IPingBuilderFactory.cs" />
     <Compile Include="Connection\ISignatureFactory.cs" />
