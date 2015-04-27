@@ -10,7 +10,7 @@ namespace TomP2P.Core.Futures
     {
         protected object Lock;
 
-        protected bool Completed = false;
+        protected bool Completed;
 
         /// <summary>
         /// Default constructor that sets the lock object, which is used 
