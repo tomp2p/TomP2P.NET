@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="AddBuilder.cs" />
     <Compile Include="DhtBuilder.cs" />
+    <Compile Include="DigestBuilder.cs" />
     <Compile Include="DistributedHashTable.cs" />
     <Compile Include="TcsDigest.cs" />
     <Compile Include="TcsRemove.cs" />

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TomP2P.Core.Connection;
-using TomP2P.Core.Futures;
 using TomP2P.Core.P2P;
 using TomP2P.Core.P2P.Builder;
 using TomP2P.Core.Peers;
