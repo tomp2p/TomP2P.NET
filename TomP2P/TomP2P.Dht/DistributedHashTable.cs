@@ -12,5 +12,10 @@ namespace TomP2P.Dht
         {
             throw new NotImplementedException();
         }
+
+        public TcsRemove Remove(RemoveBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

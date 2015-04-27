@@ -27,6 +27,28 @@ namespace TomP2P.Dht
             SetSelf(this);
         }
 
+        public TcsPut Start()
+        {
+            if (PeerDht.Peer.IsShutdown)
+            {
+                return TcsPutShutdown;
+            }
+            PreBuild();
+            if (DataSet == null)
+            {
+                DataSet = new List<Data>(1);
+            }
+            if (Data != null)
+            {
+                DataSet.Add(Data);
+            }
+            if (DataSet.Count == 0)
+            {
+                throw new ArgumentException("You must either set data via SetDataSet() or SetData(). Cannot add nothing.");
+            }
+            return PeerDht.Dht.Add(this);
+        }
+
         public AddBuilder SetDataSet(ICollection<Data> dataSet)
         {
             DataSet = dataSet;
@@ -53,28 +75,6 @@ namespace TomP2P.Dht
         {
             IsList = isList;
             return this;
-        }
-
-        public TcsPut Start()
-        {
-            if (PeerDht.Peer.IsShutdown)
-            {
-                return TcsPutShutdown;
-            }
-            PreBuild();
-            if (DataSet == null)
-            {
-                DataSet = new List<Data>(1);
-            }
-            if (Data != null)
-            {
-                DataSet.Add(Data);
-            }
-            if (DataSet.Count == 0)
-            {
-                throw new ArgumentException("You must either set data via SetDataSet() or SetData(). Cannot add nothing.");
-            }
-            return PeerDht.Dht.Add(this);
         }
     }
 }
