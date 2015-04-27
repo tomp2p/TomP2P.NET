@@ -19,7 +19,7 @@ namespace TomP2P.Dht
         public DhtBuilder<dynamic> Builder { get; private set; } // TODO check if best solution
 
         private TcsRouting _tcsRouting;
-        protected Task _tasksCompleted;
+        private Task _tasksCompleted;
 
         /// <summary>
         /// Creates a new DHT task object that keeps track of the status of the DHT operations.
@@ -107,6 +107,7 @@ namespace TomP2P.Dht
 
         public Task TasksCompleted
         {
+            protected set { _tasksCompleted = value; }
             get
             {
                 lock (Lock)

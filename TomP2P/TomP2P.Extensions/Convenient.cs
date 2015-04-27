@@ -87,6 +87,17 @@ namespace TomP2P.Extensions
         }
 
         /// <summary>
+        /// Equivalent for Java's Collections.emptyMap().
+        /// </summary>
+        /// <typeparam name="TK"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <returns></returns>
+        public static IDictionary<TK, TV> EmptyDictionary<TK, TV>()
+        {
+            return new Dictionary<TK, TV>();
+        }
+
+        /// <summary>
         /// Equivalent to Java's ByteBuffer.allocate(int).
         /// Allocates a new MemoryStream.
         /// </summary>

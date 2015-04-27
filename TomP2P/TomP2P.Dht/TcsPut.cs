@@ -54,14 +54,14 @@ namespace TomP2P.Dht
                 _rawResult = rawResult;
                 var size = rawResult == null ? 0 : rawResult.Count;
                 _minReached = size > _min;
-                _tasksCompleted = tasksCompleted;
+                TasksCompleted = tasksCompleted;
                 // TODO type and reason needed?
             }
             NotifyListeners();
         }
 
         /// <summary>
-        /// The average keys received from the DHT. Only evaluates rawKeys.
+        /// The average keys received from the DHT. Only evaluates raw keys.
         /// </summary>
         public double AvgStoredKeys
         {
@@ -127,7 +127,7 @@ namespace TomP2P.Dht
             }
         }
 
-        private IDictionary<Number640, int?> Evaluate(IDictionary<PeerAddress, IDictionary<Number640, byte>> rawResult2)
+        private static IDictionary<Number640, int?> Evaluate(IDictionary<PeerAddress, IDictionary<Number640, byte>> rawResult2)
         {
             var result = new Dictionary<Number640, int?>();
             foreach (var dictionary in rawResult2.Values)
