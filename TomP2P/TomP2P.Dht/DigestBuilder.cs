@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TomP2P.Core.Peers;
 using TomP2P.Core.Rpc;
 using TomP2P.Extensions.Workaround;
@@ -30,7 +29,7 @@ namespace TomP2P.Dht
         public bool IsReturnMetaValues { get; private set; }
         public bool IsFastGet { get; private set; }
 
-        private int _returnNr = -1;
+        public int ReturnNr { get; private set; }
 
         // static constructor
         static DigestBuilder()
@@ -45,12 +44,39 @@ namespace TomP2P.Dht
             IsAscending = true;
             IsBloomFilterAnd = true;
             IsFastGet = true;
+            ReturnNr = -1;
             SetSelf(this);
         }
 
         public TcsDigest Start()
         {
-            throw new NotImplementedException();
+            if (PeerDht.Peer.IsShutdown)
+            {
+                return TcsDigestShutdown;
+            }
+            PreBuild();
+            if (IsAll)
+            {
+                ContentKeys = null;
+            }
+            else if (ContentKeys == null && !IsAll)
+            {
+                // default is Number160.Zero
+                if (ContentKey == null)
+                {
+                    ContentKeys = NumberZeroContentKeys;
+                }
+                else
+                {
+                    ContentKeys = new List<Number160>();
+                    ContentKeys.Add(ContentKey);
+                }
+            }
+            if (EvaluationScheme == null)
+            {
+                EvaluationScheme = new VotingSchemeDht();
+            }
+            return PeerDht.Dht.Digest(this);
         }
 
         /// <summary>
@@ -172,6 +198,39 @@ namespace TomP2P.Dht
         {
             IsBloomFilterAnd = isBloomFilterAnd;
             return this;
+        }
+
+        public DigestBuilder SetIsReturnMetaValues()
+        {
+            return SetIsReturnMetaValues(true);
+        }
+
+        public DigestBuilder SetIsReturnMetaValues(bool isReturnMetaValues)
+        {
+            IsReturnMetaValues = isReturnMetaValues;
+            return this;
+        }
+
+        public DigestBuilder SetIsFastGet()
+        {
+            return SetIsFastGet(true);
+        }
+
+        public DigestBuilder SetIsFastGet(bool isFastGet)
+        {
+            IsFastGet = isFastGet;
+            return this;
+        }
+
+        public DigestBuilder SetReturnNr(int returnNr)
+        {
+            ReturnNr = returnNr;
+            return this;
+        }
+
+        public bool IsRange
+        {
+            get { return From != null && To != null; }
         }
     }
 }

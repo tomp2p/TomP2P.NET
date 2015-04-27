@@ -17,5 +17,10 @@ namespace TomP2P.Dht
         {
             throw new NotImplementedException();
         }
+
+        public TcsDigest Digest(DigestBuilder digestBuilder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
