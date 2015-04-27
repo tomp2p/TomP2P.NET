@@ -195,7 +195,7 @@ namespace TomP2P.Dht
             return Self;
         }
 
-        protected void PreBuild(string name)
+        protected void PreBuild()
         {
             if (DomainKey == null)
             {
@@ -213,7 +213,7 @@ namespace TomP2P.Dht
             {
                 RequestP2PConfiguration = new RequestP2PConfiguration(3, 5, 5);
             }
-            int size = PeerDht.Peer.PeerBean.PeerMap.Size + 1;
+            var size = PeerDht.Peer.PeerBean.PeerMap.Size + 1;
             RequestP2PConfiguration = RequestP2PConfiguration.AdjustMinimumResult(size);
             if (TaskChannelCreator == null
                 || (TaskChannelCreator.Result != null && TaskChannelCreator.Result.IsShutdown))
@@ -234,8 +234,5 @@ namespace TomP2P.Dht
             routingBuilder.MaxSuccess = routingConfiguration.MaxSuccess;
             return routingBuilder;
         }
-
-        // TODO check: in Java this is commented
-        public abstract IBaseTcs Start();
     }
 }

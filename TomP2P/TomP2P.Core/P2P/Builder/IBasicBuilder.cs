@@ -7,7 +7,7 @@ namespace TomP2P.Core.P2P.Builder
     /// <summary>
     /// The basic build methods for the builder classes.
     /// </summary>
-    public interface IBasicBuilder<T> : IConnectionConfiguration, IBuilder
+    public interface IBasicBuilder<out T> : IConnectionConfiguration, IBuilder
     {
         Number160 LocationKey { get; }
 
