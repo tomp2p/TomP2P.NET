@@ -56,6 +56,7 @@
     <Compile Include="StorageLayer.cs" />
     <Compile Include="TcsDht.cs" />
     <Compile Include="TcsPut.cs" />
+    <Compile Include="VotingSchemeDht.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">
