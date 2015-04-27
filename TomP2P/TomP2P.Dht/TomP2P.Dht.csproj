@@ -48,7 +48,9 @@
     <Compile Include="IStorage.cs" />
     <Compile Include="PeerDht.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StorageLayer.cs" />
     <Compile Include="TcsDht.cs" />
+    <Compile Include="TcsPut.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">

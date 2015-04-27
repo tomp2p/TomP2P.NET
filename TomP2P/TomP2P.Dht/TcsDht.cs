@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using TomP2P.Core.Connection;
 using TomP2P.Core.Futures;
 using TomP2P.Core.Message;
+using TomP2P.Core.Peers;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Dht
@@ -19,8 +20,12 @@ namespace TomP2P.Dht
         public DhtBuilder<dynamic> Builder { get; private set; } // TODO check if best solution
 
         private TcsRouting _tcsRouting;
-        protected Task _taskDone;
+        protected Task _tasksCompleted;
 
+        /// <summary>
+        /// Creates a new DHT task object that keeps track of the status of the DHT operations.
+        /// </summary>
+        /// <param name="builder"></param>
         protected TcsDht(DhtBuilder<dynamic> builder)
         {
             Builder = builder;
@@ -101,13 +106,13 @@ namespace TomP2P.Dht
             }
         }
 
-        public Task TaskDone
+        public Task TasksCompleted
         {
             get
             {
                 lock (Lock)
                 {
-                    return _taskDone;
+                    return _tasksCompleted;
                 }
             }
         }
