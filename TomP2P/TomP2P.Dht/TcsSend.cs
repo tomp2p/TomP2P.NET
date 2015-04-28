@@ -14,7 +14,7 @@ namespace TomP2P.Dht
         // simplify the result.
         private readonly IEvaluationSchemeDht _evaluationScheme;
 
-        // storage of results
+       // storage of results
         private IDictionary<PeerAddress, ByteBuf> _rawChannels;
         private IDictionary<PeerAddress, object> _rawObjects;
 
