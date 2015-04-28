@@ -48,6 +48,7 @@
     <Compile Include="DigestBuilder.cs" />
     <Compile Include="DistributedHashTable.cs" />
     <Compile Include="TcsDigest.cs" />
+    <Compile Include="TcsGet.cs" />
     <Compile Include="TcsRemove.cs" />
     <Compile Include="IEvaluatingSchemeDht.cs" />
     <Compile Include="ISearchableBuilder.cs" />
