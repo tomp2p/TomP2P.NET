@@ -61,13 +61,13 @@ namespace TomP2P.Dht
             Self = self;
         }
 
-        public T SetDomainKey(Number160 domainKey)
+        public virtual T SetDomainKey(Number160 domainKey)
         {
             DomainKey = domainKey;
             return Self;
         }
 
-        public T SetVersionKey(Number160 versionKey)
+        public virtual T SetVersionKey(Number160 versionKey)
         {
             VersionKey = versionKey;
             return Self;

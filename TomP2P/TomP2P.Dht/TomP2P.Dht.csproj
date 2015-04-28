@@ -48,6 +48,7 @@
     <Compile Include="DigestBuilder.cs" />
     <Compile Include="DistributedHashTable.cs" />
     <Compile Include="GetBuilder.cs" />
+    <Compile Include="PutBuilder.cs" />
     <Compile Include="TcsDigest.cs" />
     <Compile Include="TcsGet.cs" />
     <Compile Include="TcsRemove.cs" />
