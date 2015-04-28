@@ -3,6 +3,8 @@ using System.IO;
 
 namespace TomP2P.Extensions.Netty.Buffer
 {
+    // TODO change ByteBuf to be an interface
+
     /// <summary>
     /// Equivalent of Java Netty's ByteBuf.
     /// </summary>
