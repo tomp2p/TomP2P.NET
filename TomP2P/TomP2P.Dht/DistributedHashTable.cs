@@ -22,5 +22,10 @@ namespace TomP2P.Dht
         {
             throw new NotImplementedException();
         }
+
+        public TcsGet Get(GetBuilder getBuilder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
