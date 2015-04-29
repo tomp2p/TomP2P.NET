@@ -49,10 +49,7 @@ namespace TomP2P.Dht
             return this;
         }
 
-        public bool IsRaw
-        {
-            get { return Object == null; }
-        }
+        public bool IsRaw => Object == null;
 
         public SendBuilder SetIsCancelOnFinish()
         {

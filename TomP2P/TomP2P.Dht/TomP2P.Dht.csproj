@@ -52,7 +52,9 @@
     <Compile Include="IOperationMapper.cs" />
     <Compile Include="IReplicationListener.cs" />
     <Compile Include="PutBuilder.cs" />
+    <Compile Include="RangeLock.cs" />
     <Compile Include="SendBuilder.cs" />
+    <Compile Include="StorageRpc.cs" />
     <Compile Include="TcsDigest.cs" />
     <Compile Include="TcsGet.cs" />
     <Compile Include="TcsRemove.cs" />

@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Extensions
@@ -112,6 +113,54 @@ namespace TomP2P.Extensions
         public static int Release2(this Semaphore s, int count)
         {
             return count != 0 ? s.Release(count) : 0;
+        }
+
+        /// <summary>
+        /// Equivalent to Java's NavigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive).
+        /// Returns a view of the portion of this map whose keys range from fromKey to toKey. If fromKey and 
+        /// toKey are equal, the returned map is empty unless fromInclusive and toInclusive are both true.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="sd"></param>
+        /// <param name="fromKey"></param>
+        /// <param name="fromInclusive"></param>
+        /// <param name="toKey"></param>
+        /// <param name="toInclusive"></param>
+        /// <returns></returns>
+        public static SortedDictionary<TKey, TValue> SubDictionary<TKey, TValue>(this SortedDictionary<TKey, TValue> sd,
+            TKey fromKey, bool fromInclusive, TKey toKey, bool toInclusive)
+        {
+            // TODO check if works
+            var subDictionary = new SortedDictionary<TKey, TValue>();
+            if (fromKey.Equals(toKey))
+            {
+                if (fromInclusive && toInclusive)
+                {
+                    subDictionary.Add(fromKey, sd[fromKey]);
+                }
+                return subDictionary;
+            }
+            if (fromInclusive)
+            {
+                subDictionary.Add(fromKey, sd[fromKey]);
+            }
+            if (toInclusive)
+            {
+                subDictionary.Add(toKey, sd[toKey]);
+            }
+            // find from key
+            var enumerator = sd.GetEnumerator();
+            do
+            {
+                enumerator.MoveNext();
+            } while (!enumerator.Current.Equals(fromKey));
+            do
+            {
+                subDictionary.Add(enumerator.Current.Key, enumerator.Current.Value);
+            } while (!enumerator.Current.Equals(toKey));
+
+            return subDictionary;
         }
 
         /// <summary>

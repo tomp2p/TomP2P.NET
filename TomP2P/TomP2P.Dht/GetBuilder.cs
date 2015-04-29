@@ -25,13 +25,13 @@ namespace TomP2P.Dht
 
         public bool IsAll { get; private set; }
         public bool IsReturnBloomFilter { get; private set; }
-        public bool IsAscending { get; private set; }
-        public bool IsBloomFilterAnd { get; private set; }
-        public bool IsFastGet { get; private set; }
+        public bool IsAscending { get; private set; } = true;
+        public bool IsBloomFilterAnd { get; private set; } = true;
+        public bool IsFastGet { get; private set; } = true;
         public bool IsGetLatest { get; private set; }
         public bool IsWithDigest { get; private set; }
 
-        public int ReturnNr { get; private set; }
+        public int ReturnNr { get; private set; } = -1;
 
         // static constructor
         static GetBuilder()
@@ -43,10 +43,6 @@ namespace TomP2P.Dht
         public GetBuilder(PeerDht peerDht, Number160 locationKey)
             : base(peerDht, locationKey)
         {
-            IsAscending = true;
-            IsBloomFilterAnd = true;
-            IsFastGet = true;
-            ReturnNr = -1;
             SetSelf(this);
         }
 

@@ -225,6 +225,12 @@ namespace TomP2P.Core.Rpc
             return new SimpleBloomFilter<Number160>(_byteArraySize, ExpectedElements, copy);
         }
 
+        public SimpleBloomFilter<T> SetAll()
+        {
+            BitArray.SetAll(true);
+            return this;
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(obj, null))

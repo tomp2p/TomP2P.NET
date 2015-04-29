@@ -195,7 +195,7 @@ namespace TomP2P.Core.P2P
                     // and it contains itself. Check for that because we need to know if we
                     // are routing, bootstrapping and bootstrapping to ourselfs, to return
                     // the correct status for the task.
-                    bool isRoutingOnlyToSelf = peerAddresses.Count == 1 &&
+                    var isRoutingOnlyToSelf = peerAddresses.Count == 1 &&
                                                peerAddresses.First().Equals(_peerBean.ServerPeerAddress);
 
                     var routingMechanism = routingBuilder.CreateRoutingMechanism(tcsRouting);
@@ -219,9 +219,9 @@ namespace TomP2P.Core.P2P
         private void RoutingRec(RoutingBuilder routingBuilder, RoutingMechanism routingMechanism,
             Message.Message.MessageType type, ChannelCreator channelCreator)
         {
-            bool randomSearch = routingBuilder.LocationKey == null;
-            int active = 0;
-            for (int i = 0; i < routingMechanism.Parallel; i++)
+            var randomSearch = routingBuilder.LocationKey == null;
+            var active = 0;
+            for (var i = 0; i < routingMechanism.Parallel; i++)
             {
                 if (routingMechanism.GetTcsResponse(i) == null
                     && !routingMechanism.IsStopCreatingNewFutures)
