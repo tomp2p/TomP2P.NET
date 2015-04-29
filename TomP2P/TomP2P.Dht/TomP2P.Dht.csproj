@@ -49,6 +49,7 @@
     <Compile Include="DigestBuilder.cs" />
     <Compile Include="DistributedHashTable.cs" />
     <Compile Include="GetBuilder.cs" />
+    <Compile Include="IOperationMapper.cs" />
     <Compile Include="IReplicationListener.cs" />
     <Compile Include="PutBuilder.cs" />
     <Compile Include="SendBuilder.cs" />
