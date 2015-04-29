@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using NLog;
 using TomP2P.Core.Peers;
 using TomP2P.Core.Rpc;
@@ -29,7 +28,7 @@ namespace TomP2P.Dht
         // stores the domains that canno be reserved and items can be added by anyone
         private readonly ICollection<Number160> _removedDomains = new HashSet<Number160>(); 
 
-        private readonly RangeLock<Number640> _rangeLock = new RangeLock<Number640>();
+        public RangeLock<Number640> RangeLock { get; private set; } = new RangeLock<Number640>();
         private readonly RangeLock<Number640> _responsibilityLock = new RangeLock<Number640>();
 
         private readonly IStorage _backend;
@@ -60,31 +59,31 @@ namespace TomP2P.Dht
 
         private RangeLock<Number640>.Range Lock(Number640 min, Number640 max)
         {
-            return _rangeLock.Lock(min, max);
+            return RangeLock.Lock(min, max);
         }
 
         private RangeLock<Number640>.Range Lock(Number640 number640)
         {
-            return _rangeLock.Lock(number640, number640);
+            return RangeLock.Lock(number640, number640);
         }
 
         private RangeLock<Number640>.Range Lock(Number480 number480)
         {
-            return _rangeLock.Lock(
+            return RangeLock.Lock(
                 new Number640(number480, Number160.Zero), 
                 new Number640(number480, Number160.MaxValue));
         }
 
         private RangeLock<Number640>.Range Lock(Number320 number320)
         {
-            return _rangeLock.Lock(
+            return RangeLock.Lock(
                 new Number640(number320, Number160.Zero, Number160.Zero), 
                 new Number640(number320, Number160.MaxValue, Number160.MaxValue));
         }
 
         private RangeLock<Number640>.Range Lock(Number160 number160)
         {
-            return _rangeLock.Lock(
+            return RangeLock.Lock(
                 new Number640(number160, Number160.Zero, Number160.Zero, Number160.Zero), 
                 new Number640(number160, Number160.MaxValue, Number160.MaxValue, Number160.MaxValue));
         }
@@ -98,7 +97,7 @@ namespace TomP2P.Dht
 
         private RangeLock<Number640>.Range Lock()
         {
-            return _rangeLock.Lock(
+            return RangeLock.Lock(
                 new Number640(Number160.Zero, Number160.Zero, Number160.Zero, Number160.Zero),
                 new Number640(Number160.MaxValue, Number160.MaxValue, Number160.MaxValue, Number160.MaxValue));
         }
@@ -281,7 +280,7 @@ namespace TomP2P.Dht
 
         public SortedDictionary<Number640, Data> Get(Number640 from, Number640 to, int limit, bool ascending)
         {
-		    var rLock = _rangeLock.Lock(from, to);
+		    var rLock = RangeLock.Lock(from, to);
 		    try
             {
 			    var tmp = _backend.SubMap(from, to, limit, ascending);
@@ -388,7 +387,7 @@ namespace TomP2P.Dht
 	        SimpleBloomFilter<Number160> versionKeyBloomFilter, SimpleBloomFilter<Number160> contentBloomFilter,  int limit, 
             bool ascending, bool isBloomFilterAnd)
         {
-		    var rLock = _rangeLock.Lock(from, to);
+		    var rLock = RangeLock.Lock(from, to);
 		    try
             {
 			    var tmp = _backend.SubMap(from, to, limit, ascending);
@@ -446,7 +445,7 @@ namespace TomP2P.Dht
 
         public SortedDictionary<Number640, Data> RemoveReturnData(Number640 from, Number640 to, IPublicKey publicKey)
         {
-		    var rLock = _rangeLock.Lock(from, to);
+		    var rLock = RangeLock.Lock(from, to);
 		    try
             {
 			    var tmp = _backend.SubMap(from, to, -1, true);
@@ -482,7 +481,7 @@ namespace TomP2P.Dht
 
         public SortedDictionary<Number640, byte> RemoveReturnStatus(Number640 from, Number640 to, IPublicKey publicKey)
         {
-		    var rLock = _rangeLock.Lock(from, to);
+		    var rLock = RangeLock.Lock(from, to);
 		    try
             {
 			    var tmp = _backend.SubMap(from, to, -1, true);
@@ -544,7 +543,7 @@ namespace TomP2P.Dht
         public DigestInfo Digest(Number640 from, Number640 to, int limit, bool ascending)
         {
             var digestInfo = new DigestInfo();
-		    var rLock = _rangeLock.Lock(from, to);
+		    var rLock = RangeLock.Lock(from, to);
 		    try
             {
 			    var tmp = _backend.SubMap(from, to, limit, ascending);
@@ -677,6 +676,260 @@ namespace TomP2P.Dht
                 return true;
             }
             return false;
+	    }
+
+        private bool ForceOverrideDomain(Number160 domainKey, IPublicKey publicKey)
+        {
+		    // we are in public key mode
+		    if (ProtectionDomainMode == ProtectionMode.MasterPublicKey && publicKey != null)
+            {
+			    // if the hash of the public key is the same as the domain, we can overwrite
+			    return IsMine(domainKey, publicKey);
+		    }
+		    return false;
+	    }
+
+        private bool ForceOverrideEntry(Number160 entryKey, IPublicKey publicKey)
+        {
+		    // we are in public key mode
+		    if (ProtectionEntryMode == ProtectionMode.MasterPublicKey && publicKey?.GetEncoded() != null)
+            {
+			    // if the hash of the public key is the same as the domain, we can overwrite
+			    return IsMine(entryKey, publicKey);
+		    }
+		    return false;
+	    }
+
+        private bool CanClaimDomain(Number320 key, IPublicKey publicKey)
+        {
+		    var domainProtectedByOthers = _backend.IsDomainProtectedByOthers(key, publicKey);
+		    var domainOverridableByMe = ForceOverrideDomain(key.DomainKey, publicKey);
+		    return !domainProtectedByOthers || domainOverridableByMe;
+	    }
+
+        private bool CanClaimEntry(Number480 key, IPublicKey publicKey)
+        {
+		    var entryProtectedByOthers = _backend.IsEntryProtectedByOthers(key, publicKey);
+		    var entryOverridableByMe = ForceOverrideEntry(key.ContentKey, publicKey);
+		    return !entryProtectedByOthers || entryOverridableByMe;
+	    }
+
+        private bool CanProtectDomain(Number160 domainKey, IPublicKey publicKey)
+        {
+		    if (IsDomainRemoved(domainKey))
+            {
+			    return false;
+		    }
+		    if (ProtectionDomainEnable == ProtectionEnable.All)
+            {
+			    return true;
+		    } 
+            if (ProtectionDomainEnable == ProtectionEnable.None) 
+            {
+			    // only if we have the master key
+			    return ForceOverrideDomain(domainKey, publicKey);
+		    }
+		    return false;
+	    }
+
+        private bool CanProtectEntry(Number160 contentKey, IPublicKey publicKey)
+        {
+		    if (ProtectionEntryEnable == ProtectionEnable.All)
+            {
+			    return true;
+		    } 
+            if (ProtectionEntryEnable == ProtectionEnable.None)
+            {
+			    // only if we have the master key
+			    return ForceOverrideEntry(contentKey, publicKey);
+		    }
+		    return false;
+	    }
+
+        private static bool IsMine(Number160 key, IPublicKey publicKey)
+        {
+		    return key.Equals(Utils.MakeShaHash(publicKey.GetEncoded()));
+	    }
+
+        public ICollection<Number160> FindContentForResponsiblePeerId(Number160 peerId)
+        {
+		    var lockResp = LockResponsibility(peerId);
+		    try 
+            {
+			    var contentIds = _backend.FindContentForResponsiblePeerId(peerId);
+			    if (contentIds == null)
+			    {
+			        return Convenient.EmptyList<Number160>();
+			    } else {
+				    return new List<Number160>(contentIds);
+			    }
+		    } 
+            finally
+            {
+			    lockResp.Unlock();
+            }
+	    }
+
+        public Number160 FindPeerIdsForResponsibleContent(Number160 locationKey)
+        {
+		    var lockResp = LockResponsibility(locationKey);
+		    try
+            {
+			    return _backend.FindPeerIdsForResponsibleContent(locationKey);
+		    }
+            finally
+            {
+			    lockResp.Unlock();
+            }
+	    }
+
+        public bool UpdateResponsibilities(Number160 locationKey, Number160 peerId)
+        {
+		    var lockResp1 = LockResponsibility(peerId);
+		    var lockResp2 = LockResponsibility(locationKey);
+            try
+            {
+                return _backend.UpdateResponsibilities(locationKey, peerId);
+            }
+            finally 
+            {
+        	    lockResp1.Unlock();
+        	    lockResp2.Unlock();
+            }
+	    }
+
+        public void RemoveResponsibility(Number160 locationKey, bool keepData)
+        {
+		    var lockResp = LockResponsibility(locationKey);
+		    try
+            {
+			    if (!keepData)
+                {
+				    var rangeLock = Lock(locationKey);
+				    try
+                    {
+					    var removed = _backend.Remove(
+						    new Number640(locationKey, Number160.Zero, Number160.Zero, Number160.Zero),
+						    new Number640(locationKey, Number160.MaxValue, Number160.MaxValue, Number160.MaxValue),
+						    false);
+					    foreach (var num640 in removed.Keys)
+                        {
+						    _backend.RemoveTimeout(num640);
+					    }
+				    }
+                    finally
+                    {
+					    rangeLock.Unlock();
+		            }
+			    }
+        	    _backend.RemoveResponsibility(locationKey);
+            }
+            finally
+            {
+        	    lockResp.Unlock();
+            }
+	    }
+
+        public void Start(ExecutorService timer, int storageIntervalMillis)
+        {
+            timer.ScheduleAtFixedRate(StorageMaintenanceTask, null, storageIntervalMillis, storageIntervalMillis);
+        }
+
+        private void StorageMaintenanceTask(object state)
+        {
+            CheckTimeout();
+        }
+
+        public Enum UpdateMeta(Number320 locationAndDomainKey, IPublicKey publicKey, IPublicKey newPublicKey)
+        {
+		    if (!SecurityDomainCheck(locationAndDomainKey, publicKey, newPublicKey, true))
+            {
+			    return PutStatus.FailedSecurity;
+		    }
+		    return PutStatus.Ok;
+	    }
+
+        public Enum UpdateMeta(IPublicKey publicKey, Number640 key, Data newData)
+        {
+		    var rangeLock = Lock(key);
+		    try 
+            {
+			    if (!SecurityEntryCheck(key.LocationAndDomainAndContentKey, publicKey, newData.PublicKey,
+			            newData.IsProtectedEntry))
+                {
+				    return PutStatus.FailedSecurity;
+			    }
+
+			    var data = _backend.Get(key);
+			    var changed = false;
+			    if (data != null && newData.PublicKey != null)
+                {
+				    data.SetPublicKey(newData.PublicKey);
+				    changed = true;
+			    }
+			    if (data != null && newData.IsSigned)
+                {
+				    data.SetSignature(newData.Signature);
+				    changed = true;
+			    }
+			    if (data != null)
+                {
+				    data.SetValidFromMillis(newData.ValidFromMillis);
+				    data.SetTtlSeconds(newData.TtlSeconds);
+				    changed = true;
+			    }
+			    if (changed)
+                {
+				    long expiration = data.ExpirationMillis;
+				    // handle timeout
+				    _backend.AddTimeout(key, expiration);
+				    _backend.Put(key, data);
+				    return PutStatus.Ok;
+			    } else
+                {
+				    return PutStatus.NotFound;
+			    }
+		    } 
+            finally 
+            {
+			    rangeLock.Unlock();
+		    }
+	    }
+
+        public int StorageCheckIntervalMillis => _backend.StorageCheckIntervalMillis;
+
+        public Enum PutConfirm(IPublicKey publicKey, Number640 key, Data newData)
+        {
+		    var rangeLock = Lock(key);
+		    try 
+            {
+			    if (!SecurityEntryCheck(key.LocationAndDomainAndContentKey, publicKey, newData.PublicKey, newData.IsProtectedEntry))
+                {
+				    return PutStatus.FailedSecurity;
+			    }
+
+			    var data = _backend.Get(key);
+			    if (data != null)
+                {
+				    // remove prepare flag
+                    data.SetHasPreparaFlag(false);
+				    data.SetValidFromMillis(newData.ValidFromMillis);
+				    data.SetTtlSeconds(newData.TtlSeconds);
+
+				    var expiration = data.ExpirationMillis;
+				    // handle timeout
+				    _backend.AddTimeout(key, expiration);
+				    _backend.Put(key, data);
+				    return PutStatus.Ok;
+			    } else {
+				    return PutStatus.NotFound;
+			    }
+		    } 
+            finally 
+            {
+			    rangeLock.Unlock();
+		    }
+		    // TODO: Java: check for FORKS!
 	    }
     }
 

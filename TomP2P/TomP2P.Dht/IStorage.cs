@@ -39,7 +39,7 @@ namespace TomP2P.Dht
 
         IEnumerable<Number640> SubMapTimeout(long to);
 
-        int StorageCheckIntervalMillis();
+        int StorageCheckIntervalMillis { get; }
 
         // domain / entry protection
         bool ProtectDomain(Number320 key, IPublicKey publicKey);
