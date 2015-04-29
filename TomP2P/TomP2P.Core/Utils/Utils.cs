@@ -147,6 +147,16 @@ namespace TomP2P.Core.Utils
             throw new NotImplementedException();
         }
 
+        public static string Hash(IPublicKey publicKey)
+        {
+            if (publicKey == null)
+            {
+                return "null";
+            }
+            // TODO check interoperability
+            return publicKey.GetHashCode().ToString();
+        }
+
         /// <summary>
         /// Adds a listener to the response tasks and releases all acquired channels in the channel creator.
         /// </summary>

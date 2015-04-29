@@ -220,7 +220,7 @@ namespace TomP2P.Extensions
         public static T RemoveAt2<T>(this IList<T> l, int index)
         {
             // TODO works?
-            T retVal = l[index];
+            var retVal = l[index];
             l.RemoveAt(index);
             return retVal;
         }
