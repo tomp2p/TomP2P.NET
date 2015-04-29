@@ -44,7 +44,7 @@ namespace TomP2P.Dht
             }
             if (DataSet.Count == 0)
             {
-                throw new ArgumentException("You must either set data via SetDataSet() or SetData(). Cannot add nothing.");
+                throw new ArgumentException("No data set to be added.");
             }
             return PeerDht.Dht.Add(this);
         }

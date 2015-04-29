@@ -18,12 +18,17 @@ namespace TomP2P.Dht
             throw new NotImplementedException();
         }
 
-        public TcsDigest Digest(DigestBuilder digestBuilder)
+        public TcsDigest Digest(DigestBuilder builder)
         {
             throw new NotImplementedException();
         }
 
-        public TcsGet Get(GetBuilder getBuilder)
+        public TcsGet Get(GetBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TcsSend Direct(SendBuilder builder)
         {
             throw new NotImplementedException();
         }
