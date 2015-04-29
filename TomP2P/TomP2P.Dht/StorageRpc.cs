@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using TomP2P.Core.Connection;
 using TomP2P.Core.Peers;
 using TomP2P.Core.Rpc;
 
@@ -25,6 +26,22 @@ namespace TomP2P.Dht
         static StorageRpc()
         {
             FullFilter.SetAll();
+        }
+
+        public StorageRpc(PeerBean peerBean, ConnectionBean connectionBean, StorageLayer storageLayer)
+            : base(peerBean, connectionBean)
+        {
+            Register(
+                Rpc.Commands.Put.GetNr(),
+                Rpc.Commands.Get.GetNr(),
+                Rpc.Commands.Add.GetNr(),
+                Rpc.Commands.Remove.GetNr(),
+                Rpc.Commands.Digest.GetNr(),
+                Rpc.Commands.DigestBloomfilter.GetNr(),
+                Rpc.Commands.DigestAllBloomfilter.GetNr(),
+                Rpc.Commands.Put.GetNr(),
+                Rpc.Commands.Put.GetNr(),
+                Rpc.Commands.Put.GetNr());
         }
 
         public override void HandleResponse(Core.Message.Message requestMessage, Core.Connection.PeerConnection peerConnection, bool sign, Core.Connection.IResponder responder)

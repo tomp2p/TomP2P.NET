@@ -4,6 +4,7 @@
     {
         // TODO convert to Java-like enum
         // max. 255 commands
+        // Don't change the order! Keep Java interoperability in mind.
         public enum Commands
         {
             Ping,
@@ -28,7 +29,12 @@
             PutConfirm,
             GetLatest,
             Rcon,
-            GetLatestWithDigest
+            HoleP,
+            GetLatestWithDigest,
+            Gcm,
+            LocalAnnounce,
+            ReplicaPut,
+            DigestAllBloomfilter
         }
     }
 
