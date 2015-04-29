@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddBuilder.cs" />
+    <Compile Include="CumulativeScheme.cs" />
     <Compile Include="DhtBuilder.cs" />
     <Compile Include="DigestBuilder.cs" />
     <Compile Include="DistributedHashTable.cs" />
