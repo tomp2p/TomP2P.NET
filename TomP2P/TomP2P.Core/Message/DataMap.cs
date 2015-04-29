@@ -33,12 +33,12 @@ namespace TomP2P.Core.Message
         }
 
         public DataMap(Number160 locationKey, Number160 domainKey, Number160 versionKey,
-            Dictionary<Number160, Data> dataMapConvert)
+            IDictionary<Number160, Data> dataMapConvert)
             : this(locationKey, domainKey, versionKey, dataMapConvert, false)
         { }
 
         public DataMap(Number160 loactionKey, Number160 domainKey, Number160 versionKey,
-            Dictionary<Number160, Data> dataMapConvert, bool isConvertMeta)
+            IDictionary<Number160, Data> dataMapConvert, bool isConvertMeta)
         {
             BackingDataMap = null;
             DataMapConvert = dataMapConvert;

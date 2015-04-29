@@ -251,6 +251,14 @@ namespace TomP2P.Core.Utils
             return result;
         }
 
+        public static void NullCheck(params object[] objects)
+        {
+            if (objects.Any(obj => obj == null))
+            {
+                throw new ArgumentException("Null parameter not allowed.");
+            }
+        }
+
         #region .NET only
 
         private static int _nrOfCores = 0;
