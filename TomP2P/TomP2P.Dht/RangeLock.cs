@@ -12,8 +12,8 @@ namespace TomP2P.Dht
 
         public struct Range
         {
-            public T FromKey { get; private set; }
-            public T ToKey { get; private set; }
+            public T FromKey { get; }
+            public T ToKey { get; }
             private readonly RangeLock<T> _reference;
 
             public Range(T fromKey, T toKey, RangeLock<T> reference)
