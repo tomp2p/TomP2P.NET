@@ -9,6 +9,8 @@ using TomP2P.Extensions.Workaround;
 
 namespace TomP2P.Core.Message
 {
+    // TODO rename setters for payload field to -> "Add..."
+    // TODO introduce properties instead of methods
     /// <summary>
     /// The message is in binary format in TomP2P. It has several header and payload fields.
     /// Since the serialization/encoding is done manually, no serialization field is needed.
@@ -16,7 +18,7 @@ namespace TomP2P.Core.Message
     public class Message
     {
         // used for creating random message id
-        private static readonly Random Random = new Random(); // TODO make transient
+        private static readonly Random Random = new Random();
 
         public const int ContentTypeLength = 8;
 
