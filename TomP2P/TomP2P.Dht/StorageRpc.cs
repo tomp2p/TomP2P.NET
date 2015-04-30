@@ -331,7 +331,7 @@ namespace TomP2P.Dht
             {
                 if (digestBuilder.LocationKey == null || digestBuilder.DomainKey == null)
                 {
-                    throw new ArgumentException("Null not allowed as parameter.");
+                    throw new ArgumentException("Null not allowed in location or domain.");
                 }
                 message.SetKey(digestBuilder.LocationKey);
                 message.SetKey(digestBuilder.DomainKey);
@@ -374,7 +374,190 @@ namespace TomP2P.Dht
 
         public Task<Message> GetAsync(PeerAddress remotePeer, GetBuilder getBuilder, ChannelCreator channelCreator)
         {
-            
+            Message.MessageType type;
+            if (getBuilder.IsAscending && getBuilder.IsBloomFilterAnd)
+            {
+                type = Message.MessageType.Request1;
+            }
+            else if (!getBuilder.IsAscending && getBuilder.IsBloomFilterAnd)
+            {
+                type = Message.MessageType.Request2;
+            }
+            else if (getBuilder.IsAscending && !getBuilder.IsBloomFilterAnd)
+            {
+                type = Message.MessageType.Request3;
+            }
+            else
+            {
+                type = Message.MessageType.Request4;
+            }
+
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Get.GetNr(), type);
+            if (getBuilder.IsSign)
+            {
+                message.SetPublicKeyAndSign(getBuilder.KeyPair);
+            }
+            if (getBuilder.IsRange)
+            {
+                var keys = new List<Number640>(2);
+                keys.Add(getBuilder.From);
+                keys.Add(getBuilder.To);
+                message.SetIntValue(getBuilder.ReturnNr);
+                message.SetKeyCollection(new KeyCollection(keys));
+            }
+            else if (getBuilder.Keys == null)
+            {
+                if (getBuilder.LocationKey == null || getBuilder.DomainKey == null)
+                {
+                    throw new ArgumentException("Null not allowed in location or domain.");
+                }
+                message.SetKey(getBuilder.LocationKey);
+                message.SetKey(getBuilder.DomainKey);
+
+                if (getBuilder.ContentKeys != null)
+                {
+                    message.SetKeyCollection(new KeyCollection(getBuilder.LocationKey, getBuilder.DomainKey,
+                        getBuilder.VersionKey, getBuilder.ContentKeys));
+                }
+                else
+                {
+                    message.SetIntValue(getBuilder.ReturnNr);
+
+                    if (getBuilder.ContentKeyBloomFilter != null)
+                    {
+                        message.SetBloomFilter(getBuilder.ContentKeyBloomFilter);
+                    }
+                    else
+                    {
+                        if (getBuilder.IsBloomFilterAnd)
+                        {
+                            message.SetBloomFilter(FullFilter);
+                        }
+                        else
+                        {
+                            message.SetBloomFilter(EmptyFilter);
+                        }
+                    }
+
+                    if (getBuilder.VersionKeyBloomFilter != null)
+                    {
+                        message.SetBloomFilter(getBuilder.VersionKeyBloomFilter);
+                    }
+                    else
+                    {
+                        if (getBuilder.IsBloomFilterAnd)
+                        {
+                            message.SetBloomFilter(FullFilter);
+                        }
+                        else
+                        {
+                            message.SetBloomFilter(EmptyFilter);
+                        }
+                    }
+
+                    if (getBuilder.ContentBloomFilter != null)
+                    {
+                        message.SetBloomFilter(getBuilder.ContentBloomFilter);
+                    }
+                    else
+                    {
+                        if (getBuilder.IsBloomFilterAnd)
+                        {
+                            message.SetBloomFilter(FullFilter);
+                        }
+                        else
+                        {
+                            message.SetBloomFilter(EmptyFilter);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                message.SetKeyCollection(new KeyCollection(getBuilder.Keys));
+            }
+
+            var tcsResponse = new TaskCompletionSource<Message>(message);
+            var requestHandler = new RequestHandler(tcsResponse, PeerBean, ConnectionBean, getBuilder);
+            if (!getBuilder.IsForceUdp)
+            {
+                return requestHandler.SendTcpAsync(channelCreator);
+            }
+            return requestHandler.SendUdpAsync(channelCreator);
+        }
+
+        public Task<Message> GetLatestAsync(PeerAddress remotePeer, GetBuilder getBuilder, ChannelCreator channelCreator,
+            Rpc.Commands command)
+        {
+            var message = CreateRequestMessage(remotePeer, command.GetNr(), Message.MessageType.Request1);
+            if (getBuilder.IsSign)
+            {
+                message.SetPublicKeyAndSign(getBuilder.KeyPair);
+            }
+            message.SetKey(getBuilder.LocationKey);
+            message.SetKey(getBuilder.DomainKey);
+            message.SetKey(getBuilder.ContentKey);
+
+            var tcsResponse = new TaskCompletionSource<Message>(message);
+            var requestHandler = new RequestHandler(tcsResponse, PeerBean, ConnectionBean, getBuilder);
+            if (!getBuilder.IsForceUdp)
+            {
+                return requestHandler.SendTcpAsync(channelCreator);
+            }
+            return requestHandler.SendUdpAsync(channelCreator);
+        }
+
+        /// <summary>
+        /// Removes data from a peer.
+        /// </summary>
+        /// <param name="remotePeer">The remote peer on which to store the data.</param>
+        /// <param name="removeBuilder">The builder to use for this operation.</param>
+        /// <param name="channelCreator">The channel creator that will be used.</param>
+        /// <returns>The future response message.</returns>
+        public Task<Message> RemoveAsync(PeerAddress remotePeer, RemoveBuilder removeBuilder,
+            ChannelCreator channelCreator)
+        {
+            var message = CreateRequestMessage(remotePeer, Rpc.Commands.Remove.GetNr(),
+                removeBuilder.IsReturnResults ? Message.MessageType.Request2 : Message.MessageType.Request1);
+            if (removeBuilder.IsSign)
+            {
+                message.SetPublicKeyAndSign(removeBuilder.KeyPair);
+            }
+            if (removeBuilder.IsRange)
+            {
+                var keys = new List<Number640>(2);
+                keys.Add(removeBuilder.From);
+                keys.Add(removeBuilder.To);
+                message.SetIntValue(0); // marker
+                message.SetKeyCollection(new KeyCollection(keys));
+            }
+            else if (removeBuilder.Keys == null)
+            {
+                if (removeBuilder.LocationKey == null || removeBuilder.DomainKey == null)
+                {
+                    throw new ArgumentException("Null not allowed in location or domain.");
+                }
+                message.SetKey(removeBuilder.LocationKey);
+                message.SetKey(removeBuilder.DomainKey);
+
+                if (removeBuilder.ContentKeys != null)
+                {
+                    message.SetKeyCollection(new KeyCollection(removeBuilder.LocationKey, removeBuilder.DomainKey,
+                        removeBuilder.VersionKey, removeBuilder.ContentKeys));
+                }
+            }
+            else
+            {
+                message.SetKeyCollection(new KeyCollection(removeBuilder.Keys));
+            }
+
+            var tcsResponse = new TaskCompletionSource<Message>(message);
+            var requestHandler = new RequestHandler(tcsResponse, PeerBean, ConnectionBean, removeBuilder);
+            if (!removeBuilder.IsForceUdp)
+            {
+                return requestHandler.SendTcpAsync(channelCreator);
+            }
+            return requestHandler.SendUdpAsync(channelCreator);
         }
 
         public override void HandleResponse(Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
