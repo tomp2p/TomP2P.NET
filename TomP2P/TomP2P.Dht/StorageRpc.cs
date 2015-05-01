@@ -18,7 +18,7 @@ namespace TomP2P.Dht
     {
         public static readonly SimpleBloomFilter<Number160> EmptyFilter = new SimpleBloomFilter<Number160>(0, 0);
         public static readonly SimpleBloomFilter<Number160> FullFilter = new SimpleBloomFilter<Number160>(8, 1);
-        
+
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly Random Rnd = new Random(); // TODO InteropRandom required?
 
@@ -109,7 +109,8 @@ namespace TomP2P.Dht
             }
             else
             {
-                dataMap = new DataMap(putBuilder.LocationKey, putBuilder.DomainKey, putBuilder.VersionKey, putBuilder.DataMapConvert);
+                dataMap = new DataMap(putBuilder.LocationKey, putBuilder.DomainKey, putBuilder.VersionKey,
+                    putBuilder.DataMapConvert);
             }
 
             var message = CreateRequestMessage(remotePeer, command.GetNr(), type);
@@ -141,7 +142,8 @@ namespace TomP2P.Dht
             }
             else
             {
-                dataMap = new DataMap(putBuilder.LocationKey, putBuilder.DomainKey, putBuilder.VersionKey, putBuilder.DataMapConvert);
+                dataMap = new DataMap(putBuilder.LocationKey, putBuilder.DomainKey, putBuilder.VersionKey,
+                    putBuilder.DataMapConvert);
             }
 
             var type = putBuilder.ChangePublicKey != null ? Message.MessageType.Request2 : Message.MessageType.Request1;
@@ -190,7 +192,8 @@ namespace TomP2P.Dht
             }
             else
             {
-                dataMap = new DataMap(putBuilder.LocationKey, putBuilder.DomainKey, putBuilder.VersionKey, putBuilder.DataMapConvert);
+                dataMap = new DataMap(putBuilder.LocationKey, putBuilder.DomainKey, putBuilder.VersionKey,
+                    putBuilder.DataMapConvert);
             }
 
             var message = CreateRequestMessage(remotePeer, Rpc.Commands.PutConfirm.GetNr(), Message.MessageType.Request1);
@@ -560,9 +563,99 @@ namespace TomP2P.Dht
             return requestHandler.SendUdpAsync(channelCreator);
         }
 
-        public override void HandleResponse(Message requestMessage, PeerConnection peerConnection, bool sign, IResponder responder)
+        public override void HandleResponse(Message requestMessage, PeerConnection peerConnection, bool sign,
+            IResponder responder)
         {
-            throw new NotImplementedException();
+            var responseMessage = CreateResponseMessage(requestMessage, Message.MessageType.Ok);
+
+            if (requestMessage.Command == Rpc.Commands.Add.GetNr())
+            {
+                HandleAdd(requestMessage, responseMessage, IsDomainProtected(requestMessage));
+            }
+            else if (requestMessage.Command == Rpc.Commands.Put.GetNr()
+                     || requestMessage.Command == Rpc.Commands.ReplicaPut.GetNr())
+            {
+                HandlePut(requestMessage, responseMessage, IsStoreIfAbsent(requestMessage),
+                    IsDomainProtected(requestMessage), IsReplicaPut(requestMessage));
+            }
+            else if (requestMessage.Command == Rpc.Commands.PutConfirm.GetNr())
+            {
+                HandlePutConfirm(requestMessage, responseMessage);
+            }
+            else if (requestMessage.Command == Rpc.Commands.Get.GetNr())
+            {
+                HandleGet(requestMessage, responseMessage);
+            }
+            else if (requestMessage.Command == Rpc.Commands.GetLatest.GetNr())
+            {
+                HandleGetLatest(requestMessage, responseMessage, false);
+            }
+            else if (requestMessage.Command == Rpc.Commands.GetLatestWithDigest.GetNr())
+            {
+                HandleGetLatest(requestMessage, responseMessage, true);
+            }
+            else if (requestMessage.Command == Rpc.Commands.Digest.GetNr()
+                     || requestMessage.Command == Rpc.Commands.DigestBloomfilter.GetNr()
+                     || requestMessage.Command == Rpc.Commands.DigestMetaValues.GetNr()
+                     || requestMessage.Command == Rpc.Commands.DigestAllBloomfilter.GetNr())
+            {
+                HandleDigest(requestMessage, responseMessage);
+            }
+            else if (requestMessage.Command == Rpc.Commands.Remove.GetNr())
+            {
+                HandleRemove(requestMessage, responseMessage,
+                    requestMessage.Type == Message.MessageType.Request2);
+            }
+            else if (requestMessage.Command == Rpc.Commands.PutMeta.GetNr())
+            {
+                HandlePutMeta(requestMessage, responseMessage,
+                    requestMessage.Type == Message.MessageType.Request2);
+            }
+            else
+            {
+                throw new ArgumentException($"Message content is wrong {requestMessage.Command}.");
+            }
+            if (sign)
+            {
+                responseMessage.SetPublicKeyAndSign(PeerBean.KeyPair);
+            }
+            Logger.Debug("Response for storage request: {0}.", responseMessage);
+            responder.Response(responseMessage);
+        }
+
+        private static bool IsReplicaPut(Message message)
+        {
+            return message.Command == Rpc.Commands.ReplicaPut.GetNr();
+        }
+
+        private static bool IsDomainProtected(Message message)
+        {
+		    return message.PublicKey(0) != null && (message.Type == Message.MessageType.Request2 || message.Type == Message.MessageType.Request4);
+	    }
+
+        private static bool IsStoreIfAbsent(Message message)
+        {
+		    return message.Type == Message.MessageType.Request3 || message.Type == Message.MessageType.Request4;
+	    }
+
+        private static bool IsList(Message message)
+        {
+		    return message.Type == Message.MessageType.Request3 || message.Type == Message.MessageType.Request4;
+	    }
+
+        private static bool IsAscending(Message message)
+        {
+		    return message.Type == Message.MessageType.Request1 || message.Type == Message.MessageType.Request3;
+	    }
+
+        private static bool IsBloomFilterAnd(Message message)
+        {
+		    return message.Type == Message.MessageType.Request1 || message.Type == Message.MessageType.Request2;
+	    }
+
+        private void HandlePutMeta(Message message, Message responseMessage, bool isDomain)
+        {
+            
         }
     }
 }

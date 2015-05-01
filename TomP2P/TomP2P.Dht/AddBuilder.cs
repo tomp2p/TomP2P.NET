@@ -13,7 +13,7 @@ namespace TomP2P.Dht
         public ICollection<Data> DataSet { get; private set; }
         public Data Data { get; private set; }
         public bool IsList { get; private set; }
-        // TODO Random needed?
+        public Random Random { get; private set; }
  
         // static constructor
         static AddBuilder()
@@ -74,6 +74,12 @@ namespace TomP2P.Dht
         public AddBuilder SetIsList(bool isList)
         {
             IsList = isList;
+            return this;
+        }
+
+        public AddBuilder SetRandom(Random random)
+        {
+            Random = random;
             return this;
         }
     }
