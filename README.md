@@ -1,7 +1,7 @@
 TomP2P.NET
 ==========
 
-A port of the original TomP2P library to the Microsoft .NET platform.
+A port of the original Java [TomP2P](https://github.com/tomp2p/TomP2P) library to the Microsoft .NET platform.
 
 Port progress: **95 %** completed.
 
